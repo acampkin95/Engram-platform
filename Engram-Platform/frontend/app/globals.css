@@ -1,0 +1,584 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* ═══════════════════════════════════════
+     ENGRAM BRAND SYSTEM — DESIGN TOKENS
+     Multi-layer AI Memory System
+  ═══════════════════════════════════════ */
+
+  /* Core depth palette */
+  --color-void: #03020a;
+  --color-deep: #090818;
+  --color-layer-0: #0c0b1c;
+  --color-layer-1: #120f2b;
+  --color-layer-2: #1a1638;
+  --color-layer-3: #221d45;
+  --color-layer-4: #2c2658;
+  --color-panel: #0d0b1a;
+
+  /* Brand colors */
+  --color-amber: #f2a93b;
+  --color-amber-bright: #ffc15e;
+  --color-amber-dim: #b87b20;
+
+  --color-violet: #7c5cbf;
+  --color-violet-bright: #9b7de0;
+  --color-violet-dim: #503980;
+
+  --color-teal: #2ec4c4;
+  --color-rose: #e05c7f;
+
+  /* Text */
+  --color-text-primary: #f0eef8;
+  --color-text-secondary: #a09bb8;
+  --color-text-muted: #5c5878;
+
+  /* Memory tier colours (mapped to Engram layers) */
+  --color-memory-tier1: #f2a93b;
+  --color-memory-tier2: #9b7de0;
+  --color-memory-tier3: #2ec4c4;
+
+  /* Primary palette mapped to amber */
+  --color-primary-50: #fff8ec;
+  --color-primary-100: #ffefc9;
+  --color-primary-200: #ffdb8d;
+  --color-primary-300: #ffc15e;
+  --color-primary-400: #f2a93b;
+  --color-primary-500: #e08a1a;
+  --color-primary-600: #b87b20;
+  --color-primary-700: #8a5c18;
+  --color-primary-800: #5c3d10;
+  --color-primary-900: #2e1e08;
+
+  /* Accent mapped to violet */
+  --color-accent-400: #9b7de0;
+  --color-accent-500: #7c5cbf;
+  --color-accent-600: #503980;
+
+  /* Font families (updated) ─────────────────────────── */
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-playfair), ui-serif, Georgia, serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* ─── Fluid Type Scale ─────────────────────────── */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);
+  --text-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem);
+  --text-5xl: clamp(3rem, 2rem + 5vw, 4.5rem);
+
+  /* ─── Semantic Tokens ─────────────────────────── */
+  --color-warning: oklch(0.75 0.15 70);
+  --color-warning-foreground: oklch(0.25 0.05 50);
+  --color-success: oklch(0.65 0.18 145);
+  --color-success-foreground: oklch(0.98 0.01 145);
+  --color-info: oklch(0.6 0.18 250);
+  --color-info-foreground: oklch(0.98 0.01 250);
+
+  /* ─── Chart Colors (5 semantic colors) ─────────────────────────── */
+  --color-chart-1: oklch(0.646 0.222 41.116);
+  --color-chart-2: oklch(0.6 0.118 184.704);
+  --color-chart-3: oklch(0.398 0.07 227.392);
+  --color-chart-4: oklch(0.828 0.189 84.429);
+  --color-chart-5: oklch(0.769 0.188 70.08);
+
+  /* ─── Sidebar Tokens ─────────────────────────── */
+  --color-sidebar: oklch(0.18 0.015 285);
+  --color-sidebar-foreground: oklch(0.95 0 0);
+  --color-sidebar-primary: oklch(0.65 0.18 65);
+  --color-sidebar-primary-foreground: oklch(0.15 0 0);
+  --color-sidebar-accent: oklch(0.22 0.02 285);
+  --color-sidebar-accent-foreground: oklch(0.95 0 0);
+  --color-sidebar-border: oklch(0.3 0.01 285);
+  --color-sidebar-ring: oklch(0.65 0.18 65);
+  /* ─── ShadCN/UI bridge tokens (Engram-mapped) ─────────────────────────── */
+  --color-background: #03020a;
+  --color-foreground: #f0eef8;
+  --color-card: #090818;
+  --color-card-foreground: #f0eef8;
+  --color-popover: #0c0b1c;
+  --color-popover-foreground: #f0eef8;
+  --color-primary: #f2a93b;
+  --color-primary-foreground: #03020a;
+  --color-secondary: #120f2b;
+  --color-secondary-foreground: #a09bb8;
+  --color-muted: #0c0b1c;
+  --color-muted-foreground: #5c5878;
+  --color-accent: #9b7de0;
+  --color-accent-foreground: #f0eef8;
+  --color-destructive: #ff6b6b;
+  --color-destructive-foreground: #f0eef8;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-input: rgba(255, 255, 255, 0.08);
+  --color-ring: #f2a93b;
+  --radius: 0.5rem;
+}
+
+/* ═══════════════════════════════════════
+   SHADCN/UI CSS VARIABLES — Engram theme bridge
+   Direct var() references used by ShadCN component internals
+═══════════════════════════════════════ */
+
+@layer base {
+  :root {
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --card: var(--color-card);
+    --card-foreground: var(--color-card-foreground);
+    --popover: var(--color-popover);
+    --popover-foreground: var(--color-popover-foreground);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--color-primary-foreground);
+    --secondary: var(--color-secondary);
+    --secondary-foreground: var(--color-secondary-foreground);
+    --muted: var(--color-muted);
+    --muted-foreground: var(--color-muted-foreground);
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-accent-foreground);
+    --destructive: var(--color-destructive);
+    --destructive-foreground: var(--color-destructive-foreground);
+    --border: rgba(255, 255, 255, 0.06);
+    --input: rgba(255, 255, 255, 0.08);
+    --ring: var(--color-ring);
+    --radius: 0.5rem;
+
+    /* Chart tokens for shadcn/ui Charts */
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+
+    /* Sidebar tokens */
+    --sidebar: var(--color-sidebar);
+    --sidebar-foreground: var(--color-sidebar-foreground);
+    --sidebar-primary: var(--color-sidebar-primary);
+    --sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+    --sidebar-accent: var(--color-sidebar-accent);
+    --sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+    --sidebar-border: var(--color-sidebar-border);
+    --sidebar-ring: var(--color-sidebar-ring);
+
+    /* Semantic tokens */
+    --warning: var(--color-warning);
+    --warning-foreground: var(--color-warning-foreground);
+    --success: var(--color-success);
+    --success-foreground: var(--color-success-foreground);
+    --info: var(--color-info);
+    --info-foreground: var(--color-info-foreground);
+  }
+}
+
+/* ═══════════════════════════════════════
+   ENGRAM ANIMATIONS
+═══════════════════════════════════════ */
+
+@keyframes strataShift {
+  0%,
+  100% {
+    transform: translateY(0px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+@keyframes synapseFlare {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes layerPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(242, 169, 59, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 32px rgba(242, 169, 59, 0.35), 0 0 64px rgba(242, 169, 59, 0.1);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow-amber {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(242, 169, 59, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(242, 169, 59, 0.7);
+  }
+}
+
+@keyframes node-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(242, 169, 59, 0.25), inset 0 0 10px rgba(242, 169, 59, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(242, 169, 59, 0.6), inset 0 0 18px rgba(242, 169, 59, 0.08);
+  }
+}
+
+@keyframes traffic-flow {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(300%);
+    opacity: 0;
+  }
+}
+
+/* ═══════════════════════════════════════
+   UTILITY CLASSES
+═══════════════════════════════════════ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+.glow-amber {
+  box-shadow: 0 0 20px rgba(242, 169, 59, 0.25);
+}
+
+.glow-violet {
+  box-shadow: 0 0 20px rgba(124, 92, 191, 0.25);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow-amber 2s ease-in-out infinite;
+}
+
+.animate-node-pulse {
+  animation: node-pulse 3s ease-in-out infinite;
+}
+
+.animate-traffic {
+  animation: traffic-flow 4s linear infinite;
+}
+
+.animate-synapse {
+  animation: synapseFlare 2.5s ease-in-out infinite;
+}
+
+.animate-strata {
+  animation: strataShift 4s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════
+   GLASSMORPHISM BASE
+═══════════════════════════════════════ */
+
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+/* ═══════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 169, 59, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(242, 169, 59, 0.3);
+}
+
+/* ═══════════════════════════════════════
+   SELECTION
+═══════════════════════════════════════ */
+
+::selection {
+  background: rgba(242, 169, 59, 0.2);
+  color: #ffc15e;
+}
+
+/* ═══════════════════════════════════════
+   PAGE TRANSITIONS
+═══════════════════════════════════════ */
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes staggerFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: pageEnter 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-stagger-fade {
+  animation: staggerFade 0.25s ease-out forwards;
+}
+
+/* Stagger delays for list items */
+.stagger-1 {
+  animation-delay: 0.05s;
+}
+.stagger-2 {
+  animation-delay: 0.1s;
+}
+.stagger-3 {
+  animation-delay: 0.15s;
+}
+.stagger-4 {
+  animation-delay: 0.2s;
+}
+.stagger-5 {
+  animation-delay: 0.25s;
+}
+
+/* ═══════════════════════════════════════
+   INTERACTIVE STATES
+═══════════════════════════════════════ */
+
+@keyframes gentleLift {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-2px);
+  }
+}
+
+.hover-lift {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Card glow on hover */
+.hover-glow-amber:hover {
+  box-shadow: 0 0 24px rgba(242, 169, 59, 0.12);
+  border-color: rgba(242, 169, 59, 0.15);
+}
+
+/* Button press effect */
+.press-effect:active {
+  transform: scale(0.98);
+}
+
+/* Focus ring utility */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 focus:ring-offset-[#090818];
+}
+
+/* Animation control via CSS variable */
+:root {
+  --animations-enabled: 1;
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --animations-enabled: 0;
+  }
+}
+
+/* Conditionally disable animations */
+[data-animations="false"] *,
+:has(#animations-disabled) * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ═══════════════════════════════════════
+   PERFORMANCE OPTIMIZATIONS
+   Additional animations and utilities
+═══════════════════════════════════════ */
+
+/* Shimmer animation for skeletons */
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* Font loading states */
+.fonts-loading body {
+  opacity: 0.99;
+}
+
+.fonts-loaded body {
+  opacity: 1;
+  transition: opacity 0.1s ease-out;
+}
+
+/* Content visibility for off-screen content */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Will-change for animated elements */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* GPU acceleration hints */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Lazy loading blur effect */
+.blur-load {
+  filter: blur(20px);
+  transition: filter 0.3s ease-out;
+}
+
+.blur-load.loaded {
+  filter: blur(0);
+}
+
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+/* Light mode overrides */
+.light {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 47.9 95.8% 53.1%;
+  --primary-foreground: 26 83.3% 14.1%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 270 68% 63%;
+  --accent-foreground: 270 68% 63%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 270 68% 63%;
+  --radius: 0.5rem;
+}
+
+.light .void {
+  background: hsl(0, 0%, 100%);
+  color: hsl(222.2, 84%, 4.9%);
+}
+@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}

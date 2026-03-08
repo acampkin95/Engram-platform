@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# c4ai — Crawl4AI OSINT CLI entry point
+# Usage: c4ai <command> [options]
+# Place this script on your PATH or run it directly from the project root.
+
+set -euo pipefail
+
+# Resolve the directory this script lives in (follows symlinks)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Activate .venv if present alongside this script
+if [ -f "$SCRIPT_DIR/.venv/bin/activate" ]; then
+    # shellcheck disable=SC1091
+    source "$SCRIPT_DIR/.venv/bin/activate"
+fi
+
+# Run the CLI module
+exec python3 -m cli "$@"

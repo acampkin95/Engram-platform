@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crawl4AI — Brand System 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ─── CORE PALETTE ─── */
+    --c-void:      #04040a;   /* deepest bg */
+    --c-abyss:     #070710;   /* base bg */
+    --c-surface:   #0d0d1a;   /* card bg */
+    --c-raised:    #141428;   /* elevated */
+    --c-border:    #1e1e3a;   /* default border */
+    --c-border-hi: #2a2a50;   /* hover border */
+
+    /* ─── BRAND PRIMARIES ─── */
+    --c-cyan:      #50ffff;   /* original brand */
+    --c-cyan-dim:  #09b5a5;   /* brand teal */
+    --c-plasma:    #0fbbaa;   /* brand green */
+
+    /* ─── 2026 EXTENDED PALETTE ─── */
+    --c-acid:      #b4ff3c;   /* acid lime — disruptive accent */
+    --c-volt:      #d4ff00;   /* voltage yellow */
+    --c-fuchsia:   #f380f5;   /* original brand magenta */
+    --c-ghost:     #7b7bff;   /* electric indigo */
+    --c-ice:       #c8f7ff;   /* crisp ice */
+    --c-neon-r:    #ff2d6b;   /* alarm red */
+
+    /* ─── TYPE ─── */
+    --c-text:      #e0e2f0;
+    --c-text-dim:  #7a7a9a;
+    --c-text-mute: #3a3a5a;
+
+    /* ─── FONTS ─── */
+    --f-display:   'Syne', sans-serif;
+    --f-mono:      'Space Mono', monospace;
+    --f-body:      'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--c-void);
+    color: var(--c-text);
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── GLOBAL NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* ─── SCAN-LINE EFFECT ─── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ─── LAYOUT ─── */
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 80px;
+    padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--c-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--c-border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.3;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(80,255,255,0.08) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    pointer-events: none;
+  }
+
+  .hero-glow-2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(180,255,60,0.06) 0%, transparent 70%);
+    bottom: 0; left: -50px;
+    pointer-events: none;
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  .hero-eyebrow {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--c-cyan);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px; height: 1px;
+    background: var(--c-cyan);
+  }
+
+  .hero-title {
+    font-family: var(--f-display);
+    font-size: clamp(48px, 6vw, 88px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 28px;
+  }
+
+  .hero-title em {
+    font-style: normal;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--c-cyan);
+    display: block;
+  }
+
+  .hero-title span {
+    display: block;
+    background: linear-gradient(135deg, var(--c-acid) 0%, var(--c-cyan) 60%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-desc {
+    font-size: 16px;
+    color: var(--c-text-dim);
+    max-width: 400px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .hero-version {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid var(--c-border-hi);
+    background: var(--c-surface);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--c-text-dim);
+  }
+
+  .hero-version .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--c-acid);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(180,255,60,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(180,255,60,0); }
+  }
+
+  /* ─── LOGO DISPLAY ─── */
+  .hero-logo-panel {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .logo-showcase {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    padding: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .logo-showcase::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(80,255,255,0.03) 0%, transparent 60%);
+  }
+
+  .logo-showcase::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--c-cyan), transparent);
+  }
+
+  .logo-type {
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: 52px;
+    letter-spacing: -0.04em;
+    position: relative;
+  }
+
+  .logo-type .crawl { color: var(--c-text); }
+  .logo-type .four { color: var(--c-cyan); }
+  .logo-type .ai { color: var(--c-acid); }
+
+  .logo-sub {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    color: var(--c-text-mute);
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* Corner decorations */
+  .corner {
+    position: absolute;
+    width: 16px; height: 16px;
+    border-color: var(--c-border-hi);
+    border-style: solid;
+  }
+  .corner-tl { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
+  .corner-tr { top: 12px; right: 12px; border-width: 1px 1px 0 0; }
+  .corner-bl { bottom: 12px; left: 12px; border-width: 0 0 1px 1px; }
+  .corner-br { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-index {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--c-text-mute);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: var(--f-display);
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .section-title .accent { color: var(--c-cyan); }
+  .section-title .acid { color: var(--c-acid); }
+
+  .section-lead {
+    font-size: 16px;
+    color: var(--c-text-dim);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 60px;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--c-cyan), var(--c-acid), transparent);
+    margin: 0 0 60px;
+    opacity: 0.4;
+  }
+
+  /* ─── COLOR SYSTEM ─── */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 2px;
+    margin-bottom: 40px;
+  }
+
+  .color-swatch {
+    aspect-ratio: 1;
+    position: relative;
+    cursor: default;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+
+  .color-swatch:hover { transform: scale(1.02); z-index: 2; }
+
+  .color-swatch .swatch-body {
+    width: 100%; height: 75%;
+  }
+
+  .color-swatch .swatch-info {
+    background: var(--c-surface);
+    padding: 12px;
+    border: 1px solid var(--c-border);
+    border-top: none;
+  }
+
+  .color-swatch .swatch-name {
+    font-family: var(--f-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .color-swatch .swatch-hex {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    color: var(--c-text-dim);
+    margin-top: 2px;
+  }
+
+  .color-swatch .swatch-role {
+    font-size: 10px;
+    color: var(--c-text-mute);
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+
+  /* Gradient strip */
+  .gradient-strip {
+    height: 80px;
+    border-radius: 0;
+    margin-bottom: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gradient-strip::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: 10px; left: 14px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+  }
+
+  /* ─── COLOUR CONTRAST GRID ─── */
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 40px;
+  }
+
+  .contrast-cell {
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .contrast-cell .sample-text {
+    font-family: var(--f-display);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .contrast-cell .sample-label {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  .type-specimen {
+    display: grid;
+    gap: 2px;
+    margin-bottom: 60px;
+  }
+
+  .type-row {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    padding: 32px 40px;
+    display: grid;
+    grid-template-columns: 160px 1fr 160px;
+    align-items: center;
+    gap: 40px;
+    transition: border-color 0.2s;
+  }
+
+  .type-row:hover { border-color: var(--c-border-hi); }
+
+  .type-row .meta {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    color: var(--c-text-mute);
+    line-height: 1.6;
+  }
+
+  .type-row .meta strong {
+    display: block;
+    color: var(--c-text-dim);
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .type-row .sample {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .type-row .usage {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    color: var(--c-text-mute);
+    text-align: right;
+  }
+
+  /* Type scale classes */
+  .t-hero    { font-family: var(--f-display); font-size: 64px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: var(--c-text); }
+  .t-display { font-family: var(--f-display); font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--c-text); }
+  .t-heading { font-family: var(--f-display); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: var(--c-text); }
+  .t-title   { font-family: var(--f-display); font-size: 20px; font-weight: 600; letter-spacing: -0.01em; color: var(--c-text); }
+  .t-body    { font-family: var(--f-body); font-size: 15px; font-weight: 400; color: var(--c-text-dim); line-height: 1.7; }
+  .t-small   { font-family: var(--f-body); font-size: 12px; color: var(--c-text-mute); }
+  .t-mono    { font-family: var(--f-mono); font-size: 13px; color: var(--c-cyan); }
+  .t-micro   { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--c-text-mute); }
+
+  /* Font showcase panels */
+  .font-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .font-card::after {
+    content: attr(data-font);
+    position: absolute;
+    bottom: -10px; right: -10px;
+    font-size: 160px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.02);
+    line-height: 1;
+    letter-spacing: -0.1em;
+  }
+
+  .font-card-label {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--c-text-mute);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .font-alphabet {
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: var(--c-text-dim);
+    line-height: 1.4;
+    margin-top: 20px;
+    word-break: break-all;
+  }
+
+  /* ─── LOGO VARIANTS ─── */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-bottom: 40px;
+  }
+
+  .logo-cell {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+    min-height: 200px;
+    overflow: hidden;
+  }
+
+  .logo-cell:nth-child(2) { background: var(--c-void); }
+  .logo-cell:nth-child(3) { background: var(--c-cyan); }
+
+  .logo-cell .cell-label {
+    position: absolute;
+    bottom: 14px; left: 14px;
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--c-text-mute);
+    text-transform: uppercase;
+  }
+
+  /* Logo variants */
+  .logo-v1 { font-family: var(--f-display); font-size: 36px; font-weight: 800; letter-spacing: -0.04em; }
+  .logo-v1 .crawl { color: var(--c-text); }
+  .logo-v1 .four { color: var(--c-cyan); }
+  .logo-v1 .ai { color: var(--c-acid); }
+
+  .logo-v2 { font-family: var(--f-display); font-size: 36px; font-weight: 800; letter-spacing: -0.04em; }
+  .logo-v2 .crawl { color: rgba(255,255,255,0.15); }
+  .logo-v2 .four { color: var(--c-cyan); }
+  .logo-v2 .ai { color: var(--c-acid); }
+
+  .logo-v3 { font-family: var(--f-display); font-size: 36px; font-weight: 800; letter-spacing: -0.04em; }
+  .logo-v3 .crawl { color: var(--c-void); }
+  .logo-v3 .four { color: var(--c-void); }
+  .logo-v3 .ai { color: var(--c-void); }
+
+  /* Icon mark */
+  .icon-mark {
+    width: 56px; height: 56px;
+    background: var(--c-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .icon-mark::before {
+    content: 'C4';
+    font-family: var(--f-display);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--c-void);
+    letter-spacing: -0.05em;
+  }
+
+  /* ─── COMPONENTS ─── */
+  .component-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-bottom: 40px;
+  }
+
+  .component-panel {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    padding: 40px;
+  }
+
+  .component-panel h4 {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--c-text-mute);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  /* Buttons */
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    border: none;
+    outline: none;
+  }
+
+  .btn-primary {
+    background: var(--c-cyan);
+    color: var(--c-void);
+  }
+  .btn-primary:hover {
+    background: var(--c-acid);
+    box-shadow: 0 0 24px rgba(180,255,60,0.3);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--c-cyan);
+    border: 1px solid var(--c-cyan);
+  }
+  .btn-ghost:hover {
+    background: rgba(80,255,255,0.08);
+    box-shadow: 0 0 16px rgba(80,255,255,0.15);
+  }
+
+  .btn-acid {
+    background: var(--c-acid);
+    color: var(--c-void);
+  }
+  .btn-acid:hover {
+    background: var(--c-volt);
+    box-shadow: 0 0 24px rgba(212,255,0,0.3);
+  }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--c-neon-r);
+    border: 1px solid rgba(255,45,107,0.4);
+  }
+  .btn-danger:hover {
+    background: rgba(255,45,107,0.08);
+    border-color: var(--c-neon-r);
+  }
+
+  .btn-sm { padding: 6px 14px; font-size: 10px; }
+
+  /* Tags/Badges */
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .badge-available { background: rgba(80,255,255,0.1); color: var(--c-cyan); border: 1px solid rgba(80,255,255,0.25); }
+  .badge-available::before { background: var(--c-cyan); }
+  .badge-beta { background: rgba(180,255,60,0.1); color: var(--c-acid); border: 1px solid rgba(180,255,60,0.25); }
+  .badge-beta::before { background: var(--c-acid); }
+  .badge-alpha { background: rgba(243,128,245,0.1); color: var(--c-fuchsia); border: 1px solid rgba(243,128,245,0.25); }
+  .badge-alpha::before { background: var(--c-fuchsia); }
+  .badge-new { background: rgba(255,45,107,0.1); color: var(--c-neon-r); border: 1px solid rgba(255,45,107,0.25); }
+  .badge-new::before { background: var(--c-neon-r); }
+  .badge-deprecated { background: rgba(122,122,154,0.1); color: var(--c-text-mute); border: 1px solid rgba(122,122,154,0.2); }
+  .badge-deprecated::before { background: var(--c-text-mute); }
+
+  /* Input */
+  .input-demo { display: flex; flex-direction: column; gap: 12px; }
+
+  .field-group { display: flex; flex-direction: column; gap: 4px; }
+
+  .field-label {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--c-text-mute);
+    text-transform: uppercase;
+  }
+
+  .field-input {
+    background: var(--c-void);
+    border: 1px solid var(--c-border);
+    color: var(--c-text);
+    padding: 10px 14px;
+    font-family: var(--f-mono);
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+
+  .field-input:focus { border-color: var(--c-cyan); box-shadow: 0 0 0 2px rgba(80,255,255,0.08); }
+  .field-input::placeholder { color: var(--c-text-mute); }
+
+  .field-input.error { border-color: var(--c-neon-r); }
+
+  /* Code block */
+  .code-block {
+    background: var(--c-void);
+    border: 1px solid var(--c-border);
+    border-left: 3px solid var(--c-cyan);
+    padding: 20px 24px;
+    font-family: var(--f-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block .line-num {
+    color: var(--c-text-mute);
+    user-select: none;
+    margin-right: 16px;
+    display: inline-block;
+    width: 20px;
+    text-align: right;
+  }
+
+  .code-block .kw { color: var(--c-fuchsia); }
+  .code-block .fn { color: var(--c-cyan); }
+  .code-block .str { color: var(--c-acid); }
+  .code-block .cm { color: var(--c-text-mute); font-style: italic; }
+  .code-block .num { color: var(--c-ghost); }
+
+  /* Terminal card */
+  .terminal {
+    background: var(--c-void);
+    border: 1px solid var(--c-border);
+    overflow: hidden;
+  }
+
+  .terminal-bar {
+    background: var(--c-raised);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .terminal-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .terminal-body {
+    padding: 20px 24px;
+    font-family: var(--f-mono);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .terminal-prompt { color: var(--c-cyan); }
+  .terminal-cmd { color: var(--c-text); }
+  .terminal-out { color: var(--c-text-dim); }
+  .terminal-success { color: var(--c-acid); }
+  .terminal-warn { color: var(--c-fuchsia); }
+
+  /* ─── ICON SYSTEM ─── */
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+  }
+
+  .icon-cell {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    transition: all 0.15s;
+    cursor: default;
+  }
+
+  .icon-cell:hover {
+    background: var(--c-raised);
+    border-color: var(--c-cyan);
+  }
+
+  .icon-cell svg {
+    width: 24px; height: 24px;
+    stroke: var(--c-text-dim);
+    fill: none;
+    stroke-width: 1.5;
+    transition: stroke 0.15s;
+  }
+
+  .icon-cell:hover svg { stroke: var(--c-cyan); }
+
+  .icon-cell span {
+    font-family: var(--f-mono);
+    font-size: 8px;
+    color: var(--c-text-mute);
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── MOTION PRINCIPLES ─── */
+  .motion-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .motion-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    padding: 32px;
+  }
+
+  .motion-card h4 {
+    font-family: var(--f-display);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .motion-card p {
+    font-size: 13px;
+    color: var(--c-text-dim);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .motion-value {
+    font-family: var(--f-mono);
+    font-size: 12px;
+    color: var(--c-cyan);
+  }
+
+  /* ─── VOICE & TONE ─── */
+  .voice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .voice-do {
+    background: rgba(15,187,170,0.04);
+    border: 1px solid rgba(15,187,170,0.2);
+    padding: 32px;
+  }
+
+  .voice-dont {
+    background: rgba(255,45,107,0.04);
+    border: 1px solid rgba(255,45,107,0.15);
+    padding: 32px;
+  }
+
+  .voice-do h4, .voice-dont h4 {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .voice-do h4 { color: var(--c-plasma); }
+  .voice-dont h4 { color: var(--c-neon-r); }
+
+  .voice-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--c-border);
+    font-size: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .voice-item:last-child { border-bottom: none; }
+
+  .voice-do .voice-item::before { content: '↗'; color: var(--c-plasma); font-family: var(--f-mono); flex-shrink: 0; }
+  .voice-dont .voice-item::before { content: '↘'; color: var(--c-neon-r); font-family: var(--f-mono); flex-shrink: 0; }
+
+  /* ─── SPACING SYSTEM ─── */
+  .spacing-demo {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 32px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+  }
+
+  .space-bar {
+    background: linear-gradient(to top, var(--c-cyan), rgba(80,255,255,0.2));
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 12px;
+    gap: 4px;
+  }
+
+  .space-bar .sz { font-family: var(--f-mono); font-size: 10px; color: var(--c-text-dim); }
+  .space-bar .val { font-family: var(--f-mono); font-size: 9px; color: var(--c-text-mute); }
+
+  /* ─── GRID SYSTEM ─── */
+  .grid-demo {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    padding: 32px;
+  }
+
+  .grid-cols {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .grid-col {
+    height: 40px;
+    background: rgba(80,255,255,0.08);
+    border: 1px solid rgba(80,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--f-mono);
+    font-size: 8px;
+    color: var(--c-text-mute);
+  }
+
+  .grid-layout-demo {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 8px;
+  }
+
+  .grid-layout-demo .col-2 { grid-column: span 2; }
+  .grid-layout-demo .col-3 { grid-column: span 3; }
+  .grid-layout-demo .col-4 { grid-column: span 4; }
+  .grid-layout-demo .col-6 { grid-column: span 6; }
+  .grid-layout-demo .col-8 { grid-column: span 8; }
+
+  .grid-block {
+    background: rgba(180,255,60,0.08);
+    border: 1px dashed rgba(180,255,60,0.2);
+    padding: 10px;
+    font-family: var(--f-mono);
+    font-size: 9px;
+    color: var(--c-acid);
+    text-align: center;
+  }
+
+  /* ─── BRAND IN USE ─── */
+  .brand-use-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .brand-use-card {
+    border: 1px solid var(--c-border);
+    overflow: hidden;
+    min-height: 280px;
+    position: relative;
+  }
+
+  .brand-use-card .card-content {
+    padding: 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .brand-use-card.dark {
+    background: var(--c-abyss);
+  }
+
+  .brand-use-card.cyan-bg {
+    background: var(--c-cyan);
+  }
+
+  .brand-use-card.acid-bg {
+    background: var(--c-acid);
+  }
+
+  .brand-use-card.surface-bg {
+    background: var(--c-surface);
+  }
+
+  /* Mockup: social card */
+  .social-mock {
+    background: var(--c-void);
+    border: 1px solid var(--c-border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 380px;
+  }
+
+  .social-mock-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .social-avatar {
+    width: 36px; height: 36px;
+    background: var(--c-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--f-display);
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--c-void);
+    flex-shrink: 0;
+  }
+
+  .social-handle {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--c-text-dim);
+  }
+
+  .social-handle strong { display: block; color: var(--c-text); font-size: 12px; }
+
+  .social-post {
+    font-size: 13px;
+    color: var(--c-text-dim);
+    line-height: 1.6;
+  }
+
+  .social-post .mention { color: var(--c-cyan); }
+  .social-post .hashtag { color: var(--c-acid); }
+
+  /* ─── DO / DON'T LOGO ─── */
+  .donts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .dont-cell {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    padding: 32px;
+    position: relative;
+  }
+
+  .dont-cell::after {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    padding: 3px 8px;
+  }
+
+  .dont-cell.do::after {
+    content: 'DO';
+    color: var(--c-plasma);
+    border: 1px solid rgba(15,187,170,0.3);
+  }
+
+  .dont-cell.dont::after {
+    content: 'DON\'T';
+    color: var(--c-neon-r);
+    border: 1px solid rgba(255,45,107,0.3);
+  }
+
+  .dont-cell .logo-sample {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    position: relative;
+  }
+
+  /* Strike through for dont */
+  .dont-cell.dont .logo-sample::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 10%;
+    width: 80%; height: 1px;
+    background: var(--c-neon-r);
+    transform: rotate(-8deg);
+    opacity: 0.7;
+  }
+
+  .dont-cell .rule {
+    font-size: 11px;
+    color: var(--c-text-mute);
+    margin-top: 16px;
+    line-height: 1.5;
+    padding-top: 12px;
+    border-top: 1px solid var(--c-border);
+    font-family: var(--f-mono);
+  }
+
+  /* ─── NAV ─── */
+  .side-nav {
+    position: fixed;
+    top: 50%;
+    right: 32px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    background: var(--c-text-mute);
+    transition: all 0.2s;
+    cursor: pointer;
+    display: block;
+  }
+
+  .nav-dot:hover, .nav-dot.active {
+    background: var(--c-cyan);
+    box-shadow: 0 0 8px rgba(80,255,255,0.5);
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding: 60px 0 80px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .footer-meta {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--c-text-mute);
+    line-height: 1.8;
+  }
+
+  .footer-meta strong { color: var(--c-text-dim); }
+
+  .footer-logo {
+    font-family: var(--f-display);
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    opacity: 0.3;
+  }
+
+  /* ─── SCROLL ANIMATIONS ─── */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+
+  [data-reveal].visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Glitch effect for title */
+  @keyframes glitch {
+    0%, 90%, 100% { clip-path: none; transform: none; }
+    92% { clip-path: polygon(0 0, 100% 0, 100% 30%, 0 30%); transform: translate(-2px, -2px); }
+    94% { clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%); transform: translate(2px, 2px); }
+    96% { clip-path: none; transform: none; }
+  }
+
+  .glitch-text {
+    position: relative;
+  }
+
+  .glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  .glitch-text::before {
+    color: var(--c-cyan);
+    animation: glitch 8s infinite;
+    animation-delay: 2s;
+    mix-blend-mode: screen;
+  }
+
+  .glitch-text::after {
+    color: var(--c-fuchsia);
+    animation: glitch 8s infinite;
+    animation-delay: 3s;
+    mix-blend-mode: screen;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-logo-panel { display: none; }
+    .component-grid { grid-template-columns: 1fr; }
+    .voice-grid { grid-template-columns: 1fr; }
+    .brand-use-grid { grid-template-columns: 1fr; }
+    .donts-grid { grid-template-columns: 1fr; }
+    .logo-grid { grid-template-columns: 1fr 1fr; }
+    .contrast-grid { grid-template-columns: repeat(2, 1fr); }
+    .icon-grid { grid-template-columns: repeat(4, 1fr); }
+    .motion-grid { grid-template-columns: 1fr; }
+    .side-nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Side Nav Dots -->
+<nav class="side-nav">
+  <a href="#hero" class="nav-dot active" title="Intro"></a>
+  <a href="#color" class="nav-dot" title="Colour"></a>
+  <a href="#typography" class="nav-dot" title="Typography"></a>
+  <a href="#logo" class="nav-dot" title="Logo"></a>
+  <a href="#components" class="nav-dot" title="Components"></a>
+  <a href="#motion" class="nav-dot" title="Motion"></a>
+  <a href="#voice" class="nav-dot" title="Voice"></a>
+  <a href="#usage" class="nav-dot" title="Usage"></a>
+</nav>
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<section id="hero" style="border-bottom:none; padding:0;">
+  <div class="container">
+    <div class="hero">
+      <div class="hero-grid-bg"></div>
+      <div class="hero-glow"></div>
+      <div class="hero-glow-2"></div>
+
+      <div class="hero-content" data-reveal>
+        <div class="hero-eyebrow">Brand Guidelines — v2.0 — 2026</div>
+        <h1 class="hero-title">
+          <em>BRAND</em>
+          <span class="glitch-text" data-text="SYSTEM">SYSTEM</span>
+        </h1>
+        <p class="hero-desc">
+          Terminal-native. AI-first. Built for the open-source era.
+          A design language that crawls fast, thinks deep, and renders sharp.
+        </p>
+        <div class="hero-version">
+          <span class="dot"></span>
+          Crawl4AI — LLM-Ready Web Crawler
+        </div>
+      </div>
+
+      <div class="hero-logo-panel" data-reveal>
+        <div class="logo-showcase">
+          <div class="corner corner-tl"></div>
+          <div class="corner corner-tr"></div>
+          <div class="corner corner-bl"></div>
+          <div class="corner corner-br"></div>
+          <div>
+            <div class="logo-type">
+              <span class="crawl">crawl</span><span class="four">4</span><span class="ai">ai</span>
+            </div>
+            <div class="logo-sub">Open-source · LLM-Friendly · Web Crawler</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px;">
+          <div style="background:var(--c-surface); border:1px solid var(--c-border); padding:20px; display:flex; align-items:center; justify-content:center;">
+            <div class="icon-mark"></div>
+          </div>
+          <div style="background:var(--c-surface); border:1px solid var(--c-border); padding:20px; display:flex; flex-direction:column; gap:4px; justify-content:center;">
+            <div class="badge badge-available" style="width:fit-content;">Available</div>
+            <div class="badge badge-beta" style="width:fit-content;">Beta</div>
+            <div class="badge badge-new" style="width:fit-content;">New!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contents strip -->
+<div style="background:var(--c-surface); border-top:1px solid var(--c-border); border-bottom:1px solid var(--c-border);">
+  <div class="container" style="display:flex; gap:0; overflow-x:auto;">
+    <a href="#color" style="padding:14px 24px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-text-dim); text-decoration:none; white-space:nowrap; border-right:1px solid var(--c-border); transition:color 0.15s;" onmouseover="this.style.color='var(--c-cyan)'" onmouseout="this.style.color='var(--c-text-dim)'">01 / Colour</a>
+    <a href="#typography" style="padding:14px 24px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-text-dim); text-decoration:none; white-space:nowrap; border-right:1px solid var(--c-border); transition:color 0.15s;" onmouseover="this.style.color='var(--c-cyan)'" onmouseout="this.style.color='var(--c-text-dim)'">02 / Typography</a>
+    <a href="#logo" style="padding:14px 24px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-text-dim); text-decoration:none; white-space:nowrap; border-right:1px solid var(--c-border); transition:color 0.15s;" onmouseover="this.style.color='var(--c-cyan)'" onmouseout="this.style.color='var(--c-text-dim)'">03 / Logo</a>
+    <a href="#components" style="padding:14px 24px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-text-dim); text-decoration:none; white-space:nowrap; border-right:1px solid var(--c-border); transition:color 0.15s;" onmouseover="this.style.color='var(--c-cyan)'" onmouseout="this.style.color='var(--c-text-dim)'">04 / Components</a>
+    <a href="#motion" style="padding:14px 24px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-text-dim); text-decoration:none; white-space:nowrap; border-right:1px solid var(--c-border); transition:color 0.15s;" onmouseover="this.style.color='var(--c-cyan)'" onmouseout="this.style.color='var(--c-text-dim)'">05 / Motion</a>
+    <a href="#voice" style="padding:14px 24px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-text-dim); text-decoration:none; white-space:nowrap; border-right:1px solid var(--c-border); transition:color 0.15s;" onmouseover="this.style.color='var(--c-cyan)'" onmouseout="this.style.color='var(--c-text-dim)'">06 / Voice</a>
+    <a href="#usage" style="padding:14px 24px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-text-dim); text-decoration:none; white-space:nowrap; transition:color 0.15s;" onmouseover="this.style.color='var(--c-cyan)'" onmouseout="this.style.color='var(--c-text-dim)'">07 / In Use</a>
+  </div>
+</div>
+
+
+<!-- ══════════════════ 01 COLOUR ══════════════════ -->
+<section id="color">
+  <div class="container">
+    <div data-reveal>
+      <div class="section-index">01 / Colour System</div>
+      <h2 class="section-title">The <span class="accent">Palette</span></h2>
+      <p class="section-lead">Terminal-dark base with signal-bright accents. Colour communicates state, hierarchy, and intent — not decoration.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Gradients -->
+    <div style="margin-bottom:40px; display:grid; gap:2px;" data-reveal>
+      <div class="gradient-strip" data-label="PRIMARY · Terminal Signal"
+        style="background: linear-gradient(135deg, #04040a 0%, #070710 20%, #09b5a5 60%, #50ffff 100%); height:100px;"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px;">
+        <div class="gradient-strip" data-label="ACCENT · Acid Override"
+          style="background: linear-gradient(90deg, #0fbbaa, #b4ff3c, #d4ff00); height:80px;"></div>
+        <div class="gradient-strip" data-label="SIGNAL · Cyber Neon"
+          style="background: linear-gradient(90deg, #7b7bff 0%, #f380f5 50%, #ff2d6b 100%); height:80px;"></div>
+      </div>
+    </div>
+
+    <!-- Swatches -->
+    <div class="color-grid" data-reveal>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#04040a;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#50ffff;">Void</div>
+          <div class="swatch-hex">#04040A</div>
+          <div class="swatch-role">Deepest background</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#070710;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#50ffff;">Abyss</div>
+          <div class="swatch-hex">#07071 0</div>
+          <div class="swatch-role">Base background</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#0d0d1a;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#50ffff;">Surface</div>
+          <div class="swatch-hex">#0D0D1A</div>
+          <div class="swatch-role">Card / panel</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#141428;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#50ffff;">Raised</div>
+          <div class="swatch-hex">#141428</div>
+          <div class="swatch-role">Elevated UI</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#50ffff;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#04040a;">Cyan</div>
+          <div class="swatch-hex">#50FFFF</div>
+          <div class="swatch-role">Primary brand</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#09b5a5;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#04040a;">Teal</div>
+          <div class="swatch-hex">#09B5A5</div>
+          <div class="swatch-role">Cyan dimmed</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#0fbbaa;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#04040a;">Plasma</div>
+          <div class="swatch-hex">#0FBBAA</div>
+          <div class="swatch-role">Success / positive</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#b4ff3c;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#04040a;">Acid</div>
+          <div class="swatch-hex">#B4FF3C</div>
+          <div class="swatch-role">Disruptive accent</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#d4ff00;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#04040a;">Volt</div>
+          <div class="swatch-hex">#D4FF00</div>
+          <div class="swatch-role">Hover / alert</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#f380f5;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#04040a;">Fuchsia</div>
+          <div class="swatch-hex">#F380F5</div>
+          <div class="swatch-role">Brand magenta</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#7b7bff;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#04040a;">Ghost</div>
+          <div class="swatch-hex">#7B7BFF</div>
+          <div class="swatch-role">Electric indigo</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-body" style="background:#ff2d6b;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#04040a;">Alarm</div>
+          <div class="swatch-hex">#FF2D6B</div>
+          <div class="swatch-role">Error / danger</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contrast pairings -->
+    <div class="section-index" style="margin-top:60px; margin-bottom:16px;" data-reveal>Colour Pairings</div>
+    <div class="contrast-grid" data-reveal>
+      <div class="contrast-cell" style="background:#04040a; border:1px solid #1e1e3a;">
+        <div class="sample-text" style="color:#50ffff;">Aa</div>
+        <div class="sample-label" style="color:#3a3a5a; font-family:var(--f-mono); font-size:9px; letter-spacing:0.2em;">CYAN on VOID</div>
+        <div style="font-family:var(--f-mono); font-size:9px; color:#09b5a5;">WCAG AA ✓</div>
+      </div>
+      <div class="contrast-cell" style="background:#50ffff; border:1px solid #1e1e3a;">
+        <div class="sample-text" style="color:#04040a;">Aa</div>
+        <div class="sample-label" style="color:#09b5a5; font-family:var(--f-mono); font-size:9px; letter-spacing:0.2em;">VOID on CYAN</div>
+        <div style="font-family:var(--f-mono); font-size:9px; color:#09b5a5;">WCAG AAA ✓</div>
+      </div>
+      <div class="contrast-cell" style="background:#04040a; border:1px solid #1e1e3a;">
+        <div class="sample-text" style="color:#b4ff3c;">Aa</div>
+        <div class="sample-label" style="color:#3a3a5a; font-family:var(--f-mono); font-size:9px; letter-spacing:0.2em;">ACID on VOID</div>
+        <div style="font-family:var(--f-mono); font-size:9px; color:#09b5a5;">WCAG AAA ✓</div>
+      </div>
+      <div class="contrast-cell" style="background:#b4ff3c; border:1px solid #1e1e3a;">
+        <div class="sample-text" style="color:#04040a;">Aa</div>
+        <div class="sample-label" style="color:#0d0d1a; font-family:var(--f-mono); font-size:9px; letter-spacing:0.2em;">VOID on ACID</div>
+        <div style="font-family:var(--f-mono); font-size:9px; color:#09b5a5;">WCAG AAA ✓</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ 02 TYPOGRAPHY ══════════════════ -->
+<section id="typography">
+  <div class="container">
+    <div data-reveal>
+      <div class="section-index">02 / Typography</div>
+      <h2 class="section-title">Type <span class="acid">Scale</span></h2>
+      <p class="section-lead">Three voices — display for impact, mono for machine-truth, body for clarity. Never mixed carelessly.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Font Families -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-bottom:60px;" data-reveal>
+      <div class="font-card" data-font="Syne">
+        <div class="font-card-label">Syne — Display</div>
+        <div style="font-family:var(--f-display); font-size:40px; font-weight:800; letter-spacing:-0.04em; line-height:1; color:var(--c-text);">crawl<span style="color:var(--c-cyan)">4</span><span style="color:var(--c-acid)">ai</span></div>
+        <div class="font-alphabet" style="font-family:var(--f-display);">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz 0123456789</div>
+        <div style="font-family:var(--f-mono); font-size:10px; color:var(--c-text-mute); margin-top:20px;">Weights: 400 · 600 · 700 · 800</div>
+      </div>
+      <div class="font-card" data-font="Mono">
+        <div class="font-card-label">Space Mono — Technical</div>
+        <div style="font-family:var(--f-mono); font-size:28px; font-weight:700; letter-spacing:-0.02em; line-height:1; color:var(--c-cyan);">$ crawl --ai</div>
+        <div class="font-alphabet" style="font-family:var(--f-mono); font-size:14px;">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 !"#$%&'()*+,-./:;<=>?@</div>
+        <div style="font-family:var(--f-mono); font-size:10px; color:var(--c-text-mute); margin-top:20px;">Weights: 400 · 700 (Regular · Bold)</div>
+      </div>
+      <div class="font-card" data-font="Body">
+        <div class="font-card-label">DM Sans — Body</div>
+        <div style="font-family:var(--f-body); font-size:22px; font-weight:400; line-height:1.3; color:var(--c-text); max-width:240px;">Precision-scraped. LLM-ready.</div>
+        <div class="font-alphabet" style="font-family:var(--f-body); font-size:14px;">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789</div>
+        <div style="font-family:var(--f-mono); font-size:10px; color:var(--c-text-mute); margin-top:20px;">Weights: 300 · 400 · 500</div>
+      </div>
+    </div>
+
+    <!-- Type Scale -->
+    <div class="section-index" style="margin-bottom:16px;" data-reveal>Type Scale</div>
+    <div class="type-specimen" data-reveal>
+      <div class="type-row">
+        <div class="meta"><strong>Hero</strong>Syne 800<br>64px / −4%</div>
+        <div class="sample t-hero">crawl<span style="color:var(--c-cyan)">4</span>ai</div>
+        <div class="usage">Hero / Cover</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><strong>Display</strong>Syne 800<br>40px / −3%</div>
+        <div class="sample t-display">Section Title</div>
+        <div class="usage">Section Heads</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><strong>Heading</strong>Syne 700<br>28px / −2%</div>
+        <div class="sample t-heading">Component Label</div>
+        <div class="usage">Cards / Panels</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><strong>Title</strong>Syne 600<br>20px / −1%</div>
+        <div class="sample t-title">Subsection Title</div>
+        <div class="usage">Sub-heads</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><strong>Body</strong>DM Sans 400<br>15px / normal</div>
+        <div class="sample t-body">Crawl4AI extracts clean, structured data ready for LLM pipelines.</div>
+        <div class="usage">Paragraphs</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><strong>Mono</strong>Space Mono 400<br>13px / +5%</div>
+        <div class="sample t-mono">$ pip install crawl4ai</div>
+        <div class="usage">Code / CLI</div>
+      </div>
+      <div class="type-row">
+        <div class="meta"><strong>Micro</strong>Space Mono 400<br>10px / +25%</div>
+        <div class="sample t-micro">Version · Label · Index · Eyebrow</div>
+        <div class="usage">Labels / Tags</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ 03 LOGO ══════════════════ -->
+<section id="logo">
+  <div class="container">
+    <div data-reveal>
+      <div class="section-index">03 / Logo System</div>
+      <h2 class="section-title">The <span class="accent">Mark</span></h2>
+      <p class="section-lead">Two elements: the wordmark and the icon. The number 4 is a structural hinge — always Cyan. The "ai" suffix carries the Acid punch.</p>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Logo variants -->
+    <div class="logo-grid" data-reveal>
+      <div class="logo-cell">
+        <div class="logo-v1 logo-type"><span class="crawl">crawl</span><span class="four">4</span><span class="ai">ai</span></div>
+        <div class="cell-label">Primary · Dark BG</div>
+      </div>
+      <div class="logo-cell">
+        <div class="logo-v2 logo-type"><span class="crawl">crawl</span><span class="four">4</span><span class="ai">ai</span></div>
+        <div class="cell-label">Ghost · Subtle BG</div>
+      </div>
+      <div class="logo-cell">
+        <div class="logo-v3 logo-type"><span class="crawl">crawl</span><span class="four">4</span><span class="ai">ai</span></div>
+        <div class="cell-label">Reversed · Cyan BG</div>
+      </div>
+    </div>
+
+    <!-- Icon marks -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:2px; margin-bottom:40px;" data-reveal>
+      <div style="background:var(--c-surface); border:1px solid var(--c-border); padding:32px; display:flex; align-items:center; justify-content:center; gap:20px;">
+        <div class="icon-mark" style="width:64px; height:64px;"></div>
+        <div>
+          <div style="font-family:var(--f-mono); font-size:10px; color:var(--c-text-mute); letter-spacing:0.2em;">ICON MARK</div>
+          <div style="font-family:var(--f-display); font-size:13px; color:var(--c-text-dim); margin-top:4px;">64×64px min</div>
+        </div>
+      </div>
+      <div style="background:var(--c-void); border:1px solid var(--c-border); padding:32px; display:flex; align-items:center; justify-content:center; gap:20px;">
+        <div class="icon-mark" style="width:64px; height:64px; background:var(--c-acid);"></div>
+      </div>
+      <div style="background:var(--c-cyan); border:1px solid var(--c-border); padding:32px; display:flex; align-items:center; justify-content:center; gap:20px;">
+        <div class="icon-mark" style="width:64px; height:64px; background:var(--c-void);"><style>.icon-mark.inv::before { color:var(--c-cyan); }</style></div>
+      </div>
+      <div style="background:var(--c-surface); border:1px solid var(--c-border); padding:32px; display:flex; flex-direction:column; justify-content:center; gap:8px;">
+        <div style="font-family:var(--f-mono); font-size:9px; color:var(--c-text-mute); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px;">Clearspace</div>
+        <div style="font-size:12px; color:var(--c-text-dim);">Min. 1× icon height on all sides</div>
+        <div style="font-size:12px; color:var(--c-text-dim);">Never place on busy imagery</div>
+        <div style="font-size:12px; color:var(--c-text-dim);">Min. size: 32px (icon) / 80px (wordmark)</div>
+      </div>
+    </div>
+
+    <!-- Do/Don't -->
+    <div class="section-index" style="margin-bottom:16px;" data-reveal>Logo Rules</div>
+    <div class="donts-grid" data-reveal>
+      <div class="dont-cell do">
+        <div class="logo-sample">
+          <div class="logo-v1 logo-type" style="font-size:28px;"><span class="crawl">crawl</span><span class="four">4</span><span class="ai">ai</span></div>
+        </div>
+        <div class="rule">Use on dark backgrounds (void, abyss, surface)</div>
+      </div>
+      <div class="dont-cell do">
+        <div class="logo-sample" style="background:var(--c-cyan); margin:-32px; padding:32px; margin-bottom:0;">
+          <div class="logo-v3 logo-type" style="font-size:28px;"><span class="crawl">crawl</span><span class="four">4</span><span class="ai">ai</span></div>
+        </div>
+        <div class="rule">Reversed on brand Cyan or Acid backgrounds</div>
+      </div>
+      <div class="dont-cell dont">
+        <div class="logo-sample" style="opacity:0.5;">
+          <div style="font-family:var(--f-display); font-size:28px; font-weight:800; letter-spacing:-0.04em; color:#888;">crawl4ai</div>
+        </div>
+        <div class="rule">Don't use on grey, mid-tone, or light backgrounds — kills contrast</div>
+      </div>
+      <div class="dont-cell dont">
+        <div class="logo-sample">
+          <div style="font-family:Arial, sans-serif; font-size:28px; font-weight:800; color:var(--c-cyan);">crawl<span style="color:var(--c-acid);">4</span>ai</div>
+        </div>
+        <div class="rule">Never substitute typeface — Syne 800 only</div>
+      </div>
+      <div class="dont-cell dont">
+        <div class="logo-sample">
+          <div style="font-family:var(--f-display); font-size:28px; font-weight:800; letter-spacing:-0.04em; color:var(--c-fuchsia);">crawl<span style="color:var(--c-ghost);">4</span>ai</div>
+        </div>
+        <div class="rule">Never recolour with off-brand colours</div>
+      </div>
+      <div class="dont-cell dont">
+        <div class="logo-sample">
+          <div style="font-family:var(--f-display); font-size:20px; font-weight:800; letter-spacing:0.2em; color:var(--c-cyan);">CRAWL4AI</div>
+        </div>
+        <div class="rule">Never set in all-caps or add tracking</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ 04 COMPONENTS ══════════════════ -->
+<section id="components">
+  <div class="container">
+    <div data-reveal>
+      <div class="section-index">04 / UI Components</div>
+      <h2 class="section-title"><span class="accent">System</span> Components</h2>
+      <p class="section-lead">Every element from the same terminal DNA. Sharp corners, mono labels, cyan-to-acid state shifts.</p>
+    </div>
+    <div class="divider"></div>
+
+    <div class="component-grid" data-reveal>
+      <!-- Buttons -->
+      <div class="component-panel">
+        <h4>Buttons</h4>
+        <div class="btn-row">
+          <button class="btn btn-primary">Run Crawler</button>
+          <button class="btn btn-ghost">Configure</button>
+          <button class="btn btn-acid">Deploy</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-sm">Start</button>
+          <button class="btn btn-ghost btn-sm">Cancel</button>
+          <button class="btn btn-danger btn-sm">Delete</button>
+        </div>
+        <div style="margin-top:16px; font-size:11px; color:var(--c-text-mute); font-family:var(--f-mono); line-height:1.8;">
+          Primary → Cyan · CTA → Acid<br>
+          Ghost → Bordered · Danger → Alarm Red<br>
+          All: uppercase mono, no border-radius
+        </div>
+      </div>
+
+      <!-- Badges -->
+      <div class="component-panel">
+        <h4>Status Badges</h4>
+        <div class="badge-row" style="margin-bottom:16px;">
+          <span class="badge badge-available">Available</span>
+          <span class="badge badge-beta">Beta</span>
+          <span class="badge badge-alpha">Alpha</span>
+          <span class="badge badge-new">New!</span>
+          <span class="badge badge-deprecated">Deprecated</span>
+        </div>
+        <div style="font-size:11px; color:var(--c-text-mute); font-family:var(--f-mono); line-height:1.8;">
+          Cyan: live / stable<br>
+          Acid: beta / active dev<br>
+          Fuchsia: alpha / experimental<br>
+          Alarm: new release<br>
+          Muted: deprecated / disabled
+        </div>
+      </div>
+
+      <!-- Inputs -->
+      <div class="component-panel">
+        <h4>Form Fields</h4>
+        <div class="input-demo">
+          <div class="field-group">
+            <label class="field-label">Target URL</label>
+            <input class="field-input" type="text" placeholder="https://example.com/docs">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Depth Limit</label>
+            <input class="field-input" type="text" value="3">
+          </div>
+          <div class="field-group">
+            <label class="field-label">API Key <span style="color:var(--c-neon-r);">*required</span></label>
+            <input class="field-input error" type="text" placeholder="sk-...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Code -->
+      <div class="component-panel">
+        <h4>Code Blocks</h4>
+        <div class="code-block">
+          <div><span class="line-num">01</span><span class="kw">import</span> <span class="fn">crawl4ai</span></div>
+          <div><span class="line-num">02</span></div>
+          <div><span class="line-num">03</span><span class="cm"># async crawler, LLM-ready</span></div>
+          <div><span class="line-num">04</span><span class="kw">async def</span> <span class="fn">main</span><span style="color:var(--c-text);">(</span><span style="color:var(--c-text);">):</span></div>
+          <div><span class="line-num">05</span>  <span class="kw">async with</span> <span class="fn">AsyncWebCrawler</span>() <span class="kw">as</span> crawler:</div>
+          <div><span class="line-num">06</span>    result = <span class="kw">await</span> crawler.<span class="fn">arun</span>(</div>
+          <div><span class="line-num">07</span>      url=<span class="str">"https://docs.python.org"</span>,</div>
+          <div><span class="line-num">08</span>      depth=<span class="num">3</span></div>
+          <div><span class="line-num">09</span>    )</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal -->
+    <div data-reveal style="margin-top:2px;">
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot" style="background:#ff2d6b;"></div>
+          <div class="terminal-dot" style="background:#b4ff3c;"></div>
+          <div class="terminal-dot" style="background:#50ffff;"></div>
+          <div style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--c-text-mute); letter-spacing:0.15em;">crawl4ai — terminal</div>
+        </div>
+        <div class="terminal-body">
+          <div><span class="terminal-prompt">crawl4ai</span> <span style="color:var(--c-text-mute);">~</span> <span class="terminal-prompt">$</span> <span class="terminal-cmd"> pip install crawl4ai</span></div>
+          <div class="terminal-out">Collecting crawl4ai...</div>
+          <div class="terminal-out">Installing collected packages: crawl4ai</div>
+          <div class="terminal-success">Successfully installed crawl4ai-0.4.2</div>
+          <div style="margin-top:8px;"><span class="terminal-prompt">crawl4ai</span> <span style="color:var(--c-text-mute);">~</span> <span class="terminal-prompt">$</span> <span class="terminal-cmd"> crawl4ai-setup</span></div>
+          <div class="terminal-warn">[INIT] Installing Playwright browsers...</div>
+          <div class="terminal-success">[OK] Setup complete. crawl4ai is ready.</div>
+          <div style="margin-top:8px;"><span class="terminal-prompt">crawl4ai</span> <span style="color:var(--c-text-mute);">~</span> <span class="terminal-prompt">$</span> <span style="display:inline-block; width:8px; height:14px; background:var(--c-cyan); vertical-align:middle; animation: pulse 1s infinite;"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Icons -->
+    <div class="section-index" style="margin-top:60px; margin-bottom:16px;" data-reveal>Icon Style — 1.5px Stroke · No Fill · 24px Grid</div>
+    <div class="icon-grid" data-reveal>
+      <!-- Using SVG inline icons matching the terminal/AI aesthetic -->
+      <div class="icon-cell">
+        <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <span>terminal</span>
+      </div>
+      <div class="icon-cell">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        <span>broadcast</span>
+      </div>
+      <div class="icon-cell">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>secure</span>
+      </div>
+      <div class="icon-cell">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>signal</span>
+      </div>
+      <div class="icon-cell">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span>add</span>
+      </div>
+      <div class="icon-cell">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>next</span>
+      </div>
+      <div class="icon-cell">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>message</span>
+      </div>
+      <div class="icon-cell">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>search</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ 05 MOTION ══════════════════ -->
+<section id="motion">
+  <div class="container">
+    <div data-reveal>
+      <div class="section-index">05 / Motion & Animation</div>
+      <h2 class="section-title">Motion <span class="accent">Language</span></h2>
+      <p class="section-lead">Fast-in, slow-out. Like a terminal response — instant acknowledgement, deliberate output.</p>
+    </div>
+    <div class="divider"></div>
+
+    <div class="motion-grid" data-reveal>
+      <div class="motion-card">
+        <h4>Micro Feedback</h4>
+        <p>Button presses, hover states, badge flickers. Instant visual response at human-interaction speed.</p>
+        <div class="motion-value">duration: 100–150ms</div>
+        <div class="motion-value">easing: ease-out</div>
+      </div>
+      <div class="motion-card">
+        <h4>Content Reveal</h4>
+        <p>Sections sliding into view on scroll. Stagger children by 50ms each for depth without jank.</p>
+        <div class="motion-value">duration: 400–600ms</div>
+        <div class="motion-value">easing: cubic-bezier(0.16, 1, 0.3, 1)</div>
+      </div>
+      <div class="motion-card">
+        <h4>Page Transitions</h4>
+        <p>Cross-fade and upward shift. Never flashy — the interface is the star, not the motion.</p>
+        <div class="motion-value">duration: 300ms</div>
+        <div class="motion-value">easing: ease-in-out</div>
+      </div>
+      <div class="motion-card">
+        <h4>Glitch Effect</h4>
+        <p>Reserved for brand moments only: hero headlines, error states, splash screens. Use sparingly.</p>
+        <div class="motion-value">clip-path + translate offset</div>
+        <div class="motion-value">Max 2× per page</div>
+      </div>
+      <div class="motion-card">
+        <h4>Progress / Loading</h4>
+        <p>Pulse on the status dot. Scan-line shimmer on loading skeletons. Always cyan.</p>
+        <div class="motion-value">pulse: 2s infinite</div>
+        <div class="motion-value">skeleton: 1.5s ease-in-out</div>
+      </div>
+      <div class="motion-card">
+        <h4>Reduced Motion</h4>
+        <p>All animations must respect <code style="color:var(--c-cyan); font-family:var(--f-mono); font-size:11px;">prefers-reduced-motion</code>. Strip to 0.01ms duration — no exceptions.</p>
+        <div class="motion-value">@media (prefers-reduced-motion)</div>
+        <div class="motion-value" style="color:var(--c-alarm);">Accessibility non-negotiable</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ 06 VOICE ══════════════════ -->
+<section id="voice">
+  <div class="container">
+    <div data-reveal>
+      <div class="section-index">06 / Voice & Tone</div>
+      <h2 class="section-title">Brand <span class="acid">Voice</span></h2>
+      <p class="section-lead">Developer-native. No corporate softness. No inflated claims. Precise, technical, with a dry edge of wit.</p>
+    </div>
+    <div class="divider"></div>
+
+    <div class="voice-grid" data-reveal>
+      <div class="voice-do">
+        <h4>We Are</h4>
+        <div class="voice-item">Direct and precise — say exactly what it does</div>
+        <div class="voice-item">Technical without being elitist</div>
+        <div class="voice-item">Confident in our open-source status</div>
+        <div class="voice-item">Dry wit — one-liners that land, never forced</div>
+        <div class="voice-item">Community-first, jargon-light documentation</div>
+        <div class="voice-item">Numbers and benchmarks over adjectives</div>
+      </div>
+      <div class="voice-dont">
+        <h4>We're Not</h4>
+        <div class="voice-item">Marketing-speak: "revolutionary", "paradigm-shifting"</div>
+        <div class="voice-item">Overly casual — no "Hey there, friend!"</div>
+        <div class="voice-item">Apologetic or hedge-everything cautious</div>
+        <div class="voice-item">Emoji-heavy in technical documentation</div>
+        <div class="voice-item">Vague: "powerful tool that helps you do stuff"</div>
+        <div class="voice-item">Dismissive of non-developer users</div>
+      </div>
+    </div>
+
+    <!-- Example copy -->
+    <div style="margin-top:2px; display:grid; grid-template-columns:1fr 1fr; gap:2px;" data-reveal>
+      <div style="background:rgba(15,187,170,0.04); border:1px solid rgba(15,187,170,0.2); padding:32px;">
+        <div style="font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-plasma); margin-bottom:16px;">✓ DO write like this</div>
+        <div style="font-size:16px; color:var(--c-text); line-height:1.6; margin-bottom:12px;">"Crawl a site. Get clean markdown. Feed it to your LLM. Takes 3 lines of Python."</div>
+        <div style="font-size:13px; color:var(--c-text-dim);">Clear, functional, developer-respecting. Proves value in one sentence.</div>
+      </div>
+      <div style="background:rgba(255,45,107,0.04); border:1px solid rgba(255,45,107,0.15); padding:32px;">
+        <div style="font-family:var(--f-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--c-neon-r); margin-bottom:16px;">✗ DON'T write like this</div>
+        <div style="font-size:16px; color:var(--c-text-dim); line-height:1.6; margin-bottom:12px; text-decoration:line-through; opacity:0.6;">"Empower your AI journey with our revolutionary, next-generation web intelligence platform!"</div>
+        <div style="font-size:13px; color:var(--c-text-dim);">Means nothing. Respects no one. Contributes zero information.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ 07 BRAND IN USE ══════════════════ -->
+<section id="usage">
+  <div class="container">
+    <div data-reveal>
+      <div class="section-index">07 / Brand in Use</div>
+      <h2 class="section-title">Applied <span class="accent">Brand</span></h2>
+      <p class="section-lead">How the system looks in real contexts — social, docs, product UI, and community presence.</p>
+    </div>
+    <div class="divider"></div>
+
+    <div class="brand-use-grid" data-reveal>
+      <!-- Dark card - social share -->
+      <div class="brand-use-card dark">
+        <div class="card-content">
+          <div>
+            <div style="font-family:var(--f-mono); font-size:10px; letter-spacing:0.25em; color:var(--c-text-mute); text-transform:uppercase; margin-bottom:20px;">Social / Share Card</div>
+            <div style="font-family:var(--f-display); font-size:32px; font-weight:800; letter-spacing:-0.03em; line-height:1.1; margin-bottom:16px;">
+              <span style="color:var(--c-text);">#1 LLM-Friendly</span><br>
+              <span style="color:var(--c-cyan);">Web Crawler</span>
+            </div>
+            <div style="font-size:13px; color:var(--c-text-dim); line-height:1.6; max-width:320px;">Extract clean markdown from any URL. Production-ready async Python. MIT licensed.</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div style="font-family:var(--f-display); font-size:22px; font-weight:800; letter-spacing:-0.04em;">crawl<span style="color:var(--c-cyan);">4</span><span style="color:var(--c-acid);">ai</span></div>
+            <div class="badge badge-available">v0.4.2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cyan card -->
+      <div class="brand-use-card cyan-bg">
+        <div class="card-content" style="background:var(--c-cyan);">
+          <div>
+            <div style="font-family:var(--f-mono); font-size:10px; letter-spacing:0.25em; color:rgba(7,7,16,0.5); text-transform:uppercase; margin-bottom:20px;">Event / Conference Banner</div>
+            <div style="font-family:var(--f-display); font-size:32px; font-weight:800; letter-spacing:-0.03em; color:var(--c-void); line-height:1.1; margin-bottom:12px;">Open Source.<br>AI Ready.</div>
+            <div style="font-size:13px; color:rgba(7,7,16,0.6); max-width:280px;">Contributing to the future of AI data infrastructure.</div>
+          </div>
+          <div style="font-family:var(--f-display); font-size:22px; font-weight:800; letter-spacing:-0.04em; color:var(--c-void);">crawl<span style="opacity:0.5;">4</span>ai</div>
+        </div>
+      </div>
+
+      <!-- Acid card - announcement -->
+      <div class="brand-use-card acid-bg">
+        <div class="card-content" style="background:var(--c-acid);">
+          <div>
+            <div style="font-family:var(--f-mono); font-size:10px; letter-spacing:0.25em; color:rgba(4,4,10,0.45); text-transform:uppercase; margin-bottom:20px;">Release Announcement</div>
+            <div style="font-family:var(--f-display); font-size:40px; font-weight:800; letter-spacing:-0.04em; color:var(--c-void); line-height:1;">v0.5 DROPS</div>
+            <div style="margin-top:12px; font-size:13px; color:rgba(4,4,10,0.6);">LLM extraction · MCP server · Async streaming</div>
+          </div>
+          <div style="font-family:var(--f-display); font-size:22px; font-weight:800; letter-spacing:-0.04em; color:var(--c-void);">crawl4ai</div>
+        </div>
+      </div>
+
+      <!-- Surface card - social post -->
+      <div class="brand-use-card surface-bg">
+        <div class="card-content">
+          <div>
+            <div style="font-family:var(--f-mono); font-size:10px; letter-spacing:0.25em; color:var(--c-text-mute); text-transform:uppercase; margin-bottom:20px;">Social Post Format</div>
+            <div class="social-mock">
+              <div class="social-mock-top">
+                <div class="social-avatar">C4</div>
+                <div class="social-handle">
+                  <strong>Crawl4AI</strong>
+                  @crawl4ai
+                </div>
+              </div>
+              <div class="social-post">
+                New: async streaming output now available in <span class="mention">@crawl4ai</span> v0.5.<br><br>
+                Your LLM gets data as it arrives — not after. 3× faster pipeline throughput in benchmarks.<br><br>
+                <span class="hashtag">#opensource</span> <span class="hashtag">#LLM</span> <span class="hashtag">#AI</span>
+              </div>
+              <div style="font-family:var(--f-mono); font-size:9px; color:var(--c-text-mute); margin-top:8px;">Feb 20, 2026 · 4.7K impressions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spacing & Grid reference -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px; margin-top:2px;" data-reveal>
+      <!-- Spacing -->
+      <div>
+        <div class="section-index" style="margin-bottom:16px;">Spacing Scale</div>
+        <div class="spacing-demo">
+          <div class="space-bar" style="height:16px;"><span class="sz">4</span><span class="val">4px</span></div>
+          <div class="space-bar" style="height:24px;"><span class="sz">8</span><span class="val">8px</span></div>
+          <div class="space-bar" style="height:40px;"><span class="sz">16</span><span class="val">16px</span></div>
+          <div class="space-bar" style="height:56px;"><span class="sz">24</span><span class="val">24px</span></div>
+          <div class="space-bar" style="height:80px;"><span class="sz">32</span><span class="val">32px</span></div>
+          <div class="space-bar" style="height:112px;"><span class="sz">48</span><span class="val">48px</span></div>
+          <div class="space-bar" style="height:160px;"><span class="sz">80</span><span class="val">80px</span></div>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div>
+        <div class="section-index" style="margin-bottom:16px;">12-Column Grid · 40px Gutter</div>
+        <div class="grid-demo">
+          <div class="grid-cols">
+            <div class="grid-col">1</div><div class="grid-col">2</div>
+            <div class="grid-col">3</div><div class="grid-col">4</div>
+            <div class="grid-col">5</div><div class="grid-col">6</div>
+            <div class="grid-col">7</div><div class="grid-col">8</div>
+            <div class="grid-col">9</div><div class="grid-col">10</div>
+            <div class="grid-col">11</div><div class="grid-col">12</div>
+          </div>
+          <div class="grid-layout-demo">
+            <div class="grid-block col-4">4 col</div>
+            <div class="grid-block col-8">8 col</div>
+            <div class="grid-block col-6">6 col</div>
+            <div class="grid-block col-3">3</div>
+            <div class="grid-block col-3">3</div>
+            <div class="grid-block col-2">2</div>
+            <div class="grid-block col-2">2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<div style="border-top:1px solid var(--c-border);">
+  <div class="container">
+    <div class="footer">
+      <div class="footer-meta">
+        <strong>Crawl4AI Brand System 2026</strong><br>
+        Maintained by the Crawl4AI community · MIT Licensed<br>
+        Primary: <span style="color:var(--c-cyan);">#50FFFF</span> · Acid: <span style="color:var(--c-acid);">#B4FF3C</span> · Void: <span style="color:var(--c-text-dim);">#04040A</span><br>
+        Syne 800 · Space Mono 400 · DM Sans 300–500<br>
+        <span style="color:var(--c-text-mute);">questions → github.com/unclecode/crawl4ai</span>
+      </div>
+      <div class="footer-logo">crawl<span style="color:var(--c-cyan);">4</span><span style="color:var(--c-acid);">ai</span></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // Reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+
+  // Side nav active state
+  const sections = document.querySelectorAll('section[id]');
+  const navDots = document.querySelectorAll('.nav-dot');
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navDots.forEach(dot => dot.classList.remove('active'));
+        const activeId = entry.target.id;
+        const activeDot = document.querySelector(`.nav-dot[href="#${activeId}"]`);
+        if (activeDot) activeDot.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => sectionObserver.observe(s));
+
+  // Input focus effects
+  document.querySelectorAll('.field-input').forEach(input => {
+    input.addEventListener('focus', () => {
+      input.parentElement.querySelector('.field-label').style.color = 'var(--c-cyan)';
+    });
+    input.addEventListener('blur', () => {
+      input.parentElement.querySelector('.field-label').style.color = '';
+    });
+  });
+</script>
+</body>
+</html>

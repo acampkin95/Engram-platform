@@ -1,0 +1,34 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/acampkin/projects/Development/Engram/Engram-Platform/frontend[39m
+
+ [31m❯[39m app/dashboard/memory/graph/MemoryGraphContent.test.tsx [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 17[2mms[22m[39m
+[31m   [31m×[31m renders MemoryGraphContent without crashing[39m[32m 14[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m app/dashboard/memory/graph/MemoryGraphContent.test.tsx[2m > [22mrenders MemoryGraphContent without crashing
+[31m[1mReferenceError[22m: handleNodeDoubleClick is not defined[39m
+[36m [2m❯[22m GraphContent app/dashboard/memory/graph/MemoryGraphContent.tsx:[2m463:36[22m[39m
+    [90m461| [39m                [33monEdgesChange[39m[33m=[39m[33m{[39monEdgesChange[33m}[39m
+    [90m462| [39m                [33monNodeClick[39m[33m=[39m[33m{[39mhandleNodeClick[33m}[39m
+    [90m463| [39m                [33monNodeDoubleClick[39m[33m=[39m[33m{[39mhandleNodeDoubleClick[33m}[39m
+    [90m   | [39m                                   [31m^[39m
+    [90m464| [39m                [33monPaneClick[39m[33m=[39m[33m{[39mhandlePaneClick[33m}[39m
+    [90m465| [39m              [33m/[39m[33m>[39m
+[90m [2m❯[22m Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:[2m25904:20[22m[39m
+[90m [2m❯[22m renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:[2m7662:22[22m[39m
+[90m [2m❯[22m updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:[2m10166:19[22m[39m
+[90m [2m❯[22m beginWork node_modules/react-dom/cjs/react-dom-client.development.js:[2m11778:18[22m[39m
+[90m [2m❯[22m runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:[2m874:13[22m[39m
+[90m [2m❯[22m performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:[2m17641:22[22m[39m
+[90m [2m❯[22m workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:[2m17469:41[22m[39m
+[90m [2m❯[22m renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:[2m17450:11[22m[39m
+[90m [2m❯[22m performWorkOnRoot node_modules/react-dom/cjs/react-dom-client.development.js:[2m16583:35[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 17:42:43
+[2m   Duration [22m 1.00s[2m (transform 148ms, setup 152ms, import 384ms, tests 17ms, environment 267ms)[22m

@@ -1,0 +1,75 @@
+[Unit]
+Description=Engram AI Memory Platform (Weaviate, Redis, FastAPI, MCP, Next.js)
+Documentation=https://github.com/velocity-digital/engram
+Requires=docker.service network-online.target tailscaled.service
+After=docker.service network-online.target tailscaled.service
+Wants=network-online.target tailscaled.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+# Graceful shutdown ordering
+Before=shutdown.target reboot.target halt.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/engram
+EnvironmentFile=/opt/engram/.env
+
+# User and group to run as
+User=root
+Group=docker
+
+# Path to docker-compose file
+Environment="COMPOSE_PROJECT_NAME=engram-platform"
+Environment="COMPOSE_FILE=/opt/engram/docker-compose.yml"
+
+# Exec commands
+ExecStartPre=/usr/bin/docker compose -f /opt/engram/docker-compose.yml pull -q
+ExecStart=/usr/bin/docker compose -f /opt/engram/docker-compose.yml up -d --remove-orphans
+ExecStop=/usr/bin/docker compose -f /opt/engram/docker-compose.yml down --timeout 120
+
+# Restart policy - crash protection
+Restart=on-failure
+RestartSec=10
+
+# Timeout settings
+TimeoutStartSec=300
+TimeoutStopSec=180
+TimeoutSec=300
+
+# Resource limits
+LimitNOFILE=1048576
+LimitNPROC=infinity
+LimitMEMLOCK=infinity
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=engram-platform
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/opt/engram /var/log/engram /var/run
+
+# Allow container restart on failure
+# Note: Docker's restart policy handles container restarts, not the service itself
+
+[Install]
+WantedBy=multi-user.target
+
+# ==========================================
+# GRACEFUL SHUTDOWN NOTES:
+# ==========================================
+# - On system shutdown/reboot, systemd sends SIGTERM to this service
+# - ExecStop runs "docker compose down --timeout 120"
+# - Docker Compose sends SIGTERM to each container and waits up to 120s
+# - Containers with proper shutdown handlers will:
+#   1. Stop accepting new connections
+#   2. Wait for existing requests to complete
+#   3. Flush logs and close connections
+#   4. Exit gracefully
+# - After timeout, containers receive SIGKILL
+# ==========================================

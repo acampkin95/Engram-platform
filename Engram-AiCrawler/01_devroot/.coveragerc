@@ -1,0 +1,11 @@
+[run]
+concurrency = thread
+source = app
+fail_under = 75
+
+[report]
+show_missing = True
+
+exclude_lines =
+    # pragma: no cover
+    async def execute_crawl

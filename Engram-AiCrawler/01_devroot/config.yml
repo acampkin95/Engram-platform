@@ -1,0 +1,166 @@
+# Crawl4AI OSINT Configuration
+
+# Application Settings
+app:
+  name: "crawl4ai-osint"
+  version: "0.1.0"
+  debug: false
+  log_level: "INFO"
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 11235
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:5173"
+    - "http://127.0.0.1:3000"
+    - "http://127.0.0.1:5173"
+  websocket_ping_interval: 20
+  websocket_ping_timeout: 60
+
+# Crawl4AI Configuration
+crawl4ai:
+  version: "0.7.4"
+  browser_type: "chromium"
+  headless: true
+  viewport_width: 1920
+  viewport_height: 1080
+  cache_enabled: true
+  cache_mode: "enabled"
+  word_count_threshold: 50
+  excluded_tags:
+    - "script"
+    - "style"
+    - "nav"
+    - "footer"
+    - "header"
+  exclude_all_images: false
+  semaphore_count: 5
+  page_timeout: 30000
+
+# LM Studio Bridge
+lm_studio:
+  url: "http://host.docker.internal:1234/v1"
+  model: "local-model"
+  timeout: 60
+  max_retries: 3
+  retry_delay: 5
+  temperature: 0.7
+
+# Redis Configuration
+redis:
+  url: "redis://redis:6379/0"
+  max_connections: 10
+  socket_timeout: 5
+  socket_connect_timeout: 5
+  retry_on_timeout: true
+
+# ChromaDB Configuration
+chromadb:
+  path: "/app/data/chroma"
+  collection_prefix: "scan_"
+  similarity_threshold: 0.75
+  embedding_batch_size: 32
+
+# Data Lifecycle
+data_lifecycle:
+  tiers:
+    hot:
+      path: "/app/data/tiers/hot"
+      max_age_hours: 24
+    warm:
+      path: "/app/data/tiers/warm"
+      max_age_days: 3
+    cold:
+      path: "/app/data/tiers/cold"
+      max_age_days: 7
+    archive:
+      path: "/app/data/tiers/archive"
+      compression: "gzip"
+  offload_threshold_days: 3
+  archive_threshold_gb: 50
+  cleanup_interval_minutes: 5
+
+# Watchdog Configuration
+watchdog:
+  check_interval_seconds: 30
+  orphan_age_minutes: 60
+  memory_threshold_percent: 90
+  disk_threshold_percent: 85
+  memory_check_enabled: true
+  disk_check_enabled: true
+
+# OSINT Configuration
+osint:
+  platforms:
+    - twitter
+    - linkedin
+    - instagram
+    - facebook
+    - reddit
+    - tiktok
+  stealth_mode: true
+  user_agent_rotation: true
+  rate_limit_enabled: true
+  parallel_crawls: 10
+  image_similarity_threshold: 0.85
+  search_queries_per_platform: 10
+
+# Rate Limiting Configuration
+rate_limit:
+  enabled: true
+  user:
+    requests_per_minute: 60
+    daily_quota: 1000
+  admin:
+    requests_per_minute: 120
+    daily_quota: 10000
+  exempted_paths:
+    - "/health"
+    - "/"
+    - "/docs"
+    - "/redoc"
+    - "/openapi.json"
+    - "/ws"
+
+# Logging Configuration
+logging:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: INFO
+      formatter: standard
+      stream: ext://sys.stdout
+    file:
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      formatter: standard
+      filename: /app/data/logs/app.log
+      maxBytes: 52428800  # 50MB
+      backupCount: 10
+  root:
+    level: INFO
+    handlers:
+      - console
+      - file
+
+# Cache Configuration
+cache:
+  enabled: true
+  backend: "redis"
+  ttl_seconds: 3600
+  max_size_mb: 1000
+
+# Performance Configuration
+performance:
+  max_concurrent_crawls: 10
+  request_timeout: 30
+  chunk_size: 1024
+  overlap_rate: 0.1

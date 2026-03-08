@@ -1,0 +1,68 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+ENV/
+01_devroot/.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# pytest
+.pytest_cache/
+
+# mypy / ruff
+.mypy_cache/
+.ruff_cache/
+
+# Supervisor runtime data
+01_devroot/data/supervisor/*.log
+01_devroot/data/supervisor/supervisord.pid
+01_devroot/data/
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Node (frontend)
+node_modules/
+01_devroot/frontend/node_modules/
+01_devroot/frontend/.next/
+01_devroot/frontend/dist/
+01_devroot/frontend/build/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# aistore
+aistore/
+
+# AI tool state
+.aistore/
+.omc/
+.sisyphus/
+.claude/
+
+# OS
+Thumbs.db

@@ -1,0 +1,296 @@
+# =============================================================================
+# OSINT Investigation Platform — Production Docker Compose
+# Phase 9 — Ubuntu Deployment
+#
+# Services:
+#   app      — FastAPI + Playwright + supervisord (port 11235, internal only)
+#   redis    — Redis 7 with AOF persistence
+#   nginx    — Reverse proxy (ports 80/443, TLS termination, WebSocket)
+#   tor      — Tor SOCKS5 proxy for dark web crawling (internal only)
+#   backup   — rclone sidecar: nightly backup to Storj S3
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+#
+# First-run SSL:
+#   ./scripts/deploy_ubuntu.sh --domain yourdomain.com --email admin@yourdomain.com
+# =============================================================================
+
+version: '3.8'
+
+# ---------------------------------------------------------------------------
+# Networks — backend isolated, only nginx is public-facing
+# ---------------------------------------------------------------------------
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
+
+# ---------------------------------------------------------------------------
+# Named volumes — production data persistence
+# ---------------------------------------------------------------------------
+volumes:
+  app_cache:
+  app_logs:
+  app_hot:
+  app_warm:
+  app_cold:
+  app_archive:
+  app_chroma:
+  app_cases:
+  app_face_refs:
+  redis_data:
+  nginx_ssl:        # Let's Encrypt certificates
+  nginx_logs:
+  nginx_webroot:    # ACME challenge files (certbot)
+  supervisor_logs:
+
+# ---------------------------------------------------------------------------
+# Services
+# ---------------------------------------------------------------------------
+services:
+
+  # ---- Main Application -----------------------------------------------
+  app:
+    image: crawl4ai-osint:${APP_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: osint-app
+    restart: unless-stopped
+    expose:
+      - "11235"       # API — only accessible to nginx via backend network
+    volumes:
+      - app_cache:/app/data/cache
+      - app_logs:/app/data/logs
+      - app_hot:/app/data/tiers/hot
+      - app_warm:/app/data/tiers/warm
+      - app_cold:/app/data/tiers/cold
+      - app_archive:/app/data/tiers/archive
+      - app_chroma:/app/data/chroma
+      - app_cases:/app/data/cases
+      - app_face_refs:/app/data/face_references
+      - supervisor_logs:/var/log/supervisor
+      - ./config.yml:/app/config.yml:ro
+    env_file:
+      - .env.production
+    environment:
+      PYTHONUNBUFFERED: "1"
+      # Tor proxy — points to tor service on backend network
+      TOR_SOCKS_HOST: "tor"
+      TOR_SOCKS_PORT: "9050"
+      TOR_CONTROL_HOST: "tor"
+      TOR_CONTROL_PORT: "9051"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    shm_size: 3g
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11235/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    networks:
+      - backend
+    depends_on:
+      redis:
+        condition: service_healthy
+      tor:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '4'
+        reservations:
+          memory: 4G
+          cpus: '2'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ---- Redis ------------------------------------------------------------
+  redis:
+    image: redis:7.2-alpine
+    container_name: osint-redis
+    restart: unless-stopped
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '1'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  # ---- Nginx Reverse Proxy --------------------------------------------
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: osint-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - nginx_ssl:/etc/letsencrypt:ro
+      - nginx_webroot:/var/www/certbot:ro
+      - nginx_logs:/var/log/nginx
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t && curl -sf http://localhost/health-check || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      app:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '1'
+        reservations:
+          memory: 64M
+          cpus: '0.25'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  # ---- Certbot SSL (run as one-shot job, not long-running) -----------
+  certbot:
+    image: certbot/certbot:v2.11.0
+    container_name: osint-certbot
+    restart: "no"
+    volumes:
+      - nginx_ssl:/etc/letsencrypt
+      - nginx_webroot:/var/www/certbot
+    profiles:
+      - ssl         # Only started with: docker compose --profile ssl run certbot
+    entrypoint: >
+      certbot certonly
+      --webroot
+      --webroot-path=/var/www/certbot
+      --email ${CERTBOT_EMAIL}
+      --agree-tos
+      --no-eff-email
+      -d ${DOMAIN}
+    networks:
+      - frontend
+
+  # ---- Tor Proxy (dark web crawling) ----------------------------------
+  tor:
+    image: dperson/torproxy:latest
+    container_name: osint-tor
+    restart: unless-stopped
+    expose:
+      - "8118"      # Privoxy HTTP proxy
+      - "9050"      # SOCKS5
+      - "9051"      # Control port
+    environment:
+      TOR_MaxCircuitDirtiness: "600"
+      TOR_ControlPort: "9051"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip || exit 0"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  # ---- Storj Backup Sidecar ------------------------------------------
+  backup:
+    image: rclone/rclone:1.68
+    container_name: osint-backup
+    restart: unless-stopped
+    volumes:
+      - app_chroma:/backup/chroma:ro
+      - app_cases:/backup/cases:ro
+      - app_hot:/backup/data/hot:ro
+      - app_warm:/backup/data/warm:ro
+      - app_cold:/backup/data/cold:ro
+      - app_archive:/backup/data/archive:ro
+      - app_logs:/backup/logs:ro
+      - redis_data:/backup/redis:ro
+      - ./scripts/backup_entrypoint.sh:/backup_entrypoint.sh:ro
+    environment:
+      # Storj S3-compatible gateway (env-based rclone config — no config file needed)
+      RCLONE_CONFIG_STORJ_TYPE: s3
+      RCLONE_CONFIG_STORJ_PROVIDER: Storj
+      RCLONE_CONFIG_STORJ_ACCESS_KEY_ID: ${STORJ_ACCESS_KEY}
+      RCLONE_CONFIG_STORJ_SECRET_ACCESS_KEY: ${STORJ_SECRET_KEY}
+      RCLONE_CONFIG_STORJ_ENDPOINT: ${STORJ_ENDPOINT:-https://gateway.storjshare.io}
+      RCLONE_CONFIG_STORJ_REGION: us-1
+      STORJ_BUCKET: ${STORJ_BUCKET:-osint-investigation-backups}
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
+      BACKUP_RETAIN_DAYS: ${BACKUP_RETAIN_DAYS:-30}
+    entrypoint: ["/bin/sh", "/backup_entrypoint.sh"]
+    networks:
+      - backend
+    depends_on:
+      app:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"

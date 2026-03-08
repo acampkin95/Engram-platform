@@ -1,0 +1,102 @@
+# Pre-commit hooks configuration for Engram monorepo
+# Prevents accidental commits of .env files, API keys, and other sensitive data
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Detect private keys and sensitive data
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect secrets
+        description: Detects private keys and sensitive data in code
+        entry: detect-secrets scan
+        language: python
+        types: [python, javascript, json, yaml, text]
+
+  # Prevent .env files from being committed
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+        name: Check for large files
+        description: Prevents giant files from being committed
+        args: ['--maxkb=1000']
+
+      - id: check-case-conflict
+        name: Check for case conflicts
+        description: Checks for files that would conflict in case-insensitive filesystems
+
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+        description: Checks for files that would conflict in merge
+
+      - id: check-yaml
+        name: Check YAML
+        description: Checks yaml files for parseable syntax
+        args: ['--unsafe']
+
+      - id: check-json
+        name: Check JSON
+        description: Checks json files for parseable syntax
+
+      - id: check-toml
+        name: Check TOML
+        description: Checks toml files for parseable syntax
+
+      - id: end-of-file-fixer
+        name: Fix end of file
+        description: Ensures files end with a newline
+
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        description: Trims trailing whitespace
+
+  # Custom hooks to block .env files and secrets
+  - repo: local
+    hooks:
+      - id: block-env-files
+        name: Block .env files
+        description: Prevents .env files from being committed
+        entry: .pre-commit-hooks/block-env-files.sh
+        language: script
+        pass_filenames: false
+
+      - id: block-secrets-in-code
+        name: Block hardcoded secrets
+        description: Prevents hardcoded API keys, tokens, and passwords
+        entry: .pre-commit-hooks/block-secrets.sh
+        language: script
+        pass_filenames: false
+
+  # Python linting (for Engram-AiMemory and Engram-AiCrawler)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.11
+    hooks:
+      - id: ruff
+        name: Ruff lint
+        description: Fast Python linter
+        args: [--fix]
+        types: [python]
+
+      - id: ruff-format
+        name: Ruff format
+        description: Fast Python formatter
+        types: [python]
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        name: YAML lint
+        description: Lints YAML files
+        args: [--strict]
+        types: [yaml]
+
+# Global configuration
+default_language_version:
+  python: python3
+fail_fast: false
+minimum_pre_commit_version: '2.15.0'

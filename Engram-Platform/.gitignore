@@ -1,0 +1,43 @@
+# Node
+node_modules/
+frontend/node_modules/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+frontend/.env.local
+frontend/.env.local.backup
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# playwright
+playwright-report/
+test-results/
+
+# OS
+Thumbs.db
+
+# OMC / Claude state
+.omc/
+.sisyphus/
+.worktrees/
+
+# AI workspace store
+aistore/

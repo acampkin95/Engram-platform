@@ -1,0 +1,52 @@
+{
+  "name": "crawl4ai-engram",
+  "version": "0.1.0",
+  "description": "Engram memory integration for Crawl4AI. Persists crawl results, entities, and OSINT findings into the Engram/Weaviate knowledge system for long-term memory and cross-session retrieval.",
+  "author": "Crawl4AI Community",
+  "license": "MIT",
+  "min_crawl4ai_version": "0.7.4",
+  "entry_point": "crawl4ai_engram",
+  "api_prefix": "/api/engram",
+  "requires": [
+    "httpx>=0.27.0"
+  ],
+  "optional_requires": {
+    "weaviate": [
+      "weaviate-client>=4.0.0"
+    ]
+  },
+  "features": [
+    "memory_store",
+    "entity_registry",
+    "matter_management",
+    "semantic_search"
+  ],
+  "environment_variables": [
+    "ENGRAM_ENABLED",
+    "ENGRAM_API_URL",
+    "ENGRAM_API_KEY",
+    "ENGRAM_AUTO_STORE"
+  ],
+  "setup_wizard": true,
+  "ui_integration": {
+    "dashboard_tab": "Engram Memory",
+    "icon": "brain",
+    "routes": [
+      "/engram",
+      "/engram/matters",
+      "/engram/search"
+    ]
+  },
+  "api_endpoints": {
+    "memory": {
+      "status": "GET /api/engram/status",
+      "store": "POST /api/engram/store",
+      "search": "POST /api/engram/search"
+    },
+    "matters": {
+      "create": "POST /api/engram/matters",
+      "list": "GET /api/engram/matters",
+      "ingest": "POST /api/engram/matters/{matter_id}/ingest"
+    }
+  }
+}

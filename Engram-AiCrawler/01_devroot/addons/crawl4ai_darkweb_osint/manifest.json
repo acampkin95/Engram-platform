@@ -1,0 +1,67 @@
+{
+  "name": "crawl4ai-darkweb-osint",
+  "version": "0.1.0",
+  "description": "Dark web OSINT discovery and extraction addon for Crawl4AI. Integrates Robin's 16 search engine aggregator with Tor proxy support.",
+  "author": "Crawl4AI Community",
+  "license": "MIT",
+  "min_crawl4ai_version": "0.7.4",
+  "entry_point": "crawl4ai_darkweb_osint",
+  "api_prefix": "/api/darkweb",
+  "requires": [
+    "requests>=2.31.0",
+    "requests[socks]>=2.31.0",
+    "aiohttp>=3.9.0",
+    "pydantic>=2.0.0",
+    "tenacity>=8.2.0"
+  ],
+  "optional_requires": {
+    "llm": [
+      "openai>=1.0.0",
+      "anthropic>=0.18.0"
+    ],
+    "tor": [
+      "stem>=1.8.0"
+    ]
+  },
+  "features": [
+    "discovery",
+    "extraction",
+    "analysis",
+    "tor_proxy",
+    "llm_providers"
+  ],
+  "environment_variables": [
+    "DARKWEB_TOR_PROXY_HOST",
+    "DARKWEB_TOR_PROXY_PORT",
+    "DARKWEB_TOR_CONTROL_PORT",
+    "DARKWEB_LLM_PROVIDER",
+    "DARKWEB_LLM_MODEL",
+    "DARKWEB_LLM_API_KEY",
+    "DARKWEB_LLM_BASE_URL"
+  ],
+  "setup_wizard": true,
+  "ui_integration": {
+    "dashboard_tab": "Dark Web OSINT",
+    "icon": "shield",
+    "routes": [
+      "/darkweb",
+      "/darkweb/discovery",
+      "/darkweb/extraction",
+      "/darkweb/analysis"
+    ]
+  },
+  "api_endpoints": {
+    "discovery": {
+      "discover": "POST /api/darkweb/discover",
+      "engines_status": "GET /api/darkweb/engines/status"
+    },
+    "extraction": {
+      "extract": "POST /api/darkweb/extract",
+      "extract_status": "GET /api/darkweb/extract/status/{id}"
+    },
+    "analysis": {
+      "analyze": "POST /api/darkweb/analyze",
+      "report": "GET /api/darkweb/report/{id}"
+    }
+  }
+}

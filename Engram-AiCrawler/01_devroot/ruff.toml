@@ -1,0 +1,30 @@
+# Ruff Configuration for Crawl4AI OSINT Container
+# https://docs.astral.sh/ruff/
+
+target-version = "py311"
+
+line-length = 100
+indent-width = 4
+[lint]
+# Enable all error and warning rules
+select = ["E", "F", "W", "C90", "UP"]
+
+# Ignore specific rules that don't make sense for this project
+ignore = [
+    "E501",    # Line too long (sometimes necessary for readability)
+    "UP007",    # Using % in logging is common and intentional
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+docstring-code-format = true
+
+[lint.per-file-ignores]
+# Ignore test files from certain rules
+"tests/*.py" = ["S101"]  # Assert statements in tests are fine
+
+[lint.isort]
+known-first-party = ["app", "crawl4ai"]
+known-third-party = ["fastapi", "uvicorn", "websockets", "openai", "yaml"]

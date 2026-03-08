@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  engram-mcp:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - MCP_TRANSPORT=http
+      - MEMORY_API_URL=${MEMORY_API_URL:-http://engram-backend:8000}
+      - MCP_AUTH_TOKEN=${MCP_AUTH_TOKEN:-}
+      - OAUTH_ENABLED=${OAUTH_ENABLED:-false}
+    depends_on:
+      engram-backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  engram-backend:
+    image: ghcr.io/engramhq/engram:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - engram-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  engram-data:

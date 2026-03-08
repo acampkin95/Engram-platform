@@ -1,0 +1,53 @@
+{
+	"name": "@engram/mcp",
+	"version": "1.0.0",
+	"description": "Engram Unified MCP Server — dual transport (stdio + HTTP streaming), OAuth 2.1, hookify memory hooks, and streamlined installer",
+	"type": "module",
+	"main": "dist/index.js",
+	"bin": {
+		"engram-mcp": "./dist/index.js",
+		"engram-mcp-install": "./dist/installer/cli.js"
+	},
+	"scripts": {
+		"build": "tsc",
+		"dev": "tsc --watch",
+		"start": "node dist/index.js",
+		"start:stdio": "node dist/index.js --transport stdio",
+		"start:http": "node dist/index.js --transport http",
+		"install-mcp": "node dist/installer/cli.js",
+		"smoke": "npm run build && node scripts/smoke.mjs",
+		"test": "node --test tests/*.test.ts",
+		"lint": "biome check .",
+		"format": "biome format . --write"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.13.7",
+		"@modelcontextprotocol/sdk": "^1.27.1",
+		"hono": "^4.7.5",
+		"zod": "^3.23.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.0",
+		"@types/node": "^20.0.0",
+		"typescript": "^5.6.0"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"files": [
+		"dist",
+		"hookify",
+		"templates",
+		"install.sh",
+		"README.md"
+	],
+	"keywords": [
+		"mcp",
+		"model-context-protocol",
+		"ai-memory",
+		"engram",
+		"oauth",
+		"hookify"
+	],
+	"license": "MIT"
+}

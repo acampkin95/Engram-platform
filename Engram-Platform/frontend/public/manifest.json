@@ -1,0 +1,29 @@
+{
+  "name": "ENGRAM - Multi-Layer AI Memory System",
+  "short_name": "ENGRAM",
+  "description": "Persistent AI memory system with a 5-tier cognitive architecture. Store, search, and retrieve memories across projects with semantic vector search.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#03020a",
+  "theme_color": "#F2A93B",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "developer tools", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}

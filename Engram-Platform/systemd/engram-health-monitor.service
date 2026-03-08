@@ -1,0 +1,39 @@
+[Unit]
+Description=Engram Platform Health Monitor
+Documentation=https://github.com/velocity-digital/engram
+Requires=docker.service engram-platform.service
+After=engram-platform.service
+Wants=engram-platform.service
+
+[Service]
+Type=simple
+User=root
+Group=docker
+WorkingDirectory=/opt/engram
+
+# Health check interval (seconds)
+Environment="HEALTH_INTERVAL=30"
+Environment="HEALTH_TIMEOUT=300"
+Environment="ALERT_EMAIL="
+
+# Run the health monitor
+ExecStartPre=/bin/sleep 30
+ExecStart=/opt/engram/scripts/engram-health-monitor.sh
+
+# Restart on failure (with backoff)
+Restart=on-failure
+RestartSec=30
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=engram-health
+
+# Security
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/engram
+
+[Install]
+WantedBy=multi-user.target

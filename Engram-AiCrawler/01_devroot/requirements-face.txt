@@ -1,0 +1,12 @@
+# Optional face recognition dependencies.
+#
+# These require native C++ toolchains (cmake, dlib) and system libraries
+# (libopenblas, liblapack). See scripts/install_face_recognition.sh for
+# platform-specific setup instructions, or use the Docker image which
+# includes all dependencies pre-built.
+#
+# Install manually:
+#   pip install -r requirements-face.txt
+
+face-recognition>=1.3.0
+opencv-python-headless>=4.8.0

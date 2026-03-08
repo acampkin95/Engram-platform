@@ -1,0 +1,123 @@
+# ============================================================================
+# Engram-MCP CI/CD Pipeline
+# TypeScript MCP Server with Node.js
+# ============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'tsconfig.json'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'tsconfig.json'
+      - '.github/workflows/ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  CI: true
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Run Biome lint
+        run: npx biome check src/
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [lint]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-build
+          path: dist/
+          retention-days: 1
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mcp-build
+          path: dist/
+
+      - name: Run smoke tests
+        run: npm run smoke
+        env:
+          MEMORY_API_URL: ${{ vars.MEMORY_API_URL_TEST }}
+          MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN_TEST }}
+
+      - name: Run health tests
+        run: npm test
+        env:
+          MEMORY_API_URL: ${{ vars.MEMORY_API_URL_TEST }}
+          MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN_TEST }}

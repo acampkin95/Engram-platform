@@ -1,0 +1,41 @@
+# Pre-commit Configuration for Crawl4AI OSINT Container
+# https://pre-commit.com/
+
+repos:
+  # Ruff - Fast Python linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      # Linting
+      - id: ruff
+        types_or: [python]
+        args: [--fix, --exit-non-zero-on-fix]
+      # Import sorting
+      - id: ruff-format
+        types_or: [python]
+        args: [--line-length=100]
+
+  # MyPy - Static type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        types_or: [python]
+        additional_dependencies: [mypy]
+        args: [--config-file=mypy.ini, --ignore-missing-imports]
+
+# Global settings
+default_language_version:
+  python: python3.11
+
+# Fail fast on first error
+fail_fast: false
+
+# CI configuration
+ci:
+  autofix_commit_msg: "pre-commit: auto-fixing linting/type issues"
+  autofix_prs: false
+  autoupdate_commit_msg: "pre-commit: autoupdate hooks"
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

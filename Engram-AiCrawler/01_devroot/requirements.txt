@@ -1,0 +1,30 @@
+../../engram-shared[dev]
+crawl4ai[all]==0.7.4
+chromadb>=0.4.0
+openai>=1.0.0
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+pyyaml>=6.0.1
+redis>=5.0.0
+supervisor>=4.2.0
+pillow>=10.0.0
+imagehash>=4.3.0
+numpy>=1.24.0
+scipy>=1.11.0
+pyjwt[crypto]==2.8.0
+python-dotenv==1.0.0
+
+tenacity>=8.2.0
+apscheduler>=3.10.0
+croniter>=1.4.0
+
+# Phase 1: Platform architecture (ADR-001)
+arq>=0.26
+pybloom-live>=4.0
+
+# OSINT integrations
+python-whois>=0.9.4
+dnspython>=2.4.0
+aiohttp>=3.9.0
+httpx>=0.27.0

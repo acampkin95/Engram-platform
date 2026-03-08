@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  crawl4ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: crawl4ai-osint:latest
+    container_name: crawl4ai-osint
+    restart: unless-stopped
+    ports:
+      - "11235:11235"  # Crawl4AI API
+      - "80:80"         # Nginx
+    volumes:
+      # Data tiers
+      - ./data/cache:/app/data/cache
+      - ./data/logs:/app/data/logs
+      - ./data/tiers/hot:/app/data/tiers/hot
+      - ./data/tiers/warm:/app/data/tiers/warm
+      - ./data/tiers/cold:/app/data/tiers/cold
+      - ./data/tiers/archive:/app/data/tiers/archive
+      # ChromaDB persistence
+      - ./data/chroma:/app/data/chroma
+      # Configuration
+      - ./config.yml:/app/config.yml:ro
+      # Supervisor logs
+      - ./data/supervisor:/var/log/supervisor
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REDIS_URL=redis://redis:6379/0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    shm_size: 3g
+    healthcheck:
+      test: ["CMD", "/app/scripts/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+    networks:
+      - crawl4ai-network
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    container_name: crawl4ai-redis
+    restart: unless-stopped
+    volumes:
+      - ./data/redis:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+    networks:
+      - crawl4ai-network
+
+networks:
+  crawl4ai-network:
+    driver: bridge
+
+volumes:
+  crawl4ai-data:
+  crawl4ai-redis:
