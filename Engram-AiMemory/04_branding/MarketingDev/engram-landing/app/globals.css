@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   ENGRAM BRAND SYSTEM — DESIGN TOKENS
+   Multi-layer AI Memory System
+═══════════════════════════════════════════════════════════ */
+:root {
+  /* Core Palette */
+  --void: #03020A;
+  --deep: #090818;
+  --layer-0: #0C0B1C;
+  --layer-1: #120F2B;
+  --layer-2: #1A1638;
+  --layer-3: #221D45;
+  --layer-4: #2C2658;
+
+  /* Brand Colors */
+  --engram-amber: #F2A93B;
+  --engram-amber-bright: #FFC15E;
+  --engram-amber-dim: #B87B20;
+  --engram-amber-glow: rgba(242, 169, 59, 0.15);
+
+  --engram-violet: #7C5CBF;
+  --engram-violet-bright: #9B7DE0;
+  --engram-violet-dim: #503980;
+  --engram-violet-glow: rgba(124, 92, 191, 0.15);
+
+  --engram-teal: #2EC4C4;
+  --engram-teal-glow: rgba(46, 196, 196, 0.12);
+
+  --engram-rose: #E05C7F;
+
+  /* Text */
+  --text-primary: #F0EEF8;
+  --text-secondary: #A09BB8;
+  --text-muted: #5C5878;
+  --text-amber: var(--engram-amber);
+
+  /* Surfaces */
+  --surface-1: rgba(255,255,255,0.03);
+  --surface-2: rgba(255,255,255,0.05);
+  --surface-3: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.06);
+  --border-amber: rgba(242, 169, 59, 0.25);
+  --border-violet: rgba(124, 92, 191, 0.25);
+
+  /* Gradients */
+  --grad-amber: linear-gradient(135deg, #F2A93B 0%, #FFC15E 100%);
+  --grad-violet: linear-gradient(135deg, #503980 0%, #9B7DE0 100%);
+  --grad-deep: linear-gradient(180deg, #03020A 0%, #120F2B 50%, #1A1638 100%);
+  --grad-strata: linear-gradient(180deg,
+    rgba(242,169,59,0.08) 0%,
+    rgba(124,92,191,0.06) 33%,
+    rgba(46,196,196,0.05) 66%,
+    rgba(242,169,59,0.04) 100%);
+
+  /* Typography */
+  --font-display: var(--font-syne), sans-serif;
+  --font-body: var(--font-instrument-serif), serif;
+  --font-mono: var(--font-ibm-plex-mono), monospace;
+}
+
+@theme inline {
+  --color-background: var(--void);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--deep); }
+::-webkit-scrollbar-thumb { background: var(--layer-3); border-radius: 3px; }
+
+::selection {
+  background: rgba(242,169,59,0.25);
+  color: var(--engram-amber-bright);
+}
+
+/* ═══════════════════════════════════════
+   LAYER EFFECTS — Visual Language
+══════════════════════════════════════ */
+@keyframes strataShift {
+  0%, 100% { transform: translateY(0px); opacity: 0.6; }
+  50% { transform: translateY(-8px); opacity: 1; }
+}
+
+@keyframes synapseFlare {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes layerPulse {
+  0%, 100% { box-shadow: 0 0 20px var(--engram-amber-glow); }
+  50% { box-shadow: 0 0 50px rgba(242,169,59,0.3), 0 0 100px rgba(242,169,59,0.1); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scanDown {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(400%); }
+}
+
+@keyframes rotateOrbit {
+  from { transform: rotate(0deg) translateX(90px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(90px) rotate(-360deg); }
+}
+
+@keyframes memoryWrite {
+  0% { width: 0; opacity: 0; }
+  10% { opacity: 1; }
+  100% { width: 100%; opacity: 1; }
+}
+
+@keyframes flickerIn {
+  0% { opacity: 0; }
+  10% { opacity: 0.8; }
+  15% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 1; }
+}

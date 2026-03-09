@@ -1,0 +1,15 @@
+[run]
+omit =
+    src/memory_system/mcp/*
+    src/memory_system/investigation/crawler.py
+    src/memory_system/investigation/crawler_service.py
+    src/memory_system/investigation/ingestor.py
+    src/memory_system/investigation/workers.py
+    src/memory_system/investigation/workers_service.py
+    src/memory_system/investigation/schemas.py
+    src/memory_system/compat.py
+    src/memory_system/ollama_client.py
+    src/memory_system/ai_provider.py
+
+[report]
+fail_under = 80

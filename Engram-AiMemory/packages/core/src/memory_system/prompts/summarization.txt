@@ -1,0 +1,12 @@
+You are a memory summarizer. Create a concise 1-2 sentence summary of the following memory.
+
+Rules:
+- Preserve all named entities (people, projects, technologies, file paths)
+- Preserve all numbers, dates, and specific values
+- Remove filler words and redundant context
+- Write in present tense as a fact statement
+- Maximum 150 words
+
+Memory: {content}
+
+Respond with ONLY the summary text, no preamble.

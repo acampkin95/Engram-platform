@@ -1,0 +1,63 @@
+# =============================================================================
+# Traefik v3 — Static Configuration
+# =============================================================================
+# Mounted into the Traefik container at /traefik.yml (read-only).
+#
+# Design notes:
+#   - HTTP only (port 80). TLS is handled by Tailscale at the WireGuard layer.
+#   - No ACME / Let's Encrypt — Tailscale provides end-to-end encryption.
+#   - Routing rules live in dynamic.yml (file provider).
+#   - Docker provider is included but exposedByDefault=false — services must
+#     opt-in via labels. Currently all routing uses the file provider for
+#     clarity and predictability.
+# =============================================================================
+
+# ─── Entry Points ─────────────────────────────────────────────────────────────
+entryPoints:
+  web:
+    address: ":80"
+    # Tailscale provides the encryption layer, so HTTP inside the tailnet is
+    # effectively private. If you want HTTPS termination at Traefik too,
+    # configure Tailscale's HTTPS feature + TLS challenge here instead.
+
+# ─── Providers ────────────────────────────────────────────────────────────────
+providers:
+  # Docker provider — enabled for container discovery (opt-in via labels).
+  # Currently all routing is file-based; keep this enabled for future use.
+  docker:
+    exposedByDefault: false
+    network: memory-network
+    watch: true
+
+  # File provider — reads dynamic routing rules from /dynamic.yml.
+  file:
+    filename: /dynamic.yml
+    watch: true   # Hot-reload on file change (no Traefik restart needed)
+
+# ─── API & Dashboard ──────────────────────────────────────────────────────────
+# Traefik dashboard is DISABLED for security.
+# Re-enable only temporarily for debugging, and restrict access.
+api:
+  dashboard: false
+  insecure: false
+
+# ─── Logging ──────────────────────────────────────────────────────────────────
+log:
+  level: INFO          # Options: DEBUG, INFO, WARN, ERROR
+  format: json         # json | common (structured for log aggregation)
+
+# Access logs — one line per request.
+accessLog:
+  format: json
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: drop   # Don't log request headers (may contain tokens)
+      names:
+        User-Agent: keep
+        X-Forwarded-For: keep
+
+# ─── Ping / Health ────────────────────────────────────────────────────────────
+# Expose a /ping endpoint on the entryPoint for liveness probes.
+ping:
+  entryPoint: web

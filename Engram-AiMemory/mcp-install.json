@@ -1,0 +1,83 @@
+{
+  "_readme": "AI Memory System — MCP overlay config. Copy the relevant 'mcpServers' block into your client config (see paths below). Do NOT copy this entire file.",
+  "_clients": {
+    "claude_desktop_macos": "~/Library/Application Support/Claude/claude_desktop_config.json",
+    "claude_desktop_windows": "%APPDATA%\\Claude\\claude_desktop_config.json",
+    "claude_code": "~/.claude/settings.json",
+    "cursor": "<project-root>/.cursor/mcp.json",
+    "vscode_continue": "<project-root>/.continue/config.json"
+  },
+
+  "local_stdio": {
+    "_comment": "Run the MCP server as a child process (stdio). Requires: npm run build, docker compose up.",
+    "_prereqs": [
+      "npm run build -w packages/mcp-server",
+      "docker compose -f docker/docker-compose.yml up -d"
+    ],
+    "mcpServers": {
+      "ai-memory": {
+        "command": "node",
+        "args": ["/ABSOLUTE/PATH/TO/DN0_INT_Weaviate/packages/mcp-server/dist/index.js"],
+        "env": {
+          "MEMORY_API_URL": "http://localhost:8000",
+          "AI_MEMORY_API_KEY": "your-api-key-from-API_KEYS-in-.env",
+          "MCP_LOG_LEVEL": "warn"
+        }
+      }
+    }
+  },
+
+  "local_http": {
+    "_comment": "Connect to the MCP server already running via Docker Compose on port 3000.",
+    "_prereqs": ["docker compose -f docker/docker-compose.yml up -d"],
+    "mcpServers": {
+      "ai-memory": {
+        "type": "http",
+        "url": "http://localhost:3000/mcp",
+        "headers": {
+          "Authorization": "Bearer your-MCP_AUTH_TOKEN-from-.env"
+        }
+      }
+    }
+  },
+
+  "remote": {
+    "_comment": "Connect to the hosted instance. Replace domain and token as needed.",
+    "mcpServers": {
+      "ai-memory": {
+        "type": "http",
+        "url": "https://memory.velocitydigi.com/mcp",
+        "headers": {
+          "Authorization": "Bearer your-MCP_AUTH_TOKEN"
+        }
+      }
+    }
+  },
+
+  "npx": {
+    "_comment": "Zero-install via npx — pulls the published package on first run. Requires the package to be published to npm.",
+    "_status": "available once @ai-memory/mcp-server is published to npm",
+    "mcpServers": {
+      "ai-memory": {
+        "command": "npx",
+        "args": ["-y", "@ai-memory/mcp-server"],
+        "env": {
+          "MEMORY_API_URL": "http://localhost:8000",
+          "AI_MEMORY_API_KEY": "your-api-key",
+          "MCP_LOG_LEVEL": "warn"
+        }
+      }
+    }
+  },
+
+  "_tools": {
+    "add_memory": "Store a memory (content, type, tier, metadata)",
+    "search_memory": "Semantic search across memory tiers",
+    "get_memory": "Retrieve a memory by ID",
+    "delete_memory": "Remove a memory by ID",
+    "list_memories": "Stats overview and paginated listing",
+    "add_entity": "Add a knowledge graph entity",
+    "add_relation": "Link two entities with a typed relation",
+    "query_graph": "Traverse the entity graph from a starting node"
+  }
+}

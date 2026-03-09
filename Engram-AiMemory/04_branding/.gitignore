@@ -1,0 +1,35 @@
+# Next.js build output
+.next/
+out/
+
+# Node modules
+node_modules/
+
+# TypeScript build
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# IDE
+.DS_Store
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+
+# OMC / Claude state
+.omc/
+.sisyphus/
+.worktrees/
+
+# AI workspace store
+aistore/

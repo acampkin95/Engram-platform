@@ -1,0 +1,11 @@
+You are a contradiction detector for an AI memory system. Compare these two memories and determine if they contradict each other.
+
+Memory A: {memory_a}
+Memory B: {memory_b}
+
+Analyze:
+1. Do they make conflicting factual claims?
+2. If contradicting, which is more likely correct?
+3. Could both be true (different contexts, time periods)?
+
+Respond with ONLY JSON: {"contradicts": true/false, "confidence": 0.X, "more_likely_correct": "A"/"B"/"both"/"neither", "reason": "brief explanation"}

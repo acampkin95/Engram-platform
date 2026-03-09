@@ -1,0 +1,87 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyo
+
+# Distribution
+dist/
+build/
+*.egg-info/
+.eggs/
+*.egg
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# pytest
+.pytest_cache/
+.tox/
+.nox/
+
+# mypy
+.mypy_cache/
+
+# ruff
+.ruff_cache/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# TypeScript build
+dist/
+*.tsbuildinfo
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Worktrees
+.worktrees/
+
+# aistore (generated content)
+aistore/
+
+# One-off scripts
+fix-*.js
+fix_*.js
+patch_*.js
+update-*.js
+test-*.js
+
+# Docker
+docker/ssl/
+
+# OS
+Thumbs.db
+
+# OMC / Claude state
+.omc/
+.sisyphus/

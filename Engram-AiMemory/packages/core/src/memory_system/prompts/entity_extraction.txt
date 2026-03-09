@@ -1,0 +1,7 @@
+Extract named entities from the following memory. Focus on entities relevant to software development and AI.
+
+Entity types: PERSON, PROJECT, TECHNOLOGY, CONCEPT, FILE, URL
+
+Memory: {content}
+
+Respond with ONLY JSON: {"entities": [{"name": "...", "type": "PERSON|PROJECT|TECHNOLOGY|CONCEPT|FILE|URL", "confidence": 0.X}]}

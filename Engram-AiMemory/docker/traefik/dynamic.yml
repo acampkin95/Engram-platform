@@ -1,0 +1,136 @@
+# =============================================================================
+# Traefik v3 — Dynamic Routing Configuration (File Provider)
+# =============================================================================
+# Hot-reloaded by Traefik when this file changes (no restart required).
+#
+# Hostnames use the *.memory.internal convention.
+#
+# DNS setup — clients accessing these services need one of:
+#   Option A: Tailscale split-DNS
+#     In Tailscale admin → DNS → add nameserver for "memory.internal"
+#     pointing to your server's Tailscale IP (or use local resolver).
+#
+#   Option B: /etc/hosts on each client machine
+#     <tailscale-ip>  api.memory.internal
+#     <tailscale-ip>  dashboard.memory.internal
+#     <tailscale-ip>  mcp.memory.internal
+#
+# ─── To use your actual Tailscale hostname instead ────────────────────────────
+# Replace "memory.internal" with your machine's Tailscale DNS name, e.g.:
+#   acdev-devnode.tailnet.ts.net
+# Then access services as:
+#   http://acdev-devnode.tailnet.ts.net/        → dashboard (path-based)
+#   or set up subdomain routing in Tailscale's MagicDNS.
+# =============================================================================
+
+http:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Routers — match incoming requests and forward to a service
+  # ──────────────────────────────────────────────────────────────────────────
+  routers:
+
+    # ── Memory API ──────────────────────────────────────────────────────────
+    # Handles REST API calls from MCP clients, dashboard, and direct queries.
+    memory-api-router:
+      rule: "Host(`api.memory.internal`)"
+      # TODO: Replace with your Tailscale hostname if not using split-DNS:
+      # rule: "Host(`acdev-devnode.tail1234.ts.net`) && PathPrefix(`/api`)"
+      entryPoints:
+        - web
+      service: memory-api-svc
+      # Middleware: add security headers, strip /api prefix if path-based
+      middlewares:
+        - security-headers
+
+    # ── Dashboard ────────────────────────────────────────────────────────────
+    # Next.js web UI for browsing and managing memories.
+    dashboard-router:
+      rule: "Host(`dashboard.memory.internal`)"
+      # TODO: Replace with your Tailscale hostname:
+      # rule: "Host(`acdev-devnode.tail1234.ts.net`)"
+      entryPoints:
+        - web
+      service: dashboard-svc
+      middlewares:
+        - security-headers
+
+    # ── MCP Server ──────────────────────────────────────────────────────────
+    # Model Context Protocol HTTP transport for AI clients.
+    mcp-router:
+      rule: "Host(`mcp.memory.internal`)"
+      # TODO: Replace with your Tailscale hostname:
+      # rule: "Host(`mcp.acdev-devnode.tail1234.ts.net`)"
+      entryPoints:
+        - web
+      service: mcp-svc
+      middlewares:
+        - security-headers
+
+    # ── Traefik Ping / Health ────────────────────────────────────────────────
+    # Internal liveness probe — used by deploy script health checks.
+    # Accessible at: http://<tailscale-ip>/ping
+    ping-router:
+      rule: "PathPrefix(`/ping`)"
+      entryPoints:
+        - web
+      service: ping@internal
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Services — define the backend servers to forward traffic to
+  # ──────────────────────────────────────────────────────────────────────────
+  services:
+
+    # FastAPI Python backend (port 8000 inside memory-network)
+    memory-api-svc:
+      loadBalancer:
+        servers:
+          - url: "http://memory-api:8000"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+          timeout: "5s"
+
+    # Next.js dashboard (port 3000 inside memory-network)
+    dashboard-svc:
+      loadBalancer:
+        servers:
+          - url: "http://dashboard:3000"
+        healthCheck:
+          path: "/"
+          interval: "30s"
+          timeout: "5s"
+
+    # TypeScript MCP server (port 3000 inside memory-network)
+    mcp-svc:
+      loadBalancer:
+        servers:
+          - url: "http://mcp-server:3000"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+          timeout: "5s"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Middlewares
+  # ──────────────────────────────────────────────────────────────────────────
+  middlewares:
+
+    # Minimal security headers (no HTTPS redirects — Tailscale handles TLS)
+    security-headers:
+      headers:
+        customResponseHeaders:
+          X-Content-Type-Options: "nosniff"
+          X-Frame-Options: "SAMEORIGIN"
+          X-XSS-Protection: "1; mode=block"
+          Referrer-Policy: "strict-origin-when-cross-origin"
+          # Note: No HSTS — using HTTP inside Tailscale by design
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlMaxAge: 100
+        addVaryHeader: true

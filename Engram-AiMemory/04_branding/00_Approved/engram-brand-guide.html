@@ -1,0 +1,2910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ENGRAM — Brand Identity System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       ENGRAM BRAND SYSTEM — DESIGN TOKENS
+       Multi-layer AI Memory System
+    ═══════════════════════════════════════════════════════════ */
+    :root {
+      /* Core Palette */
+      --void: #03020A;
+      --deep: #090818;
+      --layer-0: #0C0B1C;
+      --layer-1: #120F2B;
+      --layer-2: #1A1638;
+      --layer-3: #221D45;
+      --layer-4: #2C2658;
+
+      /* Brand Colors */
+      --engram-amber: #F2A93B;
+      --engram-amber-bright: #FFC15E;
+      --engram-amber-dim: #B87B20;
+      --engram-amber-glow: rgba(242, 169, 59, 0.15);
+
+      --engram-violet: #7C5CBF;
+      --engram-violet-bright: #9B7DE0;
+      --engram-violet-dim: #503980;
+      --engram-violet-glow: rgba(124, 92, 191, 0.15);
+
+      --engram-teal: #2EC4C4;
+      --engram-teal-glow: rgba(46, 196, 196, 0.12);
+
+      --engram-rose: #E05C7F;
+
+      /* Text */
+      --text-primary: #F0EEF8;
+      --text-secondary: #A09BB8;
+      --text-muted: #5C5878;
+      --text-amber: var(--engram-amber);
+
+      /* Surfaces */
+      --surface-1: rgba(255,255,255,0.03);
+      --surface-2: rgba(255,255,255,0.05);
+      --surface-3: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.06);
+      --border-amber: rgba(242, 169, 59, 0.25);
+      --border-violet: rgba(124, 92, 191, 0.25);
+
+      /* Gradients */
+      --grad-amber: linear-gradient(135deg, #F2A93B 0%, #FFC15E 100%);
+      --grad-violet: linear-gradient(135deg, #503980 0%, #9B7DE0 100%);
+      --grad-deep: linear-gradient(180deg, #03020A 0%, #120F2B 50%, #1A1638 100%);
+      --grad-strata: linear-gradient(180deg, 
+        rgba(242,169,59,0.08) 0%, 
+        rgba(124,92,191,0.06) 33%, 
+        rgba(46,196,196,0.05) 66%, 
+        rgba(242,169,59,0.04) 100%);
+
+      /* Typography */
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'Instrument Serif', serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+
+      /* Spacing */
+      --nav-width: 260px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--void);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--deep); }
+    ::-webkit-scrollbar-thumb { background: var(--layer-3); border-radius: 3px; }
+
+    ::selection { background: rgba(242,169,59,0.25); color: var(--engram-amber-bright); }
+
+    /* ═══════════════════════════════════════
+       LAYER EFFECTS — Visual Language
+    ═══════════════════════════════════════ */
+    @keyframes strataShift {
+      0%, 100% { transform: translateY(0px); opacity: 0.6; }
+      50% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    @keyframes synapseFlare {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    @keyframes layerPulse {
+      0%, 100% { box-shadow: 0 0 20px var(--engram-amber-glow); }
+      50% { box-shadow: 0 0 50px rgba(242,169,59,0.3), 0 0 100px rgba(242,169,59,0.1); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scanDown {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(400%); }
+    }
+
+    @keyframes rotateOrbit {
+      from { transform: rotate(0deg) translateX(90px) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(90px) rotate(-360deg); }
+    }
+
+    @keyframes memoryWrite {
+      0% { width: 0; opacity: 0; }
+      10% { opacity: 1; }
+      100% { width: 100%; opacity: 1; }
+    }
+
+    @keyframes flickerIn {
+      0% { opacity: 0; }
+      10% { opacity: 0.8; }
+      15% { opacity: 0.2; }
+      20% { opacity: 1; }
+      100% { opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════════
+       NAVIGATION SIDEBAR
+    ═══════════════════════════════════════ */
+    .nav {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--nav-width);
+      height: 100vh;
+      background: var(--deep);
+      border-right: 1px solid var(--border);
+      z-index: 100;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-header {
+      padding: 32px 24px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-wordmark {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.25em;
+      color: var(--engram-amber);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-wordmark-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--engram-amber);
+      border-radius: 50%;
+      animation: synapseFlare 2.5s ease-in-out infinite;
+    }
+
+    .nav-tagline {
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+
+    .nav-body {
+      padding: 24px 16px;
+      flex: 1;
+    }
+
+    .nav-section {
+      margin-bottom: 28px;
+    }
+
+    .nav-section-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      padding: 0 8px;
+      margin-bottom: 8px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+      background: var(--surface-2);
+    }
+
+    .nav-link.active {
+      color: var(--engram-amber);
+      background: rgba(242,169,59,0.08);
+    }
+
+    .nav-link-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--layer-4);
+      border: 1px solid var(--text-muted);
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .nav-link.active .nav-link-dot {
+      background: var(--engram-amber);
+      border-color: var(--engram-amber);
+      box-shadow: 0 0 8px var(--engram-amber);
+    }
+
+    .nav-layer-indicator {
+      padding: 16px;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+    }
+
+    .layer-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .layer-bar {
+      height: 4px;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .layer-bar-0 { background: var(--engram-amber); width: 100%; animation: strataShift 4s ease-in-out infinite; }
+    .layer-bar-1 { background: var(--engram-violet); width: 85%; animation: strataShift 4s ease-in-out infinite 0.5s; }
+    .layer-bar-2 { background: var(--engram-teal); width: 70%; animation: strataShift 4s ease-in-out infinite 1s; }
+    .layer-bar-3 { background: var(--engram-violet-dim); width: 55%; animation: strataShift 4s ease-in-out infinite 1.5s; }
+    .layer-bar-4 { background: var(--engram-amber-dim); width: 40%; animation: strataShift 4s ease-in-out infinite 2s; }
+
+    .layer-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      text-align: center;
+      letter-spacing: 0.1em;
+    }
+
+    /* ═══════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════ */
+    .main {
+      margin-left: var(--nav-width);
+      min-height: 100vh;
+    }
+
+    /* ═══════════════════════════════════════
+       HERO / COVER
+    ═══════════════════════════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 120px 80px;
+    }
+
+    .hero-strata {
+      position: absolute;
+      inset: 0;
+      background: var(--grad-deep);
+    }
+
+    /* Geological strata lines */
+    .strata-layer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      opacity: 0.15;
+    }
+
+    .strata-layer-1 { top: 20%; background: linear-gradient(90deg, transparent 0%, var(--engram-amber) 30%, transparent 100%); opacity: 0.2; }
+    .strata-layer-2 { top: 38%; background: linear-gradient(90deg, transparent 10%, var(--engram-violet) 50%, transparent 90%); }
+    .strata-layer-3 { top: 55%; background: linear-gradient(90deg, transparent 0%, var(--engram-teal) 40%, transparent 80%); }
+    .strata-layer-4 { top: 72%; background: linear-gradient(90deg, transparent 20%, var(--engram-violet) 60%, transparent 100%); }
+
+    /* Scan line animation */
+    .hero-scan {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .hero-scan::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, transparent, rgba(242,169,59,0.03), transparent);
+      animation: scanDown 12s linear infinite;
+    }
+
+    /* Ambient orbs */
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+
+    .hero-orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(124,92,191,0.15) 0%, transparent 70%);
+      top: -20%;
+      right: -10%;
+    }
+
+    .hero-orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(242,169,59,0.1) 0%, transparent 70%);
+      bottom: 0;
+      left: 10%;
+      animation: strataShift 8s ease-in-out infinite;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      max-width: 900px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--engram-amber);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: flickerIn 1s ease both;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: var(--engram-amber);
+    }
+
+    .hero-logo {
+      margin-bottom: 40px;
+    }
+
+    .hero-wordmark {
+      font-family: var(--font-display);
+      font-size: clamp(5rem, 12vw, 9rem);
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      line-height: 0.9;
+      color: transparent;
+      background: linear-gradient(135deg, #FFC15E 0%, #F2A93B 40%, #9B7DE0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: fadeUp 0.8s ease 0.2s both;
+    }
+
+    .hero-descriptor {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 12px;
+      animation: fadeUp 0.8s ease 0.4s both;
+    }
+
+    .hero-tagline {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+      color: var(--text-secondary);
+      line-height: 1.4;
+      max-width: 600px;
+      margin-top: 40px;
+      margin-bottom: 48px;
+      animation: fadeUp 0.8s ease 0.6s both;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 40px;
+      animation: fadeUp 0.8s ease 0.8s both;
+    }
+
+    .hero-meta-item {
+      border-top: 1px solid var(--border-amber);
+      padding-top: 12px;
+    }
+
+    .hero-meta-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .hero-meta-value {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Memory layer visual (right side) */
+    .hero-visual {
+      position: absolute;
+      right: 80px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 5;
+    }
+
+    .memory-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      perspective: 800px;
+    }
+
+    .memory-layer {
+      width: 280px;
+      height: 52px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .memory-layer::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+    }
+
+    .memory-layer:hover {
+      transform: translateX(-8px);
+    }
+
+    .ml-0 {
+      background: rgba(242,169,59,0.08);
+      border: 1px solid rgba(242,169,59,0.2);
+      animation: layerPulse 4s ease-in-out infinite;
+    }
+    .ml-0::before { background: var(--engram-amber); }
+
+    .ml-1 {
+      background: rgba(124,92,191,0.08);
+      border: 1px solid rgba(124,92,191,0.2);
+      animation: layerPulse 4s ease-in-out infinite 0.8s;
+    }
+    .ml-1::before { background: var(--engram-violet); }
+
+    .ml-2 {
+      background: rgba(46,196,196,0.06);
+      border: 1px solid rgba(46,196,196,0.15);
+      animation: layerPulse 4s ease-in-out infinite 1.6s;
+    }
+    .ml-2::before { background: var(--engram-teal); }
+
+    .ml-3 {
+      background: rgba(124,92,191,0.05);
+      border: 1px solid rgba(124,92,191,0.12);
+    }
+    .ml-3::before { background: var(--engram-violet-dim); }
+
+    .ml-4 {
+      background: rgba(242,169,59,0.04);
+      border: 1px solid rgba(242,169,59,0.1);
+    }
+    .ml-4::before { background: var(--engram-amber-dim); }
+
+    .ml-icon {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ml-text {
+      flex: 1;
+    }
+
+    .ml-name {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: 0.08em;
+    }
+
+    .ml-type {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .ml-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .ind-amber { background: var(--engram-amber); box-shadow: 0 0 8px var(--engram-amber); animation: synapseFlare 2s ease-in-out infinite; }
+    .ind-violet { background: var(--engram-violet-bright); box-shadow: 0 0 8px var(--engram-violet-bright); animation: synapseFlare 2s ease-in-out infinite 0.5s; }
+    .ind-teal { background: var(--engram-teal); box-shadow: 0 0 8px var(--engram-teal); animation: synapseFlare 2s ease-in-out infinite 1s; }
+    .ind-dim { background: var(--text-muted); }
+
+    /* ═══════════════════════════════════════
+       SECTION STRUCTURE
+    ═══════════════════════════════════════ */
+    .section {
+      padding: 100px 80px;
+      border-top: 1px solid var(--border);
+      position: relative;
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 80px;
+      right: 80px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--engram-amber);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-eyebrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border-amber), transparent);
+      max-width: 80px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+
+    .section-subtitle {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.6;
+      margin-bottom: 60px;
+    }
+
+    /* ═══════════════════════════════════════
+       BRAND STORY
+    ═══════════════════════════════════════ */
+    .story-section { background: var(--layer-0); }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .story-text p {
+      font-family: var(--font-body);
+      font-size: 1.0625rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .story-text p strong {
+      color: var(--text-primary);
+      font-style: italic;
+    }
+
+    .story-values {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .value-card {
+      padding: 24px;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .value-card:hover {
+      border-color: var(--border-amber);
+      background: var(--engram-amber-glow);
+    }
+
+    .value-number {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--engram-amber);
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+    }
+
+    .value-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .value-desc {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════
+       LOGO SYSTEM
+    ═══════════════════════════════════════ */
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+
+    .logo-cell {
+      border-radius: 16px;
+      padding: 60px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .logo-cell-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      position: absolute;
+      bottom: 16px;
+      left: 20px;
+    }
+
+    .logo-cell-dark {
+      background: var(--deep);
+      border: 1px solid var(--border);
+    }
+
+    .logo-cell-amber {
+      background: #F2A93B;
+    }
+
+    .logo-cell-light {
+      background: #F0EEF8;
+    }
+
+    .logo-cell-void {
+      background: var(--void);
+      border: 1px solid var(--border);
+    }
+
+    /* SVG Logo Components */
+    .logo-full {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logomark {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+
+    .logotype {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+    }
+
+    .logo-on-dark .logotype { color: var(--text-primary); }
+    .logo-on-amber .logotype { color: #1A1638; }
+    .logo-on-light .logotype { color: #0C0B1C; }
+
+    .logo-variations-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .logo-var-cell {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .logo-var-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-align: center;
+    }
+
+    /* Usage rules */
+    .usage-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .usage-card {
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .usage-do { background: rgba(46,196,196,0.06); border: 1px solid rgba(46,196,196,0.2); }
+    .usage-dont { background: rgba(224,92,127,0.06); border: 1px solid rgba(224,92,127,0.2); }
+
+    .usage-badge {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .badge-do { background: rgba(46,196,196,0.15); color: var(--engram-teal); }
+    .badge-dont { background: rgba(224,92,127,0.15); color: var(--engram-rose); }
+
+    .usage-text {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════
+       COLOR SYSTEM
+    ═══════════════════════════════════════ */
+    .color-section { background: var(--layer-1); }
+
+    .color-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+
+    .color-group-title {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-group-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .color-swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .swatch {
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .swatch:hover { transform: translateY(-4px); }
+
+    .swatch-color {
+      height: 100px;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      padding: 12px;
+    }
+
+    .swatch-copy {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      padding: 3px 6px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      color: white;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .swatch:hover .swatch-copy { opacity: 1; }
+
+    .swatch-info {
+      padding: 14px 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-top: none;
+    }
+
+    .swatch-name {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .swatch-codes {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .swatch-usage {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* Layer Color Map */
+    .layer-map {
+      margin-top: 48px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .layer-map-header {
+      padding: 20px 24px;
+      background: var(--surface-1);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .layer-map-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 120px 120px 100px;
+      align-items: center;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+      transition: background 0.2s;
+    }
+
+    .layer-map-row:hover { background: var(--surface-1); }
+    .layer-map-row:last-child { border-bottom: none; }
+
+    .lm-index {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .lm-name {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lm-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .lm-color { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); }
+    .lm-role { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); }
+    .lm-type { font-family: var(--font-mono); font-size: 0.7rem; }
+
+    /* ═══════════════════════════════════════
+       TYPOGRAPHY
+    ═══════════════════════════════════════ */
+    .type-section { background: var(--void); }
+
+    .type-showcase {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .type-specimen {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .type-specimen::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .spec-display::before { background: var(--grad-amber); }
+    .spec-body::before { background: var(--grad-violet); }
+
+    .type-family-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .type-family-name {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      color: var(--engram-amber);
+      margin-bottom: 24px;
+    }
+
+    .spec-body .type-family-name { color: var(--engram-violet-bright); }
+
+    .type-sample-display {
+      font-family: var(--font-display);
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 0.9;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .type-sample-body {
+      font-family: var(--font-body);
+      font-size: 1.5rem;
+      font-style: italic;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .type-weights {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .weight-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .weight-sample {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+
+    .weight-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* Type Scale Table */
+    .type-scale {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .scale-row {
+      display: grid;
+      grid-template-columns: 80px 100px 1fr 140px;
+      align-items: baseline;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+
+    .scale-row:last-child { border-bottom: none; }
+    .scale-row:hover { background: var(--surface-1); }
+
+    .scale-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); }
+    .scale-size { font-family: var(--font-mono); font-size: 0.75rem; color: var(--engram-amber); }
+    .scale-usage { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); }
+
+    /* Mono specimen */
+    .mono-specimen {
+      background: var(--layer-0);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-top: 40px;
+      font-family: var(--font-mono);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mono-line {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .mono-ln { color: var(--text-muted); min-width: 20px; font-size: 0.75rem; }
+    .mono-kw { color: var(--engram-amber); font-size: 0.8rem; }
+    .mono-fn { color: var(--engram-violet-bright); font-size: 0.8rem; }
+    .mono-str { color: var(--engram-teal); font-size: 0.8rem; }
+    .mono-cm { color: var(--text-muted); font-size: 0.8rem; font-style: italic; }
+    .mono-text { color: var(--text-secondary); font-size: 0.8rem; }
+    .mono-num { color: #E8955A; font-size: 0.8rem; }
+
+    .mono-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 14px;
+      background: var(--engram-amber);
+      vertical-align: middle;
+      animation: synapseFlare 1s ease-in-out infinite;
+    }
+
+    /* ═══════════════════════════════════════
+       VISUAL LANGUAGE — Memory Layers
+    ═══════════════════════════════════════ */
+    .visual-section { background: var(--layer-0); }
+
+    .layer-diagram {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+
+    .ld-header {
+      background: var(--surface-1);
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ld-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .ld-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--engram-teal);
+    }
+
+    .ld-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--engram-teal);
+      animation: synapseFlare 2s ease-in-out infinite;
+    }
+
+    .ld-body {
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ld-layer {
+      display: grid;
+      grid-template-columns: 200px 1fr 100px 80px;
+      align-items: center;
+      gap: 20px;
+      padding: 18px 24px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .ld-layer:hover { transform: translateX(8px); }
+
+    .ldl-0 { background: rgba(242,169,59,0.06); border-color: rgba(242,169,59,0.2); }
+    .ldl-1 { background: rgba(124,92,191,0.06); border-color: rgba(124,92,191,0.15); }
+    .ldl-2 { background: rgba(46,196,196,0.05); border-color: rgba(46,196,196,0.12); }
+    .ldl-3 { background: rgba(124,92,191,0.04); border-color: rgba(124,92,191,0.1); }
+    .ldl-4 { background: rgba(242,169,59,0.03); border-color: rgba(242,169,59,0.08); }
+
+    .ldl-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ldl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .ldl-desc {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .ldl-ttl {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .ldl-badge {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .badge-hot { background: rgba(242,169,59,0.15); color: var(--engram-amber); }
+    .badge-warm { background: rgba(124,92,191,0.15); color: var(--engram-violet-bright); }
+    .badge-cool { background: rgba(46,196,196,0.1); color: var(--engram-teal); }
+    .badge-cold { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+    /* Pattern Library */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .pattern-cell {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      aspect-ratio: 4/3;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Pattern 1: Strata lines */
+    .pat-strata {
+      background: var(--deep);
+    }
+    .pat-strata-line {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      opacity: 0.3;
+    }
+
+    /* Pattern 2: Node network */
+    .pat-network { background: var(--layer-0); }
+
+    /* Pattern 3: Grid */
+    .pat-grid {
+      background: var(--deep);
+      background-image: 
+        linear-gradient(rgba(242,169,59,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(242,169,59,0.05) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .pattern-label {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* ═══════════════════════════════════════
+       IMPLEMENTATION TOKENS
+    ═══════════════════════════════════════ */
+    .impl-section { background: var(--deep); }
+
+    .code-block {
+      background: var(--layer-0);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--surface-1);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+
+    .code-copy {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--engram-amber);
+      background: rgba(242,169,59,0.1);
+      border: 1px solid var(--border-amber);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .code-copy:hover { background: rgba(242,169,59,0.2); }
+
+    .code-body {
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      overflow-x: auto;
+    }
+
+    .code-body .tok-key { color: var(--engram-violet-bright); }
+    .code-body .tok-val { color: var(--engram-teal); }
+    .code-body .tok-str { color: var(--engram-amber); }
+    .code-body .tok-cm { color: var(--text-muted); }
+    .code-body .tok-num { color: #E8955A; }
+    .code-body .tok-prop { color: var(--text-primary); }
+
+    /* ═══════════════════════════════════════
+       COMPONENTS
+    ═══════════════════════════════════════ */
+    .comp-section { background: var(--layer-1); }
+
+    .comp-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .comp-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .comp-preview {
+      padding: 48px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--layer-0);
+      min-height: 180px;
+    }
+
+    .comp-meta {
+      padding: 16px 24px;
+      background: var(--surface-1);
+      border-top: 1px solid var(--border);
+    }
+
+    .comp-name {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .comp-desc {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    /* UI Components */
+    .ui-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-amber {
+      background: var(--engram-amber);
+      color: var(--void);
+    }
+
+    .btn-amber:hover {
+      background: var(--engram-amber-bright);
+      box-shadow: 0 0 24px rgba(242,169,59,0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--engram-amber);
+      border: 1px solid var(--border-amber);
+    }
+
+    .btn-outline:hover {
+      background: var(--engram-amber-glow);
+    }
+
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface-3);
+      color: var(--text-primary);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Memory Card */
+    .mem-card {
+      background: var(--layer-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      width: 280px;
+      position: relative;
+    }
+
+    .mem-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--engram-amber);
+      border-radius: 3px 0 0 3px;
+    }
+
+    .mc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .mc-layer {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--engram-amber);
+      letter-spacing: 0.12em;
+    }
+
+    .mc-ttl {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+
+    .mc-key {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .mc-value {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .mc-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .mc-score-bar {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .mc-score-fill {
+      height: 100%;
+      background: var(--grad-amber);
+      border-radius: 2px;
+      width: 78%;
+    }
+
+    .mc-score-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--engram-amber);
+    }
+
+    /* Badge / Tag component */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+    }
+
+    .tag-amber { background: rgba(242,169,59,0.12); color: var(--engram-amber); border: 1px solid rgba(242,169,59,0.2); }
+    .tag-violet { background: rgba(124,92,191,0.12); color: var(--engram-violet-bright); border: 1px solid rgba(124,92,191,0.2); }
+    .tag-teal { background: rgba(46,196,196,0.1); color: var(--engram-teal); border: 1px solid rgba(46,196,196,0.15); }
+
+    .tag-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ═══════════════════════════════════════
+       ANIMATION PRINCIPLES
+    ═══════════════════════════════════════ */
+    .motion-section { background: var(--void); }
+
+    .motion-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .motion-card {
+      background: var(--layer-0);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .motion-demo {
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .motion-orb {
+      width: 40px;
+      height: 40px;
+      background: var(--grad-amber);
+      border-radius: 50%;
+    }
+
+    .motion-orb-pulse { animation: synapseFlare 2s ease-in-out infinite; }
+
+    .motion-orb-float { animation: strataShift 3s ease-in-out infinite; }
+
+    .motion-orb-scan {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--engram-amber), transparent);
+      animation: scanDown 2s linear infinite;
+      position: relative;
+    }
+
+    .motion-title {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .motion-desc {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════
+       DOWNLOADS
+    ═══════════════════════════════════════ */
+    .downloads-section { background: var(--layer-0); }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .dl-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .dl-card:hover {
+      border-color: var(--border-amber);
+      background: var(--engram-amber-glow);
+    }
+
+    .dl-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--layer-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .dl-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .dl-desc {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .dl-format {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--engram-amber);
+      letter-spacing: 0.1em;
+    }
+
+    /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+    .brand-footer {
+      background: var(--void);
+      border-top: 1px solid var(--border);
+      padding: 60px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: end;
+    }
+
+    .footer-wordmark {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      color: var(--engram-amber);
+      margin-bottom: 8px;
+    }
+
+    .footer-tagline {
+      font-family: var(--font-body);
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-meta {
+      text-align: right;
+    }
+
+    .footer-version {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      margin-bottom: 4px;
+    }
+
+    .footer-copy {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media (max-width: 1100px) {
+      :root { --nav-width: 0px; }
+      .nav { display: none; }
+      .main { margin-left: 0; }
+      .hero-visual { display: none; }
+      .hero { padding: 120px 40px 80px; }
+      .section { padding: 80px 40px; }
+      .story-grid, .type-showcase, .comp-grid { grid-template-columns: 1fr; }
+      .logo-grid { grid-template-columns: 1fr; }
+      .logo-variations-grid { grid-template-columns: repeat(2, 1fr); }
+      .pattern-grid, .motion-grid, .download-grid { grid-template-columns: repeat(2, 1fr); }
+      .layer-map-row { grid-template-columns: 40px 1fr 80px; }
+      .lm-role, .lm-type { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-header">
+      <div class="nav-wordmark">
+        <span class="nav-wordmark-dot"></span>
+        ENGRAM
+      </div>
+      <div class="nav-tagline">Brand Identity System · v1.0</div>
+    </div>
+
+    <div class="nav-body">
+      <div class="nav-section">
+        <div class="nav-section-label">Foundation</div>
+        <a href="#hero" class="nav-link active">
+          <span class="nav-link-dot"></span>Overview
+        </a>
+        <a href="#story" class="nav-link">
+          <span class="nav-link-dot"></span>Brand Story
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Visual Identity</div>
+        <a href="#logo" class="nav-link">
+          <span class="nav-link-dot"></span>Logo System
+        </a>
+        <a href="#colors" class="nav-link">
+          <span class="nav-link-dot"></span>Color Palette
+        </a>
+        <a href="#typography" class="nav-link">
+          <span class="nav-link-dot"></span>Typography
+        </a>
+        <a href="#visual" class="nav-link">
+          <span class="nav-link-dot"></span>Visual Language
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Implementation</div>
+        <a href="#components" class="nav-link">
+          <span class="nav-link-dot"></span>Components
+        </a>
+        <a href="#motion" class="nav-link">
+          <span class="nav-link-dot"></span>Motion
+        </a>
+        <a href="#tokens" class="nav-link">
+          <span class="nav-link-dot"></span>Design Tokens
+        </a>
+        <a href="#downloads" class="nav-link">
+          <span class="nav-link-dot"></span>Downloads
+        </a>
+      </div>
+    </div>
+
+    <div class="nav-layer-indicator">
+      <div class="layer-stack">
+        <div class="layer-bar layer-bar-0"></div>
+        <div class="layer-bar layer-bar-1"></div>
+        <div class="layer-bar layer-bar-2"></div>
+        <div class="layer-bar layer-bar-3"></div>
+        <div class="layer-bar layer-bar-4"></div>
+      </div>
+      <div class="layer-label">5-LAYER MEMORY ARCHITECTURE</div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ═══ HERO ═══ -->
+    <section class="hero" id="hero">
+      <div class="hero-strata"></div>
+      <div class="strata-layer strata-layer-1"></div>
+      <div class="strata-layer strata-layer-2"></div>
+      <div class="strata-layer strata-layer-3"></div>
+      <div class="strata-layer strata-layer-4"></div>
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+      <div class="hero-scan"></div>
+
+      <div class="hero-content">
+        <div class="hero-eyebrow">Brand Identity System</div>
+        <div class="hero-logo">
+          <div class="hero-wordmark">ENGRAM</div>
+          <div class="hero-descriptor">Multi-Layer AI Memory System</div>
+        </div>
+        <p class="hero-tagline">
+          Memory isn't stored — it's stratified.<br>
+          Every thought leaves a trace.
+        </p>
+        <div class="hero-meta">
+          <div class="hero-meta-item">
+            <div class="hero-meta-label">Version</div>
+            <div class="hero-meta-value">1.0.0</div>
+          </div>
+          <div class="hero-meta-item">
+            <div class="hero-meta-label">Category</div>
+            <div class="hero-meta-value">AI Infrastructure</div>
+          </div>
+          <div class="hero-meta-item">
+            <div class="hero-meta-label">Style</div>
+            <div class="hero-meta-value">Neuro-Industrial</div>
+          </div>
+          <div class="hero-meta-item">
+            <div class="hero-meta-label">Primary Color</div>
+            <div class="hero-meta-value" style="color: var(--engram-amber);">#F2A93B</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Memory Stack Visual -->
+      <div class="hero-visual">
+        <div class="memory-stack">
+          <div class="memory-layer ml-0">
+            <div class="ml-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F2A93B" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+            <div class="ml-text">
+              <div class="ml-name">WORKING MEMORY</div>
+              <div class="ml-type">layer_0 · ephemeral · hot</div>
+            </div>
+            <div class="ml-indicator ind-amber"></div>
+          </div>
+          <div class="memory-layer ml-1">
+            <div class="ml-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9B7DE0" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <div class="ml-text">
+              <div class="ml-name">SESSION MEMORY</div>
+              <div class="ml-type">layer_1 · contextual · warm</div>
+            </div>
+            <div class="ml-indicator ind-violet"></div>
+          </div>
+          <div class="memory-layer ml-2">
+            <div class="ml-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2EC4C4" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              </svg>
+            </div>
+            <div class="ml-text">
+              <div class="ml-name">EPISODIC MEMORY</div>
+              <div class="ml-type">layer_2 · temporal · cool</div>
+            </div>
+            <div class="ml-indicator ind-teal"></div>
+          </div>
+          <div class="memory-layer ml-3">
+            <div class="ml-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C5CBF" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </div>
+            <div class="ml-text">
+              <div class="ml-name">SEMANTIC MEMORY</div>
+              <div class="ml-type">layer_3 · conceptual · cold</div>
+            </div>
+            <div class="ml-indicator ind-dim"></div>
+          </div>
+          <div class="memory-layer ml-4">
+            <div class="ml-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B87B20" stroke-width="2">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+              </svg>
+            </div>
+            <div class="ml-text">
+              <div class="ml-name">ARCHIVAL MEMORY</div>
+              <div class="ml-type">layer_4 · persistent · frozen</div>
+            </div>
+            <div class="ml-indicator ind-dim"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BRAND STORY ═══ -->
+    <section class="section story-section" id="story">
+      <div class="section-eyebrow">01 — Foundation</div>
+      <h2 class="section-title">The Brand Story</h2>
+      <p class="section-subtitle">Why ENGRAM exists, and what it stands for.</p>
+
+      <div class="story-grid">
+        <div class="story-text">
+          <p>
+            In neuroscience, an <strong>engram</strong> is the physical trace left in neural tissue by a memory — the actual biological mark of something experienced, learned, or felt. It is not the memory itself, but the architecture that enables retrieval.
+          </p>
+          <p>
+            ENGRAM is built on this idea. AI systems don't merely store data — they <strong>stratify experience</strong> into layers of meaning: the immediate and fleeting, the contextual and sessional, the episodic and structured, the semantic and conceptual, the archival and permanent.
+          </p>
+          <p>
+            The ENGRAM brand reflects this architecture. Geological strata as visual metaphor. Amber for the hot fire of active cognition. Violet for the depth of long-term semantic structure. Teal for the connective tissue of retrieval. Every visual decision maps to function.
+          </p>
+          <p>
+            This is <strong>memory made visible</strong>. Infrastructure with a soul.
+          </p>
+        </div>
+
+        <div class="story-values">
+          <div class="value-card">
+            <div class="value-number">PRINCIPLE_01</div>
+            <div class="value-title">Depth Over Simplicity</div>
+            <div class="value-desc">Multi-layer systems require multi-layer thinking. We don't flatten complexity — we make it legible.</div>
+          </div>
+          <div class="value-card">
+            <div class="value-number">PRINCIPLE_02</div>
+            <div class="value-title">Trace What Matters</div>
+            <div class="value-desc">Not all memory is equal. ENGRAM understands recency, relevance, and resonance as distinct dimensions.</div>
+          </div>
+          <div class="value-card">
+            <div class="value-number">PRINCIPLE_03</div>
+            <div class="value-title">Architecture as Experience</div>
+            <div class="value-desc">The system's internal structure should be felt in the brand — layered, intentional, and precise.</div>
+          </div>
+          <div class="value-card">
+            <div class="value-number">PRINCIPLE_04</div>
+            <div class="value-title">Persistent But Adaptive</div>
+            <div class="value-desc">Memory is not static storage. It decays, consolidates, and resurfaces. ENGRAM is built for that truth.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ LOGO SYSTEM ═══ -->
+    <section class="section" id="logo" style="background: var(--void);">
+      <div class="section-eyebrow">02 — Visual Identity</div>
+      <h2 class="section-title">Logo System</h2>
+      <p class="section-subtitle">The ENGRAM mark across all contexts and applications.</p>
+
+      <!-- Primary logo variations -->
+      <div class="logo-grid">
+        <!-- Dark background -->
+        <div class="logo-cell logo-cell-dark">
+          <div class="logo-full logo-on-dark">
+            <!-- SVG Logomark -->
+            <svg class="logomark" viewBox="0 0 48 48" fill="none">
+              <!-- Strata layers mark -->
+              <rect x="6" y="10" width="36" height="4" rx="2" fill="#F2A93B" opacity="1"/>
+              <rect x="10" y="17" width="28" height="4" rx="2" fill="#9B7DE0" opacity="0.9"/>
+              <rect x="14" y="24" width="20" height="4" rx="2" fill="#2EC4C4" opacity="0.8"/>
+              <rect x="18" y="31" width="12" height="4" rx="2" fill="#7C5CBF" opacity="0.6"/>
+              <rect x="22" y="38" width="4" height="4" rx="2" fill="#B87B20" opacity="0.4"/>
+              <!-- Vertical connector -->
+              <line x1="24" y1="6" x2="24" y2="45" stroke="#F2A93B" stroke-width="1" stroke-opacity="0.3"/>
+            </svg>
+            <span class="logotype">ENGRAM</span>
+          </div>
+          <div class="logo-cell-label">PRIMARY · DARK BACKGROUND</div>
+        </div>
+
+        <!-- Amber background -->
+        <div class="logo-cell logo-cell-amber">
+          <div class="logo-full logo-on-amber">
+            <svg class="logomark" viewBox="0 0 48 48" fill="none">
+              <rect x="6" y="10" width="36" height="4" rx="2" fill="#1A1638" opacity="1"/>
+              <rect x="10" y="17" width="28" height="4" rx="2" fill="#1A1638" opacity="0.75"/>
+              <rect x="14" y="24" width="20" height="4" rx="2" fill="#1A1638" opacity="0.55"/>
+              <rect x="18" y="31" width="12" height="4" rx="2" fill="#1A1638" opacity="0.4"/>
+              <rect x="22" y="38" width="4" height="4" rx="2" fill="#1A1638" opacity="0.3"/>
+              <line x1="24" y1="6" x2="24" y2="45" stroke="#1A1638" stroke-width="1" stroke-opacity="0.3"/>
+            </svg>
+            <span class="logotype">ENGRAM</span>
+          </div>
+          <div class="logo-cell-label" style="color: rgba(26,22,56,0.5);">PRIMARY · AMBER BACKGROUND</div>
+        </div>
+
+        <!-- Light background -->
+        <div class="logo-cell logo-cell-light">
+          <div class="logo-full logo-on-light">
+            <svg class="logomark" viewBox="0 0 48 48" fill="none">
+              <rect x="6" y="10" width="36" height="4" rx="2" fill="#B87B20"/>
+              <rect x="10" y="17" width="28" height="4" rx="2" fill="#503980"/>
+              <rect x="14" y="24" width="20" height="4" rx="2" fill="#1B8F8F"/>
+              <rect x="18" y="31" width="12" height="4" rx="2" fill="#7C5CBF" opacity="0.7"/>
+              <rect x="22" y="38" width="4" height="4" rx="2" fill="#B87B20" opacity="0.5"/>
+              <line x1="24" y1="6" x2="24" y2="45" stroke="#B87B20" stroke-width="1" stroke-opacity="0.4"/>
+            </svg>
+            <span class="logotype">ENGRAM</span>
+          </div>
+          <div class="logo-cell-label" style="color: rgba(12,11,28,0.4);">PRIMARY · LIGHT BACKGROUND</div>
+        </div>
+
+        <!-- Void -->
+        <div class="logo-cell logo-cell-void">
+          <div style="text-align: center;">
+            <svg viewBox="0 0 48 48" fill="none" style="width: 80px; height: 80px;">
+              <rect x="6" y="10" width="36" height="4" rx="2" fill="#F2A93B"/>
+              <rect x="10" y="17" width="28" height="4" rx="2" fill="#9B7DE0"/>
+              <rect x="14" y="24" width="20" height="4" rx="2" fill="#2EC4C4"/>
+              <rect x="18" y="31" width="12" height="4" rx="2" fill="#7C5CBF"/>
+              <rect x="22" y="38" width="4" height="4" rx="2" fill="#B87B20"/>
+              <line x1="24" y1="6" x2="24" y2="45" stroke="#F2A93B" stroke-width="1" stroke-opacity="0.4"/>
+            </svg>
+            <div class="logo-cell-label" style="position: static; margin-top: 12px;">LOGOMARK ONLY</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logo anatomy -->
+      <div style="background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 40px;">
+        <div class="section-eyebrow">Logo Anatomy</div>
+        <div style="display: flex; gap: 48px; align-items: flex-start;">
+          <div style="flex: 1;">
+            <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); line-height: 1.7;">
+              The ENGRAM logomark is built from five horizontal strata bars, each progressively narrower — representing the five layers of the memory architecture. The bars decrease in both width and opacity from top (working memory) to bottom (archival), creating a visual metaphor of memory depth and temporal distance.<br><br>
+              The vertical connector line references the retrieval pathway that threads through all layers.
+            </p>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); line-height: 2;">
+              <div style="color: var(--engram-amber);">▬▬▬▬▬▬▬▬▬  Layer 0 · Working · 100% width</div>
+              <div style="color: var(--engram-violet-bright);">▬▬▬▬▬▬▬  Layer 1 · Session · 78% width</div>
+              <div style="color: var(--engram-teal);">▬▬▬▬▬  Layer 2 · Episodic · 56% width</div>
+              <div style="color: var(--engram-violet);">▬▬▬  Layer 3 · Semantic · 33% width</div>
+              <div style="color: var(--engram-amber-dim);">▬  Layer 4 · Archival · 11% width</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage rules -->
+      <div class="section-eyebrow">Usage Rules</div>
+      <div class="usage-grid">
+        <div class="usage-card usage-do">
+          <div class="usage-badge badge-do">DO</div>
+          <div class="usage-text">Use full colour logo on dark backgrounds for primary applications</div>
+        </div>
+        <div class="usage-card usage-do">
+          <div class="usage-badge badge-do">DO</div>
+          <div class="usage-text">Maintain minimum clear space equal to the height of one stratum bar on all sides</div>
+        </div>
+        <div class="usage-card usage-do">
+          <div class="usage-badge badge-do">DO</div>
+          <div class="usage-text">Use logomark alone when space is constrained below 120px width</div>
+        </div>
+        <div class="usage-card usage-dont">
+          <div class="usage-badge badge-dont">DON'T</div>
+          <div class="usage-text">Reorder the strata bars or alter their relative widths</div>
+        </div>
+        <div class="usage-card usage-dont">
+          <div class="usage-badge badge-dont">DON'T</div>
+          <div class="usage-text">Use the logo on backgrounds with insufficient contrast (min 4.5:1 ratio)</div>
+        </div>
+        <div class="usage-card usage-dont">
+          <div class="usage-badge badge-dont">DON'T</div>
+          <div class="usage-text">Rotate, skew, stretch, or apply drop shadows to the logomark</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ COLOR SYSTEM ═══ -->
+    <section class="section color-section" id="colors">
+      <div class="section-eyebrow">03 — Color Palette</div>
+      <h2 class="section-title">Color System</h2>
+      <p class="section-subtitle">A palette derived from the geology of memory — depth, heat, and retrieval.</p>
+
+      <div class="color-groups">
+
+        <!-- Brand Colors -->
+        <div>
+          <div class="color-group-title">Brand Colors</div>
+          <div class="color-swatches">
+            <div class="swatch" onclick="copyToClipboard('#F2A93B')">
+              <div class="swatch-color" style="background: linear-gradient(135deg, #B87B20, #FFC15E);">
+                <span class="swatch-copy">#F2A93B ↗</span>
+              </div>
+              <div class="swatch-info">
+                <div class="swatch-name">Synaptic Amber</div>
+                <div class="swatch-codes">HEX #F2A93B<br>RGB 242, 169, 59<br>HSL 37°, 88%, 59%</div>
+                <div class="swatch-usage">Primary brand · CTAs · Active layer</div>
+              </div>
+            </div>
+            <div class="swatch" onclick="copyToClipboard('#9B7DE0')">
+              <div class="swatch-color" style="background: linear-gradient(135deg, #503980, #C4AAFF);">
+                <span class="swatch-copy">#9B7DE0 ↗</span>
+              </div>
+              <div class="swatch-info">
+                <div class="swatch-name">Deep Violet</div>
+                <div class="swatch-codes">HEX #9B7DE0<br>RGB 155, 125, 224<br>HSL 263°, 65%, 68%</div>
+                <div class="swatch-usage">Semantic layer · Depth · Structure</div>
+              </div>
+            </div>
+            <div class="swatch" onclick="copyToClipboard('#2EC4C4')">
+              <div class="swatch-color" style="background: linear-gradient(135deg, #1B8F8F, #5FFFFF);">
+                <span class="swatch-copy">#2EC4C4 ↗</span>
+              </div>
+              <div class="swatch-info">
+                <div class="swatch-name">Retrieval Teal</div>
+                <div class="swatch-codes">HEX #2EC4C4<br>RGB 46, 196, 196<br>HSL 180°, 62%, 47%</div>
+                <div class="swatch-usage">Episodic layer · Connections · Live state</div>
+              </div>
+            </div>
+            <div class="swatch" onclick="copyToClipboard('#E05C7F')">
+              <div class="swatch-color" style="background: linear-gradient(135deg, #A0304E, #FF8FA3);">
+                <span class="swatch-copy">#E05C7F ↗</span>
+              </div>
+              <div class="swatch-info">
+                <div class="swatch-name">Alert Rose</div>
+                <div class="swatch-codes">HEX #E05C7F<br>RGB 224, 92, 127<br>HSL 343°, 68%, 62%</div>
+                <div class="swatch-usage">Errors · Decay · Alerts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Depth / Surface Scale -->
+        <div>
+          <div class="color-group-title">Depth Scale — Background Surfaces</div>
+          <div class="color-swatches">
+            <div class="swatch"><div class="swatch-color" style="background: #03020A; border: 1px solid var(--border);"></div><div class="swatch-info"><div class="swatch-name">Void</div><div class="swatch-codes">#03020A</div><div class="swatch-usage">Page background</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background: #090818;"></div><div class="swatch-info"><div class="swatch-name">Deep</div><div class="swatch-codes">#090818</div><div class="swatch-usage">Nav / panels</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background: #0C0B1C;"></div><div class="swatch-info"><div class="swatch-name">Layer 0</div><div class="swatch-codes">#0C0B1C</div><div class="swatch-usage">Section bg</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background: #120F2B;"></div><div class="swatch-info"><div class="swatch-name">Layer 1</div><div class="swatch-codes">#120F2B</div><div class="swatch-usage">Card bg</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background: #1A1638;"></div><div class="swatch-info"><div class="swatch-name">Layer 2</div><div class="swatch-codes">#1A1638</div><div class="swatch-usage">Elevated cards</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background: #221D45;"></div><div class="swatch-info"><div class="swatch-name">Layer 3</div><div class="swatch-codes">#221D45</div><div class="swatch-usage">Hover states</div></div></div>
+          </div>
+        </div>
+
+        <!-- Text Scale -->
+        <div>
+          <div class="color-group-title">Text & Neutral Scale</div>
+          <div class="color-swatches">
+            <div class="swatch"><div class="swatch-color" style="background: #F0EEF8;"></div><div class="swatch-info"><div class="swatch-name">Primary</div><div class="swatch-codes">#F0EEF8</div><div class="swatch-usage">Headlines, key text</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background: #A09BB8;"></div><div class="swatch-info"><div class="swatch-name">Secondary</div><div class="swatch-codes">#A09BB8</div><div class="swatch-usage">Body text</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background: #5C5878;"></div><div class="swatch-info"><div class="swatch-name">Muted</div><div class="swatch-codes">#5C5878</div><div class="swatch-usage">Labels, captions</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background: #2C2658; border: 1px solid rgba(255,255,255,0.08);"></div><div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-codes">rgba(255,255,255,0.06)</div><div class="swatch-usage">Dividers, borders</div></div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Layer Color Map -->
+      <div class="layer-map" style="margin-top: 48px;">
+        <div class="layer-map-header">Memory Layer → Color Mapping</div>
+        <div class="layer-map-row">
+          <div class="lm-index">L0</div>
+          <div class="lm-name"><span class="lm-indicator" style="background: #F2A93B; box-shadow: 0 0 6px #F2A93B;"></span>Working Memory</div>
+          <div class="lm-color">#F2A93B</div>
+          <div class="lm-role">Synaptic Amber</div>
+          <div class="lm-type"><span class="badge-hot" style="font-family: var(--font-mono); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; background: rgba(242,169,59,0.15); color: var(--engram-amber);">HOT</span></div>
+        </div>
+        <div class="layer-map-row">
+          <div class="lm-index">L1</div>
+          <div class="lm-name"><span class="lm-indicator" style="background: #9B7DE0;"></span>Session Memory</div>
+          <div class="lm-color">#9B7DE0</div>
+          <div class="lm-role">Deep Violet</div>
+          <div class="lm-type"><span style="font-family: var(--font-mono); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; background: rgba(124,92,191,0.15); color: var(--engram-violet-bright);">WARM</span></div>
+        </div>
+        <div class="layer-map-row">
+          <div class="lm-index">L2</div>
+          <div class="lm-name"><span class="lm-indicator" style="background: #2EC4C4;"></span>Episodic Memory</div>
+          <div class="lm-color">#2EC4C4</div>
+          <div class="lm-role">Retrieval Teal</div>
+          <div class="lm-type"><span style="font-family: var(--font-mono); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; background: rgba(46,196,196,0.1); color: var(--engram-teal);">COOL</span></div>
+        </div>
+        <div class="layer-map-row">
+          <div class="lm-index">L3</div>
+          <div class="lm-name"><span class="lm-indicator" style="background: #7C5CBF;"></span>Semantic Memory</div>
+          <div class="lm-color">#7C5CBF</div>
+          <div class="lm-role">Violet Dim</div>
+          <div class="lm-type"><span style="font-family: var(--font-mono); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted);">COLD</span></div>
+        </div>
+        <div class="layer-map-row">
+          <div class="lm-index">L4</div>
+          <div class="lm-name"><span class="lm-indicator" style="background: #B87B20;"></span>Archival Memory</div>
+          <div class="lm-color">#B87B20</div>
+          <div class="lm-role">Amber Dim</div>
+          <div class="lm-type"><span style="font-family: var(--font-mono); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.03); color: var(--text-muted);">FROZEN</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TYPOGRAPHY ═══ -->
+    <section class="section type-section" id="typography">
+      <div class="section-eyebrow">04 — Typography</div>
+      <h2 class="section-title">Type System</h2>
+      <p class="section-subtitle">Three families, each with a distinct cognitive register.</p>
+
+      <div class="type-showcase">
+        <div class="type-specimen spec-display">
+          <div class="type-family-label">Display Family</div>
+          <div class="type-family-name">Syne — Geometric Display</div>
+          <div class="type-sample-display">Memory<br>Traced.</div>
+          <div class="type-weights">
+            <div class="weight-row">
+              <span class="weight-sample" style="font-weight: 800; font-size: 1.25rem;">The architecture of thought</span>
+              <span class="weight-label">800 · ExtraBold</span>
+            </div>
+            <div class="weight-row">
+              <span class="weight-sample" style="font-weight: 700;">The architecture of thought</span>
+              <span class="weight-label">700 · Bold</span>
+            </div>
+            <div class="weight-row">
+              <span class="weight-sample" style="font-weight: 600; color: var(--text-secondary);">The architecture of thought</span>
+              <span class="weight-label">600 · SemiBold</span>
+            </div>
+            <div class="weight-row">
+              <span class="weight-sample" style="font-weight: 400; color: var(--text-secondary);">The architecture of thought</span>
+              <span class="weight-label">400 · Regular</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="type-specimen spec-body">
+          <div class="type-family-label">Body Family</div>
+          <div class="type-family-name" style="color: var(--engram-violet-bright);">Instrument Serif — Editorial Body</div>
+          <div class="type-sample-body">
+            Every thought leaves its trace in the sediment of mind — layered, recoverable, waiting to surface when called.
+          </div>
+          <div class="type-weights" style="margin-top: 24px;">
+            <div class="weight-row">
+              <span style="font-family: var(--font-body); font-size: 1rem; color: var(--text-primary);">Regular body text in Instrument Serif</span>
+              <span class="weight-label">400</span>
+            </div>
+            <div class="weight-row">
+              <span style="font-family: var(--font-body); font-size: 1rem; font-style: italic; color: var(--text-secondary);">Italic passages for quotes and captions</span>
+              <span class="weight-label">400i</span>
+            </div>
+          </div>
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); font-family: var(--font-body); font-size: 0.875rem; color: var(--text-muted); font-style: italic;">
+            Note: Instrument Serif brings warmth and humanity to a technical product. The serif form signals permanence — fitting for a memory system.
+          </div>
+        </div>
+      </div>
+
+      <!-- Mono specimen -->
+      <div class="mono-specimen">
+        <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;">IBM Plex Mono — Technical & Code</div>
+        <div class="mono-line"><span class="mono-ln">1</span><span class="mono-cm">// ENGRAM Memory Layer Retrieval</span></div>
+        <div class="mono-line"><span class="mono-ln">2</span><span class="mono-kw">import</span> <span class="mono-fn">{ Engram }</span> <span class="mono-kw">from</span> <span class="mono-str">'@engram/core'</span></div>
+        <div class="mono-line"><span class="mono-ln">3</span></div>
+        <div class="mono-line"><span class="mono-ln">4</span><span class="mono-kw">const</span> <span class="mono-fn">memory</span> = <span class="mono-kw">new</span> <span class="mono-fn">Engram</span>({</div>
+        <div class="mono-line"><span class="mono-ln">5</span>&nbsp;&nbsp;<span class="mono-text">layers:</span> [<span class="mono-str">'working'</span>, <span class="mono-str">'session'</span>, <span class="mono-str">'episodic'</span>, <span class="mono-str">'semantic'</span>, <span class="mono-str">'archival'</span>],</div>
+        <div class="mono-line"><span class="mono-ln">6</span>&nbsp;&nbsp;<span class="mono-text">decay:</span> { working: <span class="mono-num">300</span>, session: <span class="mono-num">86400</span>, episodic: <span class="mono-num">2592000</span> },</div>
+        <div class="mono-line"><span class="mono-ln">7</span>&nbsp;&nbsp;<span class="mono-text">consolidation:</span> <span class="mono-fn">auto</span></div>
+        <div class="mono-line"><span class="mono-ln">8</span>})</div>
+        <div class="mono-line"><span class="mono-ln">9</span></div>
+        <div class="mono-line"><span class="mono-ln">10</span><span class="mono-kw">await</span> <span class="mono-fn">memory.store</span>({ key: <span class="mono-str">'context'</span>, value: <span class="mono-fn">embed</span>(input), layer: <span class="mono-num">0</span> }) <span class="mono-cursor"></span></div>
+      </div>
+
+      <!-- Type Scale -->
+      <div style="margin-top: 48px;">
+        <div class="section-eyebrow">Type Scale</div>
+        <div class="type-scale">
+          <div class="scale-row" style="background: var(--surface-1);">
+            <div class="scale-label">Token</div>
+            <div class="scale-size">Size</div>
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">Sample</div>
+            <div class="scale-usage">Usage</div>
+          </div>
+          <div class="scale-row">
+            <div class="scale-label">display</div>
+            <div class="scale-size">5rem · 80px</div>
+            <div style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--text-primary); line-height: 1;">Aa</div>
+            <div class="scale-usage">Hero wordmarks</div>
+          </div>
+          <div class="scale-row">
+            <div class="scale-label">h1</div>
+            <div class="scale-size">3rem · 48px</div>
+            <div style="font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--text-primary);">Heading</div>
+            <div class="scale-usage">Section titles</div>
+          </div>
+          <div class="scale-row">
+            <div class="scale-label">h2</div>
+            <div class="scale-size">1.875rem · 30px</div>
+            <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">Sub-heading</div>
+            <div class="scale-usage">Card titles</div>
+          </div>
+          <div class="scale-row">
+            <div class="scale-label">body-lg</div>
+            <div class="scale-size">1.125rem · 18px</div>
+            <div style="font-family: var(--font-body); font-size: 1.125rem; color: var(--text-secondary);">Body text large</div>
+            <div class="scale-usage">Lead paragraphs</div>
+          </div>
+          <div class="scale-row">
+            <div class="scale-label">body</div>
+            <div class="scale-size">1rem · 16px</div>
+            <div style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary);">Body text regular</div>
+            <div class="scale-usage">Default prose</div>
+          </div>
+          <div class="scale-row">
+            <div class="scale-label">mono</div>
+            <div class="scale-size">0.8rem · 12.8px</div>
+            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--engram-amber);">layer_0.write()</div>
+            <div class="scale-usage">Labels, code, tags</div>
+          </div>
+          <div class="scale-row">
+            <div class="scale-label">caption</div>
+            <div class="scale-size">0.65rem · 10.4px</div>
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em;">METADATA · STATUS</div>
+            <div class="scale-usage">Eyebrows, metadata</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ VISUAL LANGUAGE ═══ -->
+    <section class="section visual-section" id="visual">
+      <div class="section-eyebrow">05 — Visual Language</div>
+      <h2 class="section-title">Memory Architecture Visualised</h2>
+      <p class="section-subtitle">How the system's internal structure becomes its visual identity.</p>
+
+      <!-- Layer Diagram -->
+      <div class="layer-diagram">
+        <div class="ld-header">
+          <div class="ld-title">engram.layers — Memory Architecture Overview</div>
+          <div class="ld-status"><span class="ld-status-dot"></span>5 layers active · 3 hot</div>
+        </div>
+        <div class="ld-body">
+          <div class="ld-layer ldl-0">
+            <div class="ldl-name"><span class="ldl-dot" style="background: var(--engram-amber); box-shadow: 0 0 6px var(--engram-amber);"></span>Working Memory</div>
+            <div class="ldl-desc">Active context window — current conversation, immediate task state</div>
+            <div class="ldl-ttl">TTL: 5 min</div>
+            <div class="ldl-badge badge-hot">HOT</div>
+          </div>
+          <div class="ld-layer ldl-1">
+            <div class="ldl-name"><span class="ldl-dot" style="background: var(--engram-violet-bright);"></span>Session Memory</div>
+            <div class="ldl-desc">Conversation history, user preferences within active session</div>
+            <div class="ldl-ttl">TTL: 24 h</div>
+            <div class="ldl-badge badge-warm">WARM</div>
+          </div>
+          <div class="ld-layer ldl-2">
+            <div class="ldl-name"><span class="ldl-dot" style="background: var(--engram-teal);"></span>Episodic Memory</div>
+            <div class="ldl-desc">Timestamped events, structured experiences, temporal context</div>
+            <div class="ldl-ttl">TTL: 30 d</div>
+            <div class="ldl-badge badge-cool">COOL</div>
+          </div>
+          <div class="ld-layer ldl-3">
+            <div class="ldl-name"><span class="ldl-dot" style="background: var(--engram-violet);"></span>Semantic Memory</div>
+            <div class="ldl-desc">Conceptual knowledge, entity relationships, learned facts</div>
+            <div class="ldl-ttl">TTL: ∞</div>
+            <div class="ldl-badge badge-cold">COLD</div>
+          </div>
+          <div class="ld-layer ldl-4">
+            <div class="ldl-name"><span class="ldl-dot" style="background: var(--engram-amber-dim);"></span>Archival Memory</div>
+            <div class="ldl-desc">Immutable historical record, audit trail, foundational knowledge</div>
+            <div class="ldl-ttl">TTL: permanent</div>
+            <div class="ldl-badge badge-cold">FROZEN</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual Patterns -->
+      <div class="section-eyebrow">Visual Patterns</div>
+      <div class="pattern-grid">
+        <div class="pattern-cell pat-strata">
+          <div class="pat-strata-line" style="top: 25%; background: linear-gradient(90deg, transparent, var(--engram-amber), transparent); height: 2px; opacity: 0.4;"></div>
+          <div class="pat-strata-line" style="top: 40%; background: linear-gradient(90deg, transparent 10%, var(--engram-violet) 50%, transparent); height: 1px; opacity: 0.3;"></div>
+          <div class="pat-strata-line" style="top: 55%; background: linear-gradient(90deg, transparent 20%, var(--engram-teal) 60%, transparent); height: 1px; opacity: 0.25;"></div>
+          <div class="pat-strata-line" style="top: 68%; background: linear-gradient(90deg, transparent 30%, var(--engram-violet-dim) 70%, transparent); height: 1px; opacity: 0.2;"></div>
+          <div class="pat-strata-line" style="top: 78%; background: linear-gradient(90deg, transparent 40%, var(--engram-amber-dim) 80%, transparent); height: 1px; opacity: 0.15;"></div>
+          <div class="pattern-label">STRATA LINES</div>
+        </div>
+
+        <div class="pattern-cell pat-grid">
+          <!-- Dot overlay -->
+          <div style="position: absolute; inset: 0; background-image: radial-gradient(var(--engram-amber) 1px, transparent 1px); background-size: 32px 32px; opacity: 0.15;"></div>
+          <!-- Center glow -->
+          <div style="position: absolute; width: 120px; height: 120px; background: radial-gradient(circle, rgba(242,169,59,0.15) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%);"></div>
+          <div class="pattern-label">RETRIEVAL GRID</div>
+        </div>
+
+        <div class="pattern-cell" style="background: var(--deep);">
+          <!-- Node network SVG -->
+          <svg style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.5;" viewBox="0 0 300 200">
+            <!-- Connections -->
+            <line x1="150" y1="100" x2="80" y2="60" stroke="#F2A93B" stroke-width="0.5" opacity="0.6"/>
+            <line x1="150" y1="100" x2="220" y2="70" stroke="#9B7DE0" stroke-width="0.5" opacity="0.5"/>
+            <line x1="150" y1="100" x2="60" y2="140" stroke="#2EC4C4" stroke-width="0.5" opacity="0.4"/>
+            <line x1="150" y1="100" x2="240" y2="150" stroke="#7C5CBF" stroke-width="0.5" opacity="0.4"/>
+            <line x1="80" y1="60" x2="40" y2="30" stroke="#F2A93B" stroke-width="0.5" opacity="0.3"/>
+            <line x1="220" y1="70" x2="260" y2="40" stroke="#9B7DE0" stroke-width="0.5" opacity="0.3"/>
+            <!-- Nodes -->
+            <circle cx="150" cy="100" r="6" fill="#F2A93B" opacity="0.9"/>
+            <circle cx="80" cy="60" r="4" fill="#9B7DE0" opacity="0.8"/>
+            <circle cx="220" cy="70" r="4" fill="#9B7DE0" opacity="0.8"/>
+            <circle cx="60" cy="140" r="3" fill="#2EC4C4" opacity="0.7"/>
+            <circle cx="240" cy="150" r="3" fill="#2EC4C4" opacity="0.7"/>
+            <circle cx="40" cy="30" r="2" fill="#7C5CBF" opacity="0.5"/>
+            <circle cx="260" cy="40" r="2" fill="#7C5CBF" opacity="0.5"/>
+            <circle cx="120" cy="160" r="2" fill="#B87B20" opacity="0.4"/>
+            <circle cx="200" cy="170" r="2" fill="#B87B20" opacity="0.4"/>
+          </svg>
+          <div class="pattern-label">SYNAPSE NETWORK</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ COMPONENTS ═══ -->
+    <section class="section comp-section" id="components">
+      <div class="section-eyebrow">06 — UI Components</div>
+      <h2 class="section-title">Component Library</h2>
+      <p class="section-subtitle">Reusable interface components reflecting the memory system's visual language.</p>
+
+      <div class="comp-grid">
+        <!-- Buttons -->
+        <div class="comp-card">
+          <div class="comp-preview">
+            <div class="btn-row">
+              <button class="ui-btn btn-amber">Write Memory</button>
+              <button class="ui-btn btn-outline">Retrieve</button>
+              <button class="ui-btn btn-ghost">Archive</button>
+            </div>
+          </div>
+          <div class="comp-meta">
+            <div class="comp-name">Button System</div>
+            <div class="comp-desc">Primary · Outline · Ghost — three interaction levels</div>
+          </div>
+        </div>
+
+        <!-- Memory Card -->
+        <div class="comp-card">
+          <div class="comp-preview">
+            <div class="mem-card">
+              <div class="mc-header">
+                <span class="mc-layer">LAYER_0 · WORKING</span>
+                <span class="mc-ttl">TTL 4:32</span>
+              </div>
+              <div class="mc-key">user_preference.tone</div>
+              <div class="mc-value">Prefers concise, technical responses with code examples when applicable.</div>
+              <div class="mc-footer">
+                <div class="mc-score-bar"><div class="mc-score-fill"></div></div>
+                <span class="mc-score-label">0.78</span>
+              </div>
+            </div>
+          </div>
+          <div class="comp-meta">
+            <div class="comp-name">Memory Entry Card</div>
+            <div class="comp-desc">Displays a single memory record with layer, key, value, TTL, and relevance score</div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="comp-card">
+          <div class="comp-preview" style="flex-direction: column; gap: 12px;">
+            <div class="tag-row">
+              <span class="tag tag-amber"><span class="tag-dot"></span>working</span>
+              <span class="tag tag-violet"><span class="tag-dot"></span>semantic</span>
+              <span class="tag tag-teal"><span class="tag-dot"></span>episodic</span>
+            </div>
+            <div class="tag-row">
+              <span class="tag tag-amber">layer_0</span>
+              <span class="tag tag-violet">consolidating</span>
+              <span class="tag tag-teal">active</span>
+            </div>
+          </div>
+          <div class="comp-meta">
+            <div class="comp-name">Layer Tags & Badges</div>
+            <div class="comp-desc">Color-coded tags map directly to memory layer colors</div>
+          </div>
+        </div>
+
+        <!-- Layer Stack Mini -->
+        <div class="comp-card">
+          <div class="comp-preview">
+            <div style="display: flex; flex-direction: column; gap: 6px; width: 220px;">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(242,169,59,0.08); border: 1px solid rgba(242,169,59,0.2); border-radius: 8px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--engram-amber); box-shadow: 0 0 6px var(--engram-amber);"></div>
+                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-primary); flex: 1;">Working</div>
+                <div style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--engram-amber);">4 items</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(124,92,191,0.06); border: 1px solid rgba(124,92,191,0.15); border-radius: 8px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--engram-violet-bright);"></div>
+                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-primary); flex: 1;">Session</div>
+                <div style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--engram-violet-bright);">12 items</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(46,196,196,0.04); border: 1px solid rgba(46,196,196,0.1); border-radius: 8px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--engram-teal);"></div>
+                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-secondary); flex: 1;">Episodic</div>
+                <div style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--engram-teal);">847 items</div>
+              </div>
+            </div>
+          </div>
+          <div class="comp-meta">
+            <div class="comp-name">Layer Summary Panel</div>
+            <div class="comp-desc">Overview of active memory layers with item counts and visual indicators</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ MOTION ═══ -->
+    <section class="section motion-section" id="motion">
+      <div class="section-eyebrow">07 — Motion Principles</div>
+      <h2 class="section-title">Animation Language</h2>
+      <p class="section-subtitle">Motion that feels like thought — deliberate, layered, never arbitrary.</p>
+
+      <div class="motion-grid">
+        <div class="motion-card">
+          <div class="motion-demo">
+            <div class="motion-orb motion-orb-pulse" style="background: var(--grad-amber);"></div>
+          </div>
+          <div class="motion-title">Synaptic Pulse</div>
+          <div class="motion-desc">opacity 0.3 → 1.0 · scale 1 → 1.1<br>timing: 2s ease-in-out infinite<br>use: active states, live indicators</div>
+        </div>
+        <div class="motion-card">
+          <div class="motion-demo">
+            <div class="motion-orb motion-orb-float" style="background: var(--grad-violet); width: 32px; height: 32px;"></div>
+          </div>
+          <div class="motion-title">Memory Float</div>
+          <div class="motion-desc">translateY 0 → -20px → 0<br>timing: 4s ease-in-out infinite<br>use: hero elements, decorative layers</div>
+        </div>
+        <div class="motion-card">
+          <div class="motion-demo" style="position: relative; overflow: hidden; width: 100%;">
+            <div class="motion-orb-scan"></div>
+          </div>
+          <div class="motion-title">Retrieval Scan</div>
+          <div class="motion-desc">translateY -100% → 200%<br>timing: 8s linear infinite<br>use: background ambience, loading states</div>
+        </div>
+        <div class="motion-card">
+          <div class="motion-demo">
+            <div style="font-family: var(--font-mono); font-size: 0.875rem; color: var(--engram-amber); overflow: hidden; animation: memoryWrite 3s ease 0.5s infinite;">
+              retrieved_context ←
+            </div>
+          </div>
+          <div class="motion-title">Memory Write</div>
+          <div class="motion-desc">width 0 → 100%, opacity 0 → 1<br>timing: 0.8s cubic-bezier(0.16,1,0.3,1)<br>use: typing, data retrieval</div>
+        </div>
+        <div class="motion-card">
+          <div class="motion-demo">
+            <div style="display: flex; gap: 4px; align-items: flex-end; height: 60px;">
+              <div style="width: 8px; background: var(--engram-amber); animation: strataShift 2s ease-in-out infinite; height: 60px; border-radius: 4px 4px 0 0;"></div>
+              <div style="width: 8px; background: var(--engram-violet); animation: strataShift 2s ease-in-out infinite 0.4s; height: 45px; border-radius: 4px 4px 0 0;"></div>
+              <div style="width: 8px; background: var(--engram-teal); animation: strataShift 2s ease-in-out infinite 0.8s; height: 35px; border-radius: 4px 4px 0 0;"></div>
+              <div style="width: 8px; background: var(--engram-violet-dim); animation: strataShift 2s ease-in-out infinite 1.2s; height: 22px; border-radius: 4px 4px 0 0;"></div>
+              <div style="width: 8px; background: var(--engram-amber-dim); animation: strataShift 2s ease-in-out infinite 1.6s; height: 12px; border-radius: 4px 4px 0 0;"></div>
+            </div>
+          </div>
+          <div class="motion-title">Strata Breathe</div>
+          <div class="motion-desc">Staggered translateY with offset delays<br>timing: 4s ease-in-out per bar<br>use: layer visualisations</div>
+        </div>
+        <div class="motion-card">
+          <div class="motion-demo">
+            <div style="opacity: 0; animation: flickerIn 2s ease 0.5s infinite; font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--engram-amber);">ENGRAM</div>
+          </div>
+          <div class="motion-title">Flicker In</div>
+          <div class="motion-desc">opacity 0 → 0.8 → 0.2 → 1.0<br>timing: 0.6s ease once<br>use: brand reveals, hero entrances</div>
+        </div>
+      </div>
+
+      <!-- Easing Reference -->
+      <div style="margin-top: 48px; background: var(--layer-0); border: 1px solid var(--border); border-radius: 16px; padding: 32px;">
+        <div class="section-eyebrow">Easing Curves</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; font-family: var(--font-mono); font-size: 0.75rem;">
+          <div>
+            <div style="color: var(--engram-amber); margin-bottom: 6px;">--ease-memory</div>
+            <div style="color: var(--text-muted);">cubic-bezier(0.16, 1, 0.3, 1)</div>
+            <div style="color: var(--text-secondary); font-size: 0.65rem; margin-top: 4px;">Retrieval · snappy settle</div>
+          </div>
+          <div>
+            <div style="color: var(--engram-violet-bright); margin-bottom: 6px;">--ease-consolidate</div>
+            <div style="color: var(--text-muted);">cubic-bezier(0.4, 0, 0.2, 1)</div>
+            <div style="color: var(--text-secondary); font-size: 0.65rem; margin-top: 4px;">Writes · smooth inertia</div>
+          </div>
+          <div>
+            <div style="color: var(--engram-teal); margin-bottom: 6px;">--ease-decay</div>
+            <div style="color: var(--text-muted);">cubic-bezier(0, 0, 0.2, 1)</div>
+            <div style="color: var(--text-secondary); font-size: 0.65rem; margin-top: 4px;">Exits · natural decel</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ DESIGN TOKENS ═══ -->
+    <section class="section impl-section" id="tokens">
+      <div class="section-eyebrow">08 — Implementation</div>
+      <h2 class="section-title">Design Tokens</h2>
+      <p class="section-subtitle">Production-ready CSS variables and Tailwind v4 configuration.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-title">CSS CUSTOM PROPERTIES · globals.css</div>
+          <button class="code-copy" onclick="copyBlock('css-tokens')">Copy</button>
+        </div>
+        <div class="code-body" id="css-tokens">
+<span class="tok-cm">/* ═══ ENGRAM Design Tokens ═══ */</span>
+<span class="tok-key">:root</span> {
+  <span class="tok-cm">/* Brand Colors */</span>
+  <span class="tok-prop">--engram-amber</span>:        <span class="tok-str">#F2A93B</span>;
+  <span class="tok-prop">--engram-amber-bright</span>:  <span class="tok-str">#FFC15E</span>;
+  <span class="tok-prop">--engram-amber-dim</span>:    <span class="tok-str">#B87B20</span>;
+  <span class="tok-prop">--engram-violet</span>:       <span class="tok-str">#7C5CBF</span>;
+  <span class="tok-prop">--engram-violet-bright</span>:<span class="tok-str">#9B7DE0</span>;
+  <span class="tok-prop">--engram-teal</span>:         <span class="tok-str">#2EC4C4</span>;
+  <span class="tok-prop">--engram-rose</span>:         <span class="tok-str">#E05C7F</span>;
+
+  <span class="tok-cm">/* Depth Scale */</span>
+  <span class="tok-prop">--void</span>:    <span class="tok-str">#03020A</span>;
+  <span class="tok-prop">--deep</span>:    <span class="tok-str">#090818</span>;
+  <span class="tok-prop">--layer-0</span>: <span class="tok-str">#0C0B1C</span>;
+  <span class="tok-prop">--layer-1</span>: <span class="tok-str">#120F2B</span>;
+  <span class="tok-prop">--layer-2</span>: <span class="tok-str">#1A1638</span>;
+  <span class="tok-prop">--layer-3</span>: <span class="tok-str">#221D45</span>;
+  <span class="tok-prop">--layer-4</span>: <span class="tok-str">#2C2658</span>;
+
+  <span class="tok-cm">/* Text */</span>
+  <span class="tok-prop">--text-primary</span>:   <span class="tok-str">#F0EEF8</span>;
+  <span class="tok-prop">--text-secondary</span>: <span class="tok-str">#A09BB8</span>;
+  <span class="tok-prop">--text-muted</span>:     <span class="tok-str">#5C5878</span>;
+
+  <span class="tok-cm">/* Typography */</span>
+  <span class="tok-prop">--font-display</span>: <span class="tok-str">'Syne'</span>, sans-serif;
+  <span class="tok-prop">--font-body</span>:    <span class="tok-str">'Instrument Serif'</span>, serif;
+  <span class="tok-prop">--font-mono</span>:    <span class="tok-str">'IBM Plex Mono'</span>, monospace;
+
+  <span class="tok-cm">/* Easing */</span>
+  <span class="tok-prop">--ease-memory</span>:     <span class="tok-val">cubic-bezier(0.16, 1, 0.3, 1)</span>;
+  <span class="tok-prop">--ease-consolidate</span>:<span class="tok-val">cubic-bezier(0.4, 0, 0.2, 1)</span>;
+  <span class="tok-prop">--ease-decay</span>:      <span class="tok-val">cubic-bezier(0, 0, 0.2, 1)</span>;
+}
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-title">TAILWIND v4 · tailwind.config.css</div>
+          <button class="code-copy" onclick="copyBlock('tw-tokens')">Copy</button>
+        </div>
+        <div class="code-body" id="tw-tokens">
+<span class="tok-key">@theme</span> {
+  <span class="tok-cm">/* Brand Colors */</span>
+  <span class="tok-prop">--color-amber</span>:        <span class="tok-str">#F2A93B</span>;
+  <span class="tok-prop">--color-amber-bright</span>:  <span class="tok-str">#FFC15E</span>;
+  <span class="tok-prop">--color-amber-dim</span>:    <span class="tok-str">#B87B20</span>;
+  <span class="tok-prop">--color-violet</span>:       <span class="tok-str">#7C5CBF</span>;
+  <span class="tok-prop">--color-violet-light</span>: <span class="tok-str">#9B7DE0</span>;
+  <span class="tok-prop">--color-teal</span>:         <span class="tok-str">#2EC4C4</span>;
+  <span class="tok-prop">--color-rose</span>:         <span class="tok-str">#E05C7F</span>;
+
+  <span class="tok-cm">/* Background Depth */</span>
+  <span class="tok-prop">--color-void</span>:    <span class="tok-str">#03020A</span>;
+  <span class="tok-prop">--color-deep</span>:    <span class="tok-str">#090818</span>;
+  <span class="tok-prop">--color-l0</span>:      <span class="tok-str">#0C0B1C</span>;
+  <span class="tok-prop">--color-l1</span>:      <span class="tok-str">#120F2B</span>;
+  <span class="tok-prop">--color-l2</span>:      <span class="tok-str">#1A1638</span>;
+  <span class="tok-prop">--color-l3</span>:      <span class="tok-str">#221D45</span>;
+
+  <span class="tok-cm">/* Fonts */</span>
+  <span class="tok-prop">--font-family-display</span>: <span class="tok-str">'Syne'</span>, sans-serif;
+  <span class="tok-prop">--font-family-body</span>:    <span class="tok-str">'Instrument Serif'</span>, serif;
+  <span class="tok-prop">--font-family-mono</span>:    <span class="tok-str">'IBM Plex Mono'</span>, monospace;
+
+  <span class="tok-cm">/* Type Scale */</span>
+  <span class="tok-prop">--font-size-display</span>: <span class="tok-num">5rem</span>;
+  <span class="tok-prop">--font-size-h1</span>:      <span class="tok-num">3rem</span>;
+  <span class="tok-prop">--font-size-h2</span>:      <span class="tok-num">1.875rem</span>;
+  <span class="tok-prop">--font-size-body-lg</span>: <span class="tok-num">1.125rem</span>;
+  <span class="tok-prop">--font-size-body</span>:    <span class="tok-num">1rem</span>;
+  <span class="tok-prop">--font-size-mono</span>:    <span class="tok-num">0.8rem</span>;
+  <span class="tok-prop">--font-size-caption</span>: <span class="tok-num">0.65rem</span>;
+}
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-title">DESIGN TOKENS JSON · tokens.json</div>
+          <button class="code-copy" onclick="copyBlock('json-tokens')">Copy</button>
+        </div>
+        <div class="code-body" id="json-tokens">
+{
+  <span class="tok-str">"brand"</span>: { <span class="tok-str">"name"</span>: <span class="tok-val">"ENGRAM"</span>, <span class="tok-str">"version"</span>: <span class="tok-val">"1.0.0"</span> },
+  <span class="tok-str">"color"</span>: {
+    <span class="tok-str">"amber"</span>:    { <span class="tok-str">"$value"</span>: <span class="tok-val">"#F2A93B"</span>, <span class="tok-str">"$type"</span>: <span class="tok-val">"color"</span>, <span class="tok-str">"layer"</span>: <span class="tok-num">0</span> },
+    <span class="tok-str">"violet"</span>:   { <span class="tok-str">"$value"</span>: <span class="tok-val">"#7C5CBF"</span>, <span class="tok-str">"$type"</span>: <span class="tok-val">"color"</span>, <span class="tok-str">"layer"</span>: <span class="tok-num">1</span> },
+    <span class="tok-str">"teal"</span>:     { <span class="tok-str">"$value"</span>: <span class="tok-val">"#2EC4C4"</span>, <span class="tok-str">"$type"</span>: <span class="tok-val">"color"</span>, <span class="tok-str">"layer"</span>: <span class="tok-num">2</span> },
+    <span class="tok-str">"rose"</span>:     { <span class="tok-str">"$value"</span>: <span class="tok-val">"#E05C7F"</span>, <span class="tok-str">"$type"</span>: <span class="tok-val">"color"</span>, <span class="tok-str">"usage"</span>: <span class="tok-val">"error"</span> },
+    <span class="tok-str">"void"</span>:     { <span class="tok-str">"$value"</span>: <span class="tok-val">"#03020A"</span>, <span class="tok-str">"$type"</span>: <span class="tok-val">"color"</span>, <span class="tok-str">"depth"</span>: <span class="tok-num">0</span> },
+    <span class="tok-str">"layer-0"</span>:  { <span class="tok-str">"$value"</span>: <span class="tok-val">"#0C0B1C"</span>, <span class="tok-str">"$type"</span>: <span class="tok-val">"color"</span>, <span class="tok-str">"depth"</span>: <span class="tok-num">2</span> },
+    <span class="tok-str">"layer-1"</span>:  { <span class="tok-str">"$value"</span>: <span class="tok-val">"#120F2B"</span>, <span class="tok-str">"$type"</span>: <span class="tok-val">"color"</span>, <span class="tok-str">"depth"</span>: <span class="tok-num">3</span> }
+  },
+  <span class="tok-str">"typography"</span>: {
+    <span class="tok-str">"display"</span>:  { <span class="tok-str">"$value"</span>: [<span class="tok-val">"Syne"</span>, <span class="tok-val">"sans-serif"</span>], <span class="tok-str">"$type"</span>: <span class="tok-val">"fontFamily"</span> },
+    <span class="tok-str">"body"</span>:     { <span class="tok-str">"$value"</span>: [<span class="tok-val">"Instrument Serif"</span>, <span class="tok-val">"serif"</span>], <span class="tok-str">"$type"</span>: <span class="tok-val">"fontFamily"</span> },
+    <span class="tok-str">"mono"</span>:     { <span class="tok-str">"$value"</span>: [<span class="tok-val">"IBM Plex Mono"</span>, <span class="tok-val">"monospace"</span>], <span class="tok-str">"$type"</span>: <span class="tok-val">"fontFamily"</span> }
+  },
+  <span class="tok-str">"easing"</span>: {
+    <span class="tok-str">"memory"</span>:     { <span class="tok-str">"$value"</span>: <span class="tok-val">"cubic-bezier(0.16, 1, 0.3, 1)"</span> },
+    <span class="tok-str">"consolidate"</span>:{ <span class="tok-str">"$value"</span>: <span class="tok-val">"cubic-bezier(0.4, 0, 0.2, 1)"</span> },
+    <span class="tok-str">"decay"</span>:      { <span class="tok-str">"$value"</span>: <span class="tok-val">"cubic-bezier(0, 0, 0.2, 1)"</span> }
+  }
+}
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ DOWNLOADS ═══ -->
+    <section class="section downloads-section" id="downloads">
+      <div class="section-eyebrow">09 — Assets</div>
+      <h2 class="section-title">Download Package</h2>
+      <p class="section-subtitle">Everything needed to implement the ENGRAM brand across all touchpoints.</p>
+
+      <div class="download-grid">
+        <div class="dl-card">
+          <div class="dl-icon">⬡</div>
+          <div class="dl-name">Logo SVG Pack</div>
+          <div class="dl-desc">Primary, stacked, logomark, wordmark — all variations · dark, light, amber backgrounds</div>
+          <div class="dl-format">SVG · PDF · PNG @1x @2x @3x</div>
+        </div>
+        <div class="dl-card">
+          <div class="dl-icon">◈</div>
+          <div class="dl-name">App Icon Set</div>
+          <div class="dl-desc">macOS .icns, iOS asset catalog, PWA 192/512 maskable, favicon package with .ico</div>
+          <div class="dl-format">ICNS · PNG · ICO · SVG</div>
+        </div>
+        <div class="dl-card">
+          <div class="dl-icon">⊞</div>
+          <div class="dl-name">Design Tokens</div>
+          <div class="dl-desc">CSS custom properties, Tailwind v4 config, JSON W3C tokens format, Figma variables JSON</div>
+          <div class="dl-format">CSS · JSON · Tailwind</div>
+        </div>
+        <div class="dl-card">
+          <div class="dl-icon">⬜</div>
+          <div class="dl-name">Component Library</div>
+          <div class="dl-desc">ShadCN theme config, globals.css, button system, memory card, layer tags, navigation</div>
+          <div class="dl-format">TSX · CSS · Tailwind</div>
+        </div>
+        <div class="dl-card">
+          <div class="dl-icon">◻</div>
+          <div class="dl-name">Figma Library</div>
+          <div class="dl-desc">Color styles, text styles, components, auto-layout variants, icon set (24×24 grid)</div>
+          <div class="dl-format">.fig · Community Link</div>
+        </div>
+        <div class="dl-card">
+          <div class="dl-icon">▤</div>
+          <div class="dl-name">Brand Guidelines PDF</div>
+          <div class="dl-desc">30-page PDF brand book — all specifications, usage rules, do/don't examples, print specs</div>
+          <div class="dl-format">PDF · 30 pages</div>
+        </div>
+      </div>
+
+      <!-- Quick refs -->
+      <div style="margin-top: 48px; background: var(--layer-1); border: 1px solid var(--border); border-radius: 16px; padding: 32px;">
+        <div class="section-eyebrow">Quick Reference</div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; font-family: var(--font-mono); font-size: 0.75rem;">
+          <div>
+            <div style="color: var(--text-muted); font-size: 0.6rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.12em;">Primary Brand</div>
+            <div style="color: var(--engram-amber); margin-bottom: 4px;">#F2A93B</div>
+            <div style="color: var(--text-muted);">Synaptic Amber</div>
+          </div>
+          <div>
+            <div style="color: var(--text-muted); font-size: 0.6rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.12em;">Display Font</div>
+            <div style="font-family: var(--font-display); color: var(--text-primary); margin-bottom: 4px;">Syne 800</div>
+            <div style="color: var(--text-muted); font-size: 0.65rem;">fonts.google.com</div>
+          </div>
+          <div>
+            <div style="color: var(--text-muted); font-size: 0.6rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.12em;">Page Background</div>
+            <div style="color: var(--text-primary); margin-bottom: 4px;">#03020A</div>
+            <div style="color: var(--text-muted);">Void</div>
+          </div>
+          <div>
+            <div style="color: var(--text-muted); font-size: 0.6rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.12em;">WCAG</div>
+            <div style="color: var(--engram-teal); margin-bottom: 4px;">AA Compliant</div>
+            <div style="color: var(--text-muted);">8.4:1 amber/void</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="brand-footer">
+      <div>
+        <div class="footer-wordmark">ENGRAM</div>
+        <div class="footer-tagline">Memory isn't stored — it's stratified.</div>
+      </div>
+      <div class="footer-meta">
+        <div class="footer-version">BRAND IDENTITY SYSTEM · V1.0.0</div>
+        <div class="footer-copy">Built for multi-layer AI memory infrastructure</div>
+        <div class="footer-copy" style="margin-top: 4px; color: var(--layer-4);">engram.ai · 2025</div>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    // Nav active state on scroll
+    const sections = document.querySelectorAll('[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    function updateNav() {
+      let current = '';
+      sections.forEach(section => {
+        const top = section.offsetTop - 100;
+        if (window.scrollY >= top) current = section.id;
+      });
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
+      });
+    }
+
+    window.addEventListener('scroll', updateNav);
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Copy functions
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const el = event.currentTarget;
+        const copy = el.querySelector('.swatch-copy');
+        if (copy) { copy.textContent = 'Copied!'; setTimeout(() => copy.textContent = text + ' ↗', 1200); }
+      });
+    }
+
+    function copyBlock(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const text = el.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.currentTarget;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+      });
+    }
+
+    // Intersection observer for subtle fade-in
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.value-card, .swatch, .comp-card, .dl-card, .motion-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(16px)';
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

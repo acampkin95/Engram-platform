@@ -1,0 +1,261 @@
+# =============================================================================
+# AI Memory System — Production Stack
+# =============================================================================
+# Usage:
+#   docker compose -f docker/docker-compose.prod.yml up -d
+#
+# Networking: Tailscale VPN only. No services expose ports to the host
+# except Traefik on port 80 (reachable only via Tailscale IP).
+#
+# Reverse proxy: Traefik v3 — routes by hostname (file-based, no ACME/TLS).
+# TLS is handled at the Tailscale/WireGuard layer.
+#
+# Inference: Ollama (CPU-only). Serves:
+#   - nomic-embed-text:v1.5  (embeddings for Weaviate)
+#   - liquid/lfm2.5:1.2b     (memory consolidation LLM)
+#   - qwen2.5:0.5b-instruct  (lightweight chat)
+#
+# Memory limits are tuned for i7-12th gen / 16 GB RAM:
+#   weaviate   1 GB  |  redis    256 MB  |  memory-api  1 GB
+#   mcp-server 256 MB|  dashboard 512 MB |  ollama       3 GB
+#   traefik    128 MB
+# =============================================================================
+
+services:
+
+  # ============================================================
+  # WEAVIATE — Vector Database
+  # ============================================================
+  weaviate:
+    image: semitechnologies/weaviate:1.27.0
+    container_name: ai-memory-weaviate
+    # No host port binding — internal only via memory-network
+    environment:
+      QUERY_DEFAULTS_LIMIT: 100
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "false"
+      AUTHENTICATION_APIKEY_ENABLED: "true"
+      AUTHENTICATION_APIKEY_ALLOWED_KEYS: "${WEAVIATE_API_KEY:-}"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      DEFAULT_VECTORIZER_MODULE: "none"
+      ENABLE_MODULES: ""
+      CLUSTER_HOSTNAME: "weaviate"
+      MULTI_TENANCY_ENABLED: "true"
+      REPLICATION_FACTOR: 1
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/v1/.well-known/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    mem_limit: 1g
+    memswap_limit: 1g
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ============================================================
+  # REDIS — Caching & Session Layer
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: ai-memory-redis
+    # No host port binding — internal only via memory-network
+    command: redis-server --appendonly yes --maxmemory 200mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    mem_limit: 256m
+    memswap_limit: 256m
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ============================================================
+  # OLLAMA — Local LLM Inference (CPU-only)
+  # ============================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ai-memory-ollama
+    # No host port binding — internal only via memory-network
+    environment:
+      # Limit to 2 models loaded simultaneously to conserve RAM
+      OLLAMA_MAX_LOADED_MODELS: 2
+      # Single request parallelism to keep CPU/RAM usage bounded
+      OLLAMA_NUM_PARALLEL: 1
+      # Unload model from RAM after 5 minutes of inactivity
+      OLLAMA_KEEP_ALIVE: 5m
+    volumes:
+      - ollama_data:/root/.ollama
+    # No healthcheck — Ollama doesn't expose a /health endpoint.
+    # memory-api depends on ollama with condition: service_started.
+    mem_limit: 3g
+    memswap_limit: 3g
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ============================================================
+  # PYTHON MEMORY API — FastAPI backend
+  # ============================================================
+  memory-api:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.memory-api
+    container_name: ai-memory-api
+    # No host port binding — Traefik proxies via memory-network
+    environment:
+      WEAVIATE_URL: http://weaviate:8080
+      REDIS_URL: redis://redis:6379
+      # Embeddings via Ollama (nomic-embed-text-v1.5, 768 dims)
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-nomic}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nomic-embed-text:v1.5}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-768}
+      OLLAMA_HOST: http://ollama:11434
+      # Optional: OpenAI key for fallback / LLM consolidation
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # LLM for memory consolidation
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_MODEL: ${LLM_MODEL:-liquid/lfm2.5:1.2b}
+      MULTI_TENANCY_ENABLED: "true"
+      DEFAULT_TENANT_ID: ${DEFAULT_TENANT_ID:-default}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      JWT_SECRET: ${JWT_SECRET}
+      API_KEYS: ${API_KEYS}
+    depends_on:
+      weaviate:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      # Ollama has no healthcheck, so we only wait for it to start.
+      # The API handles Ollama connection retries internally.
+      ollama:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    mem_limit: 1g
+    memswap_limit: 1g
+    restart: unless-stopped
+    networks:
+      - memory-network
+    labels:
+      # Traefik label-based routing (alternative to file-based dynamic.yml)
+      # Disabled here — we use file-based routing for clarity.
+      traefik.enable: "false"
+
+  # ============================================================
+  # MCP SERVER — Model Context Protocol (TypeScript)
+  # ============================================================
+  mcp-server:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.mcp-server
+    container_name: ai-memory-mcp
+    # No host port binding — Traefik proxies via memory-network
+    environment:
+      MEMORY_API_URL: http://memory-api:8000
+      MCP_SERVER_NAME: ai-memory-mcp
+      MCP_SERVER_VERSION: "1.0.0"
+      MCP_SERVER_PORT: "3000"
+      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
+      MCP_LOG_LEVEL: ${MCP_LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+    depends_on:
+      memory-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    mem_limit: 256m
+    memswap_limit: 256m
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ============================================================
+  # DASHBOARD — Next.js Web UI
+  # ============================================================
+  dashboard:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.dashboard
+      args:
+        # Build-time arg: must point to the public Traefik-accessible API URL
+        # (evaluated by the browser, not the container)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api.memory.internal}
+    container_name: ai-memory-dashboard
+    # No host port binding — Traefik proxies via memory-network
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api.memory.internal}
+      # Server-side API URL (container-to-container)
+      MEMORY_API_URL: http://memory-api:8000
+      DASHBOARD_PORT: "3000"
+    depends_on:
+      memory-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    mem_limit: 512m
+    memswap_limit: 512m
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ============================================================
+  # TRAEFIK — Reverse Proxy
+  # ============================================================
+  traefik:
+    image: traefik:v3.0
+    container_name: ai-memory-traefik
+    ports:
+      # Only port exposed to the host — accessible via Tailscale IP only.
+      # Tailscale restricts access to tailnet members; no public exposure.
+      - "80:80"
+    volumes:
+      # Docker socket — read-only for container discovery (label-based if used)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Static configuration
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      # Dynamic routing rules (file provider)
+      - ./traefik/dynamic.yml:/dynamic.yml:ro
+    mem_limit: 128m
+    memswap_limit: 128m
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  weaviate_data:
+    driver: local
+  redis_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  memory-network:
+    driver: bridge

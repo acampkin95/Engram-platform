@@ -1,0 +1,247 @@
+# Full AI Memory System Stack
+# Usage: docker compose -f docker/docker-compose.yml up -d
+
+services:
+  # ==========================================
+  # WEAVIATE - Vector Database
+  # ==========================================
+  weaviate:
+    image: semitechnologies/weaviate:1.27.0
+    container_name: ai-memory-weaviate
+    # No host port binding — accessed internally via memory-network
+    environment:
+      QUERY_DEFAULTS_LIMIT: 100
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      DEFAULT_VECTORIZER_MODULE: "none"
+      ENABLE_MODULES: "offload-s3,text2vec-ollama"
+      CLUSTER_HOSTNAME: "weaviate"
+      MULTI_TENANCY_ENABLED: "true"
+      REPLICATION_FACTOR: 1
+      OFFLOAD_S3_ENDPOINT: http://minio:9000
+      OFFLOAD_S3_BUCKET_NAME: ${MINIO_BUCKET_WEAVIATE_OFFLOAD:-weaviate-offload}
+      OFFLOAD_S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+      OFFLOAD_S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      TEXT2VEC_OLLAMA_WAIT_FOR_MODEL: "true"
+      OLLAMA_APIENDPOINT: ${OLLAMA_HOST}
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/v1/.well-known/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ==========================================
+  # REDIS - Caching Layer
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: ai-memory-redis
+    # No host port binding — accessed internally via memory-network
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ==========================================
+  # PYTHON MEMORY API
+  # ==========================================
+  memory-api:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.memory-api
+    container_name: ai-memory-api
+    # No host port binding — nginx proxies via memory-network
+    environment:
+      WEAVIATE_URL: http://weaviate:8080
+      REDIS_URL: redis://redis:6379
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1536}
+      MULTI_TENANCY_ENABLED: "true"
+      DEFAULT_TENANT_ID: default
+      LOG_LEVEL: INFO
+    depends_on:
+      weaviate:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ==========================================
+  # MCP SERVER - Model Context Protocol
+  # ==========================================
+  mcp-server:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.mcp-server
+    container_name: ai-memory-mcp
+    # No host port binding — nginx proxies via memory-network
+    environment:
+      MEMORY_API_URL: http://memory-api:8000
+      MCP_SERVER_NAME: ai-memory-mcp
+      MCP_SERVER_VERSION: "1.0.0"
+      MCP_SERVER_PORT: "3000"
+      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://memory.velocitydigi.com}
+    depends_on:
+      memory-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ==========================================
+  # DASHBOARD - Next.js Web UI
+  # ==========================================
+  dashboard:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.dashboard
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://memory.velocitydigi.com/api}
+    container_name: ai-memory-dashboard
+    # No host port binding — nginx proxies via memory-network
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://memory.velocitydigi.com/api}
+      MEMORY_API_URL: http://memory-api:8000
+    depends_on:
+      memory-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ==========================================
+  # NGINX - Reverse Proxy
+  # ==========================================
+  nginx:
+    image: nginx:alpine
+    container_name: ai-memory-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - memory-api
+      - mcp-server
+      - dashboard
+    profiles:
+      - production
+    restart: unless-stopped
+    networks:
+      - memory-network
+
+  # ==========================================
+  # MINIO - S3-compatible Object Storage (for Weaviate OFFLOADED tenant state)
+  # ==========================================
+  minio:
+    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    container_name: dn0-minio
+    # No host port binding — MinIO only accessible within Docker network
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_VOLUMES: /data
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - memory-network
+    restart: unless-stopped
+
+  # ==========================================
+  # INVESTIGATION CRAWLER - OSINT crawl worker
+  # ==========================================
+  investigation-crawler:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    command: python -m memory_system.investigation.crawler_service
+    environment:
+      - WEAVIATE_URL=${WEAVIATE_URL:-http://weaviate:8080}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - MEMORY_API_URL=${MEMORY_API_URL:-http://memory-api:8000}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
+      - CRAWLER_POLL_INTERVAL_SECONDS=${CRAWLER_POLL_INTERVAL_SECONDS:-30}
+    depends_on:
+      - weaviate
+      - redis
+    networks:
+      - memory-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1"
+
+  # ==========================================
+  # INVESTIGATION WORKERS - AI processing pipeline
+  # ==========================================
+  investigation-workers:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    command: python -m memory_system.investigation.workers_service
+    environment:
+      - WEAVIATE_URL=${WEAVIATE_URL:-http://weaviate:8080}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
+      - INVESTIGATION_WORKERS_INTERVAL_MINUTES=${INVESTIGATION_WORKERS_INTERVAL_MINUTES:-5}
+    depends_on:
+      - weaviate
+    networks:
+      - memory-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+volumes:
+  weaviate_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  memory-network:
+    driver: bridge

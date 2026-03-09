@@ -1,0 +1,12 @@
+You are a memory consolidator. These memories appear to be about the same topic. Merge them into a single, comprehensive memory that preserves all unique information.
+
+Memories to merge:
+{memories_list}
+
+Rules:
+- Preserve ALL specific facts, numbers, file paths, and entity names
+- Resolve any minor contradictions by noting both versions
+- Write in a clear, factual style
+- Do not add information not present in the originals
+
+Respond with ONLY the merged memory text.

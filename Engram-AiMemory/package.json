@@ -1,0 +1,37 @@
+{
+  "name": "ai-memory-system",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/cli",
+    "packages/mcp-server",
+    "packages/dashboard"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:mcp\" \"npm run dev:dashboard\"",
+    "dev:mcp": "npm run dev -w packages/mcp-server",
+    "dev:dashboard": "npm run dev -w packages/dashboard",
+    "build": "npm run build -w packages/mcp-server && npm run build -w packages/dashboard",
+    "test": "npm run test -w packages/mcp-server && npm run test -w packages/dashboard",
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
+    "ai-memory": "npx tsx packages/cli/src/index.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "concurrently": "^9.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "framer-motion": "^12.34.3",
+    "lucide-react": "^0.575.0",
+    "react-icons": "^5.5.0"
+  }
+}

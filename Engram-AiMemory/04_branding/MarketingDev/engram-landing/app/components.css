@@ -1,0 +1,137 @@
+/* Strata Lines */
+.strata-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  opacity: 0.15;
+}
+
+.strata-layer-1 {
+  background: linear-gradient(90deg, transparent 0%, var(--engram-amber) 30%, transparent 100%);
+  opacity: 0.2;
+}
+
+.strata-layer-2 {
+  background: linear-gradient(90deg, transparent 10%, var(--engram-violet) 50%, transparent 90%);
+}
+
+.strata-layer-3 {
+  background: linear-gradient(90deg, transparent 0%, var(--engram-teal) 40%, transparent 80%);
+}
+
+.strata-layer-4 {
+  background: linear-gradient(90deg, transparent 20%, var(--engram-violet) 60%, transparent 100%);
+}
+
+.strata-position-1 { top: 20%; }
+.strata-position-2 { top: 38%; }
+.strata-position-3 { top: 55%; }
+.strata-position-4 { top: 72%; }
+
+/* Hero effects */
+.hero-scan {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+}
+
+.hero-orb-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(124,92,191,0.15) 0%, transparent 70%);
+  top: -20%;
+  right: -10%;
+}
+
+.hero-orb-2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(242,169,59,0.1) 0%, transparent 70%);
+  bottom: 0;
+  left: 10%;
+  animation: strataShift 8s ease-in-out infinite;
+}
+
+.memory-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  perspective: 800px;
+}
+
+.memory-layer {
+  width: 280px;
+  height: 52px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+}
+
+.memory-layer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+
+.memory-layer:hover {
+  transform: translateX(-8px);
+}
+
+.memory-layer-0::before { background: var(--engram-amber); }
+.memory-layer-1::before { background: var(--engram-violet); }
+.memory-layer-2::before { background: var(--engram-teal); }
+.memory-layer-3::before { background: var(--engram-violet-dim); }
+.memory-layer-4::before { background: var(--engram-amber-dim); }
+
+/* Hero animations */
+.hero-subtitle {
+  animation: flickerIn 1s ease both;
+}
+
+.hero-title {
+  animation: fadeUp 0.8s ease 0.2s both;
+  color: transparent;
+  background: linear-gradient(135deg, #FFC15E 0%, #F2A93B 40%, #9B7DE0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.hero-description {
+  animation: fadeUp 0.8s ease 0.6s both;
+}
+
+.hero-meta {
+  animation: fadeUp 0.8s ease 0.8s both;
+}
+
+.scan-line {
+  animation: scanDown 12s linear infinite;
+}
+
+/* Memory layer styles */
+.memory-layer-0 { margin-left: 0; }
+.memory-layer-1 { margin-left: 8px; }
+.memory-layer-2 { margin-left: 16px; }
+.memory-layer-3 { margin-left: 24px; }
+.memory-layer-4 { margin-left: 32px; }
