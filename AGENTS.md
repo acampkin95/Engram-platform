@@ -136,7 +136,7 @@ MCP_AUTH_TOKEN=<MCP bearer token>
    - ❌ No component documentation (Storybook missing)
 
 4. **MCP Framework**
-   - 85% compliant (missing input validation, pagination)
+   - ~88% compliant (missing pagination; Zod input validation IS implemented)
    - In-memory OAuth token store (volatile on restart)
 
 5. **Performance (i5/16GB/1TB)**
@@ -270,9 +270,9 @@ MCP_AUTH_TOKEN=<MCP bearer token>
 - Test runner: Node.js native (--test)
 - CI/CD: GitHub Actions configured
 
-**MCP Framework Compliance:** 85%
+**MCP Framework Compliance:** ~88%
 - ✅ Dual transport, OAuth 2.1, error hierarchy
-- ❌ No input validation (Zod not integrated)
+- ✅ Input validation via Zod (`src/schemas.ts`, 283 LOC — validates all 27 tool inputs on every invocation)
 - ❌ No pagination support
 - ❌ Resource content not fully implemented
 
