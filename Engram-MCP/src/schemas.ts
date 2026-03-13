@@ -179,6 +179,7 @@ export const SearchMatterSchema = z.object({
 	matter_id: z.string().min(1, "Matter ID is required"),
 	query: z.string().min(1, "Query is required"),
 	limit: z.number().min(1).max(50).default(10),
+	offset: z.number().min(0).default(0),
 });
 
 export type CreateMatterInput = z.infer<typeof CreateMatterSchema>;

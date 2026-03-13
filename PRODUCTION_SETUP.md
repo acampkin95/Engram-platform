@@ -57,6 +57,21 @@ To update the application with new code or configuration changes:
 docker-compose up -d --build
 ```
 
+## Target Hardware Profile
+
+For the i5/16GB/1TB deployment profile, the Docker Compose stack is tuned to stay near an 8.5GB total memory envelope:
+
+- `crawler-api`: 2G limit, 768M reservation, `shm_size: 2g`
+- `memory-api`: 512M limit, 192M reservation
+- `weaviate`: 1536M limit, 384M reservation, `GOMEMLIMIT=1.2GiB`, `CACHE_SIZE=384MB`
+- `crawler-redis`: 512M limit, `--maxmemory 384mb`
+- `memory-redis`: 384M limit, `--maxmemory 256mb`
+- `mcp-server`: 256M limit, 96M reservation
+- `platform-frontend`: 256M limit, 96M reservation
+- `nginx`: 128M limit, 48M reservation
+
+Adjust upward only if real production telemetry shows sustained pressure.
+
 ## Troubleshooting
 
 - **502 Bad Gateway:** Ensure the `engram-platform-frontend` container is running and healthy. It may take a minute to start.

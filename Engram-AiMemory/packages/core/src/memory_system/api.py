@@ -6,7 +6,9 @@ import asyncio
 import csv
 import io
 import json
+import logging
 import time
+import traceback
 from collections import Counter, deque
 from contextlib import asynccontextmanager, suppress
 from datetime import UTC, datetime, timedelta
@@ -22,6 +24,7 @@ from fastapi import (
     WebSocketDisconnect,
     status,
 )
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from pydantic import BaseModel, Field
@@ -46,6 +49,7 @@ from memory_system.auth import (
 from memory_system.config import get_settings
 
 console = Console()
+logger = logging.getLogger(__name__)
 limiter = Limiter(key_func=get_remote_address)
 
 # Module-level settings — required for rate-limit decorators (evaluated at import time)
@@ -54,7 +58,6 @@ _api_settings = get_settings()
 # Global memory system instance
 _memory_system: MemorySystem | None = None
 _scheduler = None  # MaintenanceScheduler instance (optional)
-
 
 
 class _ConnectionManager:
@@ -82,6 +85,7 @@ class _ConnectionManager:
 
 
 _ws_manager = _ConnectionManager()
+
 
 class ErrorResponse(BaseModel):
     """Standard error response."""
@@ -114,6 +118,7 @@ async def lifespan(app: FastAPI):
     global _scheduler
     try:
         from memory_system.workers import MaintenanceScheduler
+
         _scheduler = MaintenanceScheduler(
             memory_system=_memory_system,
             ollama_client=getattr(_memory_system, "_ollama", None),
@@ -124,7 +129,6 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         console.print(f"[yellow]⚠ Maintenance scheduler not started: {e}[/yellow]")
         _scheduler = None
-
 
     yield
 
@@ -146,6 +150,7 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception on {request.url.path}: {exc}\n{traceback.format_exc()}")
@@ -153,6 +158,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "An internal server error occurred. Please check the logs."},
     )
+
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -326,6 +332,7 @@ class SearchResponse(BaseModel):
     query: str
     total: int
 
+
 class ListMemoriesRequest(BaseModel):
     """Request to list memories without a search query."""
 
@@ -428,7 +435,9 @@ class DetailedHealthResponse(BaseModel):
 class ContextRequest(BaseModel):
     """Request to build memory context for a query."""
 
-    query: str = Field(..., min_length=1, max_length=10000, description="Query to build context for")
+    query: str = Field(
+        ..., min_length=1, max_length=10000, description="Query to build context for"
+    )
     tier: int | None = Field(default=None, ge=1, le=3, description="Filter by tier")
     project_id: str | None = Field(default=None, description="Filter by project")
     user_id: str | None = Field(default=None, description="Filter by user")
@@ -453,6 +462,7 @@ class CreateTenantRequest(BaseModel):
 class TenantListResponse(BaseModel):
     tenants: list[str]
     total: int
+
 
 class LoginRequest(BaseModel):
     """Request body for POST /auth/login."""
@@ -527,7 +537,9 @@ async def health_check():
     )
 
 
-@app.get("/health/detailed", response_model=DetailedHealthResponse, dependencies=[Depends(require_auth)])
+@app.get(
+    "/health/detailed", response_model=DetailedHealthResponse, dependencies=[Depends(require_auth)]
+)
 async def health_detailed():
     """Detailed health check with per-service resource usage."""
     services: dict[str, ServiceHealth] = {}
@@ -706,7 +718,9 @@ async def add_memory(request_obj: Request, request: AddMemoryRequest):
         expires_in_days=request.expires_in_days,
     )
 
-    await _ws_manager.broadcast({"type": "memory_added", "memory_id": str(memory_id), "tier": request.tier})
+    await _ws_manager.broadcast(
+        {"type": "memory_added", "memory_id": str(memory_id), "tier": request.tier}
+    )
     return AddMemoryResponse(
         memory_id=str(memory_id),
         tier=request.tier,
@@ -763,12 +777,18 @@ async def search_memories(request_obj: Request, request: SearchRequest):
     end_dt = None
     if request.start_date:
         from datetime import datetime
-        try: start_dt = datetime.fromisoformat(request.start_date.replace('Z', '+00:00'))
-        except: pass
+
+        try:
+            start_dt = datetime.fromisoformat(request.start_date.replace("Z", "+00:00"))
+        except:
+            pass
     if request.end_date:
         from datetime import datetime
-        try: end_dt = datetime.fromisoformat(request.end_date.replace('Z', '+00:00'))
-        except: pass
+
+        try:
+            end_dt = datetime.fromisoformat(request.end_date.replace("Z", "+00:00"))
+        except:
+            pass
 
     results = await _memory_system.search(
         query=request.query,
@@ -807,14 +827,16 @@ async def search_memories(request_obj: Request, request: SearchRequest):
 
     # Log search for analytics
     user_id = getattr(request_obj.state, "user_id", "unknown")
-    _search_logs.append({
-        "timestamp": datetime.now(UTC).isoformat(),
-        "query": request.query,
-        "results_count": len(search_results),
-        "tier": request.tier,
-        "tenant_id": request.tenant_id or "default",
-        "user_id": user_id,
-    })
+    _search_logs.append(
+        {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "query": request.query,
+            "results_count": len(search_results),
+            "tier": request.tier,
+            "tenant_id": request.tenant_id or "default",
+            "user_id": user_id,
+        }
+    )
 
     return SearchResponse(
         results=search_results,
@@ -823,7 +845,9 @@ async def search_memories(request_obj: Request, request: SearchRequest):
     )
 
 
-@app.get("/memories/list", response_model=ListMemoriesResponse, dependencies=[Depends(require_auth)])
+@app.get(
+    "/memories/list", response_model=ListMemoriesResponse, dependencies=[Depends(require_auth)]
+)
 async def list_memories(
     tenant_id: str | None = None,
     project_id: str | None = None,
@@ -870,8 +894,9 @@ async def list_memories(
     )
 
 
-
-@app.get("/memories/{memory_id}", response_model=MemoryResponse, dependencies=[Depends(require_auth)])
+@app.get(
+    "/memories/{memory_id}", response_model=MemoryResponse, dependencies=[Depends(require_auth)]
+)
 async def get_memory(
     memory_id: str,
     tier: int = Query(..., ge=1, le=3, description="Memory tier"),
@@ -1017,6 +1042,7 @@ async def run_decay(
     processed = 0
     try:
         from memory_system.decay import MemoryDecay
+
         decay_calc = MemoryDecay(half_life_days=30)
 
         # Get all memories and calculate decay
@@ -1190,7 +1216,9 @@ async def add_entity(request: AddEntityRequest):
     return {"entity_id": str(entity_id)}
 
 
-@app.get("/graph/entities", response_model=ListEntitiesResponse, dependencies=[Depends(require_auth)])
+@app.get(
+    "/graph/entities", response_model=ListEntitiesResponse, dependencies=[Depends(require_auth)]
+)
 async def list_entities(
     tenant_id: str | None = None,
     project_id: str | None = None,
@@ -1312,7 +1340,8 @@ async def query_graph(request: GraphQueryRequest):
     )
     return {
         "root_entity_id": str(result.entity.id),
-        "entities": [_entity_to_dict(result.entity)] + [_entity_to_dict(e) for e in result.neighbors],
+        "entities": [_entity_to_dict(result.entity)]
+        + [_entity_to_dict(e) for e in result.neighbors],
         "relations": [_relation_to_dict(r) for r in result.relations],
         "depth": result.depth_reached,
     }
@@ -1464,8 +1493,7 @@ async def get_search_stats(tenant_id: str | None = None):  # noqa: ARG001
     # Aggregate query counts from real search log
     query_counter: Counter = Counter(entry["query"] for entry in logs)
     top_queries = [
-        TopQuery(query=q, count=c, avg_score=0.0)
-        for q, c in query_counter.most_common(10)
+        TopQuery(query=q, count=c, avg_score=0.0) for q, c in query_counter.most_common(10)
     ]
 
     # Score distribution buckets
@@ -1546,6 +1574,7 @@ async def get_knowledge_graph_stats(tenant_id: str | None = None):
             total_entities=0,
             total_relations=0,
         )
+
 
 class AnalyticsAggregateResponse(BaseModel):
     """Aggregated analytics response for the frontend dashboard."""
@@ -1674,14 +1703,23 @@ async def export_memories(
     )
 
     if format == "csv":
+
         def generate_csv():
             output = io.StringIO()
             writer = csv.DictWriter(
                 output,
                 fieldnames=[
-                    "id", "content", "tier", "memory_type", "source",
-                    "project_id", "tenant_id", "importance", "confidence",
-                    "tags", "created_at",
+                    "id",
+                    "content",
+                    "tier",
+                    "memory_type",
+                    "source",
+                    "project_id",
+                    "tenant_id",
+                    "importance",
+                    "confidence",
+                    "tags",
+                    "created_at",
                 ],
             )
             writer.writeheader()
@@ -1689,19 +1727,23 @@ async def export_memories(
             output.truncate(0)
             output.seek(0)
             for mem in results:
-                writer.writerow({
-                    "id": str(mem.id),
-                    "content": mem.content,
-                    "tier": mem.tier.value if hasattr(mem.tier, "value") else mem.tier,
-                    "memory_type": mem.memory_type.value if hasattr(mem.memory_type, "value") else mem.memory_type,
-                    "source": mem.source.value if hasattr(mem.source, "value") else mem.source,
-                    "project_id": mem.project_id or "",
-                    "tenant_id": mem.tenant_id,
-                    "importance": mem.importance,
-                    "confidence": mem.confidence,
-                    "tags": ",".join(mem.tags or []),
-                    "created_at": mem.created_at.isoformat() if mem.created_at else "",
-                })
+                writer.writerow(
+                    {
+                        "id": str(mem.id),
+                        "content": mem.content,
+                        "tier": mem.tier.value if hasattr(mem.tier, "value") else mem.tier,
+                        "memory_type": mem.memory_type.value
+                        if hasattr(mem.memory_type, "value")
+                        else mem.memory_type,
+                        "source": mem.source.value if hasattr(mem.source, "value") else mem.source,
+                        "project_id": mem.project_id or "",
+                        "tenant_id": mem.tenant_id,
+                        "importance": mem.importance,
+                        "confidence": mem.confidence,
+                        "tags": ",".join(mem.tags or []),
+                        "created_at": mem.created_at.isoformat() if mem.created_at else "",
+                    }
+                )
                 yield output.getvalue()
                 output.truncate(0)
                 output.seek(0)
@@ -1719,7 +1761,9 @@ async def export_memories(
                 "id": str(mem.id),
                 "content": mem.content,
                 "tier": mem.tier.value if hasattr(mem.tier, "value") else mem.tier,
-                "memory_type": mem.memory_type.value if hasattr(mem.memory_type, "value") else mem.memory_type,
+                "memory_type": mem.memory_type.value
+                if hasattr(mem.memory_type, "value")
+                else mem.memory_type,
                 "importance": mem.importance,
                 "project_id": mem.project_id,
                 "tenant_id": mem.tenant_id,
@@ -1834,7 +1878,7 @@ async def trigger_confidence_maintenance(tenant_id: str | None = None):
     """Manually trigger confidence propagation and contradiction detection."""
     if not _memory_system:
         raise HTTPException(status_code=503, detail="System not initialized")
-    
+
     # Ideally trigger background worker logic here
     # We will trigger the background job method directly for demonstration
     global _scheduler
@@ -1844,5 +1888,5 @@ async def trigger_confidence_maintenance(tenant_id: str | None = None):
             return {"status": "success", "message": "Confidence maintenance job triggered"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
-    
+
     return {"status": "error", "message": "Scheduler not available"}

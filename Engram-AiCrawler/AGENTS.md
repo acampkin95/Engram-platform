@@ -73,6 +73,11 @@ npm run typecheck         # tsc --noEmit
 npm run test              # vitest
 ```
 
+## CI/CD
+
+- Authoritative workflow: `.github/workflows/ci.yml`
+- Scope: Python lint/type/test, frontend lint/build/test, Docker build, and Playwright E2E on main pushes
+
 ## ANTI-PATTERNS
 
 1. **NEVER set `check_robots_txt=False`** — legal/ethical violation

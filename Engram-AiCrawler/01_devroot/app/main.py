@@ -17,6 +17,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.encoders import jsonable_encoder
 
 from app.api import crawl, chat, data, storage, knowledge_graph, investigations, cases
 from app.api import stats, settings, scheduler, extraction, rag, performance, darkweb
@@ -143,9 +144,10 @@ async def log_requests(request: Request, call_next):
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.warning(f"Validation error on {request.url.path}: {exc.errors()}")
+    body = exc.body.decode("utf-8", errors="replace") if isinstance(exc.body, bytes) else exc.body
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": exc.errors(), "body": exc.body},
+        content=jsonable_encoder({"detail": exc.errors(), "body": body}),
     )
 
 

@@ -6,7 +6,6 @@ using Redis Streams with consumer groups for parallel processing.
 Architecture Decision: ADR-001 Section 5 — Redis Streams
 """
 
-
 from __future__ import annotations
 import json
 import logging
@@ -179,19 +178,17 @@ class EventBus:
         Yields:
             Tuple of (message_id, event_type, parsed_payload).
         """
-        client = await self._get_redis()
-
         # Create consumer group (idempotent)
-        try:
-            await client.xgroup_create(stream, group, id="0", mkstream=True)
-            logger.info(f"Created consumer group '{group}' on stream '{stream}'")
-        except aioredis.ResponseError as e:
-            if "BUSYGROUP" not in str(e):
-                raise
-            # Group already exists — expected in normal operation
-
         while True:
             try:
+                client = await self._get_redis()
+                try:
+                    await client.xgroup_create(stream, group, id="0", mkstream=True)
+                    logger.info(f"Created consumer group '{group}' on stream '{stream}'")
+                except aioredis.ResponseError as e:
+                    if "BUSYGROUP" not in str(e):
+                        raise
+
                 messages = await client.xreadgroup(
                     groupname=group,
                     consumername=consumer,
@@ -217,8 +214,9 @@ class EventBus:
                         # Acknowledge after successful yield
                         await client.xack(stream_name, group, msg_id)
 
-            except aioredis.ConnectionError as e:
+            except (aioredis.ConnectionError, ConnectionError) as e:
                 logger.error(f"EventBus connection lost: {e}, reconnecting...")
+                self._redis = None
                 await self.connect()
             except Exception as e:
                 logger.error(f"EventBus subscribe error: {e}")

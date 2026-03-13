@@ -14,7 +14,7 @@
 |-----------|-----------|------|
 | Vector DB | Weaviate 1.25 | 8080 (HTTP), 50051 (gRPC) |
 | Cache | Redis 7 | 6379 |
-| API | FastAPI (Python 3.12) | 8000 |
+| API | FastAPI (Python 3.11+) | 8000 |
 | MCP Server | TypeScript (Node 20+) | stdio |
 | Dashboard | Next.js 15 | 3001 |
 
@@ -32,21 +32,47 @@ docker compose -f docker/docker-compose.yml up -d
 open http://localhost:3001
 ```
 
+## macOS Setup
+
+This workspace targets Python 3.11+. If `python` is not on your PATH, use an explicit Python 3.11 binary.
+
+```bash
+# Homebrew example
+brew install python@3.11
+
+# Optional: pin the local interpreter with pyenv
+pyenv install 3.11.11
+pyenv local 3.11.11
+```
+
 ## Local Development
 
 ### Python API
 
 ```bash
-python3.12 -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
+
+# Required for auth-enabled tests and API boot
+export JWT_SECRET=local-dev-jwt-secret-0123456789abcdef0123456789abcdef
 
 # Run API server
 python -m memory_system.api
 
 # Run tests
-pytest
+python -m pytest packages/core/tests/ -v --no-header
 ```
+
+You can also use the Makefile entry points once Python 3.11 is available:
+
+```bash
+make install
+make test-python
+make build
+```
+
+The Makefile exports a local-only `JWT_SECRET` default for `make test` and `make test-python` so the baseline test commands work on a clean machine. Override it in your shell or `.env` if you need a different value.
 
 ### MCP Server
 

@@ -45,6 +45,24 @@ jobs:
         env:
           JWT_SECRET: test-secret-for-ci-only-not-production
 
+  dependency-audit-python:
+    name: Python Dependency Audit
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install audit tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install pip-audit
+      - name: Run pip-audit
+        run: pip-audit
+
   ts-lint:
     name: TypeScript Lint
     runs-on: ubuntu-latest
@@ -93,3 +111,18 @@ jobs:
         run: npm ci
       - name: Run dashboard tests
         run: npm run test:run -w packages/dashboard
+
+  dependency-audit-node:
+    name: Node Dependency Audit
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Run npm audit
+        run: npm audit --omit=dev

@@ -1,5 +1,9 @@
 .PHONY: help dev build test lint format docker-up docker-down docker-logs deploy clean
 
+PYTHON ?= python3.11
+# Local dev only. Override via environment or .env in CI/production.
+JWT_SECRET ?= local-dev-jwt-secret-0123456789abcdef0123456789abcdef
+
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
@@ -10,11 +14,11 @@ build:  ## Build all packages (MCP server + dashboard)
 	npm run build
 
 test:  ## Run all tests (Python + TypeScript)
-	python -m pytest packages/core/tests/ -v --no-header
+	JWT_SECRET=$(JWT_SECRET) $(PYTHON) -m pytest packages/core/tests/ -v --no-header
 	npm run test:run -w packages/dashboard
 
 test-python:  ## Run Python tests only
-	python -m pytest packages/core/tests/ -v --no-header
+	JWT_SECRET=$(JWT_SECRET) $(PYTHON) -m pytest packages/core/tests/ -v --no-header
 
 test-ts:  ## Run TypeScript tests only
 	npm run test:run -w packages/dashboard
@@ -60,7 +64,7 @@ clean:  ## Remove build artifacts
 	find . -type d -name htmlcov -exec rm -rf {} + 2>/dev/null || true
 
 install:  ## Install all dependencies
-	pip install -e ".[dev]"
+	$(PYTHON) -m pip install -e ".[dev]"
 	npm ci
 
 health:  ## Check system health

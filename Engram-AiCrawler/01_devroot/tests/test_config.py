@@ -45,7 +45,7 @@ def test_dockerfile_content():
     dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
     content = dockerfile_path.read_text()
 
-    assert "python:3.11-slim" in content, "Wrong Python version"
+    assert "python:3.11.9-slim" in content, "Wrong Python version"
     # crawl4ai version is in requirements.txt, not directly in Dockerfile
     requirements_path = Path(__file__).parent.parent / "requirements.txt"
     req_content = requirements_path.read_text()

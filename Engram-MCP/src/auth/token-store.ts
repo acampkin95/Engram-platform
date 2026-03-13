@@ -113,6 +113,10 @@ export class TokenStore {
 		return this.clients.size;
 	}
 
+	getClientCount(): number {
+		return this.clients.size;
+	}
+
 	/**
 	 * Retrieves a registered client by its identifier.
 	 *

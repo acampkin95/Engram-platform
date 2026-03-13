@@ -72,9 +72,15 @@ aistore/
 # One-off scripts
 fix-*.js
 fix_*.js
+fix_*.py
+revert_*.py
 patch_*.js
 update-*.js
 test-*.js
+
+# Accidental local artifacts
+._.DS_Store
+=*
 
 # Docker
 docker/ssl/

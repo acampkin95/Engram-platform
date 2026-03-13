@@ -55,7 +55,14 @@ ok()    { echo -e "  ${CHECK} $*" | tee -a "${LOG_FILE}" >&2; }
 warn()  { echo -e "  ${WARN}  $*" | tee -a "${LOG_FILE}" >&2; }
 fail()  { echo -e "  ${CROSS} $*" | tee -a "${LOG_FILE}" >&2; }
 info()  { echo -e "  ${INFO}  $*" >&2; }
-die()   { echo -e "\n${RED}${BOLD}FATAL:${NC} $*" | tee -a "${LOG_FILE}" >&2; exit 1; }
+die()   {
+    if [[ -n "${LOG_FILE}" ]]; then
+        echo -e "\n${RED}${BOLD}FATAL:${NC} $*" | tee -a "${LOG_FILE}" >&2
+    else
+        echo -e "\n${RED}${BOLD}FATAL:${NC} $*" >&2
+    fi
+    exit 1
+}
 
 run_cmd() {
     if [[ "$DRY_RUN" == true ]]; then
@@ -138,17 +145,23 @@ validate_env() {
     )
 
     for var_pattern in "${required_vars[@]}"; do
-        local var_name="${var_pattern%%:*}"
-        local var_prefix="${var_pattern#*:}"
+        local var_name
+        local var_prefix=""
+        if [[ "$var_pattern" == *:* ]]; then
+            var_name="${var_pattern%%:*}"
+            var_prefix="${var_pattern#*:}"
+        else
+            var_name="$var_pattern"
+        fi
         local var_value
         var_value=$(grep "^${var_name}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- | head -1 || true)
 
         if [[ -z "$var_value" ]] || [[ "$var_value" == your-* ]] || [[ "$var_value" == "..." ]]; then
             fail "${var_name} is not set or is a placeholder"
-            ((errors++))
+            errors=$((errors + 1))
         elif [[ -n "$var_prefix" ]] && [[ "$var_prefix" != "${var_value}" ]] && [[ ! "$var_value" =~ ^$var_prefix ]]; then
             fail "${var_name} does not start with ${var_prefix}"
-            ((errors++))
+            errors=$((errors + 1))
         else
             ok "${var_name} is configured"
         fi
@@ -158,7 +171,7 @@ validate_env() {
     bind_address=$(grep "^BIND_ADDRESS=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2 | head -1 || echo "127.0.0.1")
     if [[ "$bind_address" == "0.0.0.0" ]]; then
         fail "BIND_ADDRESS is 0.0.0.0 (publicly exposed). Use 127.0.0.1 or Tailscale IP."
-        ((errors++))
+        errors=$((errors + 1))
     elif [[ "$bind_address" == "127.0.0.1" ]]; then
         warn "BIND_ADDRESS is 127.0.0.1 (localhost only)"
     else
@@ -399,6 +412,12 @@ deploy_stack() {
 verify_health() {
     step "Verifying deployment health..."
 
+    if [[ "$DRY_RUN" == true ]]; then
+        info "Dry run mode: skipping live container health checks"
+        ok "Health verification skipped in dry run"
+        return 0
+    fi
+
     local timeout=180
     local elapsed=0
     local services=(weaviate memory-api crawler-api crawler-redis memory-redis)
@@ -437,6 +456,12 @@ verify_health() {
 
 verify_endpoints() {
     step "Verifying endpoints..."
+
+    if [[ "$DRY_RUN" == true ]]; then
+        info "Dry run mode: skipping live endpoint checks"
+        ok "Endpoint verification skipped in dry run"
+        return 0
+    fi
 
     local bind_address
     bind_address=$(grep "^BIND_ADDRESS=" "${INSTALL_DIR}/.env" 2>/dev/null | cut -d'=' -f2 | head -1 || echo "127.0.0.1")

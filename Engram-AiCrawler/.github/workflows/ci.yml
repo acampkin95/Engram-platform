@@ -135,6 +135,34 @@ jobs:
           path: 01_devroot/coverage.xml
           retention-days: 7
 
+  dependency-audit-python:
+    name: Python Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: '01_devroot/requirements.txt'
+
+      - name: Install audit tooling
+        working-directory: 01_devroot
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pip-audit
+
+      - name: Run pip-audit
+        working-directory: 01_devroot
+        run: pip-audit
+
   # ============================================================================
   # React Frontend
   # ============================================================================
@@ -228,6 +256,54 @@ jobs:
         env:
           VITE_API_URL: http://localhost:11235
 
+  dependency-audit-node:
+    name: Frontend Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '01_devroot/frontend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: 01_devroot/frontend
+        run: npm ci --prefer-offline
+
+      - name: Run npm audit
+        working-directory: 01_devroot/frontend
+        run: npm audit --omit=dev
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [python-test, frontend-test]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: 01_devroot
+          file: 01_devroot/Dockerfile
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: crawl4ai-osint:${{ github.sha }}
+
   # ============================================================================
   # E2E Tests (Optional - Resource Intensive)
   # ============================================================================
@@ -236,7 +312,7 @@ jobs:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [python-test, frontend-test]
+    needs: [python-test, frontend-test, docker-build]
     # Only run on main branch pushes to save resources
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -336,9 +412,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install npm audit
-        run: npm install -g npm-audit
-
       - name: Check frontend dependencies for vulnerabilities
         working-directory: 01_devroot/frontend
         run: npm audit --audit-level=moderate
@@ -352,7 +425,7 @@ jobs:
     name: CI Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [python-lint, python-test, frontend-lint, frontend-build, frontend-test]
+    needs: [python-lint, python-test, frontend-lint, frontend-build, frontend-test, docker-build, security-scan]
     if: always()
 
     steps:
@@ -367,9 +440,11 @@ jobs:
           echo "| Frontend Lint | ${{ needs.frontend-lint.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Frontend Build | ${{ needs.frontend-build.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Frontend Tests | ${{ needs.frontend-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Scan | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ needs.python-test.result }}" != "success" ] || [ "${{ needs.frontend-test.result }}" != "success" ]; then
+          if [ "${{ needs.python-test.result }}" != "success" ] || [ "${{ needs.frontend-test.result }}" != "success" ] || [ "${{ needs.docker-build.result }}" != "success" ] || [ "${{ needs.security-scan.result }}" != "success" ]; then
             echo "❌ CI failed - check individual job logs"
             exit 1
           fi

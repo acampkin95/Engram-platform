@@ -1,7 +1,7 @@
 'use client';
 
 import { Eye, Pencil, Trash2 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import type { FilterValues } from '@/src/components/FilterBar';
 import { FilterBar } from '@/src/components/FilterBar';
@@ -26,6 +26,7 @@ import {
   type SearchResult,
 } from '@/src/lib/memory-client';
 import { swrKeys } from '@/src/lib/swr-keys';
+import { useSearchFilterState } from '@/src/hooks/useURLState';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -390,7 +391,11 @@ function EditModal({ memory, onClose, onSuccess }: EditModalProps) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function MemoriesContent() {
-  const [filters, setFilters] = useState<FilterValues>({});
+  const { search: urlSearch, filter: urlFilter, setSearch, setFilter } = useSearchFilterState();
+  const [filters, setFilters] = useState<FilterValues>({
+    search: urlSearch,
+    status: urlFilter,
+  });
   const [selectedMemory, setSelectedMemory] = useState<SearchResult | null>(null);
   const [editMemory, setEditMemory] = useState<SearchResult | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -399,9 +404,26 @@ export default function MemoriesContent() {
   const [showAnomalies, setShowAnomalies] = useState(false);
   const [showSecrets, setShowSecrets] = useState(false);
 
+  useEffect(() => {
+    setFilters((current) => ({
+      ...current,
+      search: urlSearch,
+      status: urlFilter,
+    }));
+  }, [urlSearch, urlFilter]);
+
+  const handleFiltersChange = useCallback(
+    (nextFilters: FilterValues) => {
+      setFilters(nextFilters);
+      setSearch(nextFilters.search ?? '');
+      setFilter(nextFilters.status ?? '');
+    },
+    [setFilter, setSearch],
+  );
+
   // Derive search query and matter filter from FilterValues
-  const searchQuery = filters.search ?? '';
-  const selectedMatter = filters.status ?? null;
+  const searchQuery = urlSearch;
+  const selectedMatter = urlFilter || null;
 
   // SWR key changes when search/filter changes
   const swrKey = swrKeys.memory.memories({
@@ -633,7 +655,7 @@ export default function MemoriesContent() {
           showStatus={matters.length > 0}
           statusOptions={matterStatusOptions}
           placeholder="Search memories…"
-          onFiltersChange={setFilters}
+          onFiltersChange={handleFiltersChange}
         />
       )}
 

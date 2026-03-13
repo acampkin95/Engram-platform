@@ -91,7 +91,7 @@ function extractBearerToken(headerValue: string | string[] | undefined): string 
  * @param req    - The incoming Node.js HTTP request.
  * @param config - The full server configuration.
  */
-export function validateAuth(req: IncomingMessage, config: MCPConfig): AuthResult {
+export async function validateAuth(req: IncomingMessage, config: MCPConfig): Promise<AuthResult> {
 	const oauthEnabled = config.oauth.enabled;
 	const staticToken = config.authToken;
 
@@ -108,7 +108,7 @@ export function validateAuth(req: IncomingMessage, config: MCPConfig): AuthResul
 	}
 
 	// 3. OAuth token check
-	if (oauthEnabled && validateOAuthToken(token)) {
+	if (oauthEnabled && (await validateOAuthToken(token))) {
 		return { valid: true };
 	}
 

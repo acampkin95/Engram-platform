@@ -121,3 +121,25 @@ jobs:
         env:
           MEMORY_API_URL: ${{ vars.MEMORY_API_URL_TEST }}
           MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN_TEST }}
+
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Run npm audit
+        run: npm audit --omit=dev

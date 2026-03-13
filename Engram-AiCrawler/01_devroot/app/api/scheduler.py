@@ -71,7 +71,7 @@ async def _execute_scheduled_crawl(schedule_id: str) -> None:
 
         request = CrawlRequest(
             url=crawl_config.get("url", ""),
-            extraction_type=crawl_config.get("extraction_type", "markdown"),
+            extraction_type=crawl_config.get("extraction_type", "css"),
             word_count_threshold=crawl_config.get("word_count_threshold", 50),
             bypass_cache=crawl_config.get("bypass_cache", False),
             wait_for=crawl_config.get("wait_for"),

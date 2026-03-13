@@ -1,6 +1,27 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
 import HomeContent from './HomeContent';
+
+const mockSetServiceStatus = vi.fn();
+
+vi.mock('@/src/components/DraggableGrid', () => ({
+  DraggableGrid: ({ items }: { items: Array<{ title?: string; children: unknown }> }) => (
+    <div>
+      {items.map((item) => (
+        <section key={item.title ?? 'untitled'}>
+          {item.title ? <h2>{item.title}</h2> : null}
+          {item.children}
+        </section>
+      ))}
+    </div>
+  ),
+  useGridLayout: () => ({ resetLayout: vi.fn() }),
+}));
+
+vi.mock('@/src/stores/uiStore', () => ({
+  useUIStore: (selector: (state: { setServiceStatus: typeof mockSetServiceStatus }) => unknown) =>
+    selector({ setServiceStatus: mockSetServiceStatus }),
+}));
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -52,11 +73,26 @@ vi.mock('@/src/lib/memory-client', () => {
   };
 });
 
+beforeEach(() => {
+  mockSetServiceStatus.mockReset();
+});
+
 test('renders HomeContent without crashing', async () => {
   render(<HomeContent />);
 
   await waitFor(() => {
     expect(screen.getByText('Platform Overview')).toBeInTheDocument();
     expect(screen.getByText('Crawler Service')).toBeInTheDocument();
+  });
+});
+
+test('updates shared service status after successful health fetches', async () => {
+  render(<HomeContent />);
+
+  await waitFor(() => {
+    expect(mockSetServiceStatus).toHaveBeenCalledWith({
+      crawler: 'online',
+      memory: 'online',
+    });
   });
 });

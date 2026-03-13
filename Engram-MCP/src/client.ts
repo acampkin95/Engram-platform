@@ -696,7 +696,8 @@ async addEntity(data: {
 		matter_id: string;
 		query: string;
 		limit?: number;
-	}): Promise<{ total: number; results: unknown[] }> {
+		offset?: number;
+	}): Promise<{ total: number; limit: number; offset: number; results: unknown[] }> {
 		const response = await resilientFetch(
 			`${this.baseUrl}/matters/${data.matter_id}/evidence/search`,
 			{
@@ -706,12 +707,13 @@ async addEntity(data: {
 					matter_id: data.matter_id,
 					query: data.query,
 					limit: data.limit ?? 10,
+					offset: data.offset ?? 0,
 				}),
 			},
 		);
 		if (!response.ok) {
 			throw createErrorFromStatus(response.status, response.statusText);
 		}
-		return this.parseJSON<{ total: number; results: unknown[] }>(response);
+		return this.parseJSON<{ total: number; limit: number; offset: number; results: unknown[] }>(response);
 	}
 }

@@ -1,4 +1,5 @@
 """FastAPI router exposing Engram integration endpoints."""
+
 from __future__ import annotations
 
 from typing import Any, Optional
@@ -50,17 +51,8 @@ class MatterSearchRequest(BaseModel):
 
 
 def _get_client():
-    get_client = None
-    try:
-        from crawl4ai_engram.client import get_client
-    except ModuleNotFoundError:
-        try:
-            from client import get_client  # type: ignore[no-redef]
-        except ModuleNotFoundError:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Engram client module could not be imported.",
-            )
+    from ..client import get_client
+
     client = get_client()
     if not client._cfg.is_configured:
         raise HTTPException(
@@ -76,14 +68,8 @@ def _get_client():
 @router.get("/status", summary="Engram integration status")
 async def engram_status():
     """Returns whether Engram is enabled and reachable."""
-    get_client = None
-    try:
-        from crawl4ai_engram.client import get_client
-    except ModuleNotFoundError:
-        try:
-            from client import get_client  # type: ignore[no-redef]
-        except ModuleNotFoundError:
-            return {"enabled": False, "error": "Engram client module not available"}
+    from ..client import get_client
+
     client = get_client()
     health = await client.health()
     return {

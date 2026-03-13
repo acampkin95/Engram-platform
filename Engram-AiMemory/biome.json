@@ -1,17 +1,10 @@
 {
   "files": {
-    "includes": [
-      "**",
-      "!**/.next/**",
-      "!**/node_modules/**",
-      "!**/dist/**",
-      "!**/.worktrees/**",
-      "!**/__tests__/**",
-      "!**/globals.css"
-    ]
+    "include": ["**"],
+    "ignore": ["**/.next/**", "**/node_modules/**", "**/dist/**", "**/.worktrees/**", "**/__tests__/**", "**/globals.css"]
   },
-  "$schema": "https://biomejs.dev/schemas/2.3.9/schema.json",
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "organizeImports": { "enabled": true },
   "linter": {
     "enabled": true,
     "rules": {
@@ -21,7 +14,7 @@
         "noUselessCatch": "error",
         "noUselessThisAlias": "error",
         "noUselessTypeConstraint": "error",
-        "noAdjacentSpacesInRegex": "error"
+        "noMultipleSpacesInRegularExpressionLiterals": "error"
       },
       "correctness": {
         "noConstAssign": "error",
@@ -45,8 +38,7 @@
         "useIsNan": "error",
         "useValidForDirection": "error",
         "useYield": "error",
-        "noInvalidBuiltinInstantiation": "error",
-        "useValidTypeof": "error"
+        "noInvalidBuiltinInstantiation": "error"
       },
       "suspicious": {
         "noAsyncPromiseExecutor": "error",
@@ -72,7 +64,7 @@
         "noUnsafeDeclarationMerging": "error",
         "noUnsafeNegation": "error",
         "useGetterReturn": "error",
-        "noWith": "error"
+        "useValidTypeof": "error"
       }
     }
   },

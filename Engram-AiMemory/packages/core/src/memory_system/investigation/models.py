@@ -144,6 +144,7 @@ class SearchRequest(BaseModel):
     matter_id: str
     query: str
     limit: int = 10
+    offset: int = 0
     source_types: list[SourceType] = Field(default_factory=list)
 
 
@@ -152,6 +153,8 @@ class SearchResponse(BaseModel):
     total: int
     query: str
     matter_id: str
+    limit: int = 10
+    offset: int = 0
 
 
 # ---------------------------------------------------------------------------

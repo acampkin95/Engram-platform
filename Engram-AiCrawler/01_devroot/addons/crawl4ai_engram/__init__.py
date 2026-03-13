@@ -16,23 +16,19 @@ Setup:
     manually set ENGRAM_ENABLED=true in your .env file.
 """
 
+import json
+from pathlib import Path
+
 __version__ = "0.1.0"
 __author__ = "Crawl4AI Community"
 __license__ = "MIT"
 
-try:
-    from crawl4ai_engram.config import EngramConfig, get_config, reload_config
-    from crawl4ai_engram.client import EngramClient, get_client, EngramNotConfiguredError
-except ModuleNotFoundError:
-    from config import EngramConfig, get_config, reload_config
-    from client import EngramClient, get_client, EngramNotConfiguredError
+from .config import EngramConfig, get_config, reload_config
+from .client import EngramClient, get_client, EngramNotConfiguredError
 
 
 def get_addon_info() -> dict:
     """Return addon metadata for auto-detection by the addon loader."""
-    import json
-    from pathlib import Path
-
     manifest_path = Path(__file__).parent / "manifest.json"
     try:
         with open(manifest_path) as f:
@@ -78,10 +74,7 @@ def register_addon(app) -> dict:
     endpoint works even when Engram is disabled — it reports the
     disabled state rather than 404-ing.
     """
-    try:
-        from crawl4ai_engram.api.router import router
-    except ModuleNotFoundError:
-        from api.router import router
+    from .api.router import router
 
     app.include_router(router, prefix="/api/engram", tags=["engram-memory"])
 

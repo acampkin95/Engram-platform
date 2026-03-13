@@ -30,6 +30,7 @@ import { LoadingState } from '@/src/design-system/components/LoadingState';
 import { SectionHeader } from '@/src/design-system/components/SectionHeader';
 import { useForceLayout } from '@/src/hooks/useForceLayout';
 import { type Entity, type Matter, memoryClient, type Relation } from '@/src/lib/memory-client';
+import { useUIStore } from '@/src/stores/uiStore';
 
 const edgeStyle = {
   stroke: 'color-mix(in srgb, var(--color-teal) 40%, transparent)',
@@ -247,6 +248,7 @@ function RelationshipViewerModal({ entity, isOpen, onClose }: RelationshipViewer
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 text-[#5c5878] hover:text-[#f0eef8] hover:bg-white/[0.06] rounded-md transition-colors"
           >
@@ -322,6 +324,9 @@ function GraphContent({ matters }: GraphContentProps) {
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const selectedEntityId = useUIStore((state) => state.selectedEntityId);
+  const setSelectedEntityId = useUIStore((state) => state.setSelectedEntityId);
+  const clearSelectedEntity = useUIStore((state) => state.clearSelectedEntity);
 
   const { data, error, isLoading } = useSWR(
     swrKeys.memory.knowledgeGraph(selectedMatterId || undefined),
@@ -337,27 +342,34 @@ function GraphContent({ matters }: GraphContentProps) {
     setEdges(newEdges);
   }, [data]);
 
+  useEffect(() => {
+    if (!data?.data) return;
+    if (!selectedEntityId) {
+      setSelectedEntity(null);
+      return;
+    }
+    const entity = data.data.entities.find((item) => item.entity_id === selectedEntityId) ?? null;
+    setSelectedEntity(entity);
+  }, [data, selectedEntityId]);
+
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
-      const entityData = data?.data?.entities.find((e) => e.entity_id === node.id);
-      setSelectedEntity((prev) => (prev?.entity_id === node.id ? null : (entityData ?? null)));
+      const nextEntityId = selectedEntityId === node.id ? null : node.id;
+      setSelectedEntityId(nextEntityId);
     },
-    [data],
+    [selectedEntityId, setSelectedEntityId],
   );
 
   const handleNodeDoubleClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      const entity = data?.data?.entities.find((e) => e.entity_id === node.id);
-      if (entity) {
-        setSelectedEntity(entity);
-      }
+    (_event: React.MouseEvent, node: Node) => {
+      setSelectedEntityId(node.id);
     },
-    [data],
+    [setSelectedEntityId],
   );
 
   const handlePaneClick = useCallback(() => {
-    setSelectedEntity(null);
-  }, []);
+    clearSelectedEntity();
+  }, [clearSelectedEntity]);
 
   const entityCount = data?.data?.entities.length ?? 0;
   const edgeCount = data?.data?.relations.length ?? 0;
@@ -373,7 +385,7 @@ function GraphContent({ matters }: GraphContentProps) {
             value={selectedMatterId}
             onChange={(e) => {
               setSelectedMatterId(e.target.value);
-              setSelectedEntity(null);
+              clearSelectedEntity();
             }}
             className="bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-[#a09bb8] px-3 py-1.5 font-mono focus:outline-none focus:border-[rgba(46,196,196,0.4)] transition-colors"
           >
@@ -432,7 +444,7 @@ function GraphContent({ matters }: GraphContentProps) {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="absolute right-0 top-0 bottom-0 z-10 w-80 shadow-2xl"
             >
-              <EntityDetailPanel entity={selectedEntity} onClose={() => setSelectedEntity(null)} />
+              <EntityDetailPanel entity={selectedEntity} onClose={clearSelectedEntity} />
             </motion.div>
           )}
         </AnimatePresence>

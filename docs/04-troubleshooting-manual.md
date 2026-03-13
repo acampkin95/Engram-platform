@@ -115,6 +115,8 @@ curl -sf http://localhost:8000/health || echo "Memory API DOWN"
 
 ## Service Health Checks
 
+For standard release verification, run the smoke path in `plans/2026-03-11-release-checklist.md` first, then use the deeper checks in this manual if any endpoint fails.
+
 ### Memory API Health
 
 ```bash

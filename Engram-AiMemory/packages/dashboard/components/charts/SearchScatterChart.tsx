@@ -1,8 +1,8 @@
 "use client";
 
+import type { SearchStats } from "@/types";
 import type { EChartsOption } from "echarts";
 import { useMemo } from "react";
-import type { SearchStats } from "@/types";
 import { Chart } from "./Chart";
 
 interface SearchScatterChartProps {
@@ -97,18 +97,6 @@ export function SearchScatterChart({ stats, loading, height = 300 }: SearchScatt
     };
   }, [stats]);
 
-  if (!loading && !stats?.top_queries?.length) {
-    return (
-      <div className="flex flex-col items-center justify-center text-slate-500" style={{ height }}>
-        <span className="text-3xl mb-3">&#x1F50D;</span>
-        <p className="text-sm font-medium text-slate-400">No search data yet</p>
-        <p className="text-xs text-slate-600 mt-1">
-          Search queries will appear here once users start searching memories
-        </p>
-      </div>
-    );
-  }
-
   return (
     <Chart
       option={option}
@@ -116,6 +104,15 @@ export function SearchScatterChart({ stats, loading, height = 300 }: SearchScatt
       aria-label="Search query analytics scatter chart"
       style={{ height }}
     >
+      {!loading && !stats?.top_queries?.length ? (
+        <div className="flex h-full flex-col items-center justify-center text-slate-500">
+          <span className="mb-3 text-3xl">&#x1F50D;</span>
+          <p className="text-sm font-medium text-slate-400">No search data yet</p>
+          <p className="mt-1 text-xs text-slate-600">
+            Search queries will appear here once users start searching memories
+          </p>
+        </div>
+      ) : null}
       <span className="sr-only">
         {stats?.top_queries?.length ?? 0} top queries shown. Total searches: {stats?.total_searches}
       </span>

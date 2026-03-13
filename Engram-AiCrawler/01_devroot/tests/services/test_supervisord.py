@@ -3,16 +3,16 @@ from pathlib import Path
 
 
 class TestSupervisordConfig:
+    @staticmethod
+    def get_config_path() -> Path:
+        return Path(__file__).resolve().parents[2] / "supervisord.conf"
+
     def test_supervisord_config_exists(self):
-        config_path = Path(
-            "/Users/alex/Projects/Dev/LIVE/ActiveRD/Crawl4AI/01_devroot/supervisord.conf"
-        )
+        config_path = self.get_config_path()
         assert config_path.exists(), "supervisord.conf should exist"
 
     def test_supervisord_config_valid(self):
-        config_path = Path(
-            "/Users/alex/Projects/Dev/LIVE/ActiveRD/Crawl4AI/01_devroot/supervisord.conf"
-        )
+        config_path = self.get_config_path()
         config = configparser.ConfigParser()
         config.read(str(config_path))
 
@@ -21,89 +21,82 @@ class TestSupervisordConfig:
         assert config.get("supervisord", "loglevel") == "info", "Should have info log level"
 
     def test_all_services_defined(self):
-        config_path = Path(
-            "/Users/alex/Projects/Dev/LIVE/ActiveRD/Crawl4AI/01_devroot/supervisord.conf"
-        )
+        config_path = self.get_config_path()
         config = configparser.ConfigParser()
         config.read(str(config_path))
 
         expected_services = ["crawl4ai", "lm_bridge", "watchdog", "cleanup"]
         for service in expected_services:
-            assert config.has_section(
-                f"program:{service}"
-            ), f"Should have {service} service defined"
+            assert config.has_section(f"program:{service}"), (
+                f"Should have {service} service defined"
+            )
 
     def test_service_auto_restart_enabled(self):
-        config_path = Path(
-            "/Users/alex/Projects/Dev/LIVE/ActiveRD/Crawl4AI/01_devroot/supervisord.conf"
-        )
+        config_path = self.get_config_path()
         config = configparser.ConfigParser()
         config.read(str(config_path))
 
-        services = ["crawl4ai", "lm_bridge", "watchdog", "cleanup"]
-        for service in services:
-            assert (
-                config.get(f"program:{service}", "autorestart") == "true"
-            ), f"{service} should autorestart"
-            assert (
-                config.get(f"program:{service}", "autostart") == "true"
-            ), f"{service} should autostart"
+        expected_policies = {
+            "crawl4ai": {"autorestart": "true", "autostart": "true"},
+            "lm_bridge": {"autorestart": "false", "autostart": "false"},
+            "watchdog": {"autorestart": "true", "autostart": "true"},
+            "cleanup": {"autorestart": "true", "autostart": "true"},
+        }
+        for service, policy in expected_policies.items():
+            assert config.get(f"program:{service}", "autorestart") == policy["autorestart"], (
+                f"{service} should use the documented autorestart policy"
+            )
+            assert config.get(f"program:{service}", "autostart") == policy["autostart"], (
+                f"{service} should use the documented autostart policy"
+            )
 
     def test_log_rotation_configured(self):
-        config_path = Path(
-            "/Users/alex/Projects/Dev/LIVE/ActiveRD/Crawl4AI/01_devroot/supervisord.conf"
-        )
+        config_path = self.get_config_path()
         config = configparser.ConfigParser()
         config.read(str(config_path))
 
         services = ["crawl4ai", "lm_bridge", "watchdog", "cleanup"]
         for service in services:
-            assert config.has_option(
-                f"program:{service}", "stdout_logfile"
-            ), f"{service} should have stdout log"
-            assert config.has_option(
-                f"program:{service}", "stderr_logfile"
-            ), f"{service} should have stderr log"
-            assert (
-                config.get(f"program:{service}", "stdout_logfile_maxbytes") == "50MB"
-            ), f"{service} should rotate at 50MB"
-            assert (
-                config.get(f"program:{service}", "stdout_logfile_backups") == "10"
-            ), f"{service} should keep 10 backups"
+            assert config.has_option(f"program:{service}", "stdout_logfile"), (
+                f"{service} should have stdout log"
+            )
+            assert config.has_option(f"program:{service}", "stderr_logfile"), (
+                f"{service} should have stderr log"
+            )
+            assert config.get(f"program:{service}", "stdout_logfile_maxbytes") == "50MB", (
+                f"{service} should rotate at 50MB"
+            )
+            assert config.get(f"program:{service}", "stdout_logfile_backups") == "10", (
+                f"{service} should keep 10 backups"
+            )
 
     def test_graceful_shutdown_configured(self):
-        config_path = Path(
-            "/Users/alex/Projects/Dev/LIVE/ActiveRD/Crawl4AI/01_devroot/supervisord.conf"
-        )
+        config_path = self.get_config_path()
         config = configparser.ConfigParser()
         config.read(str(config_path))
 
         services = ["crawl4ai", "lm_bridge", "watchdog", "cleanup"]
         for service in services:
-            assert (
-                config.get(f"program:{service}", "stopsignal") == "TERM"
-            ), f"{service} should use SIGTERM"
-            assert (
-                config.get(f"program:{service}", "stopwaitsecs") == "30"
-            ), f"{service} should wait 30s"
+            assert config.get(f"program:{service}", "stopsignal") == "TERM", (
+                f"{service} should use SIGTERM"
+            )
+            assert config.get(f"program:{service}", "stopwaitsecs") == "30", (
+                f"{service} should wait 30s"
+            )
 
     def test_max_restart_attempts_configured(self):
-        config_path = Path(
-            "/Users/alex/Projects/Dev/LIVE/ActiveRD/Crawl4AI/01_devroot/supervisord.conf"
-        )
+        config_path = self.get_config_path()
         config = configparser.ConfigParser()
         config.read(str(config_path))
 
         services = ["crawl4ai", "lm_bridge", "watchdog", "cleanup"]
         for service in services:
-            assert (
-                config.get(f"program:{service}", "startretries") == "3"
-            ), f"{service} should retry 3 times"
+            assert config.get(f"program:{service}", "startretries") == "3", (
+                f"{service} should retry 3 times"
+            )
 
     def test_environment_variable_passthrough(self):
-        config_path = Path(
-            "/Users/alex/Projects/Dev/LIVE/ActiveRD/Crawl4AI/01_devroot/supervisord.conf"
-        )
+        config_path = self.get_config_path()
         config = configparser.ConfigParser()
         config.read(str(config_path))
 

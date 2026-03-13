@@ -84,6 +84,19 @@
 
 ---
 
+## Resource Profile Notes
+
+The production Docker Compose profile for the approved i5/16GB/1TB host class intentionally constrains service memory to keep the total stack near 8.5GB. Current targets live in `Engram-Platform/docker-compose.yml` and reduce:
+
+- Chromium shared memory from 3G to 2G
+- `crawler-api` to 2G
+- `memory-api` to 512M
+- `weaviate` to 1536M with `GOMEMLIMIT=1.2GiB`
+- `crawler-redis` to 512M with `384mb` maxmemory
+- `memory-redis` to 384M with `256mb` maxmemory
+- `mcp-server` and `platform-frontend` to 256M each
+- `nginx` to 128M
+
 ## Port Configuration Details
 
 ### Memory API (8000)

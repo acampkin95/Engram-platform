@@ -46,6 +46,8 @@ export interface OAuthConfig {
 	secret: string;
 	accessTokenTtl: number;
 	refreshTokenTtl: number;
+	redisUrl?: string;
+	redisKeyPrefix: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -112,6 +114,8 @@ export const DEFAULT_OAUTH_CONFIG: OAuthConfig = {
 	secret: "",
 	accessTokenTtl: 3600,
 	refreshTokenTtl: 86400,
+	redisUrl: undefined,
+	redisKeyPrefix: "mcp:oauth:",
 };
 
 // ---------------------------------------------------------------------------
@@ -179,6 +183,8 @@ export function loadConfig(): MCPConfig {
 			secret: process.env.OAUTH_SECRET || "",
 			accessTokenTtl: envInt(process.env.OAUTH_ACCESS_TOKEN_TTL, 3600),
 			refreshTokenTtl: envInt(process.env.OAUTH_REFRESH_TOKEN_TTL, 86400),
+			redisUrl: process.env.OAUTH_REDIS_URL || process.env.REDIS_URL || undefined,
+			redisKeyPrefix: process.env.OAUTH_REDIS_KEY_PREFIX || "mcp:oauth:",
 		},
 
 		retry: {

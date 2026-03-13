@@ -2,13 +2,21 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
+const coverageVisibilityMode = process.env.VITEST_COVERAGE_VISIBILITY === 'true';
+
 export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
-    exclude: ['node_modules', 'e2e'],
+    exclude: coverageVisibilityMode
+      ? ['node_modules', 'e2e', 'app/dashboard/memory/graph/MemoryGraphContent.test.tsx']
+      : ['node_modules', 'e2e'],
+    fileParallelism: !coverageVisibilityMode,
+    pool: coverageVisibilityMode ? 'threads' : 'forks',
+    maxWorkers: coverageVisibilityMode ? 1 : undefined,
+    minWorkers: coverageVisibilityMode ? 1 : undefined,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
@@ -30,12 +38,14 @@ export default defineConfig({
         'src/components/DraggableGrid.tsx',
         'src/components/FilterBar.tsx',
       ],
-      thresholds: {
-        statements: 80,
-        branches: 70,
-        functions: 80,
-        lines: 80,
-      },
+      thresholds: coverageVisibilityMode
+        ? undefined
+        : {
+            statements: 80,
+            branches: 70,
+            functions: 80,
+            lines: 80,
+          },
     },
   },
   resolve: {

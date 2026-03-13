@@ -568,7 +568,7 @@ class MaintenanceScheduler:
                     for memory in memories:
                         try:
                             from memory_system.temporal import TemporalExtractor
-from memory_system.decay import MemoryDecay
+                            from memory_system.decay import MemoryDecay
                             decay_calc = MemoryDecay(half_life_days=half_life)
                             new_decay = decay_calc.calculate_decay(
                                 created_at=memory.created_at,

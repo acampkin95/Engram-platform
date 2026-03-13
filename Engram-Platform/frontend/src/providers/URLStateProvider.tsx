@@ -1,6 +1,6 @@
 'use client';
 
-
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { ReactNode } from 'react';
 
 interface URLStateProviderProps {
@@ -8,5 +8,5 @@ interface URLStateProviderProps {
 }
 
 export function URLStateProvider({ children }: URLStateProviderProps) {
-  return <>{children}</>;
+  return <NuqsAdapter>{children}</NuqsAdapter>;
 }

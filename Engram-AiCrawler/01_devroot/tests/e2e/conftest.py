@@ -8,11 +8,11 @@ Provides shared fixtures:
 - `mock_crawl_result`: Reusable successful crawl result mock
 """
 
+import asyncio
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 
-from app.middleware.rate_limit import RateLimitConfig
 from datetime import UTC
 
 
@@ -64,25 +64,19 @@ def _base_patches():
     """
     disabled_auth = _make_disabled_auth_config()
 
-    # Save and patch RateLimitConfig.RATE_LIMIT_ENABLED directly so it restores
-    # correctly even when other tests run mid-session.
-    _orig_rate_limit = RateLimitConfig.RATE_LIMIT_ENABLED
-    RateLimitConfig.RATE_LIMIT_ENABLED = False
-    try:
-        with (
-            patch("app.config.auth.get_clerk_config", return_value=disabled_auth),
-            patch("app.config.get_clerk_config", return_value=disabled_auth),
-            patch("app.api.crawl.get_clerk_config", return_value=disabled_auth),
-            patch("app.api.data.get_clerk_config", return_value=disabled_auth),
-            patch("app.api.chat.get_clerk_config", return_value=disabled_auth),
-            patch(
-                "app.services.lm_studio_bridge.check_lm_studio_connection",
-                return_value="connected",
-            ),
-        ):
-            yield
-    finally:
-        RateLimitConfig.RATE_LIMIT_ENABLED = _orig_rate_limit
+    with (
+        patch("app.middleware.rate_limit._config.rate_limit_enabled", False),
+        patch("app.config.auth.get_clerk_config", return_value=disabled_auth),
+        patch("app.config.get_clerk_config", return_value=disabled_auth),
+        patch("app.api.crawl.get_clerk_config", return_value=disabled_auth),
+        patch("app.api.data.get_clerk_config", return_value=disabled_auth),
+        patch("app.api.chat.get_clerk_config", return_value=disabled_auth),
+        patch(
+            "app.services.lm_studio_bridge.check_lm_studio_connection",
+            return_value="connected",
+        ),
+    ):
+        yield
 
 
 @pytest.fixture(scope="package")
@@ -103,9 +97,10 @@ def fresh_app_client(_base_patches):
     module-level state and need isolation.
     """
     from app.main import app
-    from app.api.crawl import crawl_jobs
+    from app.services.job_store import get_job_store
 
-    crawl_jobs.clear()
+    crawl_store = get_job_store("crawl_jobs")
+    asyncio.run(crawl_store.clear())
     return TestClient(app, raise_server_exceptions=False)
 
 

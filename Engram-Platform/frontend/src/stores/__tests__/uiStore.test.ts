@@ -17,6 +17,7 @@ beforeEach(() => {
     serviceStatus: { crawler: 'loading', memory: 'loading' },
     wsConnected: false,
     activeSection: 'crawler',
+    selectedEntityId: null,
   });
 });
 
@@ -54,5 +55,20 @@ describe('uiStore', () => {
     expect(useUIStore.getState().activeSection).toBe('crawler');
     useUIStore.getState().setActiveSection('memory');
     expect(useUIStore.getState().activeSection).toBe('memory');
+  });
+
+  it('starts with no selected entity and can set one', () => {
+    expect(useUIStore.getState().selectedEntityId).toBeNull();
+    useUIStore.getState().setSelectedEntityId('entity-123');
+    expect(useUIStore.getState().selectedEntityId).toBe('entity-123');
+  });
+
+  it('clearSelectedEntity resets selectedEntityId without affecting service status', () => {
+    useUIStore.getState().setServiceStatus({ crawler: 'online' });
+    useUIStore.getState().setSelectedEntityId('entity-456');
+    useUIStore.getState().clearSelectedEntity();
+
+    expect(useUIStore.getState().selectedEntityId).toBeNull();
+    expect(useUIStore.getState().serviceStatus.crawler).toBe('online');
   });
 });

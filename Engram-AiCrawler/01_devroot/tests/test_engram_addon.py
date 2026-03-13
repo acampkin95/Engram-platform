@@ -124,55 +124,49 @@ class TestEngramClientDisabled:
         import asyncio
 
         client = self._disabled_client()
-        result = asyncio.get_event_loop().run_until_complete(client.health())
+        result = asyncio.run(client.health())
         assert result == {"status": "disabled"}
 
     def test_store_crawl_result_returns_none(self):
         import asyncio
 
         client = self._disabled_client()
-        result = asyncio.get_event_loop().run_until_complete(
-            client.store_crawl_result(url="https://example.com", content="text")
-        )
+        result = asyncio.run(client.store_crawl_result(url="https://example.com", content="text"))
         assert result is None
 
     def test_search_returns_empty_list(self):
         import asyncio
 
         client = self._disabled_client()
-        result = asyncio.get_event_loop().run_until_complete(client.search("some query"))
+        result = asyncio.run(client.search("some query"))
         assert result == []
 
     def test_search_matter_returns_empty_list(self):
         import asyncio
 
         client = self._disabled_client()
-        result = asyncio.get_event_loop().run_until_complete(
-            client.search_matter("matter-001", "query")
-        )
+        result = asyncio.run(client.search_matter("matter-001", "query"))
         assert result == []
 
     def test_list_matters_returns_empty_list(self):
         import asyncio
 
         client = self._disabled_client()
-        result = asyncio.get_event_loop().run_until_complete(client.list_matters())
+        result = asyncio.run(client.list_matters())
         assert result == []
 
     def test_create_matter_returns_none(self):
         import asyncio
 
         client = self._disabled_client()
-        result = asyncio.get_event_loop().run_until_complete(
-            client.create_matter("m-001", "Test Matter")
-        )
+        result = asyncio.run(client.create_matter("m-001", "Test Matter"))
         assert result is None
 
     def test_ingest_into_matter_returns_none(self):
         import asyncio
 
         client = self._disabled_client()
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             client.ingest_into_matter("m-001", content="evidence", source_url="https://example.com")
         )
         assert result is None

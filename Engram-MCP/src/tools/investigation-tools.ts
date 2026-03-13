@@ -111,6 +111,12 @@ export const INVESTIGATION_TOOLS: Tool[] = [
 					description: "Maximum number of results to return",
 					default: 10,
 				},
+				offset: {
+					type: "number",
+					minimum: 0,
+					description: "Pagination offset for evidence results",
+					default: 0,
+				},
 			},
 			required: ["matter_id", "query"],
 		},
@@ -196,6 +202,7 @@ export async function handleInvestigationTool(
 				matter_id: input.matter_id,
 				query: input.query,
 				limit: input.limit,
+				offset: input.offset,
 			});
 
 			return {
@@ -206,10 +213,12 @@ export async function handleInvestigationTool(
 							{
 								success: true,
 								matter_id: input.matter_id,
-								query: input.query,
-								total: result.total ?? 0,
-								results: result.results ?? [],
-							},
+							query: input.query,
+							total: result.total ?? 0,
+							limit: result.limit ?? input.limit,
+							offset: result.offset ?? input.offset,
+							results: result.results ?? [],
+						},
 							null,
 							2,
 						),

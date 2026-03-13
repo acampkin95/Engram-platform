@@ -274,7 +274,7 @@ class TestAuthEnforcementE2E:
         from fastapi.testclient import TestClient
 
         client = TestClient(app, raise_server_exceptions=False)
-        with patch("app.middleware.rate_limit.RateLimitConfig.RATE_LIMIT_ENABLED", False):
+        with patch("app.middleware.rate_limit._config.rate_limit_enabled", False):
             response = client.post(
                 "/api/crawl/start",
                 json={"url": "https://example.com"},
@@ -286,7 +286,7 @@ class TestAuthEnforcementE2E:
         from fastapi.testclient import TestClient
 
         client = TestClient(app, raise_server_exceptions=False)
-        with patch("app.middleware.rate_limit.RateLimitConfig.RATE_LIMIT_ENABLED", False):
+        with patch("app.middleware.rate_limit._config.rate_limit_enabled", False):
             response = client.post(
                 "/api/crawl/start",
                 json={"url": "https://example.com"},

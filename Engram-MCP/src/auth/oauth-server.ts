@@ -20,6 +20,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { MCPConfig } from "../config.js";
 import { readBody } from "../utils/read-body.js";
 import { verifyCodeChallenge } from "./pkce.js";
+import { RedisTokenStore } from "./redis-token-store.js";
 import type { OAuthClient } from "./token-store.js";
 import { TokenStore } from "./token-store.js";
 
@@ -27,13 +28,30 @@ import { TokenStore } from "./token-store.js";
 // Module-level singleton — shared with validateOAuthToken
 // ---------------------------------------------------------------------------
 
-const tokenStore = new TokenStore();
+type OAuthStore = TokenStore | RedisTokenStore;
 
-// Prune expired tokens every 5 minutes to prevent unbounded memory growth
-// even when the token endpoint is not being hit.
 const PRUNE_INTERVAL_MS = 5 * 60 * 1000;
-const pruneTimer = setInterval(() => tokenStore.pruneExpired(), PRUNE_INTERVAL_MS);
-pruneTimer.unref(); // Don't keep the process alive solely for pruning
+
+let tokenStore: OAuthStore | undefined;
+
+async function getTokenStore(config?: MCPConfig): Promise<OAuthStore> {
+	if (tokenStore !== undefined) {
+		return tokenStore;
+	}
+
+	if (config?.oauth.redisUrl) {
+		const redisStore = new RedisTokenStore({
+			url: config.oauth.redisUrl,
+			keyPrefix: config.oauth.redisKeyPrefix,
+		});
+		await redisStore.connect();
+		tokenStore = redisStore;
+		return tokenStore;
+	}
+
+	tokenStore = new TokenStore();
+	return tokenStore;
+}
 // ---------------------------------------------------------------------------
 // Public validator (used by oauth-middleware.ts)
 // ---------------------------------------------------------------------------
@@ -47,8 +65,9 @@ pruneTimer.unref(); // Don't keep the process alive solely for pruning
  *
  * @param token - The raw Bearer token string extracted from the request.
  */
-export function validateOAuthToken(token: string): boolean {
-	return tokenStore.isTokenValid(token);
+export async function validateOAuthToken(token: string): Promise<boolean> {
+	const store = await getTokenStore();
+	return await store.isTokenValid(token);
 }
 
 // ---------------------------------------------------------------------------
@@ -214,6 +233,7 @@ export function createOAuthRouter(
 		// POST /oauth/register  (RFC 7591 dynamic client registration)
 		// -----------------------------------------------------------------------
 		if (pathname === "/oauth/register" && method === "POST") {
+			const store = await getTokenStore(config);
 			// Rate limit
 			const regIp = String(req.socket.remoteAddress ?? "unknown");
 			if (isRateLimited(regIp)) {
@@ -226,7 +246,7 @@ export function createOAuthRouter(
 				return;
 			}
 			// Client cap
-			if (tokenStore.clientCount >= MAX_CLIENTS) {
+			if ((await store.getClientCount()) >= MAX_CLIENTS) {
 				sendJSON(
 					res,
 					503,
@@ -288,7 +308,7 @@ export function createOAuthRouter(
 				registeredAt: Date.now(),
 			};
 
-			tokenStore.registerClient(client);
+			await store.registerClient(client);
 
 			sendJSON(
 				res,
@@ -312,6 +332,7 @@ export function createOAuthRouter(
 		// GET /oauth/authorize  (authorization code + PKCE)
 		// -----------------------------------------------------------------------
 		if (pathname === "/oauth/authorize" && method === "GET") {
+			const store = await getTokenStore(config);
 			const clientId = url.searchParams.get("client_id") ?? "";
 			const redirectUri = url.searchParams.get("redirect_uri") ?? "";
 			const responseType = url.searchParams.get("response_type") ?? "";
@@ -321,7 +342,7 @@ export function createOAuthRouter(
 			const state = url.searchParams.get("state") ?? "";
 
 			// Validate client — do NOT redirect to unknown URIs on client errors
-			const client = tokenStore.getClient(clientId);
+			const client = await store.getClient(clientId);
 			if (client === undefined) {
 				sendJSON(
 					res,
@@ -409,7 +430,7 @@ export function createOAuthRouter(
 
 			// Issue the authorization code (10-minute TTL)
 			const code = randomBytes(32).toString("hex");
-			tokenStore.storeCode({
+			await store.storeCode({
 				code,
 				clientId,
 				redirectUri,
@@ -436,6 +457,7 @@ export function createOAuthRouter(
 		// POST /oauth/token  (exchange & refresh)
 		// -----------------------------------------------------------------------
 		if (pathname === "/oauth/token" && method === "POST") {
+			const store = await getTokenStore(config);
 			// Rate limit
 			const tokenIp = String(req.socket.remoteAddress ?? "unknown");
 			if (isRateLimited(tokenIp)) {
@@ -448,7 +470,7 @@ export function createOAuthRouter(
 				return;
 			}
 			// Prune stale entries on every token-endpoint request
-			tokenStore.pruneExpired();
+			await store.pruneExpired();
 
 			let body: Record<string, unknown>;
 			try {
@@ -471,7 +493,7 @@ export function createOAuthRouter(
 				const redirectUri = str(body.redirect_uri);
 				const codeVerifier = str(body.code_verifier);
 
-				const storedCode = tokenStore.getCode(code);
+				const storedCode = await store.getCode(code);
 
 				if (storedCode === undefined) {
 					sendJSON(
@@ -557,13 +579,13 @@ export function createOAuthRouter(
 					return;
 				}
 
-				tokenStore.markCodeUsed(code);
+				await store.markCodeUsed(code);
 
 				const accessToken = randomBytes(32).toString("hex");
 				const refreshToken = randomBytes(32).toString("hex");
 				const now = Date.now();
 
-				tokenStore.storeAccessToken({
+				await store.storeAccessToken({
 					token: accessToken,
 					clientId,
 					scope: storedCode.scope,
@@ -571,7 +593,7 @@ export function createOAuthRouter(
 					refreshToken,
 				});
 
-				tokenStore.storeRefreshToken({
+				await store.storeRefreshToken({
 					token: refreshToken,
 					clientId,
 					scope: storedCode.scope,
@@ -598,7 +620,7 @@ export function createOAuthRouter(
 				const refreshTokenValue = str(body.refresh_token);
 				const clientId = str(body.client_id);
 
-				const storedRefresh = tokenStore.getRefreshToken(refreshTokenValue);
+				const storedRefresh = await store.getRefreshToken(refreshTokenValue);
 
 				if (storedRefresh === undefined) {
 					sendJSON(
@@ -642,9 +664,9 @@ export function createOAuthRouter(
 				const newAccessToken = randomBytes(32).toString("hex");
 
 				// Revoke old access token(s) linked to this refresh token before issuing new one
-				tokenStore.revokeAccessTokensByRefreshToken(refreshTokenValue);
+				await store.revokeAccessTokensByRefreshToken(refreshTokenValue);
 
-				tokenStore.storeAccessToken({
+				await store.storeAccessToken({
 					token: newAccessToken,
 					clientId,
 					scope: storedRefresh.scope,

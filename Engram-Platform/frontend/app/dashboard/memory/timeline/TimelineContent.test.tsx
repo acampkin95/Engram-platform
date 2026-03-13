@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 import TimelineContent from './TimelineContent';
 
@@ -41,5 +41,6 @@ vi.mock('@/src/lib/memory-client', () => ({
 test('renders TimelineContent without crashing', async () => {
   render(<TimelineContent />);
 
-  await screen.findByText('Event Timeline');
+  await screen.findByText('Timeline');
+  await screen.findByText('No events found');
 });

@@ -76,7 +76,7 @@ export function StatCard({
                 <motion.p
                   className={clsx(
                     "text-xs mt-1",
-                    deltaPositive ? "text-[#2EC4C4]" : "text-[#E05C7F]"
+                    deltaPositive ? "text-emerald-400" : "text-rose-400"
                   )}
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}

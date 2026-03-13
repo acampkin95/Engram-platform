@@ -141,11 +141,13 @@ describe("SearchMatterSchema", () => {
 			matter_id: "case-001",
 			query: "fraud evidence",
 			limit: 25,
+			offset: 5,
 		};
 		const result = SearchMatterSchema.parse(input);
 		assert.equal(result.matter_id, "case-001");
 		assert.equal(result.query, "fraud evidence");
 		assert.equal(result.limit, 25);
+		assert.equal(result.offset, 5);
 	});
 
 	it("rejects missing matter_id", () => {
@@ -160,10 +162,11 @@ describe("SearchMatterSchema", () => {
 		assert.equal(result.success, false);
 	});
 
-	it("defaults limit to 10 when omitted", () => {
+	it("defaults limit to 10 and offset to 0 when omitted", () => {
 		const input = { matter_id: "case-001", query: "search term" };
 		const result = SearchMatterSchema.parse(input);
 		assert.equal(result.limit, 10);
+		assert.equal(result.offset, 0);
 	});
 
 	it("rejects limit below minimum (1)", () => {
@@ -174,6 +177,12 @@ describe("SearchMatterSchema", () => {
 
 	it("rejects limit above maximum (50)", () => {
 		const input = { matter_id: "case-001", query: "search", limit: 51 };
+		const result = SearchMatterSchema.safeParse(input);
+		assert.equal(result.success, false);
+	});
+
+	it("rejects offset below minimum (0)", () => {
+		const input = { matter_id: "case-001", query: "search", offset: -1 };
 		const result = SearchMatterSchema.safeParse(input);
 		assert.equal(result.success, false);
 	});
@@ -190,6 +199,7 @@ describe("SearchMatterSchema", () => {
 			matter_id: "case-001",
 			query: "search",
 			limit: 50,
+			offset: 0,
 		});
 		assert.equal(maxResult.limit, 50);
 	});
@@ -201,17 +211,19 @@ describe("SearchMatterSchema", () => {
 
 describe("validate", () => {
 	it("returns parsed data for valid input", () => {
-		const input = { matter_id: "case-001", query: "test", limit: 5 };
+		const input = { matter_id: "case-001", query: "test", limit: 5, offset: 2 };
 		const result = validate(SearchMatterSchema, input);
 		assert.equal(result.matter_id, "case-001");
 		assert.equal(result.query, "test");
 		assert.equal(result.limit, 5);
+		assert.equal(result.offset, 2);
 	});
 
 	it("applies schema defaults in returned data", () => {
 		const input = { matter_id: "case-001", query: "test" };
 		const result = validate(SearchMatterSchema, input);
 		assert.equal(result.limit, 10);
+		assert.equal(result.offset, 0);
 	});
 
 	it("throws InvalidInputError for invalid input", () => {

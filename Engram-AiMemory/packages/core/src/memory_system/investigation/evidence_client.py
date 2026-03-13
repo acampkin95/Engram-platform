@@ -1,4 +1,5 @@
 """Evidence document client — chunking, ingestion, and semantic search."""
+
 from __future__ import annotations
 
 import hashlib
@@ -23,7 +24,7 @@ console = Console()
 class EvidenceClient:
     """EvidenceDocument ingest, chunk, embed, and search."""
 
-    CHUNK_SIZE = 1000   # approximate tokens (chars / 4)
+    CHUNK_SIZE = 1000  # approximate tokens (chars / 4)
     CHUNK_OVERLAP = 100  # approximate tokens overlap
 
     def __init__(self, weaviate_client, matter_client):
@@ -48,7 +49,9 @@ class EvidenceClient:
 
         # Check for duplicate
         if await self._document_exists(ingest.matter_id, document_hash):
-            console.print(f"[yellow]Skipping duplicate document {document_hash[:8]} in matter {ingest.matter_id}[/yellow]")
+            console.print(
+                f"[yellow]Skipping duplicate document {document_hash[:8]} in matter {ingest.matter_id}[/yellow]"
+            )
             return []
 
         # Split content into chunks
@@ -65,7 +68,9 @@ class EvidenceClient:
             props = {
                 "matter_id": ingest.matter_id,
                 "source_url": ingest.source_url,
-                "source_type": ingest.source_type.value if hasattr(ingest.source_type, 'value') else ingest.source_type,
+                "source_type": ingest.source_type.value
+                if hasattr(ingest.source_type, "value")
+                else ingest.source_type,
                 "content": chunk_text,
                 "chunk_index": chunk_index,
                 "total_chunks": total_chunks,
@@ -80,18 +85,22 @@ class EvidenceClient:
                     uuid=weaviate_id,
                     properties=props,
                 )
-                responses.append(EvidenceResponse(
-                    id=weaviate_id,
-                    matter_id=ingest.matter_id,
-                    source_url=ingest.source_url,
-                    source_type=ingest.source_type,
-                    chunk_index=chunk_index,
-                    ingested_at=now,
-                ))
+                responses.append(
+                    EvidenceResponse(
+                        id=weaviate_id,
+                        matter_id=ingest.matter_id,
+                        source_url=ingest.source_url,
+                        source_type=ingest.source_type,
+                        chunk_index=chunk_index,
+                        ingested_at=now,
+                    )
+                )
             except Exception as exc:
                 console.print(f"[red]Failed to insert chunk {chunk_index}: {exc}[/red]")
 
-        console.print(f"[green]Ingested {len(responses)}/{total_chunks} chunks for matter {ingest.matter_id}[/green]")
+        console.print(
+            f"[green]Ingested {len(responses)}/{total_chunks} chunks for matter {ingest.matter_id}[/green]"
+        )
         return responses
 
     async def search_evidence(self, search: SearchRequest) -> SearchResponse:
@@ -105,48 +114,66 @@ class EvidenceClient:
 
             filters = None
             if search.source_types:
-                source_values = [st.value if hasattr(st, 'value') else st for st in search.source_types]
+                source_values = [
+                    st.value if hasattr(st, "value") else st for st in search.source_types
+                ]
                 # Filter for any of the source types
                 if len(source_values) == 1:
                     filters = Filter.by_property("source_type").equal(source_values[0])
                 else:
-                    filters = Filter.any_of([
-                        Filter.by_property("source_type").equal(v) for v in source_values
-                    ])
+                    filters = Filter.any_of(
+                        [Filter.by_property("source_type").equal(v) for v in source_values]
+                    )
 
             results = collection.with_tenant(search.matter_id).query.near_text(
                 query=search.query,
-                limit=search.limit,
+                limit=search.limit + search.offset,
                 filters=filters,
             )
 
             result_dicts = []
             for obj in results.objects:
                 props = obj.properties
-                result_dicts.append({
-                    "id": str(obj.uuid),
-                    "matter_id": props.get("matter_id", ""),
-                    "source_url": props.get("source_url", ""),
-                    "source_type": props.get("source_type", ""),
-                    "content": props.get("content", ""),
-                    "chunk_index": props.get("chunk_index", 0),
-                    "document_hash": props.get("document_hash", ""),
-                    "ingested_at": str(props.get("ingested_at", "")),
-                })
+                result_dicts.append(
+                    {
+                        "id": str(obj.uuid),
+                        "matter_id": props.get("matter_id", ""),
+                        "source_url": props.get("source_url", ""),
+                        "source_type": props.get("source_type", ""),
+                        "content": props.get("content", ""),
+                        "chunk_index": props.get("chunk_index", 0),
+                        "document_hash": props.get("document_hash", ""),
+                        "ingested_at": str(props.get("ingested_at", "")),
+                    }
+                )
+
+            paged_results = result_dicts[search.offset : search.offset + search.limit]
 
             return SearchResponse(
-                results=result_dicts,
+                results=paged_results,
                 total=len(result_dicts),
                 query=search.query,
                 matter_id=search.matter_id,
+                limit=search.limit,
+                offset=search.offset,
             )
         except Exception as exc:
             console.print(f"[red]search_evidence failed: {exc}[/red]")
-            return SearchResponse(results=[], total=0, query=search.query, matter_id=search.matter_id)
+            return SearchResponse(
+                results=[],
+                total=0,
+                query=search.query,
+                matter_id=search.matter_id,
+                limit=search.limit,
+                offset=search.offset,
+            )
 
-    async def get_document_chunks(self, matter_id: str, document_hash: str) -> list[EvidenceResponse]:
+    async def get_document_chunks(
+        self, matter_id: str, document_hash: str
+    ) -> list[EvidenceResponse]:
         """Get all chunks for a document by hash."""
         from weaviate.classes.query import Filter
+
         self._matter_client.ensure_tenant_active(matter_id, EVIDENCE_DOCUMENT)
         collection = self._client.collections.get(EVIDENCE_DOCUMENT)
         try:
@@ -157,14 +184,16 @@ class EvidenceClient:
             responses = []
             for obj in results.objects:
                 props = obj.properties
-                responses.append(EvidenceResponse(
-                    id=str(obj.uuid),
-                    matter_id=matter_id,
-                    source_url=props.get("source_url", ""),
-                    source_type=SourceType(props.get("source_type", "MANUAL")),
-                    chunk_index=props.get("chunk_index", 0),
-                    ingested_at=props.get("ingested_at") or datetime.now(UTC),
-                ))
+                responses.append(
+                    EvidenceResponse(
+                        id=str(obj.uuid),
+                        matter_id=matter_id,
+                        source_url=props.get("source_url", ""),
+                        source_type=SourceType(props.get("source_type", "MANUAL")),
+                        chunk_index=props.get("chunk_index", 0),
+                        ingested_at=props.get("ingested_at") or datetime.now(UTC),
+                    )
+                )
             return responses
         except Exception as exc:
             console.print(f"[red]get_document_chunks failed: {exc}[/red]")
@@ -173,6 +202,7 @@ class EvidenceClient:
     async def delete_document(self, matter_id: str, document_hash: str) -> int:
         """Delete all chunks for a document. Returns count deleted."""
         from weaviate.classes.query import Filter
+
         self._matter_client.ensure_tenant_active(matter_id, EVIDENCE_DOCUMENT)
         collection = self._client.collections.get(EVIDENCE_DOCUMENT)
         try:
@@ -203,6 +233,7 @@ class EvidenceClient:
 
         try:
             from langchain_text_splitters import RecursiveCharacterTextSplitter
+
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=char_size,
                 chunk_overlap=char_overlap,
@@ -223,7 +254,7 @@ class EvidenceClient:
             chunk = content[start:end]
             # Try to break on whitespace
             if end < len(content):
-                last_space = chunk.rfind(' ')
+                last_space = chunk.rfind(" ")
                 if last_space > char_size // 2:
                     chunk = chunk[:last_space]
                     end = start + last_space
@@ -236,6 +267,7 @@ class EvidenceClient:
     async def _document_exists(self, matter_id: str, document_hash: str) -> bool:
         """Check if document with this hash already exists in the matter."""
         from weaviate.classes.query import Filter
+
         try:
             collection = self._client.collections.get(EVIDENCE_DOCUMENT)
             results = collection.with_tenant(matter_id).query.fetch_objects(

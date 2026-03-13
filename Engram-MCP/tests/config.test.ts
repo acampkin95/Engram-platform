@@ -163,6 +163,14 @@ describe("loadConfig", () => {
 			assert.equal(loadConfig().oauth.enabled, true);
 		});
 
+		it("reads OAuth Redis config from env", () => {
+			process.env.OAUTH_REDIS_URL = "redis://localhost:6380";
+			process.env.OAUTH_REDIS_KEY_PREFIX = "custom:oauth:";
+			const cfg = loadConfig();
+			assert.equal(cfg.oauth.redisUrl, "redis://localhost:6380");
+			assert.equal(cfg.oauth.redisKeyPrefix, "custom:oauth:");
+		});
+
 		it("reads retry config from env", () => {
 			process.env.MCP_RETRY_MAX = "5";
 			process.env.MCP_RETRY_INITIAL_MS = "200";

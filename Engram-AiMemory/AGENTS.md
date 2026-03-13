@@ -58,6 +58,9 @@ Engram-AiMemory/
 ## COMMANDS
 
 ```bash
+# Install deps (Python 3.11+ required; `.python-version` pins local baseline)
+make install
+
 # All tests
 make test
 

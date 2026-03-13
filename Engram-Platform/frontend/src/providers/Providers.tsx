@@ -1,7 +1,9 @@
 'use client';
+import * as Sentry from '@sentry/nextjs';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SWRConfig } from 'swr';
 import { ToastContainer } from '../design-system/components/Toast';
+import { URLStateProvider } from './URLStateProvider';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -11,17 +13,24 @@ export function Providers({ children }: ProvidersProps) {
   const isClerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
   const content = (
-    <SWRConfig
-      value={{
-        revalidateOnFocus: false,
-        revalidateOnReconnect: true,
-        dedupingInterval: 5000,
-        errorRetryCount: 3,
-      }}
-    >
-      {children}
-      <ToastContainer />
-    </SWRConfig>
+    <URLStateProvider>
+      <SWRConfig
+        value={{
+          revalidateOnFocus: false,
+          revalidateOnReconnect: true,
+          dedupingInterval: 5000,
+          errorRetryCount: 3,
+          onError: (error) => {
+            Sentry.captureException(error, {
+              tags: { area: 'swr' },
+            });
+          },
+        }}
+      >
+        {children}
+        <ToastContainer />
+      </SWRConfig>
+    </URLStateProvider>
   );
 
   // Clerk is optional — if not configured, render without auth

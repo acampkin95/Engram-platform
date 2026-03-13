@@ -113,6 +113,21 @@ The Engram Platform is a multi-layer AI memory and intelligence platform consist
 
 **Total Recommended**: 12 cores, 16.5GB RAM, 670GB SSD
 
+### Target Profile: i5 / 16GB / 1TB
+
+Use the tuned `Engram-Platform/docker-compose.yml` profile when deploying to the approved i5/16GB/1TB host class. The current compose target reduces the stack to roughly 8.5GB total memory by using:
+
+- `crawler-api` 2G limit with 2GB Chromium shared memory
+- `memory-api` 512M limit
+- `weaviate` 1536M limit with `GOMEMLIMIT=1.2GiB` and `CACHE_SIZE=384MB`
+- `crawler-redis` 512M limit / `384mb` maxmemory
+- `memory-redis` 384M limit / `256mb` maxmemory
+- `mcp-server` 256M limit
+- `platform-frontend` 256M limit
+- `nginx` 128M limit
+
+This profile is the default release target unless host telemetry justifies larger limits.
+
 ---
 
 ## Environment Configuration
@@ -244,6 +259,8 @@ docker compose build --no-cache
 ---
 
 ## Production Deployment
+
+Use `plans/2026-03-11-release-checklist.md` as the authoritative pre-release, deployment, smoke-test, and rollback checklist. The manual below provides background and detailed procedures; the checklist is the release gate.
 
 ### Step 1: Prepare Infrastructure
 

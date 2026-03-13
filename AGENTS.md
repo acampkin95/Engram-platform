@@ -97,30 +97,30 @@ MCP_AUTH_TOKEN=<MCP bearer token>
 ## NOTES
 
 - Monorepo uses numbered prefixes (`01_devroot`, `04_branding`) — non-standard but intentional
-- No GitHub Actions CI/CD currently configured
+- GitHub Actions CI/CD is configured for AiMemory, AiCrawler, MCP, and Platform; AiCrawler now uses a single authoritative workflow at `Engram-AiCrawler/.github/workflows/ci.yml`
 - Docker Compose master file at `Engram-Platform/docker-compose.yml`
 - Pre-commit hooks configured at root `.pre-commit-config.yaml`
 
 ## CURRENT PROJECT STATE
 
-**Status:** 65% Complete (as of 2026-03-04)
+**Status:** 70% Complete (as of 2026-03-11, after roadmap refresh)
 
 ### Component Maturity
 
 | Component | Test Coverage | Security | Performance | Docs | Overall |
 |-----------|--------------|----------|-------------|------|---------|
-| **AiMemory** | ~70% (target 95%) | 60% | 80% | 50% | 70% |
-| **AiCrawler** | 57.82% (target 85%) | 75% | 85% | 40% | 65% |
-| **MCP Server** | Unknown (161 tests) | 85% | 90% | 60% | 80% |
-| **Platform** | ~0% (target 80%) | 70% | 75% | 30% | 45% |
+| **AiMemory** | Baseline refresh needed (stretch 95%) | 60% | 80% | 50% | 70% |
+| **AiCrawler** | 57.82% (75% enforced, 85% stretch) | 75% | 85% | 40% | 65% |
+| **MCP Server** | Baseline not yet reported (161 tests) | 85% | 90% | 60% | 80% |
+| **Platform** | Coverage reporting configured; tested surface still needs baseline | 70% | 75% | 30% | 45% |
 
 ### Critical Gaps
 
 1. **Test Coverage**
-   - AiMemory: ~70% → Need 95% (Memory DB/Client requirement)
-   - AiCrawler: 57.82% → Need 85% (17.18% below minimum)
-   - Platform: ~0% → Need 80% (almost no tests)
-   - **Missing CI/CD for AiCrawler** (largest test suite)
+   - AiMemory: refresh the real baseline, then drive in-scope coverage toward 85%+ with 95% as a stretch target
+   - AiCrawler: 57.82% → Need 75% minimum first, then continue toward 85%
+   - Platform: coverage reporting exists, but the trusted baseline and tested critical surface still need to be established
+   - MCP: test suite is healthy, but coverage reporting still needs to be surfaced
 
 2. **Security (NIST Compliance)**
    - ❌ No encryption at rest (Weaviate, Redis)
@@ -130,8 +130,8 @@ MCP_AUTH_TOKEN=<MCP bearer token>
    - ❌ No MFA for admin users
 
 3. **Dashboard (2026 Standards)**
-   - ❌ No URL state management (nuqs missing)
-   - ❌ No error tracking (Sentry not integrated)
+   - ⚠️ `nuqs` is installed, but URL-state rollout is incomplete
+   - ⚠️ Sentry packages and instrumentation exist, but full runtime rollout is incomplete
    - ❌ Inconsistent memoization
    - ❌ No component documentation (Storybook missing)
 
@@ -210,8 +210,8 @@ MCP_AUTH_TOKEN=<MCP bearer token>
 - 22 TS test files
 - 7 E2E specs (Playwright)
 - Current: 57.82%
-- Target: 85%
-- **CI/CD: MISSING** (critical gap)
+- Target: 75% enforced minimum, 85% stretch target
+- **CI/CD: CONFIGURED** (single authoritative workflow at `Engram-AiCrawler/.github/workflows/ci.yml`)
 
 **Caching Strategy:**
 - HOT: 1 hour (frequently accessed)
@@ -496,7 +496,7 @@ MCP_AUTH_TOKEN=<MCP bearer token>
 | Component | GitHub Actions | Status |
 |-----------|----------------|--------|
 | AiMemory | ✅ `.github/workflows/ci.yml` | Configured |
-| AiCrawler | ❌ **MISSING** | Critical gap |
+| AiCrawler | ✅ `.github/workflows/ci.yml` | Configured |
 | MCP | ✅ `.github/workflows/ci.yml` | Configured |
 | Platform | ✅ `.github/workflows/ci.yml` | Configured |
 
@@ -552,11 +552,11 @@ MCP_AUTH_TOKEN=<MCP bearer token>
 
 ## NEXT STEPS
 
-**See `PROJECT_ROADMAP.md` for detailed 12-week plan**
+**See `PROJECT_ROADMAP.md` for the current 10-week release plan**
 
 **Immediate Priorities:**
-1. Add CI/CD for AiCrawler (MISSING)
-2. Establish test coverage baselines (AiMemory, MCP, Platform)
-3. Fix Platform coverage reporting (~0%)
-4. Create test plan for AiMemory (95% target)
-5. Begin Phase 1 (Testing) per roadmap
+1. Reconcile docs and plans with the corrected project state
+2. Re-baseline AiMemory, MCP, and Platform coverage/reporting
+3. Raise AiCrawler to the enforced 75% coverage minimum
+4. Move MCP OAuth state out of process memory into Redis
+5. Build one verified release checklist and deployment smoke path

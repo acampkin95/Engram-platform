@@ -1,7 +1,6 @@
-"""Tests for Redis Streams event bus."""
-
-import pytest
 import json
+import pytest
+import asyncio
 from unittest.mock import AsyncMock, patch
 
 from app.services.event_bus import (
@@ -180,6 +179,53 @@ class TestEventBus:
         result = await event_bus.stream_length("crawl_events")
 
         assert result == 0
+
+    @pytest.mark.asyncio
+    async def test_subscribe_recovers_after_connection_loss(self):
+        bus = EventBus(redis_url="redis://localhost:6379/0")
+
+        first_client = AsyncMock()
+        first_client.xgroup_create = AsyncMock()
+        first_client.xreadgroup = AsyncMock(side_effect=ConnectionError("redis down"))
+
+        second_client = AsyncMock()
+        second_client.xgroup_create = AsyncMock()
+        second_client.xack = AsyncMock()
+        second_client.xreadgroup = AsyncMock(
+            return_value=[
+                (
+                    "crawl_events",
+                    [
+                        (
+                            "1700000000-0",
+                            {"type": "crawl.started", "payload": '{"url": "https://example.com"}'},
+                        )
+                    ],
+                )
+            ]
+        )
+
+        bus._redis = first_client
+
+        with patch("app.services.event_bus.aioredis.from_url", return_value=second_client):
+            message = await asyncio.wait_for(
+                anext(
+                    bus.subscribe(
+                        stream="crawl_events",
+                        group="pipeline_processors",
+                        consumer="worker_1",
+                    )
+                ),
+                timeout=0.2,
+            )
+
+        assert message == (
+            "1700000000-0",
+            "crawl.started",
+            {"url": "https://example.com"},
+        )
+        assert bus._redis is second_client
+        second_client.xgroup_create.assert_awaited_once()
 
 
 class TestEventBusSingleton:

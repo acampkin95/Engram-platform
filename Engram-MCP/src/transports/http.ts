@@ -167,7 +167,7 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 			// ----- MCP endpoint -----
 			if (url.pathname === "/mcp") {
 				// Auth validation (OAuth or Bearer token)
-				const authResult = validateAuth(req, config);
+				const authResult = await validateAuth(req, config);
 				if (!authResult.valid) {
 					logger.warn("Authentication failed", {
 						requestId,

@@ -30,6 +30,11 @@ interface UIState extends UIPersistedState {
   // WebSocket connection state — runtime only, not persisted
   wsConnected: boolean;
   setWsConnected: (connected: boolean) => void;
+
+  // Graph selection state — runtime only, not persisted
+  selectedEntityId: string | null;
+  setSelectedEntityId: (entityId: string | null) => void;
+  clearSelectedEntity: () => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -45,6 +50,7 @@ export const useUIStore = create<UIState>()(
       },
       activeSection: 'crawler' as const,
       wsConnected: false,
+      selectedEntityId: null,
 
       // Sidebar actions
       toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
@@ -62,6 +68,10 @@ export const useUIStore = create<UIState>()(
 
       // WebSocket actions
       setWsConnected: (wsConnected) => set({ wsConnected }),
+
+      // Graph selection actions
+      setSelectedEntityId: (selectedEntityId) => set({ selectedEntityId }),
+      clearSelectedEntity: () => set({ selectedEntityId: null }),
     }),
     {
       name: 'engram-ui-store',

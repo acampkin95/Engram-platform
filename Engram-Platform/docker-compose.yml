@@ -76,7 +76,7 @@ services:
       - crawler_archive:/app/data/tiers/archive
       - crawler_chroma_data:/app/data/chroma
       - crawler_supervisor:/var/log/supervisor
-    shm_size: 3g
+    shm_size: 2g
     logging:
       driver: "json-file"
       options:
@@ -91,10 +91,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G
+          memory: 2G
           cpus: '2.0'
         reservations:
-          memory: 1G
+          memory: 768M
     depends_on:
       crawler-redis:
         condition: service_healthy
@@ -158,10 +158,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 512M
           cpus: '1.0'
         reservations:
-          memory: 256M
+          memory: 192M
     depends_on:
       weaviate:
         condition: service_healthy
@@ -194,7 +194,7 @@ services:
       MULTI_TENANCY_ENABLED: "true"
       REPLICATION_FACTOR: "1"
       # Performance tuning
-      GOMEMLIMIT: "1.5GiB"
+      GOMEMLIMIT: "1.2GiB"
       GOMAXPROCS: "2"
       ENABLE_TurboBoost: "true"
       # Connection pool
@@ -202,7 +202,7 @@ services:
       GRPC_INITIAL_WINDOW_SIZE: "65536"
       # Caching
       CACHE_ENABLED: "true"
-      CACHE_SIZE: "512MB"
+      CACHE_SIZE: "384MB"
       CACHE_TTL: "3600"
     volumes:
       - weaviate_data:/var/lib/weaviate
@@ -219,10 +219,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1536M
           cpus: '1.0'
         reservations:
-          memory: 512M
+          memory: 384M
     networks:
       - engram-platform-network
 
@@ -233,7 +233,7 @@ services:
     image: redis:7-alpine
     container_name: engram-crawler-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --maxmemory 768mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --timeout 0
+    command: redis-server --appendonly yes --maxmemory 384mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --timeout 0
     volumes:
       - crawler_redis_data:/data
     logging:
@@ -249,10 +249,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 512M
           cpus: '0.5'
         reservations:
-          memory: 384M
+          memory: 192M
     networks:
       - engram-platform-network
 
@@ -263,7 +263,7 @@ services:
     image: redis:7-alpine
     container_name: engram-memory-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --timeout 0
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --tcp-keepalive 300 --timeout 0
     volumes:
       - memory_redis_data:/data
     logging:
@@ -279,10 +279,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 768M
+          memory: 384M
           cpus: '0.5'
         reservations:
-          memory: 256M
+          memory: 128M
     networks:
       - engram-platform-network
 
@@ -317,10 +317,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 256M
           cpus: '0.5'
         reservations:
-          memory: 128M
+          memory: 96M
     depends_on:
       memory-api:
         condition: service_healthy
@@ -385,10 +385,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 256M
           cpus: '0.5'
         reservations:
-          memory: 128M
+          memory: 96M
     networks:
       - engram-platform-network
 
@@ -415,10 +415,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 128M
           cpus: '0.5'
         reservations:
-          memory: 64M
+          memory: 48M
     depends_on:
       - crawler-api
       - memory-api
