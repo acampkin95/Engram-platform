@@ -8,7 +8,7 @@ Tests real scheduling logic, stats tracking, and job routing.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -59,8 +59,8 @@ def _make_memory(
         canonical_id=canonical_id,
         access_count=access_count,
         last_accessed_at=last_accessed_at,
-        created_at=created_at or datetime.now(timezone),
-        updated_at=datetime.now(timezone),
+        created_at=created_at or datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
 
@@ -156,14 +156,23 @@ class TestSchedulerLifecycle:
         system = _make_mock_system()
         scheduler = MaintenanceScheduler(system)
 
-        with patch.dict("sys.modules", {"apscheduler": None, "apscheduler.schedulers": None, "apscheduler.schedulers.asyncio": None}):
+        with patch.dict(
+            "sys.modules",
+            {
+                "apscheduler": None,
+                "apscheduler.schedulers": None,
+                "apscheduler.schedulers.asyncio": None,
+            },
+        ):
             with patch("memory_system.workers.MaintenanceScheduler.start") as mock_start:
                 # Simulate the ImportError path
                 pass
 
         # Direct test: manually test the ImportError branch
         scheduler_obj = MaintenanceScheduler(system)
-        original_import = __builtins__.__import__ if hasattr(__builtins__, '__import__') else __import__
+        original_import = (
+            __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
+        )
 
         def mock_import(name, *args, **kwargs):
             if "apscheduler" in name:
@@ -189,8 +198,8 @@ class TestSchedulerLifecycle:
 
         assert scheduler._scheduler is mock_async_scheduler
         mock_async_scheduler.start.assert_called_once()
-        # Should have added 7 jobs
-        assert mock_async_scheduler.add_job.call_count == 7
+        # Should have added 9 jobs
+        assert mock_async_scheduler.add_job.call_count == 9
 
     def test_stop_when_running(self) -> None:
         system = _make_mock_system()
@@ -354,12 +363,10 @@ class TestJobUpdateDecay:
         system = _make_mock_system()
         mem = _make_memory(
             access_count=2,
-            last_accessed_at=datetime.now(timezone),
-            created_at=datetime.now(timezone),
+            last_accessed_at=datetime.now(timezone.utc),
+            created_at=datetime.now(timezone.utc),
         )
-        system.list_memories = AsyncMock(
-            side_effect=[([mem], 1), ([], 0)]
-        )
+        system.list_memories = AsyncMock(side_effect=[([mem], 1), ([], 0)])
 
         scheduler = MaintenanceScheduler(system)
         await scheduler._job_update_decay()
@@ -495,12 +502,14 @@ class TestJobDetectContradictionsBody:
         system.list_memories = AsyncMock(return_value=([mem_a, mem_b], 2))
 
         mock_ollama = MagicMock()
-        mock_ollama.detect_contradiction = AsyncMock(return_value={
-            "contradicts": True,
-            "confidence": 0.9,
-            "more_likely_correct": "memory_a",
-            "reason": "Opposite claims",
-        })
+        mock_ollama.detect_contradiction = AsyncMock(
+            return_value={
+                "contradicts": True,
+                "confidence": 0.9,
+                "more_likely_correct": "memory_a",
+                "reason": "Opposite claims",
+            }
+        )
 
         scheduler = MaintenanceScheduler(system, ollama_client=mock_ollama)
         await scheduler._job_detect_contradictions()
@@ -517,12 +526,14 @@ class TestJobDetectContradictionsBody:
         system.list_memories = AsyncMock(return_value=([mem_a, mem_b], 2))
 
         mock_ollama = MagicMock()
-        mock_ollama.detect_contradiction = AsyncMock(return_value={
-            "contradicts": True,
-            "confidence": 0.3,  # Below 0.7 threshold
-            "more_likely_correct": "neither",
-            "reason": "",
-        })
+        mock_ollama.detect_contradiction = AsyncMock(
+            return_value={
+                "contradicts": True,
+                "confidence": 0.3,  # Below 0.7 threshold
+                "more_likely_correct": "neither",
+                "reason": "",
+            }
+        )
 
         scheduler = MaintenanceScheduler(system, ollama_client=mock_ollama)
         await scheduler._job_detect_contradictions()
@@ -537,12 +548,14 @@ class TestJobDetectContradictionsBody:
         system.list_memories = AsyncMock(return_value=([mem_a, mem_b], 2))
 
         mock_ollama = MagicMock()
-        mock_ollama.detect_contradiction = AsyncMock(return_value={
-            "contradicts": False,
-            "confidence": 0.1,
-            "more_likely_correct": "neither",
-            "reason": "",
-        })
+        mock_ollama.detect_contradiction = AsyncMock(
+            return_value={
+                "contradicts": False,
+                "confidence": 0.1,
+                "more_likely_correct": "neither",
+                "reason": "",
+            }
+        )
 
         scheduler = MaintenanceScheduler(system, ollama_client=mock_ollama)
         await scheduler._job_detect_contradictions()
@@ -621,10 +634,7 @@ class TestJobConsolidateExtended:
 
     async def test_skips_groups_smaller_than_3(self) -> None:
         system = _make_mock_system()
-        mems = [
-            _make_memory(project_id="proj-1", canonical_id=None)
-            for _ in range(2)
-        ]
+        mems = [_make_memory(project_id="proj-1", canonical_id=None) for _ in range(2)]
         system.list_memories = AsyncMock(return_value=(mems, 2))
 
         mock_ollama = MagicMock()
@@ -636,10 +646,7 @@ class TestJobConsolidateExtended:
     async def test_skips_candidates_with_canonical_id(self) -> None:
         system = _make_mock_system()
         # All memories already have canonical_id → they're already merged
-        mems = [
-            _make_memory(project_id="proj-1", canonical_id=str(uuid4()))
-            for _ in range(4)
-        ]
+        mems = [_make_memory(project_id="proj-1", canonical_id=str(uuid4())) for _ in range(4)]
         system.list_memories = AsyncMock(return_value=(mems, 4))
 
         mock_ollama = MagicMock()
@@ -650,10 +657,7 @@ class TestJobConsolidateExtended:
 
     async def test_skips_when_no_vector(self) -> None:
         system = _make_mock_system()
-        mems = [
-            _make_memory(project_id="proj-1", canonical_id=None, vector=None)
-            for _ in range(4)
-        ]
+        mems = [_make_memory(project_id="proj-1", canonical_id=None, vector=None) for _ in range(4)]
         system.list_memories = AsyncMock(return_value=(mems, 4))
 
         mock_ollama = MagicMock()
@@ -670,9 +674,7 @@ class TestJobConsolidateExtended:
         ]
         system.list_memories = AsyncMock(return_value=(mems, 4))
         # Only 1 similar found — below threshold of 2
-        system._weaviate.find_similar_memories_by_vector = AsyncMock(
-            return_value=[mems[0]]
-        )
+        system._weaviate.find_similar_memories_by_vector = AsyncMock(return_value=[mems[0]])
 
         mock_ollama = MagicMock()
         scheduler = MaintenanceScheduler(system, ollama_client=mock_ollama)
@@ -687,9 +689,7 @@ class TestJobConsolidateExtended:
             for _ in range(4)
         ]
         system.list_memories = AsyncMock(return_value=(mems, 4))
-        system._weaviate.find_similar_memories_by_vector = AsyncMock(
-            return_value=mems[:3]
-        )
+        system._weaviate.find_similar_memories_by_vector = AsyncMock(return_value=mems[:3])
 
         mock_ollama = MagicMock()
         mock_ollama.consolidate_memories = AsyncMock(return_value=None)
@@ -819,9 +819,7 @@ class TestJobUpdateDecayExtended:
         mem = _make_memory(last_accessed_at=None, created_at=None)
         # Override created_at to None on the object after creation
         object.__setattr__(mem, "created_at", None)
-        system.list_memories = AsyncMock(
-            side_effect=[([mem], 1), ([], 0)]
-        )
+        system.list_memories = AsyncMock(side_effect=[([mem], 1), ([], 0)])
 
         scheduler = MaintenanceScheduler(system)
         await scheduler._job_update_decay()
@@ -835,14 +833,13 @@ class TestJobUpdateDecayExtended:
     async def test_handles_naive_datetime(self) -> None:
         """Memory with naive datetime (no tzinfo) should still work."""
         from datetime import datetime as dt
+
         system = _make_mock_system()
         naive_dt = dt(2025, 1, 1, 12, 0, 0)  # No timezone
-        mem = _make_memory(last_accessed_at=naive_dt, created_at=datetime.now(timezone))
+        mem = _make_memory(last_accessed_at=naive_dt, created_at=datetime.now(timezone.utc))
         # Force last_accessed_at to naive via object.__setattr__
         object.__setattr__(mem, "last_accessed_at", naive_dt)
-        system.list_memories = AsyncMock(
-            side_effect=[([mem], 1), ([], 0)]
-        )
+        system.list_memories = AsyncMock(side_effect=[([mem], 1), ([], 0)])
 
         scheduler = MaintenanceScheduler(system)
         await scheduler._job_update_decay()
@@ -851,13 +848,9 @@ class TestJobUpdateDecayExtended:
 
     async def test_handles_individual_update_error(self) -> None:
         system = _make_mock_system()
-        mem = _make_memory(last_accessed_at=datetime.now(timezone))
-        system.list_memories = AsyncMock(
-            side_effect=[([mem], 1), ([], 0)]
-        )
-        system._weaviate.update_memory_fields = AsyncMock(
-            side_effect=RuntimeError("Update failed")
-        )
+        mem = _make_memory(last_accessed_at=datetime.now(timezone.utc))
+        system.list_memories = AsyncMock(side_effect=[([mem], 1), ([], 0)])
+        system._weaviate.update_memory_fields = AsyncMock(side_effect=RuntimeError("Update failed"))
 
         scheduler = MaintenanceScheduler(system)
         await scheduler._job_update_decay()
@@ -1011,9 +1004,7 @@ class TestJobsWithAIRouter:
             for i in range(4)
         ]
         system.list_memories = AsyncMock(return_value=(mems, 4))
-        system._weaviate.find_similar_memories_by_vector = AsyncMock(
-            return_value=mems[:3]
-        )
+        system._weaviate.find_similar_memories_by_vector = AsyncMock(return_value=mems[:3])
         system._weaviate.add_memory = AsyncMock(return_value=uuid4())
 
         mock_router = MagicMock()

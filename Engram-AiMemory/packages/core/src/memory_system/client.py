@@ -1,6 +1,7 @@
 """
 Weaviate client with 3-tier memory schema management.
 """
+
 import json
 import os
 from datetime import UTC, datetime
@@ -33,26 +34,32 @@ from memory_system.memory import (
 )
 
 console = Console()
+
+
 class WeaviateMemoryClient:
     """
     Async Weaviate client for the 3-tier memory system.
     Handles schema creation, CRUD operations, and search across all tiers.
     """
+
     # Map tiers to collection names
     TIER_COLLECTIONS = {
         MemoryTier.PROJECT: TIER1_COLLECTION,
         MemoryTier.GENERAL: TIER2_COLLECTION,
         MemoryTier.GLOBAL: TIER3_COLLECTION,
     }
+
     def __init__(self, settings: Settings | None = None):
         self.settings = settings or get_settings()
         self._client: WeaviateClient | None = None
+
     @property
     def client(self) -> "WeaviateClient":
         """Get the Weaviate client, ensuring it is connected."""
         if self._client is None:
             raise RuntimeError("Weaviate client not connected")
         return self._client
+
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def connect(self) -> None:
         """Connect to Weaviate with retry logic."""
@@ -60,6 +67,7 @@ class WeaviateMemoryClient:
 
         import weaviate
         from weaviate.classes.init import Auth
+
         console.print(f"[cyan]Connecting to Weaviate at {self.settings.weaviate_url}...[/cyan]")
         auth = None
         if self.settings.weaviate_api_key:
@@ -99,6 +107,7 @@ class WeaviateMemoryClient:
             )
             await self._drop_all_collections()
         await self._ensure_schemas()
+
     async def _drop_all_collections(self) -> None:
         """Drop all managed collections (destructive — use only for schema migration)."""
         all_names = [
@@ -113,9 +122,11 @@ class WeaviateMemoryClient:
             if name in existing:
                 self.client.collections.delete(name)
                 console.print(f"[yellow]Dropped collection: {name}[/yellow]")
+
     async def _ensure_schemas(self) -> None:
         """Create all required collections if they don't exist."""
         from weaviate.classes.config import Configure, DataType, Property, VectorDistances
+
         existing = self.client.collections.list_all()
         # Schema for all memory tiers (same structure, different collections)
         # Schema for all memory tiers (same structure, different collections)
@@ -148,31 +159,6 @@ class WeaviateMemoryClient:
             Property(name="is_canonical", data_type=DataType.BOOL, index_filterable=True),
         ]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         # Create tier collections
         for tier, collection_name in self.TIER_COLLECTIONS.items():
             if collection_name not in existing:
@@ -195,22 +181,6 @@ class WeaviateMemoryClient:
                         else None
                     ),
                 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                 console.print(f"[green]✓ {collection_name} created[/green]")
             else:
@@ -263,8 +233,12 @@ class WeaviateMemoryClient:
                 name=RELATION_COLLECTION,
                 description="Relationships between entities",
                 properties=[
-                    Property(name="source_entity_id", data_type=DataType.TEXT, index_filterable=True),
-                    Property(name="target_entity_id", data_type=DataType.TEXT, index_filterable=True),
+                    Property(
+                        name="source_entity_id", data_type=DataType.TEXT, index_filterable=True
+                    ),
+                    Property(
+                        name="target_entity_id", data_type=DataType.TEXT, index_filterable=True
+                    ),
                     Property(name="relation_type", data_type=DataType.TEXT, index_filterable=True),
                     Property(name="weight", data_type=DataType.NUMBER, index_filterable=True),
                     Property(name="project_id", data_type=DataType.TEXT, index_filterable=True),
@@ -274,7 +248,9 @@ class WeaviateMemoryClient:
                     # Phase B: new relation properties
                     Property(name="confidence", data_type=DataType.NUMBER, index_filterable=True),
                     Property(name="evidence_memory_ids", data_type=DataType.TEXT_ARRAY),
-                    Property(name="last_updated_at", data_type=DataType.DATE, index_filterable=True),
+                    Property(
+                        name="last_updated_at", data_type=DataType.DATE, index_filterable=True
+                    ),
                 ],
                 vectorizer_config=Configure.Vectorizer.none(),
                 vector_index_config=Configure.VectorIndex.hnsw(
@@ -291,30 +267,12 @@ class WeaviateMemoryClient:
                 ),
             )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             console.print(f"[green]✓ {RELATION_COLLECTION} created[/green]")
         else:
             console.print(f"[green]✓ {RELATION_COLLECTION} exists[/green]")
             # Migration: add missing properties if they don't exist
             await self._migrate_relation_collection()
+
     # -----------------------------------------------------------------------
     # Memory object helpers
     # -----------------------------------------------------------------------
@@ -354,29 +312,53 @@ class WeaviateMemoryClient:
             "canonical_id": memory.canonical_id or "",
             "is_canonical": memory.is_canonical,
             "overall_confidence": memory.overall_confidence,
-            "confidence_factors": json.dumps(memory.confidence_factors.dict() if hasattr(memory.confidence_factors, 'dict') else memory.confidence_factors),
-            "provenance": json.dumps(memory.provenance.dict() if hasattr(memory.provenance, 'dict') else memory.provenance),
-            "modification_history": json.dumps([m.dict() if hasattr(m, 'dict') else m for m in memory.modification_history]),
+            "confidence_factors": json.dumps(
+                memory.confidence_factors.model_dump(mode="json")
+                if hasattr(memory.confidence_factors, "model_dump")
+                else memory.confidence_factors
+            ),
+            "provenance": json.dumps(
+                memory.provenance.model_dump(mode="json")
+                if hasattr(memory.provenance, "model_dump")
+                else memory.provenance
+            ),
+            "modification_history": json.dumps(
+                [
+                    m.model_dump(mode="json") if hasattr(m, "model_dump") else m
+                    for m in memory.modification_history
+                ]
+            ),
             "contradictions": memory.contradictions,
             "contradictions_resolved": memory.contradictions_resolved,
             "is_deprecated": memory.is_deprecated,
             "deprecated_by": memory.deprecated_by or "",
             "supporting_evidence_ids": memory.supporting_evidence_ids,
             "contradicting_evidence_ids": memory.contradicting_evidence_ids,
-            "last_contradiction_check": memory.last_contradiction_check.isoformat() if memory.last_contradiction_check else None,
-            "last_confidence_update": memory.last_confidence_update.isoformat() if memory.last_confidence_update else None,
-            "temporal_bounds": json.dumps(memory.temporal_bounds.dict() if hasattr(memory.temporal_bounds, 'dict') else memory.temporal_bounds) if memory.temporal_bounds else None,
+            "last_contradiction_check": memory.last_contradiction_check.isoformat()
+            if memory.last_contradiction_check
+            else None,
+            "last_confidence_update": memory.last_confidence_update.isoformat()
+            if memory.last_confidence_update
+            else None,
+            "temporal_bounds": json.dumps(
+                memory.temporal_bounds.model_dump(mode="json")
+                if hasattr(memory.temporal_bounds, "model_dump")
+                else memory.temporal_bounds
+            )
+            if memory.temporal_bounds
+            else None,
             "is_event": memory.is_event,
             "cause_ids": memory.cause_ids,
             "effect_ids": memory.effect_ids,
         }
-    
+
     def _parse_json_field(self, props: dict, key: str, default: dict | list) -> dict | list:
         val = props.get(key)
         if not val:
             return default
         if isinstance(val, str):
             import json
+
             try:
                 return json.loads(val)
             except Exception:
@@ -432,16 +414,19 @@ class WeaviateMemoryClient:
             cause_ids=props.get("cause_ids", []),
             effect_ids=props.get("effect_ids", []),
         )
+
     async def _ensure_memory_tenant(self, tenant_id: str, collection_name: str) -> None:
         """Create tenant in a memory collection if it doesn't already exist."""
         if not self.settings.multi_tenancy_enabled or not tenant_id:
             return
         from weaviate.classes.tenants import Tenant
+
         collection = self.client.collections.get(collection_name)
         existing_tenants = {t.name for t in collection.tenants.get().values()}
         if tenant_id not in existing_tenants:
             collection.tenants.create([Tenant(name=tenant_id)])
             console.print(f"[cyan]Created tenant '{tenant_id}' in {collection_name}[/cyan]")
+
     async def add_memory(self, memory: Memory) -> UUID:
         """Add a memory to the appropriate tier collection."""
         collection_name = self.TIER_COLLECTIONS[memory.tier]
@@ -464,11 +449,13 @@ class WeaviateMemoryClient:
                 vector=memory.vector,
             )
         return memory.id
+
     async def search(
         self, query: MemoryQuery, query_vector: list[float]
     ) -> list[MemorySearchResult]:
         """Search memories across specified tiers."""
         from weaviate.classes.query import Filter, MetadataQuery
+
         results = []
         # Determine which collections to search
         if query.tier:
@@ -492,14 +479,14 @@ class WeaviateMemoryClient:
             if query.tags:
                 for tag in query.tags:
                     filters.append(Filter.by_property("tags").contains_any([tag]))
-            
+
             if query.event_only:
                 filters.append(Filter.by_property("is_event").equal(True))
-            
+
             if query.start_date:
                 # Weaviate date filters need RFC3339 string format usually, but Python date objects work in v4 client
                 filters.append(Filter.by_property("created_at").greater_or_equal(query.start_date))
-                
+
             if query.end_date:
                 filters.append(Filter.by_property("created_at").less_or_equal(query.end_date))
             # Combine filters
@@ -529,6 +516,7 @@ class WeaviateMemoryClient:
         # Sort by score and limit
         results.sort(key=lambda x: x.score or 0.0, reverse=True)
         return results[: query.limit]
+
     async def get_memory(
         self, memory_id: UUID, tier: MemoryTier, tenant_id: str | None = None
     ) -> Memory | None:
@@ -549,6 +537,7 @@ class WeaviateMemoryClient:
             return self._obj_to_memory(obj, tier)
         except Exception:
             return None
+
     async def list_memories(
         self,
         tier: MemoryTier | None = None,
@@ -564,6 +553,7 @@ class WeaviateMemoryClient:
             the current page size.
         """
         from weaviate.classes.query import Filter
+
         all_memories: list[Memory] = []
         total_count: int = 0
         collections_to_list = {tier: self.TIER_COLLECTIONS[tier]} if tier else self.TIER_COLLECTIONS
@@ -610,6 +600,7 @@ class WeaviateMemoryClient:
             # Apply global offset+limit slice across all combined tier results
             all_memories = all_memories[offset : offset + limit]
         return all_memories, total_count
+
     async def delete_memory(
         self, memory_id: UUID, tier: MemoryTier, tenant_id: str | None = None
     ) -> bool:
@@ -626,6 +617,7 @@ class WeaviateMemoryClient:
             return True
         except Exception:
             return False
+
     async def add_memories_batch(self, memories: list["Memory"]) -> tuple[list[UUID], list]:
         """Insert a batch of Memory objects into Weaviate, one at a time.
         Returns (successful_ids, failed_objects).
@@ -640,6 +632,7 @@ class WeaviateMemoryClient:
                 console.print(f"[red]Batch insert failed for memory {memory.id}: {exc}[/red]")
                 failed_objects.append(memory)
         return successful_ids, failed_objects
+
     async def get_stats(self, tenant_id: str | None = None) -> MemoryStats:
         """Get memory statistics."""
         stats = MemoryStats()
@@ -662,18 +655,22 @@ class WeaviateMemoryClient:
             else:
                 stats.tier3_count = count
         return stats
+
     async def close(self) -> None:
         """Close the Weaviate connection."""
         if self._client:
             self._client.close()
             console.print("[cyan]Weaviate connection closed[/cyan]")
+
     @property
     def is_connected(self) -> bool:
         """Check if client is connected."""
         return self._client is not None and self._client.is_ready()
+
     async def _migrate_memory_collection(self, collection_name: str) -> None:
         """Add Phase B properties to existing memory collections (idempotent)."""
         from weaviate.classes.config import DataType, Property
+
         new_props = {
             "metadata": DataType.TEXT,
             "embedding_model": DataType.TEXT,
@@ -696,9 +693,11 @@ class WeaviateMemoryClient:
             console.print(
                 f"[yellow]Memory collection migration warning ({collection_name}): {e}[/yellow]"
             )
+
     async def _migrate_entity_collection(self) -> None:
         """Add missing properties to existing entity collection (idempotent)."""
         from weaviate.classes.config import DataType, Property
+
         try:
             collection = self.client.collections.get(ENTITY_COLLECTION)
             existing_props = {p.name for p in collection.config.get().properties}
@@ -716,9 +715,11 @@ class WeaviateMemoryClient:
                     console.print(f"[cyan]Migrated entity collection: added {prop_name}[/cyan]")
         except Exception as e:
             console.print(f"[yellow]Entity migration warning: {e}[/yellow]")
+
     async def _migrate_relation_collection(self) -> None:
         """Add missing properties to existing relation collection (idempotent)."""
         from weaviate.classes.config import DataType, Property
+
         try:
             collection = self.client.collections.get(RELATION_COLLECTION)
             existing_props = {p.name for p in collection.config.get().properties}
@@ -737,17 +738,20 @@ class WeaviateMemoryClient:
                     console.print(f"[cyan]Migrated relation collection: added {prop_name}[/cyan]")
         except Exception as e:
             console.print(f"[yellow]Relation migration warning: {e}[/yellow]")
+
     async def _ensure_graph_tenant(self, tenant_id: str) -> None:
         """Create tenant in entity/relation collections if it doesn't already exist."""
         if not self.settings.multi_tenancy_enabled or not tenant_id:
             return
         from weaviate.classes.tenants import Tenant
+
         for collection_name in (ENTITY_COLLECTION, RELATION_COLLECTION):
             collection = self.client.collections.get(collection_name)
             existing_tenants = {t.name for t in collection.tenants.get().values()}
             if tenant_id not in existing_tenants:
                 collection.tenants.create([Tenant(name=tenant_id)])
                 console.print(f"[cyan]Created tenant '{tenant_id}' in {collection_name}[/cyan]")
+
     # ---------------------------------------------------------------------------
     # Knowledge Graph CRUD
     # ---------------------------------------------------------------------------
@@ -761,9 +765,11 @@ class WeaviateMemoryClient:
             effective_tenant = tenant_id or self.settings.default_tenant_id
             return collection.with_tenant(effective_tenant)
         return collection
+
     async def add_entity(self, entity: KnowledgeEntity) -> UUID:
         """Insert a knowledge graph entity into Weaviate."""
         import json
+
         await self._ensure_graph_tenant(entity.tenant_id)
         collection = self._get_graph_collection(ENTITY_COLLECTION, entity.tenant_id)
         properties = {
@@ -779,6 +785,7 @@ class WeaviateMemoryClient:
         }
         collection.data.insert(uuid=str(entity.id), properties=properties)
         return entity.id
+
     async def get_entity(
         self, entity_id: UUID, tenant_id: str | None = None
     ) -> KnowledgeEntity | None:
@@ -791,11 +798,13 @@ class WeaviateMemoryClient:
             return self._obj_to_entity(obj)
         except Exception:
             return None
+
     async def find_entity_by_name(
         self, name: str, project_id: str | None = None, tenant_id: str | None = None
     ) -> KnowledgeEntity | None:
         """Find the first entity matching name (exact, case-insensitive) within project scope."""
         from weaviate.classes.query import Filter
+
         collection = self._get_graph_collection(ENTITY_COLLECTION, tenant_id)
         filters = [Filter.by_property("name").equal(name)]
         if project_id:
@@ -805,6 +814,7 @@ class WeaviateMemoryClient:
         if results.objects:
             return self._obj_to_entity(results.objects[0])
         return None
+
     async def list_entities(
         self,
         project_id: str | None = None,
@@ -814,6 +824,7 @@ class WeaviateMemoryClient:
     ) -> list[KnowledgeEntity]:
         """List knowledge graph entities (no query required)."""
         from weaviate.classes.query import Filter
+
         collection = self._get_graph_collection(ENTITY_COLLECTION, tenant_id)
         filters = []
         if project_id:
@@ -825,6 +836,7 @@ class WeaviateMemoryClient:
             offset=offset,
         )
         return [self._obj_to_entity(obj) for obj in results.objects]
+
     async def add_relation(self, relation: KnowledgeRelation) -> UUID:
         """Insert a knowledge graph relation into Weaviate."""
         await self._ensure_graph_tenant(relation.tenant_id)
@@ -841,6 +853,7 @@ class WeaviateMemoryClient:
         }
         collection.data.insert(uuid=str(relation.id), properties=properties)
         return relation.id
+
     async def query_graph(
         self,
         entity_id: UUID,
@@ -902,6 +915,7 @@ class WeaviateMemoryClient:
             neighbors=all_neighbors,
             depth_reached=depth_reached,
         )
+
     async def _get_relations_for_entity(
         self,
         entity_id: UUID,
@@ -910,6 +924,7 @@ class WeaviateMemoryClient:
     ) -> list[KnowledgeRelation]:
         """Fetch all relations where entity is source or target, within project scope."""
         from weaviate.classes.query import Filter
+
         collection = self._get_graph_collection(RELATION_COLLECTION, tenant_id)
         eid_str = str(entity_id)
         relations: list[KnowledgeRelation] = []
@@ -924,6 +939,7 @@ class WeaviateMemoryClient:
                 if rel is not None:
                     relations.append(rel)
         return relations
+
     async def delete_entity(self, entity_id: UUID, tenant_id: str | None = None) -> bool:
         """Delete a knowledge graph entity by ID."""
         collection = self._get_graph_collection(ENTITY_COLLECTION, tenant_id)
@@ -932,9 +948,11 @@ class WeaviateMemoryClient:
             return True
         except Exception:
             return False
+
     def _obj_to_entity(self, obj) -> KnowledgeEntity:
         """Convert a Weaviate object to a KnowledgeEntity."""
         import json
+
         raw_meta = obj.properties.get("metadata", "{}")
         try:
             metadata = json.loads(raw_meta) if raw_meta else {}
@@ -952,6 +970,7 @@ class WeaviateMemoryClient:
             created_at=obj.properties.get("created_at"),
             updated_at=obj.properties.get("updated_at"),
         )
+
     def _obj_to_relation(self, obj) -> KnowledgeRelation | None:
         """Convert a Weaviate object to a KnowledgeRelation."""
         try:
@@ -968,6 +987,7 @@ class WeaviateMemoryClient:
             )
         except Exception:
             return None
+
     # -----------------------------------------------------------------------
     # Tenant management
     # -----------------------------------------------------------------------
@@ -982,6 +1002,7 @@ class WeaviateMemoryClient:
         ]
         try:
             from weaviate.classes.tenants import Tenant, TenantActivityStatus
+
             tenant_obj = Tenant(name=tenant_id, activity_status=TenantActivityStatus.HOT)
             for coll_name in all_collections:
                 collection = self.client.collections.get(coll_name)
@@ -992,6 +1013,7 @@ class WeaviateMemoryClient:
         except Exception as exc:  # noqa: BLE001
             console.print(f"[red]create_tenant failed: {exc}[/red]")
             return False
+
     async def list_tenants(self) -> list[str]:
         """Return tenant names from the first tier collection (representative)."""
         try:
@@ -1001,6 +1023,7 @@ class WeaviateMemoryClient:
         except Exception as exc:  # noqa: BLE001
             console.print(f"[red]list_tenants failed: {exc}[/red]")
             return []
+
     async def increment_access_count(
         self,
         memory_id: "UUID",
@@ -1019,6 +1042,7 @@ class WeaviateMemoryClient:
             },
             tenant_id=tenant_id,
         )
+
     async def update_memory_fields(
         self,
         memory_id: "UUID",
@@ -1043,6 +1067,7 @@ class WeaviateMemoryClient:
         except Exception as exc:  # noqa: BLE001
             console.print(f"[yellow]update_memory_fields failed: {exc}[/yellow]")
             return False
+
     async def update_memory_metadata(
         self,
         memory_id: "UUID",
@@ -1068,6 +1093,7 @@ class WeaviateMemoryClient:
             {"metadata": json.dumps(merged_metadata)},
             tenant_id,
         )
+
     async def delete_expired_memories(
         self,
         tier: "MemoryTier",
@@ -1075,6 +1101,7 @@ class WeaviateMemoryClient:
     ) -> int:
         """Delete memories past their expires_at date. Returns count deleted."""
         from weaviate.classes.query import Filter
+
         collection_name = self.TIER_COLLECTIONS[tier]
         collection = self.client.collections.get(collection_name)
         now_iso = datetime.now(UTC).isoformat()
@@ -1104,6 +1131,7 @@ class WeaviateMemoryClient:
         except Exception as exc:
             console.print(f"[yellow]delete_expired_memories failed for {tier}: {exc}[/yellow]")
             return 0
+
     async def find_similar_memories_by_vector(
         self,
         vector: list[float],
@@ -1117,6 +1145,7 @@ class WeaviateMemoryClient:
         Returns memories where cosine similarity >= threshold (distance <= 1 - threshold).
         """
         from weaviate.classes.query import Filter, MetadataQuery
+
         collection_name = self.TIER_COLLECTIONS[tier]
         collection = self.client.collections.get(collection_name)
         distance_threshold = 1.0 - threshold
@@ -1151,6 +1180,7 @@ class WeaviateMemoryClient:
         except Exception as exc:
             console.print(f"[yellow]find_similar_memories_by_vector failed: {exc}[/yellow]")
             return []
+
     async def find_consolidation_candidates(
         self,
         tier: "MemoryTier",
@@ -1163,6 +1193,7 @@ class WeaviateMemoryClient:
         Returns a flat list of recent memories from the specified tier.
         """
         from weaviate.classes.query import Filter
+
         collection_name = self.TIER_COLLECTIONS[tier]
         collection = self.client.collections.get(collection_name)
         cutoff = (
@@ -1186,9 +1217,11 @@ class WeaviateMemoryClient:
         except Exception as exc:
             console.print(f"[yellow]find_consolidation_candidates failed: {exc}[/yellow]")
             return []
+
     async def add_analysis(self, analysis: object) -> None:
         """Store a memory analysis result (stub — schema not yet defined)."""
         return
+
     async def delete_tenant(self, tenant_id: str) -> bool:
         """Delete a tenant from all collections."""
         all_collections = [

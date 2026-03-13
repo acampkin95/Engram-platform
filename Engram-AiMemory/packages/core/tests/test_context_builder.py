@@ -6,7 +6,7 @@ Mocks MemorySystem for ContextBuilder. ConversationMemoryManager is standalone.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -49,8 +49,8 @@ def _make_memory(
         confidence=1.0,
         tags=tags or [],
         metadata={},
-        created_at=datetime.now(timezone),
-        updated_at=datetime.now(timezone),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
 
@@ -173,10 +173,7 @@ class TestBuildContext:
     @pytest.mark.asyncio
     async def test_build_context_respects_token_budget(self) -> None:
         # Create results that exceed a tiny budget
-        results = [
-            _make_search_result(_make_memory(content="A" * 200))
-            for _ in range(20)
-        ]
+        results = [_make_search_result(_make_memory(content="A" * 200)) for _ in range(20)]
         system = _make_mock_system(search_results=results)
         builder = ContextBuilder(system)
 
@@ -209,17 +206,12 @@ class TestBuildContext:
     @pytest.mark.asyncio
     async def test_build_context_session_skipped_when_budget_low(self) -> None:
         """Session context is skipped when remaining budget < 500 tokens."""
-        results = [
-            _make_search_result(_make_memory(content="A" * 200))
-            for _ in range(20)
-        ]
+        results = [_make_search_result(_make_memory(content="A" * 200)) for _ in range(20)]
         system = _make_mock_system(search_results=results)
         builder = ContextBuilder(system)
 
         # Use a very small max_tokens so budget is exhausted by main results
-        context = await builder.build_context(
-            query="test", session_id="sess-1", max_tokens=100
-        )
+        context = await builder.build_context(query="test", session_id="sess-1", max_tokens=100)
         # search should only be called once (session search skipped)
         assert system.search.await_count == 1
 

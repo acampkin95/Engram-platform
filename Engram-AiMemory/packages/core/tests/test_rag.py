@@ -7,7 +7,7 @@ Tests the real RAG assembly/formatting logic.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -48,8 +48,8 @@ def _make_memory(
         confidence=0.9,
         tags=["test"],
         metadata={},
-        created_at=datetime.now(timezone),
-        updated_at=datetime.now(timezone),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
 
@@ -142,9 +142,7 @@ class TestGenerateWithContext:
 
     async def test_tier_and_project_passed_to_search(self) -> None:
         rag = _make_rag()
-        await rag.generate_with_context(
-            "test", tier=MemoryTier.GENERAL, project_id="my-proj"
-        )
+        await rag.generate_with_context("test", tier=MemoryTier.GENERAL, project_id="my-proj")
         rag._system.search.assert_called_once_with(
             query="test", tier=MemoryTier.GENERAL, project_id="my-proj", limit=5
         )

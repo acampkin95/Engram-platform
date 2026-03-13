@@ -8,7 +8,7 @@ heuristic scoring, similarity detection, deduplication, LLM fallback.
 from __future__ import annotations
 import sys
 
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -51,8 +51,8 @@ def _make_memory(
         tags=[],
         metadata={},
         vector=vector,
-        created_at=datetime.now(timezone),
-        updated_at=datetime.now(timezone),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
 
@@ -113,10 +113,13 @@ class TestIsSimilarContent:
 
     def test_completely_different_content_is_not_similar(self) -> None:
         analyzer = _make_analyzer()
-        assert analyzer._is_similar_content(
-            "the quick brown fox jumps over the lazy dog",
-            "completely unrelated content about quantum physics"
-        ) is False
+        assert (
+            analyzer._is_similar_content(
+                "the quick brown fox jumps over the lazy dog",
+                "completely unrelated content about quantum physics",
+            )
+            is False
+        )
 
     def test_high_overlap_is_similar(self) -> None:
         analyzer = _make_analyzer()
@@ -179,7 +182,9 @@ class TestAnalyzeWithHeuristic:
     async def test_contradiction_detection_via_negation(self) -> None:
         analyzer = _make_analyzer()
         mem_positive = _make_memory(content="Python is good for web development and data science")
-        mem_negative = _make_memory(content="Python is not good for web development or data science")
+        mem_negative = _make_memory(
+            content="Python is not good for web development or data science"
+        )
 
         result = await analyzer._analyze_with_heuristic(mem_negative, [mem_positive])
 
@@ -196,8 +201,12 @@ class TestAnalyzeWithHeuristic:
 
     async def test_deduplication_finds_similar(self) -> None:
         analyzer = _make_analyzer(deduplication=True)
-        mem_existing = _make_memory(content="Python is a great programming language for building APIs")
-        mem_new = _make_memory(content="Python is a great programming language for building APIs and services")
+        mem_existing = _make_memory(
+            content="Python is a great programming language for building APIs"
+        )
+        mem_new = _make_memory(
+            content="Python is a great programming language for building APIs and services"
+        )
 
         result = await analyzer._analyze_with_heuristic(mem_new, [mem_existing])
         assert len(result["similar_to"]) > 0
@@ -312,6 +321,7 @@ class TestGetLlm:
         with patch.dict(sys.modules, {"openai": mock_openai_module}):
             result = await analyzer._get_llm()
         assert result is mock_openai_client
+
     async def test_falls_back_to_deepinfra(self) -> None:
         analyzer = _make_analyzer(llm_provider="deepinfra")
         del analyzer._system.ai_router
@@ -324,6 +334,7 @@ class TestGetLlm:
         with patch.dict(sys.modules, {"openai": mock_openai_module}):
             result = await analyzer._get_llm()
         assert result is mock_client
+
     async def test_returns_none_when_no_provider(self) -> None:
         analyzer = _make_analyzer(llm_provider="local")
         del analyzer._system.ai_router
@@ -365,7 +376,9 @@ class TestAnalyze:
 
         analysis = await analyzer.analyze(memory)
 
-        assert analysis.analysis_method == "llm"  # heuristic dict is truthy, so code sets method="llm"
+        assert (
+            analysis.analysis_method == "llm"
+        )  # heuristic dict is truthy, so code sets method="llm"
         assert analysis.importance == 0.7  # "bug" keyword
 
     async def test_analyze_with_llm_success(self) -> None:
@@ -391,9 +404,7 @@ class TestAnalyze:
 
     async def test_deduplication_runs_when_no_llm_similar(self) -> None:
         """When dedup enabled and LLM didn't find similar, _find_similar_memories is called."""
-        analyzer = _make_analyzer(
-            auto_importance=True, deduplication=True
-        )
+        analyzer = _make_analyzer(auto_importance=True, deduplication=True)
         analyzer._analyze_with_llm = AsyncMock(
             return_value={
                 "importance": 0.5,

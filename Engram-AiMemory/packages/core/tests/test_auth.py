@@ -7,7 +7,7 @@ Only mocks get_settings for require_auth dependency tests.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -88,8 +88,8 @@ class TestCreateAccessToken:
     def test_custom_expire_hours(self) -> None:
         token = create_access_token({"sub": "charlie"}, TEST_SECRET, expire_hours=48)
         decoded = jwt.decode(token, TEST_SECRET, algorithms=[ALGORITHM])
-        exp = datetime.fromtimestamp(decoded["exp"], tz=timezone)
-        iat = datetime.fromtimestamp(decoded["iat"], tz=timezone)
+        exp = datetime.fromtimestamp(decoded["exp"], tz=timezone.utc)
+        iat = datetime.fromtimestamp(decoded["iat"], tz=timezone.utc)
         # Expiry should be ~48h after issued-at
         diff = exp - iat
         assert timedelta(hours=47) < diff < timedelta(hours=49)
@@ -112,8 +112,8 @@ class TestDecodeAccessToken:
         # Create a manually expired token
         payload = {
             "sub": "frank",
-            "exp": datetime.now(timezone) - timedelta(hours=1),
-            "iat": datetime.now(timezone) - timedelta(hours=2),
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1),
+            "iat": datetime.now(timezone.utc) - timedelta(hours=2),
         }
         expired_token = jwt.encode(payload, TEST_SECRET, algorithm=ALGORITHM)
         with pytest.raises(ValueError, match="Token has expired"):
@@ -205,8 +205,8 @@ class TestRequireAuth:
     async def test_expired_jwt_raises_401(self) -> None:
         payload = {
             "sub": "expired-user",
-            "exp": datetime.now(timezone) - timedelta(hours=1),
-            "iat": datetime.now(timezone) - timedelta(hours=2),
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1),
+            "iat": datetime.now(timezone.utc) - timedelta(hours=2),
         }
         expired_token = jwt.encode(payload, TEST_SECRET, algorithm=ALGORITHM)
         bearer = MagicMock()

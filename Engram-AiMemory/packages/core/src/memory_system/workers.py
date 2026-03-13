@@ -155,7 +155,6 @@ class MaintenanceScheduler:
             coalesce=True,
         )
 
-
         # Job 7: Confidence maintenance (daily at 4am)
         self._scheduler.add_job(
             self._job_confidence_maintenance,
@@ -166,7 +165,6 @@ class MaintenanceScheduler:
             max_instances=1,
             coalesce=True,
         )
-
 
         # Job 8: Timeline event extraction (daily at 5am)
         self._scheduler.add_job(
@@ -207,6 +205,7 @@ class MaintenanceScheduler:
         """Use AIRouter to score importance. Returns (score, reason)."""
         from memory_system.ai_provider import TaskComplexity
         from memory_system.ollama_client import IMPORTANCE_PROMPT
+
         prompt = IMPORTANCE_PROMPT.format(content=content[:2000])
         raw = await self._ai_router.chat_completion(  # type: ignore[union-attr]
             messages=[{"role": "user", "content": prompt}],
@@ -217,6 +216,7 @@ class MaintenanceScheduler:
         )
         try:
             from memory_system.ollama_client import OllamaClient
+
             data = OllamaClient(host="")._extract_json(raw)  # reuse JSON extractor
             importance = float(data.get("importance", 0.5))
             reason = data.get("reason", "")
@@ -230,6 +230,7 @@ class MaintenanceScheduler:
             return None
         from memory_system.ai_provider import TaskComplexity
         from memory_system.ollama_client import SUMMARIZATION_PROMPT
+
         prompt = SUMMARIZATION_PROMPT.format(content=content[:4000])
         try:
             summary = await self._ai_router.chat_completion(  # type: ignore[union-attr]
@@ -247,6 +248,7 @@ class MaintenanceScheduler:
         """Use AIRouter for contradiction detection. Returns same dict shape as OllamaClient."""
         from memory_system.ai_provider import TaskComplexity
         from memory_system.ollama_client import CONTRADICTION_PROMPT
+
         prompt = CONTRADICTION_PROMPT.format(memory_a=content_a[:1500], memory_b=content_b[:1500])
         try:
             raw = await self._ai_router.chat_completion(  # type: ignore[union-attr]
@@ -257,6 +259,7 @@ class MaintenanceScheduler:
                 complexity=TaskComplexity.STANDARD,
             )
             from memory_system.ollama_client import OllamaClient
+
             data = OllamaClient(host="")._extract_json(raw)
             return {
                 "contradicts": bool(data.get("contradicts", False)),
@@ -265,12 +268,18 @@ class MaintenanceScheduler:
                 "reason": data.get("reason", ""),
             }
         except Exception:
-            return {"contradicts": False, "confidence": 0.0, "more_likely_correct": "neither", "reason": ""}
+            return {
+                "contradicts": False,
+                "confidence": 0.0,
+                "more_likely_correct": "neither",
+                "reason": "",
+            }
 
     async def _router_extract_entities(self, content: str) -> list[dict]:
         """Use AIRouter for entity extraction. Returns same list shape as OllamaClient."""
         from memory_system.ai_provider import TaskComplexity
         from memory_system.ollama_client import ENTITY_EXTRACTION_PROMPT
+
         prompt = ENTITY_EXTRACTION_PROMPT.format(content=content[:2000])
         try:
             raw = await self._ai_router.chat_completion(  # type: ignore[union-attr]
@@ -281,16 +290,19 @@ class MaintenanceScheduler:
                 complexity=TaskComplexity.SIMPLE,
             )
             from memory_system.ollama_client import OllamaClient
+
             data = OllamaClient(host="")._extract_json(raw)
             entities = data.get("entities", [])
             valid = []
             for e in entities:
                 if isinstance(e, dict) and "name" in e and "type" in e:
-                    valid.append({
-                        "name": str(e["name"]),
-                        "type": str(e.get("type", "CONCEPT")),
-                        "confidence": float(e.get("confidence", 0.7)),
-                    })
+                    valid.append(
+                        {
+                            "name": str(e["name"]),
+                            "type": str(e.get("type", "CONCEPT")),
+                            "confidence": float(e.get("confidence", 0.7)),
+                        }
+                    )
             return valid
         except Exception:
             return []
@@ -299,9 +311,9 @@ class MaintenanceScheduler:
         """Use AIRouter to consolidate memories. Returns merged content or None."""
         from memory_system.ai_provider import TaskComplexity
         from memory_system.ollama_client import CONSOLIDATION_PROMPT
+
         memories_list = "\n\n".join(
-            f"Memory {i + 1}: {content[:1000]}"
-            for i, content in enumerate(memory_contents[:5])
+            f"Memory {i + 1}: {content[:1000]}" for i, content in enumerate(memory_contents[:5])
         )
         prompt = CONSOLIDATION_PROMPT.format(memories_list=memories_list)
         try:
@@ -315,6 +327,7 @@ class MaintenanceScheduler:
             return result if result else None
         except Exception:
             return None
+
     # -------------------------------------------------------------------------
     # Job implementations
     # -------------------------------------------------------------------------
@@ -396,7 +409,10 @@ class MaintenanceScheduler:
 
     async def _job_detect_contradictions(self) -> None:
         """Detect contradictions between recent memories."""
-        if not (self._ai_router or self._ollama) or not self._ms.settings.contradiction_detection_enabled:
+        if (
+            not (self._ai_router or self._ollama)
+            or not self._ms.settings.contradiction_detection_enabled
+        ):
             return
 
         async with self._semaphore:
@@ -494,8 +510,6 @@ class MaintenanceScheduler:
             except Exception as e:
                 logger.error(f"entity_extraction job failed: {e}")
 
-
-
     async def _job_event_extraction(self) -> None:
         """Extract temporal events from recent unstructured memories."""
         if not self._ollama:
@@ -530,15 +544,23 @@ class MaintenanceScheduler:
                             tier=memory.tier,
                             fields={
                                 "is_event": True,
-                                "temporal_bounds": __import__('json').dumps({
-                                    "start_time": memory.temporal_bounds.start_time.isoformat() if memory.temporal_bounds.start_time else None,
-                                    "end_time": memory.temporal_bounds.end_time.isoformat() if memory.temporal_bounds.end_time else None,
-                                    "resolution": memory.temporal_bounds.resolution,
-                                    "is_ongoing": memory.temporal_bounds.is_ongoing,
-                                    "relative_to": memory.temporal_bounds.relative_to
-                                }) if memory.temporal_bounds else None
+                                "temporal_bounds": __import__("json").dumps(
+                                    {
+                                        "start_time": memory.temporal_bounds.start_time.isoformat()
+                                        if memory.temporal_bounds.start_time
+                                        else None,
+                                        "end_time": memory.temporal_bounds.end_time.isoformat()
+                                        if memory.temporal_bounds.end_time
+                                        else None,
+                                        "resolution": memory.temporal_bounds.resolution,
+                                        "is_ongoing": memory.temporal_bounds.is_ongoing,
+                                        "relative_to": memory.temporal_bounds.relative_to,
+                                    }
+                                )
+                                if memory.temporal_bounds
+                                else None,
                             },
-                            tenant_id=memory.tenant_id
+                            tenant_id=memory.tenant_id,
                         )
                         total_extracted += 1
 
@@ -569,6 +591,7 @@ class MaintenanceScheduler:
                         try:
                             from memory_system.temporal import TemporalExtractor
                             from memory_system.decay import MemoryDecay
+
                             decay_calc = MemoryDecay(half_life_days=half_life)
                             new_decay = decay_calc.calculate_decay(
                                 created_at=memory.created_at,
@@ -576,7 +599,7 @@ class MaintenanceScheduler:
                                 access_count=memory.access_count,
                                 access_boost=access_boost,
                                 min_importance=min_importance,
-                                now=now
+                                now=now,
                             )
 
                             await self._ms._weaviate.update_memory_fields(
@@ -588,6 +611,7 @@ class MaintenanceScheduler:
                             total_updated += 1
                         except Exception as e:
                             import logging
+
                             logger = logging.getLogger(__name__)
                             logger.warning(f"Decay update failed for {memory.id}: {e}")
 
@@ -598,10 +622,12 @@ class MaintenanceScheduler:
                 self._stats["memories_decayed"] = total_updated
                 self._stats["jobs_run"] += 1
                 import logging
+
                 logger = logging.getLogger(__name__)
                 logger.info(f"Updated decay for {total_updated} memories")
             except Exception as e:
                 import logging
+
                 logger = logging.getLogger(__name__)
                 logger.error(f"decay_update job failed: {e}")
 
@@ -718,3 +744,13 @@ class MaintenanceScheduler:
                 self._stats["jobs_run"] += 1
             except Exception as e:
                 logger.error(f"delete_expired job failed: {e}")
+
+    async def _job_confidence_maintenance(self) -> None:
+        """Placeholder for confidence maintenance job."""
+        async with self._semaphore:
+            self._stats["last_run"]["confidence_maintenance"] = datetime.now(UTC).isoformat()
+            try:
+                logger.info("Confidence maintenance job ran (placeholder)")
+                self._stats["jobs_run"] += 1
+            except Exception as e:
+                logger.error(f"confidence_maintenance job failed: {e}")

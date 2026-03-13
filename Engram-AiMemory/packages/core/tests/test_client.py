@@ -8,7 +8,7 @@ and knowledge graph operations WITHOUT requiring a live Weaviate instance.
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
@@ -76,6 +76,8 @@ def _make_memory(**overrides) -> Memory:
         confidence=1.0,
         tags=["test"],
         vector=[0.1] * 768,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
     )
     defaults.update(overrides)
     return Memory(**defaults)
@@ -102,8 +104,8 @@ def _make_weaviate_obj(
         "importance": 0.7,
         "confidence": 1.0,
         "tags": ["test"],
-        "created_at": datetime.now(timezone),
-        "updated_at": datetime.now(timezone),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "access_count": 0,
         "decay_factor": 1.0,
         "is_canonical": True,
@@ -132,8 +134,8 @@ def _make_entity_obj(uuid: str | None = None, props: dict | None = None) -> Magi
         "tenant_id": "default",
         "aliases": [],
         "metadata": "{}",
-        "created_at": datetime.now(timezone),
-        "updated_at": datetime.now(timezone),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
     }
     if props:
         default_props.update(props)
@@ -158,7 +160,7 @@ def _make_relation_obj(
         "project_id": "proj-1",
         "tenant_id": "default",
         "context": "test context",
-        "created_at": datetime.now(timezone),
+        "created_at": datetime.now(timezone.utc),
     }
     if props:
         default_props.update(props)
@@ -194,7 +196,7 @@ class TestInit:
 class TestMemoryToProperties:
     def test_converts_all_fields(self):
         client = _make_client()
-        memory = _make_memory(summary="A summary", expires_at=datetime.now(timezone))
+        memory = _make_memory(summary="A summary", expires_at=datetime.now())
         props = client._memory_to_properties(memory)
 
         assert props["content"] == "Test content"
@@ -249,8 +251,8 @@ class TestObjToMemory:
         # Provide only the fields Memory absolutely requires (content min_length=1, datetimes)
         obj.properties = {
             "content": "x",
-            "created_at": datetime.now(timezone),
-            "updated_at": datetime.now(timezone),
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
         }
         memory = client._obj_to_memory(obj, MemoryTier.GENERAL)
 
@@ -698,9 +700,7 @@ class TestUpdateMemoryFields:
         collection = MagicMock()
         client._client.collections.get.return_value = collection
 
-        result = await client.update_memory_fields(
-            uuid4(), MemoryTier.PROJECT, {"importance": 0.9}
-        )
+        result = await client.update_memory_fields(uuid4(), MemoryTier.PROJECT, {"importance": 0.9})
         assert result is True
         collection.data.update.assert_called_once()
 
@@ -710,9 +710,7 @@ class TestUpdateMemoryFields:
         collection.data.update.side_effect = RuntimeError("fail")
         client._client.collections.get.return_value = collection
 
-        result = await client.update_memory_fields(
-            uuid4(), MemoryTier.PROJECT, {"importance": 0.9}
-        )
+        result = await client.update_memory_fields(uuid4(), MemoryTier.PROJECT, {"importance": 0.9})
         assert result is False
 
     async def test_update_with_multitenancy(self):
@@ -741,9 +739,7 @@ class TestUpdateMemoryMetadata:
         client._client.collections.get.return_value = collection
 
         uid = uuid4()
-        result = await client.update_memory_metadata(
-            uid, MemoryTier.PROJECT, {"key": "val"}
-        )
+        result = await client.update_memory_metadata(uid, MemoryTier.PROJECT, {"key": "val"})
         assert result is True
         collection.data.update.assert_called_once()
 

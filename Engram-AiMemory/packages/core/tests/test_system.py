@@ -8,7 +8,7 @@ No live services required.
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
@@ -435,7 +435,7 @@ class TestAdd:
         call_args = system._weaviate.add_memory.call_args
         memory_arg = call_args[0][0]
         assert memory_arg.expires_at is not None
-        assert memory_arg.expires_at > datetime.now(timezone)
+        assert memory_arg.expires_at > datetime.now(timezone.utc)
 
     async def test_add_default_expiration_from_settings(self, system):
         system._cache.get_embedding = AsyncMock(return_value=None)
@@ -529,10 +529,12 @@ class TestAddBatch:
         ids = [uuid4(), uuid4()]
         system._weaviate.add_memories_batch = AsyncMock(return_value=(ids, []))
 
-        result_ids, failed = await system.add_batch([
-            {"content": "Memory 1"},
-            {"content": "Memory 2"},
-        ])
+        result_ids, failed = await system.add_batch(
+            [
+                {"content": "Memory 1"},
+                {"content": "Memory 2"},
+            ]
+        )
         assert result_ids == ids
         assert failed == 0
         system._cache.invalidate_stats.assert_awaited()
@@ -730,14 +732,9 @@ class TestConsolidate:
         system._nomic_embedder = None
         system._embedding_client = None
 
-        mems = [
-            _make_memory(content=f"Fact {i}", memory_type=MemoryType.FACT)
-            for i in range(4)
-        ]
+        mems = [_make_memory(content=f"Fact {i}", memory_type=MemoryType.FACT) for i in range(4)]
         # First call for consolidation, second for promotion
-        system._weaviate.find_consolidation_candidates = AsyncMock(
-            side_effect=[mems, []]
-        )
+        system._weaviate.find_consolidation_candidates = AsyncMock(side_effect=[mems, []])
         system._weaviate.add_memory = AsyncMock(return_value=uuid4())
 
         result = await system.consolidate(project_id="proj")
@@ -750,9 +747,7 @@ class TestConsolidate:
             await uninit_system.consolidate()
 
     async def test_consolidate_no_candidates(self, system):
-        system._weaviate.find_consolidation_candidates = AsyncMock(
-            side_effect=[[], []]
-        )
+        system._weaviate.find_consolidation_candidates = AsyncMock(side_effect=[[], []])
 
         result = await system.consolidate()
         assert result == 0

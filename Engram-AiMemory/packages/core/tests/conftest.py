@@ -77,8 +77,8 @@ def _make_mock_memory() -> Memory:
         confidence=0.9,
         tags=["test"],
         metadata={},
-        created_at=datetime.now(timezone),
-        updated_at=datetime.now(timezone),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
         expires_at=None,
     )
 
@@ -177,8 +177,8 @@ def mock_memory_system() -> MagicMock:
     mock_entity.tenant_id = "default"
     mock_entity.aliases = []
     mock_entity.metadata = {}
-    mock_entity.created_at = datetime.now(timezone)
-    mock_entity.updated_at = datetime.now(timezone)
+    mock_entity.created_at = datetime.now(timezone.utc)
+    mock_entity.updated_at = datetime.now(timezone.utc)
 
     system.add_entity = AsyncMock(return_value=entity_id)
     system.list_entities = AsyncMock(return_value=[mock_entity])

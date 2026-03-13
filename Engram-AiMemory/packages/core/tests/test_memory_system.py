@@ -1192,44 +1192,44 @@ class TestMemoryDecayScoring:
         from datetime import datetime, timezone
 
         decay = MemoryDecay(half_life_days=7)
-        now = datetime.now(timezone)
+        now = datetime.now(timezone.utc)
         assert decay.calculate_recency_score(now, now) == 1.0
 
     def test_half_life_gives_half_score(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
         decay = MemoryDecay(half_life_days=7)
-        now = datetime.now(timezone)
+        now = datetime.now(timezone.utc)
         created = now - timedelta(days=7)
         score = decay.calculate_recency_score(created, now)
         assert abs(score - 0.5) < 0.01
 
     def test_very_old_memory_near_zero(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
         decay = MemoryDecay(half_life_days=7)
-        now = datetime.now(timezone)
+        now = datetime.now(timezone.utc)
         created = now - timedelta(days=365)
         score = decay.calculate_recency_score(created, now)
         assert score < 0.01
 
     def test_future_memory_clamped_to_one(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
         decay = MemoryDecay(half_life_days=7)
-        now = datetime.now(timezone)
+        now = datetime.now(timezone.utc)
         future = now + timedelta(days=1)
         assert decay.calculate_recency_score(future, now) == 1.0
 
     def test_custom_half_life(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
         decay = MemoryDecay(half_life_days=30)
-        now = datetime.now(timezone)
+        now = datetime.now(timezone.utc)
         created = now - timedelta(days=30)
         score = decay.calculate_recency_score(created, now)
         assert abs(score - 0.5) < 0.01
@@ -1492,7 +1492,6 @@ class TestSystemRerankerLazyInit:
         assert system._get_reranker() is reranker  # Same instance
 
 
-
 class TestKnowledgeGraphModels:
     """Tests for knowledge graph data models (KnowledgeEntity, KnowledgeRelation, GraphQueryResult)."""
 
@@ -1742,15 +1741,16 @@ class TestGraphSystemDelegates:
         assert GraphQueryResult is not None
 
 
-
 class TestMemorySystemModels:
     """Tests for new API request/response models."""
 
     def test_list_memories_request_validation(self):
         """ListMemoriesRequest validates limit bounds."""
         from pydantic import ValidationError
+
         # This import will fail until we add the model -- that's the point
         from memory_system.api import ListMemoriesRequest
+
         req = ListMemoriesRequest(tenant_id="t1", limit=50)
         assert req.limit == 50
         assert req.offset == 0
@@ -1761,6 +1761,7 @@ class TestMemorySystemModels:
     def test_list_entities_response_model(self):
         """ListEntitiesResponse validates correctly."""
         from memory_system.api import ListEntitiesResponse
+
         resp = ListEntitiesResponse(entities=[], count=0, limit=50, offset=0)
         assert resp.count == 0
 
@@ -1796,7 +1797,7 @@ class TestListMemoriesPagination:
                 importance=0.5,
                 confidence=1.0,
                 tags=[],
-                created_at=datetime.now(timezone),
+                created_at=datetime.now(timezone.utc),
                 score=0.0,
                 distance=None,
             )
@@ -1845,7 +1846,7 @@ class TestListMemoriesPagination:
                 importance=0.7,
                 confidence=0.9,
                 tags=["tag"],
-                created_at=datetime.now(timezone),
+                created_at=datetime.now(timezone.utc),
                 score=0.0,
                 distance=None,
             )
@@ -1895,12 +1896,14 @@ class TestAuthSettings:
     def test_api_keys_default_empty(self):
         """API_KEYS defaults to empty list (no auth required if not set)."""
         from memory_system.config import Settings
+
         s = Settings(_env_file=None, api_keys=[])
         assert s.api_keys == []
 
     def test_jwt_secret_accepts_secure_value(self):
         """JWT_SECRET accepts a secure random-like value."""
         from memory_system.config import Settings
+
         secure_secret = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         s = Settings(_env_file=None, jwt_secret=secure_secret)
         assert s.jwt_secret == secure_secret
@@ -1908,24 +1911,28 @@ class TestAuthSettings:
     def test_jwt_expire_hours_default(self):
         """JWT_EXPIRE_HOURS defaults to 24."""
         from memory_system.config import Settings
+
         s = Settings()
         assert s.jwt_expire_hours == 24
 
     def test_admin_username_default(self):
         """ADMIN_USERNAME defaults to 'admin'."""
         from memory_system.config import Settings
+
         s = Settings()
         assert s.admin_username == "admin"
 
     def test_admin_password_hash_default_none(self):
         """ADMIN_PASSWORD_HASH defaults to None (login disabled until set)."""
         from memory_system.config import Settings
+
         s = Settings()
         assert s.admin_password_hash is None
 
     def test_rate_limit_default(self):
         """RATE_LIMIT_PER_MINUTE defaults to 100."""
         from memory_system.config import Settings
+
         s = Settings(_env_file=None, rate_limit_per_minute=100)
         assert s.rate_limit_per_minute == 100
 
@@ -1933,21 +1940,23 @@ class TestAuthSettings:
         """Empty ADMIN_PASSWORD_HASH env var is treated as None (login disabled)."""
         monkeypatch.setenv("ADMIN_PASSWORD_HASH", "")
         from memory_system.config import Settings
+
         s = Settings()
         assert s.admin_password_hash is None
 
     def test_api_keys_parsed_from_comma_string(self, monkeypatch):
         monkeypatch.setenv("API_KEYS", "key1, key2 , , key3")
         from memory_system.config import Settings
+
         s = Settings()
         assert s.api_keys == ["key1", "key2", "key3"]
 
     def test_api_keys_empty_string_gives_empty_list(self, monkeypatch):
         monkeypatch.setenv("API_KEYS", "")
         from memory_system.config import Settings
+
         s = Settings()
         assert s.api_keys == []
-
 
 
 class TestAuthModule:
@@ -1956,6 +1965,7 @@ class TestAuthModule:
     def test_create_access_token_returns_string(self):
         """create_access_token returns a non-empty string."""
         from memory_system.auth import create_access_token
+
         token = create_access_token({"sub": "admin"}, secret="test-secret", expire_hours=1)
         assert isinstance(token, str)
         assert len(token) > 0
@@ -1963,6 +1973,7 @@ class TestAuthModule:
     def test_create_access_token_is_decodable(self):
         """Token created by create_access_token can be decoded back."""
         from memory_system.auth import create_access_token, decode_access_token
+
         token = create_access_token({"sub": "testuser"}, secret="test-secret", expire_hours=1)
         payload = decode_access_token(token, secret="test-secret")
         assert payload["sub"] == "testuser"
@@ -1970,10 +1981,12 @@ class TestAuthModule:
     def test_decode_expired_token_raises(self):
         """decode_access_token raises ValueError for expired tokens."""
         from memory_system.auth import decode_access_token
+
         # expire_hours=0 is invalid but we can create a token with past expiry manually
         from jose import jwt
-        from datetime import datetime, timedelta
-        payload = {"sub": "admin", "exp": datetime.now(timezone) - timedelta(hours=1)}
+        from datetime import datetime, timedelta, timezone
+
+        payload = {"sub": "admin", "exp": datetime.now(timezone.utc) - timedelta(hours=1)}
         expired_token = jwt.encode(payload, "test-secret", algorithm="HS256")
         with pytest.raises(ValueError, match="expired"):
             decode_access_token(expired_token, secret="test-secret")
@@ -1981,39 +1994,46 @@ class TestAuthModule:
     def test_decode_invalid_token_raises(self):
         """decode_access_token raises ValueError for garbage tokens."""
         from memory_system.auth import decode_access_token
+
         with pytest.raises(ValueError):
             decode_access_token("not.a.valid.token", secret="test-secret")
 
     def test_verify_api_key_valid(self):
         """verify_api_key returns True when key is in allowed list."""
         from memory_system.auth import check_api_key
+
         assert check_api_key("valid-key", allowed_keys=["valid-key", "other-key"]) is True
 
     def test_verify_api_key_invalid(self):
         """verify_api_key returns False when key is not in allowed list."""
         from memory_system.auth import check_api_key
+
         assert check_api_key("bad-key", allowed_keys=["valid-key"]) is False
 
     def test_verify_api_key_empty_list_returns_false(self):
         """verify_api_key returns False when allowed_keys is empty."""
         from memory_system.auth import check_api_key
+
         assert check_api_key("any-key", allowed_keys=[]) is False
 
     def test_hash_password_returns_bcrypt_hash(self):
         """hash_password returns a bcrypt hash string."""
         from memory_system.auth import hash_password
+
         hashed = hash_password("mypassword")
         assert hashed.startswith("$2b$") or hashed.startswith("$2a$")
 
     def test_verify_password_correct(self):
         """verify_password returns True for correct password."""
         from memory_system.auth import hash_password, verify_password
+
         hashed = hash_password("correct")
         assert verify_password("correct", hashed) is True
 
     def test_verify_password_wrong(self):
         """verify_password returns False for wrong password."""
         from memory_system.auth import hash_password, verify_password
+
         hashed = hash_password("correct")
         assert verify_password("wrong", hashed) is False
 
@@ -2024,18 +2044,21 @@ class TestAuthAPIEndpoints:
     def test_login_endpoint_exists(self):
         """POST /auth/login route is registered."""
         from memory_system.api import app
+
         routes = {r.path for r in app.routes}
         assert "/auth/login" in routes
 
     def test_refresh_endpoint_exists(self):
         """POST /auth/refresh route is registered."""
         from memory_system.api import app
+
         routes = {r.path for r in app.routes}
         assert "/auth/refresh" in routes
 
     def test_login_request_model_has_username_and_password(self):
         """LoginRequest model has username and password fields."""
         from memory_system.api import LoginRequest
+
         fields = LoginRequest.model_fields
         assert "username" in fields
         assert "password" in fields
@@ -2043,6 +2066,7 @@ class TestAuthAPIEndpoints:
     def test_login_response_model_has_access_token(self):
         """LoginResponse model has access_token and expires_in fields."""
         from memory_system.api import LoginResponse
+
         fields = LoginResponse.model_fields
         assert "access_token" in fields
         assert "expires_in" in fields
@@ -2051,6 +2075,7 @@ class TestAuthAPIEndpoints:
         """GET /health route has no require_auth dependency."""
         from memory_system.api import app
         from memory_system.auth import require_auth
+
         for route in app.routes:
             if hasattr(route, "path") and route.path == "/health":
                 deps = getattr(route, "dependencies", [])
@@ -2061,6 +2086,7 @@ class TestAuthAPIEndpoints:
         """GET /stats route has require_auth dependency."""
         from memory_system.api import app
         from memory_system.auth import require_auth
+
         for route in app.routes:
             if hasattr(route, "path") and route.path == "/stats":
                 deps = getattr(route, "dependencies", [])
@@ -2071,6 +2097,7 @@ class TestAuthAPIEndpoints:
         """POST /memories route has require_auth dependency."""
         from memory_system.api import app
         from memory_system.auth import require_auth
+
         for route in app.routes:
             if hasattr(route, "path") and route.path == "/memories":
                 if hasattr(route, "methods") and "POST" in route.methods:
@@ -2085,12 +2112,14 @@ class TestRateLimiting:
     def test_limiter_attached_to_app(self):
         """App has a slowapi limiter in its state."""
         from memory_system.api import app
+
         assert hasattr(app.state, "limiter")
 
     def test_rate_limit_exception_handler_registered(self):
         """App has a handler for RateLimitExceeded."""
         from slowapi.errors import RateLimitExceeded
         from memory_system.api import app
+
         assert RateLimitExceeded in app.exception_handlers
 
 
