@@ -1,7 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { test, vi } from 'vitest';
 import { DashboardClient } from './DashboardClient';
-
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -25,7 +24,6 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
-
 // Mock Next.js routing hooks
 vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/dashboard'),
@@ -37,15 +35,15 @@ vi.mock('@/src/hooks/useHealthPolling', () => ({
     crawlerHealth: 'healthy',
     memoryError: null,
     crawlerError: null,
-    isInitialLoading: false
-  })
+    isInitialLoading: false,
+  }),
 }));
 
 test('renders DashboardClient without crashing', async () => {
   render(
     <DashboardClient>
       <div data-testid="dashboard-content">Dashboard Content</div>
-    </DashboardClient>
+    </DashboardClient>,
   );
 
   await screen.findByTestId('dashboard-content');

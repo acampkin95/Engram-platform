@@ -41,7 +41,11 @@ vi.mock('@/src/hooks/useURLState', () => ({
 }));
 
 vi.mock('@/src/components/FilterBar', () => ({
-  FilterBar: ({ onFiltersChange }: { onFiltersChange: (filters: { search?: string; status?: string }) => void }) => (
+  FilterBar: ({
+    onFiltersChange,
+  }: {
+    onFiltersChange: (filters: { search?: string; status?: string }) => void;
+  }) => (
     <button
       type="button"
       data-testid="filter-change"

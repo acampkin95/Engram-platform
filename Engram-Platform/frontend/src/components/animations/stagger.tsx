@@ -149,6 +149,7 @@ export function StaggerItem({ children, className = '', variant = 'default' }: S
 interface StaggerListProps<T> {
   items: T[];
   renderItem: (item: T, index: number) => ReactNode;
+  keyExtractor?: (item: T, index: number) => string | number;
   className?: string;
   itemClassName?: string;
   variant?: 'default' | 'fast' | 'card';
@@ -157,6 +158,7 @@ interface StaggerListProps<T> {
 export function StaggerList<T>({
   items,
   renderItem,
+  keyExtractor,
   className = '',
   itemClassName = '',
   variant = 'default',
@@ -164,7 +166,11 @@ export function StaggerList<T>({
   return (
     <StaggerContainer className={className} variant={variant}>
       {items.map((item, index) => (
-        <StaggerItem key={index} className={itemClassName} variant={variant}>
+        <StaggerItem
+          key={keyExtractor ? keyExtractor(item, index) : index}
+          className={itemClassName}
+          variant={variant}
+        >
           {renderItem(item, index)}
         </StaggerItem>
       ))}

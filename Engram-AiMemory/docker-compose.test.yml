@@ -1,0 +1,64 @@
+# Docker Compose for isolated Weaviate testing
+# Usage: docker-compose -f docker-compose.test.yml up -d
+
+version: "3.8"
+
+services:
+  weaviate-test:
+    image: semitechnologies/weaviate:1.24.0
+    container_name: engram-weaviate-test
+    ports:
+      - "18080:8080"
+      - "15051:50051"
+    volumes:
+      - weaviate-test-data:/var/lib/weaviate
+    environment:
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      DEFAULT_VECTORIZER_MODULE: "none"
+      ENABLE_MODULES: ""
+      QUERY_MAXIMUM_RESULTS: "1000"
+      QUERY_DEFAULTS_LIMIT: "100"
+      LOG_LEVEL: "warning"
+      LOG_FORMAT: "text"
+      GRPC_PORT: "50051"
+      GRPC_ADDRESS: "0.0.0.0"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/v1/.well-known/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - engram-test-network
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: engram-redis-test
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis-test-data:/data
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - engram-test-network
+
+volumes:
+  weaviate-test-data:
+  redis-test-data:
+
+networks:
+  engram-test-network:
+    driver: bridge

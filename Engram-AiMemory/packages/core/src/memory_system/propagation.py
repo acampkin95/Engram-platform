@@ -1,7 +1,4 @@
-import asyncio
-from datetime import UTC, datetime
 
-from memory_system.memory import Memory
 
 
 class ConfidencePropagator:
@@ -29,7 +26,7 @@ class ConfidencePropagator:
             return {"status": "evidence_not_resolvable"}
 
         avg_evidence_confidence = sum(evidence_confidences) / len(evidence_confidences)
-        
+
         # Dampened update
         current_conf = seed_memory.overall_confidence
         new_conf = min(1.0, (current_conf * 0.7) + (avg_evidence_confidence * 0.3))

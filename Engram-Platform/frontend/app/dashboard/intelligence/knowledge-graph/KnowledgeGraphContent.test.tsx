@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { test, vi } from 'vitest';
 import KnowledgeGraphContent from './KnowledgeGraphContent';
 
 // Mock matchMedia
@@ -29,19 +29,19 @@ vi.mock('@xyflow/react', () => ({
   Background: () => null,
   Panel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Handle: () => null,
-  Position: { Top: 'top', Bottom: 'bottom', Left: 'left', Right: 'right' }
+  Position: { Top: 'top', Bottom: 'bottom', Left: 'left', Right: 'right' },
 }));
 
 vi.mock('swr', () => ({
-  default: vi.fn((key: string) => {
+  default: vi.fn((_key: string) => {
     return {
       data: {
         entities: [{ id: '1', name: 'Test Entity', type: 'Entity', properties: {} }],
-        relationships: []
+        relationships: [],
       },
       error: null,
       isLoading: false,
-      mutate: vi.fn()
+      mutate: vi.fn(),
     };
   }),
 }));

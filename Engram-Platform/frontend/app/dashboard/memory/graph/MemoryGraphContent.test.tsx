@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
-import MemoryGraphContent from './MemoryGraphContent';
 import { useUIStore } from '@/src/stores/uiStore';
+import MemoryGraphContent from './MemoryGraphContent';
 
 vi.mock('@/src/stores/uiStore', () => {
   let state = {
@@ -12,10 +12,14 @@ vi.mock('@/src/stores/uiStore', () => {
     selectedEntityId: null as string | null,
   };
 
-  const hook = ((selector: (value: typeof state & {
-    setSelectedEntityId: (entityId: string | null) => void;
-    clearSelectedEntity: () => void;
-  }) => unknown) =>
+  const hook = ((
+    selector: (
+      value: typeof state & {
+        setSelectedEntityId: (entityId: string | null) => void;
+        clearSelectedEntity: () => void;
+      },
+    ) => unknown,
+  ) =>
     selector({
       ...state,
       setSelectedEntityId: (selectedEntityId: string | null) => {
@@ -52,18 +56,20 @@ Object.defineProperty(window, 'matchMedia', {
 // Mock @xyflow/react
 vi.mock('@xyflow/react', () => ({
   ReactFlowProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  ReactFlow: vi.fn((props: { onNodeClick?: (event: React.MouseEvent, node: { id: string }) => void }) => (
-    <div>
-      <div data-testid="react-flow-mock">Graph</div>
-      <button
-        type="button"
-        data-testid="graph-node-1"
-        onClick={() => props.onNodeClick?.({} as React.MouseEvent, { id: '1' })}
-      >
-        Select Node
-      </button>
-    </div>
-  )),
+  ReactFlow: vi.fn(
+    (props: { onNodeClick?: (event: React.MouseEvent, node: { id: string }) => void }) => (
+      <div>
+        <div data-testid="react-flow-mock">Graph</div>
+        <button
+          type="button"
+          data-testid="graph-node-1"
+          onClick={() => props.onNodeClick?.({} as React.MouseEvent, { id: '1' })}
+        >
+          Select Node
+        </button>
+      </div>
+    ),
+  ),
   useReactFlow: () => ({ setNodes: vi.fn(), getNodes: vi.fn(() => []), getEdges: vi.fn(() => []) }),
   useNodesState: () => [[], vi.fn(), vi.fn()],
   useEdgesState: () => [[], vi.fn(), vi.fn()],
@@ -72,12 +78,17 @@ vi.mock('@xyflow/react', () => ({
   Background: () => null,
   Panel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Handle: () => null,
-  Position: { Top: 'top', Bottom: 'bottom', Left: 'left', Right: 'right' }
+  Position: { Top: 'top', Bottom: 'bottom', Left: 'left', Right: 'right' },
 }));
 
 vi.mock('swr', () => ({
   default: vi.fn(() => ({
-    data: { data: { entities: [{ id: '1', name: 'Test Entity', type: 'Entity', properties: {} }], relations: [] } },
+    data: {
+      data: {
+        entities: [{ id: '1', name: 'Test Entity', type: 'Entity', properties: {} }],
+        relations: [],
+      },
+    },
     error: null,
     isLoading: false,
     mutate: vi.fn(),

@@ -43,7 +43,7 @@ class EntityExtractionWorker:
         Returns summary: {'chunks_processed': int, 'persons_found': int, 'orgs_found': int}
         """
         from memory_system.config import EVIDENCE_DOCUMENT
-        from memory_system.investigation.models import SubjectPersonCreate, SubjectOrgCreate
+        from memory_system.investigation.models import SubjectOrgCreate, SubjectPersonCreate
 
         self._matter_client.ensure_tenant_active(matter_id, EVIDENCE_DOCUMENT)
         collection = self._client.collections.get(EVIDENCE_DOCUMENT)
@@ -434,9 +434,7 @@ class IntelligenceReportWorker:
         Returns the report as a dict.
         When ai_router is set, adds a 'narrative' key with LLM executive summary.
         """
-        from memory_system.config import (
-            EVIDENCE_DOCUMENT, TIMELINE_EVENT, INTELLIGENCE_REPORT
-        )
+        from memory_system.config import EVIDENCE_DOCUMENT, INTELLIGENCE_REPORT, TIMELINE_EVENT
 
         # Gather data
         self._matter_client.ensure_tenant_active(matter_id, EVIDENCE_DOCUMENT)

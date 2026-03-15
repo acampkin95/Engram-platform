@@ -1,8 +1,8 @@
 'use client';
-import { FadeIn, SlideIn } from '@/src/components/Animations';
 
 import { Activity, BarChart2, Brain, FolderSearch, Globe, Server, Zap } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { FadeIn, SlideIn } from '@/src/components/Animations';
 import type { GridItem } from '@/src/components/DraggableGrid';
 import { DraggableGrid, useGridLayout } from '@/src/components/DraggableGrid';
 import { SkeletonDashboardHome } from '@/src/components/Skeletons';

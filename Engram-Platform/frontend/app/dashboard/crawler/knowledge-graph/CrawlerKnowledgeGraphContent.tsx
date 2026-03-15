@@ -291,18 +291,12 @@ export default function CrawlerKnowledgeGraphContent() {
               if (entries.length === 0) return null;
               return (
                 <div className="space-y-1.5 text-xs mt-3 pt-3 border-t border-white/[0.06]">
-                  {entries.map(
-                    ([key, val]) => (
-                      <div key={key} className="flex flex-col gap-0.5 mb-2">
-                        <span className="text-[10px] font-mono text-[#5c5878] uppercase">
-                          {key}
-                        </span>
-                        <span className="text-[#a09bb8] break-words">
-                          {String(val)}
-                        </span>
-                      </div>
-                    ),
-                  )}
+                  {entries.map(([key, val]) => (
+                    <div key={key} className="flex flex-col gap-0.5 mb-2">
+                      <span className="text-[10px] font-mono text-[#5c5878] uppercase">{key}</span>
+                      <span className="text-[#a09bb8] break-words">{String(val)}</span>
+                    </div>
+                  ))}
                 </div>
               );
             })()}

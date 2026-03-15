@@ -6,29 +6,22 @@ import {
   type Edge,
   MiniMap,
   type Node,
-  type OnEdgesChange,
-  type OnNodesChange,
   type NodeProps,
   ReactFlow,
   ReactFlowProvider,
-  useEdgesState,
-  useNodesState,
 } from '@xyflow/react';
 import { GitBranch, Layers, Network, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { swrKeys } from '@/src/lib/swr-keys';
 import '@xyflow/react/dist/style.css';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Badge } from '@/src/design-system/components/Badge';
 import { Button } from '@/src/design-system/components/Button';
-import { Tooltip } from '@/src/design-system/components/Tooltip';
-import { addToast } from '@/src/design-system/components/Toast';
-import { motion, AnimatePresence } from 'framer-motion';
 import { EmptyState } from '@/src/design-system/components/EmptyState';
 import { ErrorState } from '@/src/design-system/components/ErrorState';
 import { LoadingState } from '@/src/design-system/components/LoadingState';
 import { SectionHeader } from '@/src/design-system/components/SectionHeader';
-import { useForceLayout } from '@/src/hooks/useForceLayout';
 import { type Entity, type Matter, memoryClient, type Relation } from '@/src/lib/memory-client';
 import { useUIStore } from '@/src/stores/uiStore';
 
@@ -56,17 +49,25 @@ function EntityNode({ data, selected }: NodeProps<Node<EntityNodeData>>) {
           : 'none',
       }}
     >
-      <div className="text-[11px] font-mono mb-0.5 uppercase tracking-wider" style={{ color: 'var(--color-teal)' }}>
+      <div
+        className="text-[11px] font-mono mb-0.5 uppercase tracking-wider"
+        style={{ color: 'var(--color-teal)' }}
+      >
         {data.entityType}
       </div>
-      <div className="text-[#f0eef8] font-medium text-xs leading-tight max-w-[160px] truncate">{data.label}</div>
+      <div className="text-[#f0eef8] font-medium text-xs leading-tight max-w-[160px] truncate">
+        {data.label}
+      </div>
     </div>
   );
 }
 
 const nodeTypes = { entity: EntityNode };
 
-function transformToFlow(entities: Entity[], relations: Relation[]): { nodes: Node[]; edges: Edge[] } {
+function transformToFlow(
+  entities: Entity[],
+  relations: Relation[],
+): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = entities.map((entity) => ({
     id: entity.entity_id,
     type: 'entity',
@@ -109,7 +110,6 @@ interface EntityDetailPanelProps {
 }
 
 function EntityDetailPanel({ entity, onClose }: EntityDetailPanelProps) {
-  const [isRelViewerOpen, setIsRelViewerOpen] = useState(false);
   const properties = entity.properties ?? {};
   const propertyEntries = Object.entries(properties);
 
@@ -134,18 +134,24 @@ function EntityDetailPanel({ entity, onClose }: EntityDetailPanelProps) {
 
       <div className="p-4 space-y-4 overflow-y-auto flex-1">
         <div>
-          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-1.5">Entity Type</p>
+          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-1.5">
+            Entity Type
+          </p>
           <Badge variant="memory">{entity.entity_type}</Badge>
         </div>
 
         <div>
-          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-1">Entity ID</p>
+          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-1">
+            Entity ID
+          </p>
           <p className="text-xs font-mono text-[#a09bb8] break-all">{entity.entity_id}</p>
         </div>
 
         {propertyEntries.length > 0 && (
           <div>
-            <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-2">Properties</p>
+            <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-2">
+              Properties
+            </p>
             <dl className="space-y-1.5">
               {propertyEntries.map(([key, value]) => (
                 <div key={key} className="flex flex-col gap-0.5">
@@ -171,109 +177,14 @@ function EntityDetailPanel({ entity, onClose }: EntityDetailPanelProps) {
         </div>
 
         <div className="pt-4 border-t border-[#1e1e3a] mt-4">
-          <Button variant="secondary" className="w-full justify-center gap-2" onClick={() => setIsRelViewerOpen(true)}>
+          <Button
+            variant="secondary"
+            className="w-full justify-center gap-2"
+            onClick={() => setIsRelViewerOpen(true)}
+          >
             <Network className="w-4 h-4" />
             Explore Relationships
           </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface RelationshipViewerModalProps {
-  entity: Entity;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-function RelationshipViewerModal({ entity, isOpen, onClose }: RelationshipViewerModalProps) {
-  const { data: graphData, isLoading } = useSWR(
-    isOpen ? `memory-graph-${entity.entity_id}` : null,
-    () => memoryClient.getKnowledgeGraph(),
-  );
-
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
-
-  useEffect(() => {
-    if (graphData?.data) {
-      const relatedEdges = (graphData.data.relations || []).filter(
-        (r) => r.source_id === entity.entity_id || r.target_id === entity.entity_id,
-      );
-
-      const relatedEntityIds = new Set<string>();
-      relatedEntityIds.add(entity.entity_id);
-
-      relatedEdges.forEach((r) => {
-        relatedEntityIds.add(r.source_id);
-        relatedEntityIds.add(r.target_id);
-      });
-
-      const relatedEntities = (graphData.data.entities || []).filter((e) => relatedEntityIds.has(e.entity_id));
-
-      const { nodes: n, edges: e } = transformToFlow(relatedEntities, relatedEdges);
-
-      const rootNode = n.find((node) => node.id === entity.entity_id);
-      if (rootNode) {
-        rootNode.style = {
-          ...rootNode.style,
-          boxShadow: '0 0 20px rgba(46,196,196,0.8)',
-          border: '2px solid #2EC4C4',
-          zIndex: 10,
-        };
-      }
-
-      setNodes(n);
-      setEdges(e);
-    }
-  }, [graphData, entity.entity_id]);
-
-  const onNodesChange: OnNodesChange = useCallback(() => {}, []);
-  const onEdgesChange: OnEdgesChange = useCallback(() => {}, []);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#0d0d1a] border border-[#1e1e3a] rounded-xl w-[90vw] h-[85vh] max-w-6xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-4 border-b border-[#1e1e3a]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[rgba(46,196,196,0.12)] rounded-lg">
-              <Network className="w-5 h-5 text-[#2EC4C4]" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-[#f0eef8]">Relationship Explorer</h2>
-              <p className="text-xs text-[#a09bb8] font-mono">Focusing on: {entity.name}</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 text-[#5c5878] hover:text-[#f0eef8] hover:bg-white/[0.06] rounded-md transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 relative bg-background">
-          {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-6 h-6 border-2 border-[#2EC4C4] border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm font-mono text-[#a09bb8]">Mapping semantic connections...</span>
-              </div>
-            </div>
-          ) : (
-            <ReactFlowProvider>
-              <GraphCanvas
-                nodes={nodes}
-                edges={edges}
-                onNodeClick={() => {}}
-                onPaneClick={() => {}}
-              />
-            </ReactFlowProvider>
-          )}
         </div>
       </div>
     </div>
@@ -310,7 +221,11 @@ function GraphCanvas({
     >
       <Background color="#1a1830" gap={20} />
       <Controls className="bg-panel border border-white/[0.06] rounded-lg" />
-      <MiniMap nodeColor="#2EC4C4" maskColor="rgba(3,2,10,0.8)" className="bg-deep border border-white/[0.06] rounded-lg" />
+      <MiniMap
+        nodeColor="#2EC4C4"
+        maskColor="rgba(3,2,10,0.8)"
+        className="bg-deep border border-white/[0.06] rounded-lg"
+      />
     </ReactFlow>
   );
 }

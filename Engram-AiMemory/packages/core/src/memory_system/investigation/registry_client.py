@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from rich.console import Console
 
-from memory_system.config import SUBJECT_PERSON, SUBJECT_ORGANISATION
+from memory_system.config import SUBJECT_ORGANISATION, SUBJECT_PERSON
 from memory_system.investigation.models import (
     SubjectOrgCreate,
     SubjectOrgResponse,
@@ -35,9 +35,9 @@ class GlobalRegistryClient:
         Otherwise insert new.
         """
         from weaviate.classes.query import MetadataQuery
-        
+
         collection = self._client.collections.get(SUBJECT_PERSON)
-        
+
         # Search for existing by canonical_name
         try:
             results = collection.query.near_text(
@@ -69,7 +69,7 @@ class GlobalRegistryClient:
                 )
         except Exception:
             pass  # Fall through to insert
-        
+
         # Insert new
         now = datetime.now(UTC)
         weaviate_id = str(uuid4())
@@ -96,9 +96,9 @@ class GlobalRegistryClient:
     async def upsert_organisation(self, org: SubjectOrgCreate) -> SubjectOrgResponse:
         """Insert or update organisation. Same dedup logic as upsert_person."""
         from weaviate.classes.query import MetadataQuery
-        
+
         collection = self._client.collections.get(SUBJECT_ORGANISATION)
-        
+
         try:
             results = collection.query.near_text(
                 query=org.canonical_name,
@@ -128,7 +128,7 @@ class GlobalRegistryClient:
                 )
         except Exception:
             pass
-        
+
         now = datetime.now(UTC)
         weaviate_id = str(uuid4())
         props = {

@@ -3,6 +3,7 @@ Redis caching layer for memory optimization.
 """
 
 import json
+from contextlib import suppress
 from datetime import timedelta
 from typing import Any
 
@@ -51,9 +52,8 @@ class RedisCache:
 
     def _check_connection(self) -> bool:
         """Check connection and log warning if not available."""
-        if self._client is None:
-            return False
-        return True
+        return self._client is not None
+
     async def connect(self) -> None:
         """Connect to Redis."""
         console.print(f"[cyan]Connecting to Redis at {self.settings.redis_url}...[/cyan]")
@@ -107,10 +107,8 @@ class RedisCache:
         if not self._check_connection():
             return
         key = self._embedding_key(text_hash)
-        try:
+        with suppress(Exception):
             await self._client.setex(key, self.EMBEDDING_TTL, json.dumps(vector))
-        except Exception:
-            pass
 
     # ==================== Search Cache ====================
 
@@ -137,10 +135,8 @@ class RedisCache:
         if not self._check_connection():
             return
         key = self._search_key(query)
-        try:
+        with suppress(Exception):
             await self._client.setex(key, self.SEARCH_TTL, json.dumps(results))
-        except Exception:
-            pass
 
     async def invalidate_search_cache(self, project_id: str | None = None) -> None:
         """Invalidate search cache for a project."""
@@ -238,8 +234,3 @@ class RedisCache:
             "used_memory": info.get("used_memory_human", "unknown"),
             "peak_memory": info.get("used_memory_peak_human", "unknown"),
         }
-
-    @property
-    def is_connected(self) -> bool:
-        """Check if client is connected."""
-        return self._client is not None

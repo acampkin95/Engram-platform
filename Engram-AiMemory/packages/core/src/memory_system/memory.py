@@ -4,7 +4,7 @@ Memory data models and types.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum, StrEnum
 from typing import Any, Literal
 from uuid import UUID, uuid4
@@ -162,13 +162,13 @@ class Memory(BaseModel):
     confidence_factors: ConfidenceFactors = Field(default_factory=ConfidenceFactors)
     provenance: ProvenanceRecord = Field(default_factory=ProvenanceRecord)
     modification_history: list[MemoryModification] = Field(default_factory=list)
-    
+
     # Contradiction tracking via Weaviate cross-references (stored as list of IDs initially)
     contradictions: list[str] = Field(default_factory=list)
     contradictions_resolved: bool = Field(default=False)
     is_deprecated: bool = Field(default=False)
     deprecated_by: str | None = None
-    
+
     # Evidence tracking (cross-references)
     supporting_evidence_ids: list[str] = Field(default_factory=list)
     contradicting_evidence_ids: list[str] = Field(default_factory=list)

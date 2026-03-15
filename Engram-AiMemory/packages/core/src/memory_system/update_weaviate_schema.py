@@ -1,4 +1,3 @@
-import sys
 
 content = open("client.py").read()
 

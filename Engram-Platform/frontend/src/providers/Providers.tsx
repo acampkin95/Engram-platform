@@ -1,6 +1,6 @@
 'use client';
-import * as Sentry from '@sentry/nextjs';
 import { ClerkProvider } from '@clerk/nextjs';
+import * as Sentry from '@sentry/nextjs';
 import { SWRConfig } from 'swr';
 import { ToastContainer } from '../design-system/components/Toast';
 import { URLStateProvider } from './URLStateProvider';

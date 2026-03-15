@@ -1,11 +1,10 @@
 """OSINT crawler for investigation matters using Crawl4AI with Redis URL deduplication."""
 from __future__ import annotations
 
-import json
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import AsyncIterator
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 from rich.console import Console
 
@@ -60,7 +59,7 @@ class InvestigationCrawler:
         Respects max_depth and max_pages limits.
         check_robots_txt=True ALWAYS — never False.
         """
-        from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
+        from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
 
         browser_config = BrowserConfig(
             headless=True,
@@ -157,7 +156,7 @@ class InvestigationCrawler:
 
     async def crawl_single(self, url: str, matter_id: str) -> CrawlResult:
         """Crawl a single URL. Does not use deduplication."""
-        from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
+        from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
 
         browser_config = BrowserConfig(headless=True, text_mode=True, light_mode=True)
         run_config = CrawlerRunConfig(

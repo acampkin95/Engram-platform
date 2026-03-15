@@ -69,3 +69,6 @@ install:  ## Install all dependencies
 
 health:  ## Check system health
 	bash scripts/healthcheck.sh
+
+test-coverage:  ## Run tests with coverage report
+	JWT_SECRET=$(JWT_SECRET) $(PYTHON) -m pytest packages/core/tests/ -v --cov=packages/core/src --cov-report=term-missing --cov-fail-under=80

@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Protocol, runtime_checkable
 
 import httpx
@@ -69,10 +69,10 @@ class TokenUsage:
 # ---------------------------------------------------------------------------
 
 
-class TaskComplexity(str, Enum):
-    SIMPLE = "simple"      # classification, scoring → small fast model
+class TaskComplexity(StrEnum):
+    SIMPLE = "simple"  # classification, scoring → small fast model
     STANDARD = "standard"  # summarization, extraction → medium model
-    COMPLEX = "complex"    # analysis, synthesis → large model
+    COMPLEX = "complex"  # analysis, synthesis → large model
 
 
 # ---------------------------------------------------------------------------
@@ -140,8 +140,7 @@ class OllamaProvider:
     ) -> str:
         # Flatten messages into a single prompt for /api/generate
         prompt = "\n".join(
-            f"{m.get('role', 'user').capitalize()}: {m.get('content', '')}"
-            for m in messages
+            f"{m.get('role', 'user').capitalize()}: {m.get('content', '')}" for m in messages
         )
         client = await self._get_client()
         response = await client.post(
@@ -378,9 +377,7 @@ class AIRouter:
                 last_exc = exc
                 continue
 
-        raise RuntimeError(
-            f"All AI providers failed. Last error: {last_exc}"
-        ) from last_exc
+        raise RuntimeError(f"All AI providers failed. Last error: {last_exc}") from last_exc
 
     async def embed(self, texts: list[str], model: str) -> list[list[float]]:
         """Try each provider in order for embedding."""
@@ -457,7 +454,7 @@ class AIRouter:
         }
 
     @classmethod
-    def from_settings(cls, settings: Any) -> "AIRouter":
+    def from_settings(cls, settings: Any) -> AIRouter:
         """
         Build router from a Settings object.
 

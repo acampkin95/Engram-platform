@@ -8,6 +8,8 @@ Local embedding and reranking models.
 
 import logging
 
+import httpx
+
 logger = logging.getLogger(__name__)
 
 
@@ -104,47 +106,76 @@ class OllamaEmbedder:
     Requires: Ollama running at ollama_host.
     """
 
-    DIMENSION = 768  # nomic-embed-text:v1.5 default
+    # Class-level connection pool
+    _client_pool: dict[str, httpx.AsyncClient] = {}
+    DIMENSION = 768
 
-    def __init__(self, host: str, model: str = "nomic-embed-text:v1.5", dimension: int = 768) -> None:
-        import httpx
-
-        self._client = httpx.Client(
-            base_url=host.rstrip("/"),
-            timeout=60.0,  # local inference can be slow
-        )
+    def __init__(
+        self, host: str, model: str = "nomic-embed-text:v1.5", dimension: int = 768
+    ) -> None:
+        self._host = host
         self._model = model
         self._dimension = dimension
         self.DIMENSION = dimension
 
-    def _embed_one(self, text: str) -> list[float]:
+    def _get_client(self) -> httpx.AsyncClient:
+        """Get or create a pooled client for this host."""
+        if self._host not in self._client_pool:
+            self._client_pool[self._host] = httpx.AsyncClient(
+                base_url=self._host.rstrip("/"),
+                timeout=60.0,
+                limits=httpx.Limits(max_connections=10, max_keepalive=30),
+            )
+        return self._client_pool[self._host]
+
+    async def _embed_one(self, text: str) -> list[float]:
         """Embed a single text via Ollama /api/embeddings."""
-        response = self._client.post(
+        client = self._get_client()
+        response = await client.post(
             "/api/embeddings",
             json={"model": self._model, "prompt": text},
         )
         response.raise_for_status()
         return response.json()["embedding"]
 
-    def embed(self, texts: list[str], task: str = "search_document") -> list[list[float]]:
+    async def embed(self, texts: list[str], task: str = "search_document") -> list[list[float]]:
         """Embed multiple texts (sequential — Ollama is single-text)."""
-        return [self._embed_one(t) for t in texts]
+        return [await self._embed_one(t) for t in texts]
 
-    def embed_query(self, text: str) -> list[float]:
+    async def embed_query(self, text: str) -> list[float]:
         """Embed a single search query."""
-        return self._embed_one(text)
+        return await self._embed_one(text)
 
-    def embed_document(self, text: str) -> list[float]:
+    async def embed_document(self, text: str) -> list[float]:
         """Embed a single document for storage."""
-        return self._embed_one(text)
+        return await self._embed_one(text)
 
-    def embed_batch(self, texts: list[str], task: str = "search_document") -> list[list[float]]:
+    async def embed_batch(
+        self, texts: list[str], task: str = "search_document"
+    ) -> list[list[float]]:
         """Embed multiple texts efficiently (sequential for Ollama)."""
-        return self.embed(texts, task=task)
+        return await self.embed(texts, task=task)
+# Singleton provider cache with memory limit
+_PROVIDER_CACHE_MAX_SIZE = 100
+_provider_cache: dict[str, "NomicEmbedder | OllamaEmbedder"] = {}
+_provider_cache_order: list[str] = []  # Track insertion order for LRU eviction
 
-    def close(self) -> None:
-        """Close the HTTP client."""
-        self._client.close()
+
+def clear_embedding_provider_cache() -> None:
+    """Clear the singleton provider cache and close all connections."""
+    global _provider_cache, _provider_cache_order
+
+    # Close any Ollama clients
+    for provider in _provider_cache.values():
+        if isinstance(provider, OllamaEmbedder):
+            # Clean up all clients in the pool
+            for client in OllamaEmbedder._client_pool.values():
+                client.close()
+            OllamaEmbedder._client_pool.clear()
+
+    _provider_cache.clear()
+    _provider_cache_order.clear()
+    logger.info("Cleared embedding provider cache")
 
 
 def get_embedding_provider(
@@ -155,7 +186,7 @@ def get_embedding_provider(
     ollama_model: str = "nomic-embed-text:v1.5",
 ) -> "NomicEmbedder | OllamaEmbedder":
     """
-    Return the configured embedding provider instance.
+    Return a configured embedding provider instance (singleton per configuration).
 
     Args:
         provider: One of 'nomic', 'ollama'. ('openai' is handled in system.py via AsyncOpenAI.)
@@ -169,15 +200,39 @@ def get_embedding_provider(
     Raises:
         ValueError: If provider is unsupported or required config is missing.
     """
+    global _provider_cache, _provider_cache_order
+
+    cache_key = f"{provider}:{dimension}:{ollama_host}:{ollama_model}"
+
+    if cache_key in _provider_cache:
+        # Move to end of LRU list
+        _provider_cache_order.remove(cache_key)
+        _provider_cache_order.append(cache_key)
+        return _provider_cache[cache_key]
+
+    # Enforce max cache size with LRU eviction
+    if len(_provider_cache) >= _PROVIDER_CACHE_MAX_SIZE:
+        # Remove least recently used
+        lru_key = _provider_cache_order.pop(0)
+        old_provider = _provider_cache.pop(lru_key)
+        # Clean up the specific client for this provider
+        if isinstance(old_provider, OllamaEmbedder) and old_provider._host in OllamaEmbedder._client_pool:
+            OllamaEmbedder._client_pool[old_provider._host].close()
+            del OllamaEmbedder._client_pool[old_provider._host]
+        logger.warning(f"Evicted LRU embedding provider: {lru_key}")
+
     if provider == "nomic":
-        return NomicEmbedder(dimension=dimension)
-    if provider == "ollama":
+        instance = NomicEmbedder(dimension=dimension)
+    elif provider == "ollama":
         if not ollama_host:
-            raise ValueError(
-                "OLLAMA_HOST must be set when EMBEDDING_PROVIDER=ollama"
-            )
-        return OllamaEmbedder(host=ollama_host, model=ollama_model, dimension=dimension)
-    raise ValueError(
-        f"Unsupported embedding provider for local use: {provider!r}. ",
-        "Supported: 'nomic', 'ollama'. For 'openai', use system.py's AsyncOpenAI path.",
-    )
+            raise ValueError("OLLAMA_HOST must be set when EMBEDDING_PROVIDER=ollama")
+        instance = OllamaEmbedder(host=ollama_host, model=ollama_model, dimension=dimension)
+    else:
+        raise ValueError(
+            f"Unsupported embedding provider for local use: {provider!r}. "
+            f"Supported: 'nomic', 'ollama'. For 'openai', use system.py's AsyncOpenAI path.",
+        )
+
+    _provider_cache[cache_key] = instance
+    _provider_cache_order.append(cache_key)
+    return instance

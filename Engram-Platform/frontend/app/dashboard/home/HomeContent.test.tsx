@@ -39,7 +39,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 vi.mock('swr', () => ({
-  default: vi.fn((key: string) => {
+  default: vi.fn((_key: string) => {
     return { data: { data: {} }, error: null, isLoading: false, mutate: vi.fn() };
   }),
 }));

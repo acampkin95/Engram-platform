@@ -485,36 +485,41 @@ class MemorySystem:
         # Generate query embedding
         query_vector = await self._get_embedding(query)
 
-        # Search Weaviate (hybrid: BM25 + vector with composite scoring)
+        # Search Weaviate using the configured retrieval mode.
         results = await self._weaviate.search(memory_query, query_vector)
 
         # Optional reranking
         if self.settings.reranker_enabled and results:
             results = await self._apply_reranking(query, results, top_k=limit)
 
-
         # --- Apply Confidence Weighting ---
         confidence_weight = 0.3
         for result in results:
             hybrid_score = result.score or 0.0
-            if hasattr(result, 'rerank_score') and result.rerank_score is not None:
+            if hasattr(result, "rerank_score") and result.rerank_score is not None:
                 hybrid_score = result.rerank_score
-                
-            confidence_score = getattr(result.memory, 'overall_confidence', 0.5)
-            
+
+            confidence_score = getattr(result.memory, "overall_confidence", 0.5)
+
             # Weighted combination
-            combined_score = (hybrid_score * (1 - confidence_weight)) + (confidence_score * confidence_weight)
-            
+            combined_score = (hybrid_score * (1 - confidence_weight)) + (
+                confidence_score * confidence_weight
+            )
+
             # Apply temporal freshness factor if available
             try:
-                if hasattr(result.memory, 'confidence_factors') and isinstance(result.memory.confidence_factors, dict):
-                    temporal_freshness = result.memory.confidence_factors.get('temporal_freshness', 1.0)
+                if hasattr(result.memory, "confidence_factors") and isinstance(
+                    result.memory.confidence_factors, dict
+                ):
+                    temporal_freshness = result.memory.confidence_factors.get(
+                        "temporal_freshness", 1.0
+                    )
                     combined_score *= temporal_freshness
             except Exception:
                 pass
-                
+
             result.composite_score = combined_score
-            
+
         # Re-sort by composite_score
         results.sort(key=lambda x: x.composite_score, reverse=True)
         # -----------------------------------

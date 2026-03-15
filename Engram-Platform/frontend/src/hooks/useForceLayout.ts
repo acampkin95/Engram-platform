@@ -1,5 +1,12 @@
 import { useReactFlow } from '@xyflow/react';
-import { forceLink, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force';
+import {
+  forceLink,
+  forceManyBody,
+  forceSimulation,
+  forceX,
+  forceY,
+  type SimulationNodeDatum,
+} from 'd3-force';
 import { useEffect } from 'react';
 
 type UseForceLayoutOptions = {
@@ -39,7 +46,7 @@ export function useForceLayout({ strength = -300, distance = 100 }: UseForceLayo
       .force(
         'link',
         forceLink(simulationLinks)
-          .id((d: any) => d.id)
+          .id((d: SimulationNodeDatum) => d.id)
           .distance(distance),
       )
       .force('x', forceX(0).strength(0.05))

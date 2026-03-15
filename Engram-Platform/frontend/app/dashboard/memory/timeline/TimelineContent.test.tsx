@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { test, vi } from 'vitest';
 import TimelineContent from './TimelineContent';
 
 // Mock matchMedia
@@ -17,11 +17,9 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-
-
 vi.mock('swr', () => ({
   default: vi.fn((key: string) => {
-    if (key && key.includes('matters')) {
+    if (key?.includes('matters')) {
       return { data: { data: { matters: [] } }, error: null, isLoading: false };
     }
     return { data: { data: { results: [] } }, error: null, isLoading: false, mutate: vi.fn() };

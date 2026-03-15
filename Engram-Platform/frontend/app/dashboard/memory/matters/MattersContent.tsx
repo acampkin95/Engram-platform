@@ -1,7 +1,18 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Brain, Calendar, Edit2, FolderOpen, InfoIcon, Plus, Trash2, X, Activity, BarChart2, GitCommit, Download, Upload, FileText } from 'lucide-react';
+import {
+  Brain,
+  Calendar,
+  Download,
+  Edit2,
+  FolderOpen,
+  InfoIcon,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import { useCallback, useState } from 'react';
 import useSWR from 'swr';
 import {
@@ -498,32 +509,47 @@ function MatterDetailPanel({ matter, onClose }: MatterDetailPanelProps) {
 
         {/* Memory Composition */}
         <div>
-          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-2">Memory Composition</p>
+          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-2">
+            Memory Composition
+          </p>
           <div className="flex w-full h-2 rounded-full overflow-hidden bg-[#1e1e3a] mb-2">
             <div className="bg-[#2EC4C4] w-[45%]" title="Research" />
             <div className="bg-purple-500 w-[30%]" title="Decisions" />
             <div className="bg-orange-500 w-[25%]" title="Tasks" />
           </div>
           <div className="flex items-center justify-between text-[10px] font-mono text-[#5c5878]">
-            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#2EC4C4]" /> Research</span>
-            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-purple-500" /> Decisions</span>
-            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-orange-500" /> Tasks</span>
+            <span className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-[#2EC4C4]" /> Research
+            </span>
+            <span className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-purple-500" /> Decisions
+            </span>
+            <span className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-orange-500" /> Tasks
+            </span>
           </div>
         </div>
 
         {/* Action Panel */}
         <div className="pt-2 border-t border-[#1e1e3a]">
-          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-2">Quick Actions</p>
+          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-2">
+            Quick Actions
+          </p>
           <div className="flex gap-2">
-            <Button variant="secondary" className="flex-1 text-xs py-1 h-auto bg-[#1e1e3a] text-[#f0eef8] border border-transparent hover:border-[#2EC4C4]">
+            <Button
+              variant="secondary"
+              className="flex-1 text-xs py-1 h-auto bg-[#1e1e3a] text-[#f0eef8] border border-transparent hover:border-[#2EC4C4]"
+            >
               View Graph
             </Button>
-            <Button variant="secondary" className="flex-1 text-xs py-1 h-auto bg-[#1e1e3a] text-[#f0eef8] border border-transparent hover:border-[#2EC4C4]">
+            <Button
+              variant="secondary"
+              className="flex-1 text-xs py-1 h-auto bg-[#1e1e3a] text-[#f0eef8] border border-transparent hover:border-[#2EC4C4]"
+            >
               View Timeline
             </Button>
           </div>
         </div>
-
       </div>
     </div>
   );
@@ -578,22 +604,32 @@ export default function MattersContent() {
         action={
           <div className="flex items-center gap-2">
             <Tooltip content="Import Markdown" side="top">
-              <Button size="icon" variant="secondary" className="h-8 w-8" onClick={() => alert('Markdown import coming soon')}>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-8 w-8"
+                onClick={() => alert('Markdown import coming soon')}
+              >
                 <Upload className="w-3.5 h-3.5" />
               </Button>
             </Tooltip>
             <Tooltip content="Export Markdown" side="top">
-              <Button size="icon" variant="secondary" className="h-8 w-8" onClick={() => alert('Markdown export coming soon')}>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-8 w-8"
+                onClick={() => alert('Markdown export coming soon')}
+              >
                 <Download className="w-3.5 h-3.5" />
               </Button>
             </Tooltip>
             <Button
               size="sm"
-            onClick={() => setShowNewModal(true)}
-            className="bg-[rgba(46,196,196,0.12)] border border-[rgba(46,196,196,0.2)] text-[#2EC4C4] hover:bg-[rgba(46,196,196,0.2)] focus:ring-[#2EC4C4]"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            New Matter
+              onClick={() => setShowNewModal(true)}
+              className="bg-[rgba(46,196,196,0.12)] border border-[rgba(46,196,196,0.2)] text-[#2EC4C4] hover:bg-[rgba(46,196,196,0.2)] focus:ring-[#2EC4C4]"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              New Matter
             </Button>
           </div>
         }

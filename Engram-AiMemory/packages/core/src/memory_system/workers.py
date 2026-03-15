@@ -344,27 +344,40 @@ class MaintenanceScheduler:
                 memories, _ = await self._ms.list_memories(limit=self._batch_size)
                 unscored = [m for m in memories if m.importance == 0.5]
 
-                for memory in unscored:
+                # Process memories concurrently with semaphore to limit concurrent AI requests
+                async def score_single_memory(mem):
                     try:
                         if self._ai_router:
-                            importance, reason = await self._router_score_importance(memory.content)
+                            importance, reason = await self._router_score_importance(mem.content)
                         else:
-                            importance, reason = await self._ollama.score_importance(memory.content)  # type: ignore[union-attr]
+                            importance, reason = await self._ollama.score_importance(mem.content)  # type: ignore[union-attr]
                         await self._ms._weaviate.update_memory_fields(
-                            memory_id=memory.id,
-                            tier=memory.tier,
+                            memory_id=mem.id,
+                            tier=mem.tier,
                             fields={"importance": importance},
-                            tenant_id=memory.tenant_id,
+                            tenant_id=mem.tenant_id,
                         )
                         await self._ms._weaviate.update_memory_metadata(
-                            memory_id=memory.id,
-                            tier=memory.tier,
+                            memory_id=mem.id,
+                            tier=mem.tier,
                             metadata={"importance_reasoning": reason, "ai_scored": True},
-                            tenant_id=memory.tenant_id,
+                            tenant_id=mem.tenant_id,
                         )
-                        self._stats["memories_scored"] += 1
+                        return True
                     except Exception as e:
-                        logger.warning(f"Failed to score memory {memory.id}: {e}")
+                        logger.warning(f"Failed to score memory {mem.id}: {e}")
+                        return False
+
+                # Run scoring concurrently (max 5 at a time via nested semaphore)
+                score_semaphore = asyncio.Semaphore(5)
+
+                async def limited_score(mem):
+                    async with score_semaphore:
+                        return await score_single_memory(mem)
+
+                results = await asyncio.gather(*[limited_score(m) for m in unscored])
+                scored_count = sum(1 for r in results if r)
+                self._stats["memories_scored"] += scored_count
 
                 if unscored:
                     logger.info(f"Scored importance for {len(unscored)} memories")
@@ -589,7 +602,6 @@ class MaintenanceScheduler:
                     now = datetime.now(UTC)
                     for memory in memories:
                         try:
-                            from memory_system.temporal import TemporalExtractor
                             from memory_system.decay import MemoryDecay
 
                             decay_calc = MemoryDecay(half_life_days=half_life)
@@ -729,15 +741,27 @@ class MaintenanceScheduler:
                 from memory_system.memory import MemoryTier
 
                 total_deleted = 0
-                for tier in MemoryTier:
-                    deleted = await self._ms._weaviate.delete_expired_memories(
-                        tier=tier,
-                        tenant_id=self._ms.settings.default_tenant_id,
-                    )
-                    total_deleted += deleted
+                if self._ms.settings.multi_tenancy_enabled:
+                    tenants = await self._ms._weaviate.list_tenants()
+                    if not tenants:
+                        tenants = [self._ms.settings.default_tenant_id]
+                else:
+                    tenants = [self._ms.settings.default_tenant_id]
 
-                if total_deleted > 0:
-                    await self._ms._cache.invalidate_stats(self._ms.settings.default_tenant_id)
+                invalidated_tenants: set[str] = set()
+                for tenant_id in tenants:
+                    for tier in MemoryTier:
+                        deleted = await self._ms._weaviate.delete_expired_memories(
+                            tier=tier,
+                            tenant_id=tenant_id,
+                        )
+                        total_deleted += deleted
+                        if deleted > 0:
+                            invalidated_tenants.add(tenant_id)
+
+                if invalidated_tenants:
+                    for tenant_id in sorted(invalidated_tenants):
+                        await self._ms._cache.invalidate_stats(tenant_id)
                     logger.info(f"Deleted {total_deleted} expired memories")
 
                 self._stats["memories_deleted"] += total_deleted

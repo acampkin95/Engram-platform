@@ -73,6 +73,7 @@ def _make_mock_system() -> MagicMock:
     mock_settings.ollama_classifier_model = "qwen2.5:0.5b-instruct"
     mock_settings.ollama_maintenance_model = "liquid/lfm2.5:1.2b"
     mock_settings.default_tenant_id = "default"
+    mock_settings.multi_tenancy_enabled = True
     mock_settings.decay_half_life_days = 30.0
     mock_settings.decay_access_boost = 0.1
     mock_settings.decay_min_importance = 0.1
@@ -87,6 +88,7 @@ def _make_mock_system() -> MagicMock:
     system._weaviate.delete_expired_memories = AsyncMock(return_value=0)
     system._weaviate.find_similar_memories_by_vector = AsyncMock(return_value=[])
     system._weaviate.add_memory = AsyncMock(return_value=uuid4())
+    system._weaviate.list_tenants = AsyncMock(return_value=["default"])
     system._cache = MagicMock()
     system._cache.invalidate_stats = AsyncMock()
     system._get_embedding = AsyncMock(return_value=[0.1] * 768)
@@ -388,6 +390,7 @@ class TestJobDeleteExpired:
     async def test_deletes_and_invalidates_cache(self) -> None:
         system = _make_mock_system()
         system._weaviate.delete_expired_memories = AsyncMock(return_value=3)
+        system._weaviate.list_tenants = AsyncMock(return_value=["default"])
 
         scheduler = MaintenanceScheduler(system)
         await scheduler._job_delete_expired()
@@ -398,12 +401,26 @@ class TestJobDeleteExpired:
     async def test_no_deletions_skips_cache_invalidation(self) -> None:
         system = _make_mock_system()
         system._weaviate.delete_expired_memories = AsyncMock(return_value=0)
+        system._weaviate.list_tenants = AsyncMock(return_value=["default"])
 
         scheduler = MaintenanceScheduler(system)
         await scheduler._job_delete_expired()
 
         assert scheduler._stats["memories_deleted"] == 0
         system._cache.invalidate_stats.assert_not_called()
+
+    async def test_deletes_for_all_tenants(self) -> None:
+        system = _make_mock_system()
+        system._weaviate.list_tenants = AsyncMock(return_value=["default", "tenant-b"])
+        system._weaviate.delete_expired_memories = AsyncMock(side_effect=[1, 0, 0, 2, 0, 0])
+
+        scheduler = MaintenanceScheduler(system)
+        await scheduler._job_delete_expired()
+
+        assert scheduler._stats["memories_deleted"] == 3
+        assert system._weaviate.delete_expired_memories.await_count == 6
+        system._cache.invalidate_stats.assert_any_await("default")
+        system._cache.invalidate_stats.assert_any_await("tenant-b")
 
 
 class TestJobDetectContradictions:

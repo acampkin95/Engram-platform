@@ -2,11 +2,8 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 import signal
-import sys
-from datetime import datetime
 
 from rich.console import Console
 
@@ -47,11 +44,9 @@ async def run_crawler_service() -> None:
     evidence_client = None
 
     try:
-        import weaviate
         from memory_system.client import WeaviateMemoryClient
-        from memory_system.investigation.matter_client import MatterClient
         from memory_system.investigation.evidence_client import EvidenceClient
-        from memory_system.investigation.models import EvidenceIngest, SourceType
+        from memory_system.investigation.matter_client import MatterClient
 
         wc = WeaviateMemoryClient()
         await wc.connect()
@@ -99,7 +94,7 @@ async def run_crawler_service() -> None:
                 shutdown_event.wait(),
                 timeout=CRAWLER_POLL_INTERVAL
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
 
     console.print("[cyan]Investigation Crawler Service stopped[/cyan]")

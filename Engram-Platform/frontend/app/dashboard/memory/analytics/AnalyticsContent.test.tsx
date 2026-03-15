@@ -1,7 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { test, vi } from 'vitest';
 import AnalyticsContent from './AnalyticsContent';
-
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -17,9 +16,6 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
-
-
-
 
 vi.mock('echarts', () => ({
   default: {
@@ -40,9 +36,8 @@ vi.mock('echarts', () => ({
 // Mock zrender to completely disable any rendering engine loops just in case
 vi.mock('zrender', () => ({
   init: vi.fn(),
-  dispose: vi.fn()
+  dispose: vi.fn(),
 }));
-
 
 // Mock ResizeObserver for Recharts
 
@@ -52,27 +47,28 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
-
-
-
-
 vi.mock('swr', () => ({
   default: vi.fn((key: string) => {
-    if (key && key.includes('matters')) {
+    if (key?.includes('matters')) {
       return { data: { data: { matters: [] } }, error: null, isLoading: false };
     }
-    if (key && key.includes('memories')) {
+    if (key?.includes('memories')) {
       return { data: { data: { memories: [] } }, error: null, isLoading: false };
     }
     return {
-      data: { data: { total_memories: 100, total_entities: 50, confidence_metrics: { average_confidence: 0.8 } } },
+      data: {
+        data: {
+          total_memories: 100,
+          total_entities: 50,
+          confidence_metrics: { average_confidence: 0.8 },
+        },
+      },
       error: null,
       isLoading: false,
-      mutate: vi.fn()
+      mutate: vi.fn(),
     };
   }),
 }));
-
 
 vi.mock('@/src/hooks/useMounted', () => ({
   useMounted: () => false,
@@ -88,7 +84,9 @@ vi.mock('@/src/lib/memory-client', () => ({
 vi.mock('recharts', () => {
   const MockComponent = ({ children }: any) => <div>{children}</div>;
   return {
-    ResponsiveContainer: ({ children }: any) => <div style={{ width: '100%', height: 300 }}>{children}</div>,
+    ResponsiveContainer: ({ children }: any) => (
+      <div style={{ width: '100%', height: 300 }}>{children}</div>
+    ),
     LineChart: MockComponent,
     Line: MockComponent,
     BarChart: MockComponent,
@@ -102,7 +100,7 @@ vi.mock('recharts', () => {
 });
 
 vi.mock('./ScatterChart', () => ({
-  default: () => <div data-testid="mock-scatter-chart">Scatter Chart</div>
+  default: () => <div data-testid="mock-scatter-chart">Scatter Chart</div>,
 }));
 
 test('renders AnalyticsContent without crashing', async () => {

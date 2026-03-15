@@ -17,7 +17,9 @@ export default function MemoryRouteError({
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8 border border-white/5 bg-layer-1 rounded-xl">
       <ErrorState
-        message={error.message || 'Failed to load memory module. The memory backend might be disconnected.'}
+        message={
+          error.message || 'Failed to load memory module. The memory backend might be disconnected.'
+        }
         onRetry={reset}
         className="w-full max-w-xl"
       />

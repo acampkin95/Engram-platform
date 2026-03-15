@@ -152,7 +152,10 @@ export function FilterBar({
       {/* ── Search ── */}
       {showSearch && (
         <div className="relative flex-1 min-w-[180px] max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5c5878]" aria-hidden="true" />
+          <Search
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5c5878]"
+            aria-hidden="true"
+          />
           <input
             {...register('search')}
             placeholder={placeholder}
@@ -164,7 +167,9 @@ export function FilterBar({
             aria-label="Search"
             aria-describedby="search-help"
           />
-          <span id="search-help" className="sr-only">Enter keywords to search</span>
+          <span id="search-help" className="sr-only">
+            Enter keywords to search
+          </span>
         </div>
       )}
 
@@ -181,7 +186,10 @@ export function FilterBar({
                 void handleSubmit(emitChange)();
               }}
             >
-              <SelectTrigger className={cn(inputBase, 'w-[140px] px-3 [&>svg]:text-[#5c5878]')} aria-label="Status filter">
+              <SelectTrigger
+                className={cn(inputBase, 'w-[140px] px-3 [&>svg]:text-[#5c5878]')}
+                aria-label="Status filter"
+              >
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-[#0c0b1c] border-white/[0.08] text-[#f0eef8]">
@@ -216,7 +224,10 @@ export function FilterBar({
                 void handleSubmit(emitChange)();
               }}
             >
-              <SelectTrigger className={cn(inputBase, 'w-[140px] px-3 [&>svg]:text-[#5c5878]')} aria-label={`${sectionLabel} filter`}>
+              <SelectTrigger
+                className={cn(inputBase, 'w-[140px] px-3 [&>svg]:text-[#5c5878]')}
+                aria-label={`${sectionLabel} filter`}
+              >
                 <SelectValue placeholder={sectionLabel} />
               </SelectTrigger>
               <SelectContent className="bg-[#0c0b1c] border-white/[0.08] text-[#f0eef8]">
@@ -283,7 +294,11 @@ export function FilterBar({
 
       {/* ── Score Range Slider ── */}
       {showScoreRange && (
-        <div className="flex items-center gap-3 min-w-[200px]" role="group" aria-label="Score range filter">
+        <div
+          className="flex items-center gap-3 min-w-[200px]"
+          role="group"
+          aria-label="Score range filter"
+        >
           <div className="flex items-center gap-1.5 shrink-0">
             <SlidersHorizontal className="w-3.5 h-3.5 text-[#5c5878]" aria-hidden="true" />
             <span className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider whitespace-nowrap">

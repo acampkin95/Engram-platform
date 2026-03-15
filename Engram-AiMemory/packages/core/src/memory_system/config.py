@@ -31,11 +31,14 @@ class Settings(BaseSettings):
     redis_password: str | None = Field(default=None, description="Redis password")
 
     # Embedding Configuration
-    embedding_provider: Literal["openai", "cohere", "local", "ollama", "nomic", "deepinfra"] = Field(
-        default="nomic", description="Embedding provider"
+    embedding_provider: Literal["openai", "cohere", "local", "ollama", "nomic", "deepinfra"] = (
+        Field(default="nomic", description="Embedding provider")
     )
     openai_api_key: str | None = Field(default=None, description="OpenAI API key")
-    openai_base_url: str | None = Field(default=None, description="OpenAI-compatible API base URL (e.g. https://api.deepinfra.com/v1/openai)")
+    openai_base_url: str | None = Field(
+        default=None,
+        description="OpenAI-compatible API base URL (e.g. https://api.deepinfra.com/v1/openai)",
+    )
     embedding_model: str = Field(
         default="text-embedding-3-small", description="Embedding model name"
     )
@@ -95,12 +98,18 @@ class Settings(BaseSettings):
     decay_access_boost: float = Field(default=0.1, description="Importance boost per access")
     decay_min_importance: float = Field(default=0.1, description="Minimum importance floor")
 
+    # Retrieval
+    search_retrieval_mode: Literal["vector", "hybrid"] = Field(
+        default="vector",
+        description="Primary Weaviate retrieval mode for memory search",
+    )
+
     # Hybrid search
     hybrid_alpha: float = Field(
         default=0.7,
         ge=0.0,
         le=1.0,
-        description="Hybrid search alpha: 0=pure keyword (BM25), 1=pure vector",
+        description="Hybrid search alpha when search_retrieval_mode=hybrid: 0=keyword, 1=vector",
     )
 
     # Reranking
@@ -114,20 +123,36 @@ class Settings(BaseSettings):
     )
 
     # Ollama
-    ollama_host: str | None = Field(default=None, description="Ollama API host (e.g. http://localhost:11434)")
-    ollama_maintenance_model: str = Field(default="liquid/lfm2.5:1.2b", description="LFM model for summarization/consolidation")
-    ollama_classifier_model: str = Field(default="qwen2.5:0.5b-instruct", description="Qwen model for importance scoring/entity extraction")
+    ollama_host: str | None = Field(
+        default=None, description="Ollama API host (e.g. http://localhost:11434)"
+    )
+    ollama_maintenance_model: str = Field(
+        default="liquid/lfm2.5:1.2b", description="LFM model for summarization/consolidation"
+    )
+    ollama_classifier_model: str = Field(
+        default="qwen2.5:0.5b-instruct",
+        description="Qwen model for importance scoring/entity extraction",
+    )
     ollama_request_timeout: int = Field(default=30, description="Ollama request timeout in seconds")
-    investigation_workers_interval_minutes: int = Field(default=15, description="Investigation worker APScheduler interval in minutes")
+    investigation_workers_interval_minutes: int = Field(
+        default=15, description="Investigation worker APScheduler interval in minutes"
+    )
 
     # DeepInfra Configuration
-    deepinfra_api_key: str | None = Field(default=None, description="DeepInfra API key for cloud inference")
-    deepinfra_chat_model: str = Field(default="meta-llama/Meta-Llama-3.1-8B-Instruct", description="DeepInfra chat model")
-    deepinfra_embed_model: str = Field(default="BAAI/bge-m3", description="DeepInfra embedding model (768d)")
+    deepinfra_api_key: str | None = Field(
+        default=None, description="DeepInfra API key for cloud inference"
+    )
+    deepinfra_chat_model: str = Field(
+        default="meta-llama/Meta-Llama-3.1-8B-Instruct", description="DeepInfra chat model"
+    )
+    deepinfra_embed_model: str = Field(
+        default="BAAI/bge-m3", description="DeepInfra embedding model (768d)"
+    )
 
     # Schema migration
     clean_schema_migration: bool = Field(
-        default=False, description="Drop and recreate all Weaviate collections (WARNING: destroys all data)"
+        default=False,
+        description="Drop and recreate all Weaviate collections (WARNING: destroys all data)",
     )
     # Multi-tenancy
     multi_tenancy_enabled: bool = Field(default=True)
@@ -176,7 +201,9 @@ class Settings(BaseSettings):
     log_format: Literal["json", "text"] = Field(default="json")
 
     # Security — JWT
-    jwt_secret: str = Field(default="", description="JWT secret key (REQUIRED: set via JWT_SECRET env var)")
+    jwt_secret: str = Field(
+        default="", description="JWT secret key (REQUIRED: set via JWT_SECRET env var)"
+    )
     jwt_expire_hours: int = Field(default=24, ge=1, description="JWT token expiry in hours")
 
     # Security — API Keys (comma-separated list, e.g. key1,key2)
@@ -193,7 +220,9 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = Field(default=100, ge=1, description="Requests per minute per IP")
 
     # CORS — comma-separated origins, e.g. http://localhost:3001,https://app.example.com
-    cors_origins: list[str] | str = Field(default_factory=lambda: ["http://localhost:3001"], description="Allowed CORS origins")
+    cors_origins: list[str] | str = Field(
+        default_factory=lambda: ["http://localhost:3001"], description="Allowed CORS origins"
+    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod
@@ -242,6 +271,7 @@ class Settings(BaseSettings):
                 "Generate one with: openssl rand -hex 32"
             )
         return self
+
 
 @lru_cache
 def get_settings() -> Settings:

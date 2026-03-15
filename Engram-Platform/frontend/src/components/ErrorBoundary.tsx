@@ -1,8 +1,8 @@
 'use client';
 
 import * as Sentry from '@sentry/nextjs';
-import { Component, type ReactNode, type ErrorInfo } from 'react';
-import { AlertTriangle, RefreshCw, LayoutDashboard } from 'lucide-react';
+import { AlertTriangle, LayoutDashboard, RefreshCw } from 'lucide-react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -72,9 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <AlertTriangle className="w-8 h-8 text-[#F2A93B]" aria-hidden="true" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-[#f0eef8]">
-                  Something went wrong
-                </h1>
+                <h1 className="text-2xl font-bold text-[#f0eef8]">Something went wrong</h1>
                 <p className="text-[#a09bb8] mt-1">
                   An unexpected error occurred. You can try again or return to the dashboard.
                 </p>

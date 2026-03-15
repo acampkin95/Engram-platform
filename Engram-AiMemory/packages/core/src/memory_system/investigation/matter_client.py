@@ -1,16 +1,20 @@
 """Matter lifecycle client — atomic tenant creation with rollback."""
 from __future__ import annotations
-import json
+
 from datetime import UTC, datetime
 from uuid import uuid4
+
 from rich.console import Console
 from weaviate.classes.tenants import Tenant, TenantActivityStatus
+
 from memory_system.config import (
-    INVESTIGATION_TENANT_COLLECTIONS,
     INVESTIGATION_MATTER,
+    INVESTIGATION_TENANT_COLLECTIONS,
 )
 from memory_system.investigation.models import (
-    MatterCreate, MatterResponse, MatterStatus,
+    MatterCreate,
+    MatterResponse,
+    MatterStatus,
 )
 
 console = Console()

@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { test, vi } from 'vitest';
 import IntelligenceInvestigationsContent from './IntelligenceInvestigationsContent';
 
 // Mock matchMedia
@@ -18,7 +18,12 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 vi.mock('swr', () => ({
-  default: vi.fn(() => ({ data: { data: { investigations: [] } }, error: null, isLoading: false, mutate: vi.fn() })),
+  default: vi.fn(() => ({
+    data: { data: { investigations: [] } },
+    error: null,
+    isLoading: false,
+    mutate: vi.fn(),
+  })),
 }));
 
 vi.mock('@/src/lib/crawler-client', () => ({

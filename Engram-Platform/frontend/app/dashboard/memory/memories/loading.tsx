@@ -1,4 +1,4 @@
-import { SkeletonFilterBar, SkeletonDataTable } from '@/src/components/Skeletons';
+import { SkeletonDataTable, SkeletonFilterBar } from '@/src/components/Skeletons';
 
 export default function MemoriesLoading() {
   return (

@@ -1,5 +1,4 @@
 'use client';
-import { ThemeToggle } from '@/src/components/ThemeToggle';
 import {
   BarChart2,
   Brain,
@@ -21,6 +20,7 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { ThemeToggle } from '@/src/components/ThemeToggle';
 import { NavItem } from '@/src/design-system/components/NavItem';
 import { SidebarGroup } from '@/src/design-system/components/SidebarGroup';
 import { StatusDot } from '@/src/design-system/components/StatusDot';

@@ -12,6 +12,7 @@ export { NavItem } from './NavItem';
 export { SearchInput } from './SearchInput';
 export { SectionHeader } from './SectionHeader';
 export { SidebarGroup } from './SidebarGroup';
+export * from './Slider';
 export { Spinner } from './Spinner';
 export { StatCard } from './StatCard';
 export { StatusDot } from './StatusDot';
@@ -21,5 +22,3 @@ export { Tag } from './Tag';
 export type { ToastItem, ToastType } from './Toast';
 export { addToast, Toast, ToastContainer } from './Toast';
 export { Tooltip } from './Tooltip';
-
-export * from './Slider';

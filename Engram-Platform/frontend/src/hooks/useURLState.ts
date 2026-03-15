@@ -27,7 +27,7 @@ export function useDashboardURLState() {
     },
     {
       history: 'push',
-    }
+    },
   );
 }
 

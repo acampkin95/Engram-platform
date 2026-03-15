@@ -78,7 +78,7 @@ async def run_workers_service() -> None:
                 shutdown_event.wait(),
                 timeout=WORKERS_INTERVAL * 60
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
 
     console.print("[cyan]Investigation Workers Service stopped[/cyan]")
@@ -86,14 +86,12 @@ async def run_workers_service() -> None:
 
 async def run_worker_cycle(weaviate_client, matter_client, registry_client) -> None:
     """Run one full cycle of all workers across all active matters."""
-    from memory_system.investigation.matter_client import MatterClient
     from memory_system.investigation.workers import (
-        EntityExtractionWorker,
-        TimelineExtractionWorker,
         ContradictionFlaggingWorker,
+        EntityExtractionWorker,
         IntelligenceReportWorker,
+        TimelineExtractionWorker,
     )
-    from memory_system.config import INVESTIGATION_MATTER
 
     console.print(f"[dim]Workers: starting cycle at {datetime.now(UTC).isoformat()}[/dim]")
 

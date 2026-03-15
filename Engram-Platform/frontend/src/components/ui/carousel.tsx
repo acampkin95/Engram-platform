@@ -121,7 +121,7 @@ const Carousel = React.memo(
             ref={ref}
             onKeyDownCapture={handleKeyDown}
             className={cn('relative', className)}
-            aria-roledescription="carousel"
+            aria-label="Image carousel"
             {...props}
           >
             {children}
@@ -162,9 +162,9 @@ const CarouselItem = React.memo(
       const { orientation } = useCarousel();
 
       return (
-        <div
+        <fieldset
           ref={ref}
-          aria-roledescription="slide"
+          aria-label="Carousel slide"
           className={cn(
             'min-w-0 shrink-0 grow-0 basis-full',
             orientation === 'horizontal' ? 'pl-4' : 'pt-4',

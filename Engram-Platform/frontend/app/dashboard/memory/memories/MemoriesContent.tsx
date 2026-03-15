@@ -15,8 +15,8 @@ import { ErrorState } from '@/src/design-system/components/ErrorState';
 import { Modal } from '@/src/design-system/components/Modal';
 import { SectionHeader } from '@/src/design-system/components/SectionHeader';
 import { Tag } from '@/src/design-system/components/Tag';
-import { Tooltip } from '@/src/design-system/components/Tooltip';
 import { addToast } from '@/src/design-system/components/Toast';
+import { useSearchFilterState } from '@/src/hooks/useURLState';
 import {
   type AddMemoryRequest,
   type ListMemoriesResponse,
@@ -26,7 +26,6 @@ import {
   type SearchResult,
 } from '@/src/lib/memory-client';
 import { swrKeys } from '@/src/lib/swr-keys';
-import { useSearchFilterState } from '@/src/hooks/useURLState';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -392,17 +391,17 @@ function EditModal({ memory, onClose, onSuccess }: EditModalProps) {
 
 export default function MemoriesContent() {
   const { search: urlSearch, filter: urlFilter, setSearch, setFilter } = useSearchFilterState();
-  const [filters, setFilters] = useState<FilterValues>({
+  const [_filters, setFilters] = useState<FilterValues>({
     search: urlSearch,
     status: urlFilter,
   });
   const [selectedMemory, setSelectedMemory] = useState<SearchResult | null>(null);
   const [editMemory, setEditMemory] = useState<SearchResult | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [scope, setScope] = useState<'global' | 'personal'>('global');
-  const [showAnomalies, setShowAnomalies] = useState(false);
-  const [showSecrets, setShowSecrets] = useState(false);
+  const [_showImportModal, _setShowImportModal] = useState(false);
+  const [_scope, _setScope] = useState<'global' | 'personal'>('global');
+  const [_showAnomalies, _setShowAnomalies] = useState(false);
+  const [_showSecrets, _setShowSecrets] = useState(false);
 
   useEffect(() => {
     setFilters((current) => ({

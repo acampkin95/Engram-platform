@@ -51,6 +51,8 @@ def _make_settings(multi_tenancy: bool = False) -> MagicMock:
     s.default_tenant_id = "default"
     s.embedding_dimensions = 768
     s.clean_schema_migration = False
+    s.search_retrieval_mode = "vector"
+    s.hybrid_alpha = 0.7
     return s
 
 
@@ -214,6 +216,42 @@ class TestMemoryToProperties:
         assert props["is_canonical"] is True
         # expires_at set
         assert props["expires_at"] != ""
+
+    def test_includes_advanced_persisted_fields(self):
+        client = _make_client()
+        memory = _make_memory(is_event=True, cause_ids=["a"], effect_ids=["b"])
+
+        props = client._memory_to_properties(memory)
+
+        assert "overall_confidence" in props
+        assert "confidence_factors" in props
+        assert "provenance" in props
+        assert "modification_history" in props
+        assert "contradictions" in props
+        assert "supporting_evidence_ids" in props
+        assert "temporal_bounds" in props
+        assert props["is_event"] is True
+        assert props["cause_ids"] == ["a"]
+        assert props["effect_ids"] == ["b"]
+
+
+class TestBuildMemoryProperties:
+    def test_schema_includes_advanced_fields(self):
+        client = _make_client()
+
+        properties = client._build_memory_properties()
+        names = {prop.name for prop in properties}
+
+        assert "overall_confidence" in names
+        assert "confidence_factors" in names
+        assert "provenance" in names
+        assert "modification_history" in names
+        assert "contradictions_resolved" in names
+        assert "supporting_evidence_ids" in names
+        assert "temporal_bounds" in names
+        assert "is_event" in names
+        assert "cause_ids" in names
+        assert "effect_ids" in names
 
     def test_none_optional_fields(self):
         client = _make_client()
@@ -437,6 +475,22 @@ class TestSearch:
 
         assert results == []
         collection.with_tenant.assert_called()
+
+    async def test_search_uses_hybrid_when_configured(self):
+        client = _make_client()
+        client.settings.search_retrieval_mode = "hybrid"
+        collection = MagicMock()
+        search_response = MagicMock()
+        search_response.objects = []
+        collection.query.hybrid.return_value = search_response
+        client._client.collections.get.return_value = collection
+
+        query = MemoryQuery(query="test", tier=MemoryTier.PROJECT, limit=5)
+        results = await client.search(query, [0.1] * 768)
+
+        assert results == []
+        collection.query.hybrid.assert_called_once()
+        collection.query.near_vector.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

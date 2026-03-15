@@ -304,6 +304,7 @@ services:
       MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://memory.velocitydigi.com,https://engram.velocitydigi.com,http://localhost:3002,http://localhost:3001,http://localhost:3000}
       AI_MEMORY_API_KEY: ${MEMORY_API_KEY:-}
+      OAUTH_REDIS_URL: redis://memory-redis:6379
     logging:
       driver: "json-file"
       options:

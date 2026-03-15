@@ -40,7 +40,6 @@ const nextConfig: NextConfig = {
 
     // Enable 103 Early Hints for faster resource loading
 
-
     // Optimize CSS (removes unused CSS in production)
     optimizeCss: true,
 
@@ -76,7 +75,6 @@ const nextConfig: NextConfig = {
   // =============================================================================
   // BUNDLING OPTIMIZATIONS
   // =============================================================================
-
 
   // Modularize imports for common libraries
   modularizeImports: {
@@ -288,5 +286,4 @@ export default withSentryConfig(withAnalyzer(nextConfig), {
     disable: !process.env.SENTRY_AUTH_TOKEN,
     deleteSourcemapsAfterUpload: true,
   },
-
 });

@@ -1,6 +1,5 @@
-import json
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC
 from enum import StrEnum
 from typing import Any
 
@@ -50,7 +49,7 @@ class MultiFactorResolver:
         # Simplified temporal relevance: newer is better
         time_a = memory_a.updated_at or memory_a.created_at
         time_b = memory_b.updated_at or memory_b.created_at
-        
+
         # Make them tz-aware for comparison if needed
         if time_a.tzinfo is None: time_a = time_a.replace(tzinfo=UTC)
         if time_b.tzinfo is None: time_b = time_b.replace(tzinfo=UTC)
@@ -80,7 +79,7 @@ class MultiFactorResolver:
         for similar in similar_memories:
             if str(memory.id) == str(similar.id):
                 continue
-            
+
             # Simple prompt for LLM to detect contradiction
             prompt = f"""
             Do these two statements contradict each other factually?
@@ -88,14 +87,14 @@ class MultiFactorResolver:
             Statement B: {similar.content}
             Reply ONLY with TRUE or FALSE.
             """
-            
+
             try:
                 # Assuming ollama client has generate method
                 if hasattr(self.llm, "generate"):
                     response = await self.llm.generate(prompt)
                 else:
                     response = "FALSE"
-                    
+
                 if "TRUE" in str(response).upper():
                     contradictions.append(
                         ContradictionResult(

@@ -221,25 +221,22 @@ export function SkeletonChatView({ messages = 8 }) {
       {Array.from({ length: messages }).map((_, i) => (
         <div
           key={`skel-chat-${i}`}
-          className={cn(
-            'flex gap-3',
-            i % 2 === 0 ? 'justify-start' : 'justify-end',
-          )}
+          className={cn('flex gap-3', i % 2 === 0 ? 'justify-start' : 'justify-end')}
         >
           {i % 2 === 0 ? (
-<>
-<Skeleton className="h-10 w-10 rounded-full bg-white/[0.04]" />
-<div className="flex-1 space-y-2">
-<Skeleton className="h-4 w-32 rounded bg-white/[0.04]" />
-<Skeleton className="h-16 w-full rounded-lg bg-white/[0.04]" />
-</div>
-</>
-) : (
-<div className="flex-1 space-y-2">
-<Skeleton className="h-4 w-24 ml-auto rounded bg-white/[0.04]" />
-<Skeleton className="h-16 w-full rounded-lg bg-white/[0.04]" />
-</div>
-)}
+            <>
+              <Skeleton className="h-10 w-10 rounded-full bg-white/[0.04]" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32 rounded bg-white/[0.04]" />
+                <Skeleton className="h-16 w-full rounded-lg bg-white/[0.04]" />
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-24 ml-auto rounded bg-white/[0.04]" />
+              <Skeleton className="h-16 w-full rounded-lg bg-white/[0.04]" />
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -256,10 +253,7 @@ export function SkeletonGraphView() {
         <Skeleton className="h-4 w-64 mx-auto rounded bg-white/[0.04]" />
         <div className="flex justify-center gap-2 mt-8">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton
-              key={`skel-node-${i}`}
-              className="h-16 w-16 rounded-full bg-white/[0.04]"
-            />
+            <Skeleton key={`skel-node-${i}`} className="h-16 w-16 rounded-full bg-white/[0.04]" />
           ))}
         </div>
       </div>

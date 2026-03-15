@@ -17,7 +17,6 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-
 vi.mock('swr', () => ({
   default: vi.fn((key: string) => {
     if (key === 'memory-matters') {
@@ -29,7 +28,7 @@ vi.mock('swr', () => ({
     return {
       data: { data: { total_memories: 10, total_entities: 50 } },
       error: null,
-      isLoading: false
+      isLoading: false,
     };
   }),
 }));

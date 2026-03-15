@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { test, vi } from 'vitest';
 import MattersContent from './MattersContent';
 
 // Mock matchMedia

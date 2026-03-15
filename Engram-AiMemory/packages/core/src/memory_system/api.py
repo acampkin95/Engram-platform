@@ -776,15 +776,11 @@ async def search_memories(request_obj: Request, request: SearchRequest):
     start_dt = None
     end_dt = None
     if request.start_date:
-        try:
+        with contextlib.suppress(ValueError, TypeError):
             start_dt = datetime.fromisoformat(request.start_date.replace("Z", "+00:00"))
-        except:
-            pass
     if request.end_date:
-        try:
+        with contextlib.suppress(ValueError, TypeError):
             end_dt = datetime.fromisoformat(request.end_date.replace("Z", "+00:00"))
-        except:
-            pass
 
     results = await _memory_system.search(
         query=request.query,

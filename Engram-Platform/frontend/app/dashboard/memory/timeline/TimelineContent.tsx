@@ -4,13 +4,12 @@ import { Calendar, Clock } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { FilterBar, type FilterValues } from '@/src/components/FilterBar';
-import { Slider } from '@/src/design-system/components/Slider';
 import { Skeleton } from '@/src/components/ui/skeleton';
 import { Badge } from '@/src/design-system/components/Badge';
-import { Button } from '@/src/design-system/components/Button';
 import { Card } from '@/src/design-system/components/Card';
 import { EmptyState } from '@/src/design-system/components/EmptyState';
 import { SectionHeader } from '@/src/design-system/components/SectionHeader';
+import { Slider } from '@/src/design-system/components/Slider';
 import { memoryClient } from '@/src/lib/memory-client';
 import { swrKeys } from '@/src/lib/swr-keys';
 
@@ -91,13 +90,7 @@ export default function TimelineContent() {
       {/* Time Range Slider */}
       {events.length > 0 && (
         <div className="mb-4 px-1">
-          <Slider
-            value={timeRange}
-            onValueChange={setTimeRange}
-            min={0}
-            max={100}
-            step={1}
-          />
+          <Slider value={timeRange} onValueChange={setTimeRange} min={0} max={100} step={1} />
           <p className="text-xs text-[#5c5878] mt-1">
             Viewing {timeRange[0]}% to {timeRange[1]}% of events
           </p>
@@ -113,9 +106,17 @@ export default function TimelineContent() {
             ))}
           </div>
         ) : error ? (
-          <EmptyState title="Error loading timeline" description={error} icon={<Clock className="w-6 h-6" />} />
+          <EmptyState
+            title="Error loading timeline"
+            description={error}
+            icon={<Clock className="w-6 h-6" />}
+          />
         ) : events.length === 0 ? (
-          <EmptyState title="No events found" description="Try adjusting your filters." icon={<Calendar className="w-6 h-6" />} />
+          <EmptyState
+            title="No events found"
+            description="Try adjusting your filters."
+            icon={<Calendar className="w-6 h-6" />}
+          />
         ) : (
           <div className="space-y-3">
             {sortedEvents.map((event) => (
@@ -126,7 +127,9 @@ export default function TimelineContent() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <h4 className="text-sm font-semibold text-[#f0eef8] truncate">{event.content}</h4>
+                      <h4 className="text-sm font-semibold text-[#f0eef8] truncate">
+                        {event.content}
+                      </h4>
                       <span className="text-xs text-[#5c5878] font-mono whitespace-nowrap">
                         {formatDate(event.created_at)}
                       </span>

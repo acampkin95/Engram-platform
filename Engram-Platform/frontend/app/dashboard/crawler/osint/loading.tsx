@@ -5,7 +5,7 @@ export default function CrawlerOsintLoading() {
     <div className="space-y-6">
       <SkeletonFilterBar />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3].map((i) => (
           <SkeletonStatCard key={i} />
         ))}
       </div>

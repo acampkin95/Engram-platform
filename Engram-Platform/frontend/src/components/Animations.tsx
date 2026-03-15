@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, useReducedMotion, type HTMLMotionProps } from 'framer-motion';
-import { ReactNode, useCallback } from 'react';
+import { type HTMLMotionProps, motion, useReducedMotion } from 'framer-motion';
+import type { ReactNode } from 'react';
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 
@@ -13,10 +13,22 @@ const fadeInVariant = {
 
 // @ts-expect-error - Framer Motion variants type complexity
 const slideInVariant = {
-  up: { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } },
-  down: { hidden: { opacity: 0, y: -20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } },
-  left: { hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { duration: 0.4 } } },
-  right: { hidden: { opacity: 0, x: 20 }, visible: { opacity: 1, x: 0, transition: { duration: 0.4 } } },
+  up: {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  },
+  down: {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  },
+  left: {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.4 } },
+  },
+  right: {
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.4 } },
+  },
 };
 
 const cardStaggerVariant = {
@@ -154,7 +166,7 @@ export function StaggerItem({
       animate="show"
       transition={{
         duration: shouldReduceMotion ? 0 : 0.3,
-        delay: index * 0.08
+        delay: index * 0.08,
       }}
       className={className}
       {...props}

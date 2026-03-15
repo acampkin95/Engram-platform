@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ReactNode } from 'react';
 import { type FieldValues, type Path, type RegisterOptions, useForm } from 'react-hook-form';
-import { type z } from 'zod';
+import type { z } from 'zod';
 import { Button } from '@/src/components/ui/button';
 import {
   Form,
@@ -101,10 +101,12 @@ export function AutoForm<T extends FieldValues>({
     defaultValues: defaultValues as T,
   });
 
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => onSubmit(data))} className={`space-y-6 ${className}`}>
+      <form
+        onSubmit={form.handleSubmit((data) => onSubmit(data))}
+        className={`space-y-6 ${className}`}
+      >
         {fields.map((field) => (
           <FormInput key={field.name} control={form.control} config={field} />
         ))}

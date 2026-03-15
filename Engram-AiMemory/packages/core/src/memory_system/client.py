@@ -128,36 +128,7 @@ class WeaviateMemoryClient:
         from weaviate.classes.config import Configure, DataType, Property, VectorDistances
 
         existing = self.client.collections.list_all()
-        # Schema for all memory tiers (same structure, different collections)
-        # Schema for all memory tiers (same structure, different collections)
-        memory_properties = [
-            Property(name="content", data_type=DataType.TEXT),
-            Property(name="summary", data_type=DataType.TEXT),
-            Property(name="memory_type", data_type=DataType.TEXT),
-            Property(name="source", data_type=DataType.TEXT),
-            Property(name="project_id", data_type=DataType.TEXT, index_filterable=True),
-            Property(name="user_id", data_type=DataType.TEXT, index_filterable=True),
-            Property(name="tenant_id", data_type=DataType.TEXT, index_filterable=True),
-            Property(name="session_id", data_type=DataType.TEXT),
-            Property(name="importance", data_type=DataType.NUMBER, index_filterable=True),
-            Property(name="confidence", data_type=DataType.NUMBER, index_filterable=True),
-            Property(name="tags", data_type=DataType.TEXT_ARRAY, index_filterable=True),
-            Property(name="metadata", data_type=DataType.TEXT),
-            Property(name="created_at", data_type=DataType.DATE, index_filterable=True),
-            Property(name="updated_at", data_type=DataType.DATE, index_filterable=True),
-            Property(name="expires_at", data_type=DataType.DATE, index_filterable=True),
-            Property(name="related_memory_ids", data_type=DataType.TEXT_ARRAY),
-            Property(name="parent_memory_id", data_type=DataType.TEXT, index_filterable=True),
-            # Phase B: new properties
-            Property(name="embedding_model", data_type=DataType.TEXT),
-            Property(name="embedding_dimension", data_type=DataType.INT),
-            Property(name="embedding_updated_at", data_type=DataType.DATE),
-            Property(name="access_count", data_type=DataType.INT, index_filterable=True),
-            Property(name="last_accessed_at", data_type=DataType.DATE, index_filterable=True),
-            Property(name="decay_factor", data_type=DataType.NUMBER),
-            Property(name="canonical_id", data_type=DataType.TEXT, index_filterable=True),
-            Property(name="is_canonical", data_type=DataType.BOOL, index_filterable=True),
-        ]
+        memory_properties = self._build_memory_properties()
 
         # Create tier collections
         for tier, collection_name in self.TIER_COLLECTIONS.items():
@@ -272,6 +243,69 @@ class WeaviateMemoryClient:
             console.print(f"[green]✓ {RELATION_COLLECTION} exists[/green]")
             # Migration: add missing properties if they don't exist
             await self._migrate_relation_collection()
+
+    def _build_memory_properties(self) -> list:
+        """Return the canonical Weaviate property list for memory collections."""
+        from weaviate.classes.config import DataType, Property
+
+        return [
+            Property(name="content", data_type=DataType.TEXT),
+            Property(name="summary", data_type=DataType.TEXT),
+            Property(name="memory_type", data_type=DataType.TEXT),
+            Property(name="source", data_type=DataType.TEXT),
+            Property(name="project_id", data_type=DataType.TEXT, index_filterable=True),
+            Property(name="user_id", data_type=DataType.TEXT, index_filterable=True),
+            Property(name="tenant_id", data_type=DataType.TEXT, index_filterable=True),
+            Property(name="session_id", data_type=DataType.TEXT),
+            Property(name="importance", data_type=DataType.NUMBER, index_filterable=True),
+            Property(name="confidence", data_type=DataType.NUMBER, index_filterable=True),
+            Property(name="tags", data_type=DataType.TEXT_ARRAY, index_filterable=True),
+            Property(name="metadata", data_type=DataType.TEXT),
+            Property(name="created_at", data_type=DataType.DATE, index_filterable=True),
+            Property(name="updated_at", data_type=DataType.DATE, index_filterable=True),
+            Property(name="expires_at", data_type=DataType.DATE, index_filterable=True),
+            Property(name="related_memory_ids", data_type=DataType.TEXT_ARRAY),
+            Property(name="parent_memory_id", data_type=DataType.TEXT, index_filterable=True),
+            # Phase B: new properties
+            Property(name="embedding_model", data_type=DataType.TEXT),
+            Property(name="embedding_dimension", data_type=DataType.INT),
+            Property(name="embedding_updated_at", data_type=DataType.DATE),
+            Property(name="access_count", data_type=DataType.INT, index_filterable=True),
+            Property(name="last_accessed_at", data_type=DataType.DATE, index_filterable=True),
+            Property(name="decay_factor", data_type=DataType.NUMBER),
+            Property(name="canonical_id", data_type=DataType.TEXT, index_filterable=True),
+            Property(name="is_canonical", data_type=DataType.BOOL, index_filterable=True),
+            # Advanced integrity, provenance, and lifecycle properties
+            Property(name="overall_confidence", data_type=DataType.NUMBER, index_filterable=True),
+            Property(name="confidence_factors", data_type=DataType.TEXT),
+            Property(name="provenance", data_type=DataType.TEXT),
+            Property(name="modification_history", data_type=DataType.TEXT),
+            Property(name="contradictions", data_type=DataType.TEXT_ARRAY, index_filterable=True),
+            Property(
+                name="contradictions_resolved",
+                data_type=DataType.BOOL,
+                index_filterable=True,
+            ),
+            Property(name="is_deprecated", data_type=DataType.BOOL, index_filterable=True),
+            Property(name="deprecated_by", data_type=DataType.TEXT, index_filterable=True),
+            Property(name="supporting_evidence_ids", data_type=DataType.TEXT_ARRAY),
+            Property(name="contradicting_evidence_ids", data_type=DataType.TEXT_ARRAY),
+            Property(
+                name="last_contradiction_check",
+                data_type=DataType.DATE,
+                index_filterable=True,
+            ),
+            Property(
+                name="last_confidence_update",
+                data_type=DataType.DATE,
+                index_filterable=True,
+            ),
+            # Temporal and event modeling
+            Property(name="temporal_bounds", data_type=DataType.TEXT),
+            Property(name="is_event", data_type=DataType.BOOL, index_filterable=True),
+            Property(name="cause_ids", data_type=DataType.TEXT_ARRAY),
+            Property(name="effect_ids", data_type=DataType.TEXT_ARRAY),
+        ]
 
     # -----------------------------------------------------------------------
     # Memory object helpers
@@ -453,7 +487,7 @@ class WeaviateMemoryClient:
     async def search(
         self, query: MemoryQuery, query_vector: list[float]
     ) -> list[MemorySearchResult]:
-        """Search memories across specified tiers."""
+        """Search memories across specified tiers using the configured retrieval mode."""
         from weaviate.classes.query import Filter, MetadataQuery
 
         results = []
@@ -498,19 +532,38 @@ class WeaviateMemoryClient:
                 effective_tenant = query.tenant_id or self.settings.default_tenant_id
                 await self._ensure_memory_tenant(effective_tenant, collection_name)
                 collection = collection.with_tenant(effective_tenant)
-            search_results = collection.query.near_vector(
-                near_vector=query_vector,
-                limit=query.limit,
-                filters=combined_filter,
-                return_metadata=MetadataQuery(distance=True, certainty=True),
-            )
+            if self.settings.search_retrieval_mode == "hybrid" and query.query.strip():
+                search_results = collection.query.hybrid(
+                    query=query.query,
+                    vector=query_vector,
+                    alpha=self.settings.hybrid_alpha,
+                    limit=query.limit,
+                    filters=combined_filter,
+                    return_metadata=MetadataQuery(score=True),
+                )
+            else:
+                search_results = collection.query.near_vector(
+                    near_vector=query_vector,
+                    limit=query.limit,
+                    filters=combined_filter,
+                    return_metadata=MetadataQuery(distance=True, certainty=True),
+                )
             for obj in search_results.objects:
                 memory = self._obj_to_memory(obj, tier)
+                metadata = getattr(obj, "metadata", None)
+                score = 0.0
+                if metadata is not None:
+                    raw_score = getattr(metadata, "score", None)
+                    raw_certainty = getattr(metadata, "certainty", None)
+                    if isinstance(raw_score, (int, float)):
+                        score = float(raw_score)
+                    elif isinstance(raw_certainty, (int, float)):
+                        score = float(raw_certainty)
                 results.append(
                     MemorySearchResult(
                         memory=memory,
-                        score=obj.metadata.certainty or 0.0,
-                        distance=obj.metadata.distance,
+                        score=score,
+                        distance=getattr(metadata, "distance", None),
                     )
                 )
         # Sort by score and limit
@@ -681,6 +734,22 @@ class WeaviateMemoryClient:
             "decay_factor": DataType.NUMBER,
             "canonical_id": DataType.TEXT,
             "is_canonical": DataType.BOOL,
+            "overall_confidence": DataType.NUMBER,
+            "confidence_factors": DataType.TEXT,
+            "provenance": DataType.TEXT,
+            "modification_history": DataType.TEXT,
+            "contradictions": DataType.TEXT_ARRAY,
+            "contradictions_resolved": DataType.BOOL,
+            "is_deprecated": DataType.BOOL,
+            "deprecated_by": DataType.TEXT,
+            "supporting_evidence_ids": DataType.TEXT_ARRAY,
+            "contradicting_evidence_ids": DataType.TEXT_ARRAY,
+            "last_contradiction_check": DataType.DATE,
+            "last_confidence_update": DataType.DATE,
+            "temporal_bounds": DataType.TEXT,
+            "is_event": DataType.BOOL,
+            "cause_ids": DataType.TEXT_ARRAY,
+            "effect_ids": DataType.TEXT_ARRAY,
         }
         try:
             collection = self.client.collections.get(collection_name)
