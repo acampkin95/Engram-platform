@@ -291,8 +291,8 @@ services:
   # ==========================================
   mcp-server:
     build:
-      context: ../Engram-AiMemory
-      dockerfile: docker/Dockerfile.mcp-server
+      context: ../Engram-MCP
+      dockerfile: docker/Dockerfile
     image: engram-mcp-server:latest
     container_name: engram-mcp-server
     restart: unless-stopped

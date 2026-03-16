@@ -1,5 +1,8 @@
 #!/bin/bash
-# Interactive deployment script for AI Memory System
+# DEPRECATED: Use ./scripts/deploy-unified.sh from the monorepo root instead.
+# This script is retained for reference only.
+# To deploy the full stack: ../scripts/deploy-unified.sh deploy
+# To deploy memory only:    ../scripts/deploy-unified.sh deploy:memory
 
 set -e
 

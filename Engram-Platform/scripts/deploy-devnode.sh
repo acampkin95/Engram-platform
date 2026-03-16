@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DEPRECATED: Prefer ./scripts/deploy-unified.sh deploy:devnode from the monorepo root.
 # =============================================================================
 #  Engram Platform — Devnode Deployment Script
 #  Optimized for acdev-devnode.tail4da6b7.ts.net

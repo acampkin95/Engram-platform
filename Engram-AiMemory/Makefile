@@ -7,31 +7,26 @@ JWT_SECRET ?= local-dev-jwt-secret-0123456789abcdef0123456789abcdef
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-dev:  ## Start development stack (MCP server + dashboard)
-	npm run dev
+dev:  ## Start memory API in development mode
+	JWT_SECRET=$(JWT_SECRET) $(PYTHON) -m memory_system.api
 
-build:  ## Build all packages (MCP server + dashboard)
+build:  ## Build CLI package
 	npm run build
 
-test:  ## Run all tests (Python + TypeScript)
+test:  ## Run all tests (Python)
 	JWT_SECRET=$(JWT_SECRET) $(PYTHON) -m pytest packages/core/tests/ -v --no-header
-	npm run test:run -w packages/dashboard
 
 test-python:  ## Run Python tests only
 	JWT_SECRET=$(JWT_SECRET) $(PYTHON) -m pytest packages/core/tests/ -v --no-header
 
-test-ts:  ## Run TypeScript tests only
-	npm run test:run -w packages/dashboard
-
 lint:  ## Run all linters (ruff + biome + mypy)
 	ruff check packages/core/src/memory_system/
-	npx biome check packages/mcp-server/src packages/cli/src
+	npx biome check packages/cli/src
 	mypy packages/core/src/memory_system/api.py --ignore-missing-imports || true
 
 lint-fix:  ## Auto-fix lint issues
 	ruff check packages/core/src/memory_system/ --fix
-	npx biome check packages/mcp-server/src packages/cli/src --fix
-	npx biome check packages/dashboard/app packages/dashboard/components packages/dashboard/hooks --fix
+	npx biome check packages/cli/src --fix
 
 format:  ## Format all code
 	ruff format packages/core/src/memory_system/
@@ -56,8 +51,6 @@ deploy:  ## Run deployment script
 	bash scripts/deploy.sh
 
 clean:  ## Remove build artifacts
-	rm -rf packages/mcp-server/dist
-	rm -rf packages/dashboard/.next
 	rm -rf packages/cli/dist
 	find . -type d -name __pycache__ -not -path "./.venv/*" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true

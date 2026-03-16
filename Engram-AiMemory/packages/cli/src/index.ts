@@ -210,19 +210,9 @@ async function installNode(): Promise<boolean> {
 async function buildAll(): Promise<boolean> {
   logStep(4, 4, "Building all packages...");
 
-  const { code: pyCode } = await run("npm run build -w @ai-memory/mcp-server", ROOT);
-  if (pyCode !== 0) {
-    logError("Failed to build MCP server");
-    return false;
-  }
-  logSuccess("MCP server built");
-
-  const { code: tsCode } = await run("npm run build -w @ai-memory/dashboard", ROOT);
-  if (tsCode !== 0) {
-    logError("Failed to build dashboard");
-    return false;
-  }
-  logSuccess("Dashboard built");
+  // MCP server and dashboard are now in separate subprojects (Engram-MCP, Engram-Platform).
+  // The CLI only builds the core Python package and the CLI itself.
+  logSuccess("Build step completed (MCP and dashboard are managed independently)");
 
   return true;
 }
@@ -240,12 +230,7 @@ async function runTests(): Promise<boolean> {
     logSuccess("Python tests passed");
   }
 
-  const { code: tsCode } = await run("npm run test:run -w @ai-memory/dashboard", ROOT);
-  if (tsCode !== 0) {
-    logWarn("Some frontend tests failed");
-  } else {
-    logSuccess("Frontend tests passed");
-  }
+  logSuccess("Frontend tests are now in Engram-Platform (npm run test:run)");
 
   return true;
 }
@@ -303,8 +288,8 @@ async function install(options: Options) {
 ║    source .venv/bin/activate                               ║
 ║    python -m memory_system.api                             ║
 ║                                                               ║
-║  To start the dashboard:                                   ║
-║    npm run dev -w @ai-memory/dashboard                     ║
+║  Dashboard:                                                ║
+║    cd ../Engram-Platform/frontend && npm run dev           ║
 ║                                                               ║
 ║  To deploy with Docker:                                    ║
 ║    ./scripts/deploy.sh                                      ║

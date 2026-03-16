@@ -74,11 +74,8 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
-      - name: Biome check (MCP server)
-        run: npx biome check packages/mcp-server/src packages/cli/src
-      - name: Biome check (Dashboard source)
-        run: npx biome check packages/dashboard/app packages/dashboard/components packages/dashboard/hooks packages/dashboard/lib packages/dashboard/types
-        continue-on-error: true  # pre-existing a11y issues
+      - name: Biome check (CLI)
+        run: npx biome check packages/cli/src
 
   ts-build:
     name: TypeScript Build
@@ -91,12 +88,8 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
-      - name: Build MCP server
-        run: npm run build -w packages/mcp-server
-      - name: Build dashboard
-        run: npm run build -w packages/dashboard
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:8000
+      - name: Build CLI
+        run: npm run build -w packages/cli
 
   ts-test:
     name: TypeScript Tests
@@ -109,8 +102,8 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
-      - name: Run dashboard tests
-        run: npm run test:run -w packages/dashboard
+      - name: Note
+        run: echo "Dashboard and MCP tests are now in Engram-Platform and Engram-MCP respectively"
 
   dependency-audit-node:
     name: Node Dependency Audit

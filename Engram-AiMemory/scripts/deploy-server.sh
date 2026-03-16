@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DEPRECATED: Prefer ./scripts/deploy-unified.sh deploy:memory from the monorepo root.
 # =============================================================================
 #  AI Memory System — One-Shot Ubuntu Server Deployment
 #

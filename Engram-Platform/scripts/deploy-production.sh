@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DEPRECATED: Prefer ./scripts/deploy-unified.sh deploy:production from the monorepo root.
 # =============================================================================
 #  Engram Platform — Enhanced Production Deployment Script v2.0
 #  Features: Pre-flight checks, dry-run mode, rollback, secret validation

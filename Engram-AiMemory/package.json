@@ -3,16 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "packages/cli",
-    "packages/mcp-server",
-    "packages/dashboard"
+    "packages/cli"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:mcp\" \"npm run dev:dashboard\"",
-    "dev:mcp": "npm run dev -w packages/mcp-server",
-    "dev:dashboard": "npm run dev -w packages/dashboard",
-    "build": "npm run build -w packages/mcp-server && npm run build -w packages/dashboard",
-    "test": "npm run test -w packages/mcp-server && npm run test -w packages/dashboard",
+    "dev": "echo 'MCP and dashboard are now in Engram-MCP and Engram-Platform respectively'",
+    "build": "npm run build -w packages/cli",
+    "test": "echo 'MCP tests: cd ../Engram-MCP && npm test'",
     "lint": "biome check .",
     "format": "biome format . --write",
     "docker:up": "docker compose -f docker/docker-compose.yml up -d",

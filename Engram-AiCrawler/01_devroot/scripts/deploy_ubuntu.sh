@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DEPRECATED: Prefer ./scripts/deploy-unified.sh deploy from the monorepo root for full-stack deployment.
 # =============================================================================
 # deploy_ubuntu.sh — OSINT Investigation Platform Ubuntu Deployment Script
 # =============================================================================
