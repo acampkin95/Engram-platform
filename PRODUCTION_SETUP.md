@@ -30,7 +30,7 @@ CORS_ORIGINS=https://memory.velocitydigi.com,https://engram.velocitydigi.com
 Run the following command to build and start the services in detached mode:
 
 ```bash
-docker-compose up -d --build
+./scripts/deploy-unified.sh up
 ```
 
 ### 3. Verify Deployment
@@ -38,7 +38,7 @@ docker-compose up -d --build
 1. Check the status of the containers:
 
    ```bash
-   docker-compose ps
+   ./scripts/deploy-unified.sh ps
    ```
 
    Ensure all services (`engram-nginx`, `engram-platform-frontend`, `engram-memory-api`, `engram-crawler-api`, etc.) are `Up` and `healthy`.
@@ -54,8 +54,13 @@ To update the application with new code or configuration changes:
 # git pull origin main
 
 # Rebuild and restart only changed containers
-docker-compose up -d --build
+./scripts/deploy-unified.sh up
 ```
+
+## Unified Deployment Entry Point
+
+The canonical orchestration surface is `Engram-Platform/docker-compose.yml`.
+Use `./scripts/deploy-unified.sh` from the repository root for routine lifecycle commands instead of invoking multiple per-project compose files directly.
 
 ## Target Hardware Profile
 

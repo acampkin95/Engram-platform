@@ -98,11 +98,18 @@ Thumbs.db
 
 # Project-specific
 aistore/
+.aistore/
+**/.aistore/
 .sisyphus/
 .omc/
 .claude/
 .mcp.json
 engram-platform-bundle*.tar.gz
+Diagnostics/
+**/htmlcov/
+**/.venv_old/
+**/test-output.txt
+**/coverage.json
 
 # Next.js build output
 .next/
@@ -151,6 +158,10 @@ package-lock.json.bak
 *.tar.gz
 *.tgz
 *.zip
+!archive/**/*.tar.gz
+!archive/**/*.tgz
+!archive/**/*.zip
+!archive/**/*.gz
 
 # Session logs (archive to aistore)
 session_*.md

@@ -11,8 +11,7 @@ A production-grade multi-layer AI memory platform. Engram gives AI assistants pe
 cp Engram-Platform/.env.example Engram-Platform/.env   # fill in secrets
 
 # Start full stack
-cd Engram-Platform
-docker compose up -d
+./scripts/deploy-unified.sh up
 
 # Services will be available at:
 #   Platform UI    → http://localhost:3002
@@ -198,9 +197,8 @@ cd Engram-Platform/frontend && npm run test:run && npm run test:e2e
 Engram is deployed via Docker Swarm on Tailscale (`*.tail4da6b7.ts.net`).
 
 ```bash
-cd Engram-Platform
-docker compose up -d --profile mcp   # include MCP server
-docker compose logs -f memory-api    # tail a service
+./scripts/deploy-unified.sh up --profile mcp
+./scripts/deploy-unified.sh logs memory-api
 ```
 
 See [`docs/01-deployment-manual.md`](docs/01-deployment-manual.md) and [`PRODUCTION_SETUP.md`](PRODUCTION_SETUP.md).

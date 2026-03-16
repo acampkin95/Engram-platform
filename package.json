@@ -1,4 +1,11 @@
 {
+  "private": true,
+  "scripts": {
+    "deploy:config": "docker compose -f Engram-Platform/docker-compose.yml config",
+    "deploy:up": "docker compose -f Engram-Platform/docker-compose.yml up -d --build",
+    "deploy:down": "docker compose -f Engram-Platform/docker-compose.yml down",
+    "deploy:logs": "docker compose -f Engram-Platform/docker-compose.yml logs -f"
+  },
   "devDependencies": {
     "shadcn": "^3.8.5"
   }

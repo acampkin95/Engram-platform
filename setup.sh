@@ -58,12 +58,11 @@ else
 fi
 
 # Build and Start
-echo -e "${BLUE}🐳 Building and starting services...${NC}"
-cd Engram-Platform
-docker-compose up -d --build
+echo -e "${BLUE}🐳 Building and starting services via the unified stack compose file...${NC}"
+docker compose -f Engram-Platform/docker-compose.yml up -d --build
 
 echo -e "${GREEN}✨ Setup complete!${NC}"
-echo -e "Check status with: ${BLUE}cd Engram-Platform && docker-compose ps${NC}"
+echo -e "Check status with: ${BLUE}./scripts/deploy-unified.sh ps${NC}"
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "Access your instance at: ${BLUE}${PROD_DOMAIN}${NC}"
 fi
