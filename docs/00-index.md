@@ -24,7 +24,7 @@ New to Engram? Start with the [project README](../README.md) for an overview and
 | **Maintenance Manual** | [02-maintenance-manual.md](02-maintenance-manual.md) | Routine maintenance schedules, backup procedures, performance tuning, and disaster recovery |
 | **Architecture Manual** | [03-architecture-manual.md](03-architecture-manual.md) | System architecture, component diagrams, data flow, and integration points |
 | **Troubleshooting Manual** | [04-troubleshooting-manual.md](04-troubleshooting-manual.md) | Diagnostic methodology, common issues, error reference, and emergency procedures |
-| **MCP Manual** | [05-mcp-manual.md](05-mcp-manual.md) | MCP server installation, configuration, tools reference, and integration guides |
+| **MCP Manual** | [05-mcp-manual.md](05-mcp-manual.md) | MCP server (Engram-MCP) installation, configuration, tools reference, and integration guides |
 | **Admin Manual** | [06-admin-manual.md](06-admin-manual.md) | User management, tenant administration, security configuration, and audit logging |
 | **Pre-Commit Guide** | [07-pre-commit-guide.md](07-pre-commit-guide.md) | Git hooks for code quality, secrets detection, and formatting enforcement |
 

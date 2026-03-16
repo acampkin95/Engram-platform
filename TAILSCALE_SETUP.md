@@ -14,36 +14,36 @@ This guide describes how to configure Engram to be accessible over a Tailscale n
 Find the IP address or MagicDNS name of the machine hosting Engram.
 
 - You can find this in the Tailscale admin console or by running `tailscale ip` on the machine.
-- Example: `100.x.y.z` or `engram-host`
+- Example: `100.x.y.z` or `engram-host.tail1234.ts.net`
 
-### 2. Update Environment Variables
+### 2. Configure Environment Variables
 
-You need to update the `.env` file in `Engram-Platform` to include your Tailscale address.
-
-1. Navigate to `Engram-Platform`.
-2. Open or create your `.env` file (copy from `.env.example` if needed).
-3. Update the `NEXT_PUBLIC_APP_URL` and `CORS_ORIGINS` variables.
+Run the interactive setup wizard which will prompt for your Tailscale address:
 
 ```bash
-# Engram-Platform/.env
-
-# Application URLs
-# Use your Tailscale IP or MagicDNS name (and port 3002)
-NEXT_PUBLIC_APP_URL=http://<tailscale-ip-or-name>:3002
-
-# CORS Configuration
-# Add your Tailscale URL to the allowed origins list
-CORS_ORIGINS=http://localhost:3002,http://localhost:3001,http://<tailscale-ip-or-name>:3002
+./scripts/deploy-unified.sh setup
 ```
 
-### 3. Rebuild and Restart Containers
-
-After updating the environment variables, you need to rebuild and restart the Docker containers to apply the changes.
+Or edit `Engram-Platform/.env` manually:
 
 ```bash
-cd Engram-Platform
-docker-compose down
-docker-compose up -d --build
+# Bind services to your Tailscale IP (never 0.0.0.0)
+BIND_ADDRESS=100.x.y.z
+
+# Tailscale MagicDNS hostname
+TAILSCALE_HOSTNAME=engram-host.tail1234.ts.net
+
+# Application URL using your Tailscale address
+NEXT_PUBLIC_APP_URL=http://engram-host.tail1234.ts.net:3002
+
+# CORS: include your Tailscale URL
+CORS_ORIGINS=http://localhost:3002,http://engram-host.tail1234.ts.net:3002
+```
+
+### 3. Rebuild and Restart
+
+```bash
+./scripts/deploy-unified.sh up
 ```
 
 ## Verifying Access
@@ -52,8 +52,18 @@ docker-compose up -d --build
 2. Navigate to `http://<tailscale-ip-or-name>:3002`.
 3. You should see the Engram login or dashboard page.
 
+## Service Ports
+
+| Service | Port | URL |
+|---------|------|-----|
+| Platform UI | 3002 | `http://<tailscale-name>:3002` |
+| Memory API | 8000 | `http://<tailscale-name>:8000` |
+| MCP Server | 3000 | `http://<tailscale-name>:3000` |
+| Weaviate | 8080 | `http://<tailscale-name>:8080` |
+
 ## Troubleshooting
 
-- **CORS Errors:** If you see CORS errors in the browser console, double-check that you added the exact URL (including `http://` and port) to `CORS_ORIGINS` in the `.env` file and restarted the containers.
-- **Connection Refused:** Ensure that the Engram services are running (`docker-compose ps`) and that the host machine's firewall allows traffic on port 3002 over the Tailscale interface (Tailscale usually handles this automatically).
-- **Clerk Authentication:** If using Clerk for authentication, you may need to add your Tailscale domain/IP to the Allowed Origins in your Clerk Dashboard settings if strict security is enabled.
+- **CORS Errors:** Double-check that you added the exact URL (including `http://` and port) to `CORS_ORIGINS` in the `.env` file and restarted the containers.
+- **Connection Refused:** Ensure services are running (`./scripts/deploy-unified.sh ps`) and that the host machine's firewall allows traffic over the Tailscale interface.
+- **Clerk Authentication:** Add your Tailscale domain/IP to the Allowed Origins in your Clerk Dashboard settings if strict security is enabled.
+- **Binding Issues:** Verify `BIND_ADDRESS` is set to your Tailscale IP, not `127.0.0.1` (which restricts to localhost only).

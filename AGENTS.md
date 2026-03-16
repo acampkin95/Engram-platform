@@ -10,10 +10,13 @@ Multi-layer AI memory and intelligence platform. 4 subprojects: AiMemory (vector
 
 ```
 Engram/
-├── Engram-AiMemory/     # Python FastAPI + TypeScript npm workspaces (3 packages)
+├── Engram-AiMemory/     # Python FastAPI + CLI (npm workspace: packages/cli only)
 ├── Engram-AiCrawler/    # Python FastAPI + React 18 frontend
-├── Engram-MCP/          # TypeScript MCP server (stdio + HTTP)
-└── Engram-Platform/     # Next.js 15 + React 19 frontend
+├── Engram-MCP/          # TypeScript MCP server (stdio + HTTP, OAuth 2.1, 381 tests)
+├── Engram-Platform/     # Next.js 15 + React 19 frontend (canonical dashboard)
+├── scripts/             # Unified deployment entry point
+├── docs/                # Consolidated documentation
+└── archive/             # Retired packages and session artifacts
 ```
 
 **Data flow:** Crawler → Memory API (Weaviate) → MCP Server → Platform UI

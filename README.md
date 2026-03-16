@@ -1,4 +1,4 @@
-# Engram — AI Memory & Intelligence Platform
+# Engram -- AI Memory & Intelligence Platform
 
 A production-grade multi-layer AI memory platform. Engram gives AI assistants persistent, searchable memory across projects, with a built-in OSINT crawler, knowledge graph, and unified dashboard.
 
@@ -7,21 +7,22 @@ A production-grade multi-layer AI memory platform. Engram gives AI assistants pe
 ## Quick Start
 
 ```bash
-# Clone and configure
-cp Engram-Platform/.env.example Engram-Platform/.env   # fill in secrets
+# First-time setup (interactive env configuration + deploy)
+./scripts/deploy-unified.sh init
 
-# Start full stack
-./scripts/deploy-unified.sh up
+# Or step by step:
+./scripts/deploy-unified.sh setup    # configure .env interactively
+./scripts/deploy-unified.sh up       # build and start all services
 
-# Services will be available at:
-#   Platform UI    → http://localhost:3002
-#   Memory API     → http://localhost:8000
-#   Crawler API    → http://localhost:11235
-#   MCP Server     → http://localhost:3000 (profile: mcp)
-#   Weaviate       → http://localhost:8080
+# Services:
+#   Platform UI    http://localhost:3002
+#   Memory API     http://localhost:8000
+#   Crawler API    http://localhost:11235
+#   MCP Server     http://localhost:3000
+#   Weaviate       http://localhost:8080
 ```
 
-> **Full deployment guide** → [`docs/01-deployment-manual.md`](docs/01-deployment-manual.md)
+> **Full deployment guide** -> [`docs/01-deployment-manual.md`](docs/01-deployment-manual.md)
 
 ---
 
@@ -29,27 +30,75 @@ cp Engram-Platform/.env.example Engram-Platform/.env   # fill in secrets
 
 | Component | Purpose | Stack |
 |-----------|---------|-------|
-| [**Engram-AiMemory**](Engram-AiMemory/) | 3-tier vector memory system | Python 3.13, FastAPI, Weaviate, Redis |
-| [**Engram-AiCrawler**](Engram-AiCrawler/) | OSINT web crawler with AI analysis | Python 3.13, FastAPI, Crawl4AI, Chromium |
-| [**Engram-MCP**](Engram-MCP/) | Model Context Protocol server | TypeScript, Node 20, OAuth 2.1 |
-| [**Engram-Platform**](Engram-Platform/) | Unified frontend dashboard | Next.js 15, React 19, Clerk |
+| [**Engram-AiMemory**](Engram-AiMemory/) | 3-tier vector memory system | Python 3.11+, FastAPI, Weaviate, Redis |
+| [**Engram-AiCrawler**](Engram-AiCrawler/) | OSINT web crawler with AI analysis | Python 3.11+, FastAPI, Crawl4AI, Chromium |
+| [**Engram-MCP**](Engram-MCP/) | Model Context Protocol server | TypeScript, Node 20, OAuth 2.1, 381 tests |
+| [**Engram-Platform**](Engram-Platform/) | Unified frontend dashboard | Next.js 15, React 19, Clerk, Tailwind v4 |
 
-**Data flow:** Crawler discovers & scrapes → Memory API stores vectors → MCP exposes tools to AI clients → Platform provides the UI.
+**Data flow:** Crawler discovers & scrapes -> Memory API stores vectors -> MCP exposes tools to AI clients -> Platform provides the UI.
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│  Engram-Platform  (Next.js 15, port 3002)   │
-│  Dashboard · Memory browser · Crawler UI    │
-├──────────────┬──────────────┬───────────────┤
-│  Engram-MCP  │ Crawler API  │  Memory API   │
-│  port 3000   │ port 11235   │  port 8000    │
-├──────────────┴──────────────┴───────────────┤
-│  Weaviate :8080  │  Redis x2 :6379/:6380    │
-└──────────────────┴──────────────────────────┘
++---------------------------------------------+
+|  Engram-Platform  (Next.js 15, port 3002)   |
+|  Dashboard . Memory browser . Crawler UI    |
++--------------+--------------+---------------+
+|  Engram-MCP  | Crawler API  |  Memory API   |
+|  port 3000   | port 11235   |  port 8000    |
++--------------+--------------+---------------+
+|  Weaviate :8080  |  Redis x2 :6379/:6380    |
++------------------+--------------------------+
+```
+
+## Project Structure
+
+```
+Engram/
++-- Engram-AiMemory/        Python FastAPI memory system + CLI
++-- Engram-AiCrawler/       Python FastAPI OSINT crawler
++-- Engram-MCP/             TypeScript MCP server (canonical)
++-- Engram-Platform/        Next.js 15 dashboard (canonical UI)
+|   +-- docker-compose.yml  Master orchestration file
++-- scripts/
+|   +-- deploy-unified.sh   Canonical deployment entry point
++-- docs/                   Consolidated documentation
++-- engram-shared/          Shared Python utilities
++-- archive/                Retired artifacts and session docs
++-- plans/                  Implementation roadmaps
+```
+
+---
+
+## Unified Deployment
+
+All deployment goes through a single entry point:
+
+```bash
+./scripts/deploy-unified.sh <command>
+```
+
+| Command | Description |
+|---------|-------------|
+| `init` | First-time setup: interactive env config + build + deploy + health check |
+| `setup` | Interactive environment configuration wizard |
+| `up` | Build and start the stack |
+| `down` | Stop the stack |
+| `deploy [--dry-run]` | Production deploy with pre-flight checks |
+| `health` | Check all service health endpoints |
+| `ps` | Show container status |
+| `logs [service]` | Tail service logs |
+| `restart [service]` | Restart all or one service |
+| `config` | Validate compose config |
+
+Legacy per-subproject scripts are accessible via delegation:
+
+```bash
+./scripts/deploy-unified.sh deploy:production    # full production deploy
+./scripts/deploy-unified.sh deploy:devnode       # devnode-optimized deploy
+./scripts/deploy-unified.sh deploy:memory        # memory system deploy
 ```
 
 ---
@@ -88,7 +137,7 @@ cp Engram-Platform/.env.example Engram-Platform/.env   # fill in secrets
 
 | Document | Description |
 |----------|-------------|
-| [`PROJECT_ROADMAP.md`](PROJECT_ROADMAP.md) | 12-week completion plan |
+| [`PROJECT_ROADMAP.md`](PROJECT_ROADMAP.md) | Completion plan |
 | [`MEMORY_FEATURES.md`](MEMORY_FEATURES.md) | Memory system feature reference |
 | [`engram-shared/README.md`](engram-shared/README.md) | Shared Python utilities package |
 
@@ -101,36 +150,33 @@ cp Engram-Platform/.env.example Engram-Platform/.env   # fill in secrets
 - Docker & Docker Compose
 - Python 3.11+ (for AiMemory & AiCrawler development)
 - Node.js 20+ (for MCP & Platform development)
-- (Optional) Python venv per subproject
 
 ### Per-Subproject Dev
 
 ```bash
-# AiMemory — Python + TypeScript monorepo
+# AiMemory -- Python memory system + CLI
 cd Engram-AiMemory
-python3.13 -m venv .venv && source .venv/bin/activate
+python3.11 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-make dev              # starts MCP + Dashboard concurrently
+make test
 
-# AiCrawler — FastAPI + React
+# AiCrawler -- FastAPI + React
 cd Engram-AiCrawler/01_devroot
 source .venv/bin/activate
 uvicorn app.main:app --reload --port 11235
-cd frontend && npm run dev
 
-# MCP Server — TypeScript
+# MCP Server -- TypeScript (381 tests, OAuth 2.1)
 cd Engram-MCP
 npm install && npm run dev
 
-# Platform — Next.js 15
+# Platform -- Next.js 15 + React 19
 cd Engram-Platform/frontend
-npm install && npm run dev    # → http://localhost:3002
+npm install && npm run dev    # http://localhost:3002
 ```
 
 ### Shared Utilities
 
 ```bash
-# Install engram-shared in any service venv
 pip install -e ./engram-shared
 ```
 
@@ -143,31 +189,38 @@ pip install -e ./engram-shared
 | Platform UI | 3002 | Next.js with Clerk auth |
 | Memory API | 8000 | FastAPI, JWT auth |
 | Crawler API | 11235 | FastAPI, supervisord |
-| MCP Server | 3000 | stdio + HTTP transport |
+| MCP Server | 3000 | Dual transport: stdio + HTTP, OAuth 2.1 |
 | Weaviate | 8080 | Vector DB |
 | Crawler Redis | 6379 | Cache |
 | Memory Redis | 6380 | Cache |
-| Nginx (prod) | 8080 | Reverse proxy |
 
 ---
 
 ## Environment Variables
 
-Copy `.env.example` in each subproject. Key variables:
+Run `./scripts/deploy-unified.sh setup` for interactive configuration, or copy `.env.example`:
+
+```bash
+cp Engram-Platform/.env.example Engram-Platform/.env
+```
+
+Key variables:
 
 ```env
 # Auth
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
 CLERK_SECRET_KEY=sk_...
-JWT_SECRET=your-secret
+JWT_SECRET=your-secret-min-32-chars
 
-# Embeddings (choose one)
-EMBEDDING_PROVIDER=openai   # openai | deepinfra | nomic | local
+# Embeddings
+EMBEDDING_PROVIDER=deepinfra   # openai | deepinfra | nomic | local
 
-# Services
-WEAVIATE_URL=http://weaviate:8080
-REDIS_URL=redis://memory-redis:6379
-LM_STUDIO_URL=http://host.docker.internal:1234
+# Network (never use 0.0.0.0 in production)
+BIND_ADDRESS=127.0.0.1
+TAILSCALE_HOSTNAME=your-host.tail1234.ts.net
+
+# MCP
+MCP_AUTH_TOKEN=your-mcp-token
 ```
 
 See [`docs/reference/environment-variables.md`](docs/reference/environment-variables.md) for the full list.
@@ -177,14 +230,14 @@ See [`docs/reference/environment-variables.md`](docs/reference/environment-varia
 ## Testing
 
 ```bash
-# AiMemory (Python — 80% coverage threshold)
+# AiMemory (Python, 80% coverage threshold)
 cd Engram-AiMemory && make test
 
 # AiCrawler (Python)
 cd Engram-AiCrawler/01_devroot && pytest tests/ -v
 
-# MCP (TypeScript)
-cd Engram-MCP && npm run test && npm run smoke
+# MCP (TypeScript, 381 tests)
+cd Engram-MCP && npm test
 
 # Platform (Vitest + Playwright)
 cd Engram-Platform/frontend && npm run test:run && npm run test:e2e
@@ -194,11 +247,12 @@ cd Engram-Platform/frontend && npm run test:run && npm run test:e2e
 
 ## Production
 
-Engram is deployed via Docker Swarm on Tailscale (`*.tail4da6b7.ts.net`).
+Engram is deployed on Tailscale (`*.tail4da6b7.ts.net`). Never expose services on public IPs directly.
 
 ```bash
-./scripts/deploy-unified.sh up --profile mcp
-./scripts/deploy-unified.sh logs memory-api
+./scripts/deploy-unified.sh deploy             # full deploy with pre-flight
+./scripts/deploy-unified.sh deploy --dry-run   # validate without changes
+./scripts/deploy-unified.sh health             # verify all services
 ```
 
 See [`docs/01-deployment-manual.md`](docs/01-deployment-manual.md) and [`PRODUCTION_SETUP.md`](PRODUCTION_SETUP.md).
@@ -207,12 +261,12 @@ See [`docs/01-deployment-manual.md`](docs/01-deployment-manual.md) and [`PRODUCT
 
 ## Status
 
-**Current:** ~65% complete — In active development
+**Current:** ~70% complete -- In active development
 **Roadmap:** [`PROJECT_ROADMAP.md`](PROJECT_ROADMAP.md)
 
 | Component | Test Coverage | Overall |
 |-----------|--------------|---------|
-| AiMemory | ~70% (target 95%) | 70% |
+| AiMemory | ~80% (target 95%) | 70% |
 | AiCrawler | ~58% (target 85%) | 65% |
-| MCP Server | 161 tests passing | 80% |
-| Platform | ~0% (target 80%) | 45% |
+| MCP Server | 381 tests passing | 80% |
+| Platform | Baseline needed (target 80%) | 45% |

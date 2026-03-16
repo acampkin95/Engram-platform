@@ -130,11 +130,60 @@ This profile is the default release target unless host telemetry justifies large
 
 ---
 
+## Unified Deployment Entry Point
+
+All deployment is managed through a single script at the repository root:
+
+```bash
+./scripts/deploy-unified.sh <command>
+```
+
+### First-Time Setup
+
+```bash
+./scripts/deploy-unified.sh init
+```
+
+This runs the interactive environment wizard, builds all services, and verifies health. It will:
+1. Create `Engram-Platform/.env` from `.env.example` if missing
+2. Prompt for required secrets (Clerk keys, JWT secret, embedding API key)
+3. Auto-generate secure defaults where possible
+4. Build and start the Docker stack
+5. Run health checks against all services
+
+### Interactive Environment Configuration
+
+```bash
+./scripts/deploy-unified.sh setup
+```
+
+Walks through each required variable interactively. Existing values are preserved; only missing or placeholder values are prompted. Supports:
+- Auto-generation of JWT secrets and MCP tokens
+- Secret masking during input
+- Tailscale hostname and bind address configuration
+- Embedding provider selection
+
+### Production Deployment
+
+```bash
+./scripts/deploy-unified.sh deploy              # full deploy with pre-flight
+./scripts/deploy-unified.sh deploy --dry-run    # validate without changes
+./scripts/deploy-unified.sh health              # check all endpoints
+```
+
+Pre-flight checks validate Docker availability, `.env` existence, required secrets, and compose config before any containers are touched.
+
+### Docker Compose Reference
+
+The master orchestration file is `Engram-Platform/docker-compose.yml`. The MCP service builds from `Engram-MCP/docker/Dockerfile` (the canonical MCP server with OAuth 2.1, Zod validation, and 381 tests).
+
+---
+
 ## Environment Configuration
 
 ### Environment File Structure
 
-Create the following `.env` files in their respective directories:
+Create the `.env` file in `Engram-Platform/`, or use the interactive wizard (`./scripts/deploy-unified.sh setup`):
 
 #### Root Environment (`/Engram-Platform/.env`)
 
