@@ -31,8 +31,8 @@ class Settings(BaseSettings):
     redis_password: str | None = Field(default=None, description="Redis password")
 
     # Embedding Configuration
-    embedding_provider: Literal["openai", "cohere", "local", "ollama", "nomic", "deepinfra"] = (
-        Field(default="nomic", description="Embedding provider")
+    embedding_provider: Literal["openai", "local", "ollama", "nomic", "deepinfra"] = Field(
+        default="nomic", description="Embedding provider"
     )
     openai_api_key: str | None = Field(default=None, description="OpenAI API key")
     openai_base_url: str | None = Field(
@@ -123,6 +123,10 @@ class Settings(BaseSettings):
     )
 
     # Ollama
+    lm_studio_url: str | None = Field(
+        default=None,
+        description="LM Studio API URL (e.g. http://localhost:1234/v1)",
+    )
     ollama_host: str | None = Field(
         default=None, description="Ollama API host (e.g. http://localhost:11434)"
     )

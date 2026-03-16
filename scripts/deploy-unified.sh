@@ -109,8 +109,70 @@ env_setup() {
   prompt_value "JWT_SECRET" "JWT secret (min 32 chars)" "${jwt_default}" "true"
 
   echo -e "\n  ${BOLD}--- Embedding Provider ---${NC}"
-  prompt_value "EMBEDDING_PROVIDER" "Embedding provider (openai|deepinfra|nomic|local)" "deepinfra"
-  prompt_value "DEEPINFRA_API_KEY" "DeepInfra API key (if using deepinfra)" "" "true"
+  echo -e "  ${DIM}Supported: deepinfra (cloud), openai (cloud), ollama (local), nomic (local CPU), local (mock)${NC}"
+  prompt_value "EMBEDDING_PROVIDER" "Embedding provider" "deepinfra"
+
+  local current_provider
+  current_provider=$(grep -E "^EMBEDDING_PROVIDER=" "${ENV_FILE}" 2>/dev/null | head -1 | cut -d= -f2-)
+
+  case "${current_provider}" in
+    deepinfra)
+      prompt_value "DEEPINFRA_API_KEY" "DeepInfra API key" "" "true"
+      prompt_value "EMBEDDING_MODEL" "Embedding model" "BAAI/bge-en-icl"
+      prompt_value "EMBEDDING_DIMENSIONS" "Embedding dimensions" "1024"
+      ;;
+    openai)
+      prompt_value "OPENAI_API_KEY" "OpenAI API key" "" "true"
+      prompt_value "EMBEDDING_MODEL" "Embedding model" "text-embedding-3-small"
+      prompt_value "EMBEDDING_DIMENSIONS" "Embedding dimensions" "1536"
+      ;;
+    ollama)
+      prompt_value "OLLAMA_HOST" "Ollama host URL" "http://host.docker.internal:11434"
+      prompt_value "EMBEDDING_MODEL" "Ollama embedding model" "nomic-embed-text:v1.5"
+      prompt_value "EMBEDDING_DIMENSIONS" "Embedding dimensions" "768"
+      ;;
+    nomic)
+      prompt_value "EMBEDDING_DIMENSIONS" "Embedding dimensions" "768"
+      echo -e "  ${DIM}nomic-embed-text-v1.5 runs locally on CPU (no API key needed)${NC}"
+      ;;
+    *)
+      echo -e "  ${DIM}Using mock/local embeddings (no API key needed)${NC}"
+      ;;
+  esac
+
+  echo -e "\n  ${BOLD}--- LLM Provider (for memory maintenance) ---${NC}"
+  echo -e "  ${DIM}Used for summarization, entity extraction, contradiction detection${NC}"
+  prompt_value "LLM_PROVIDER" "LLM provider (ollama|deepinfra|openai|local)" "ollama"
+
+  local current_llm
+  current_llm=$(grep -E "^LLM_PROVIDER=" "${ENV_FILE}" 2>/dev/null | head -1 | cut -d= -f2-)
+
+  case "${current_llm}" in
+    ollama)
+      prompt_value "OLLAMA_HOST" "Ollama host URL" "http://host.docker.internal:11434"
+      prompt_value "OLLAMA_MAINTENANCE_MODEL" "Summarization model" "liquid/lfm2.5:1.2b"
+      prompt_value "OLLAMA_CLASSIFIER_MODEL" "Classification model" "qwen2.5:0.5b-instruct"
+      echo -e "  ${DIM}Tip: Pull models with: ollama pull liquid/lfm2.5:1.2b && ollama pull qwen2.5:0.5b-instruct${NC}"
+      ;;
+    deepinfra)
+      prompt_value "DEEPINFRA_API_KEY" "DeepInfra API key (if not already set)" "" "true"
+      prompt_value "DEEPINFRA_CHAT_MODEL" "DeepInfra chat model" "meta-llama/Meta-Llama-3.1-8B-Instruct"
+      ;;
+    openai)
+      prompt_value "OPENAI_API_KEY" "OpenAI API key (if not already set)" "" "true"
+      prompt_value "LLM_MODEL" "OpenAI model" "gpt-4o-mini"
+      ;;
+  esac
+
+  echo -e "\n  ${BOLD}--- LM Studio (Crawler AI / RAG Chat) ---${NC}"
+  echo -e "  ${DIM}LM Studio provides local LLM for OSINT analysis and RAG chat.${NC}"
+  echo -e "  ${DIM}Default: http://host.docker.internal:1234/v1 (Docker host bridge)${NC}"
+  echo -e "  ${DIM}Recommended models for 16GB RAM:${NC}"
+  echo -e "    ${DIM}- RAG/Chat:   meta-llama-3.1-8b-instruct (Q4_K_M, ~5GB)${NC}"
+  echo -e "    ${DIM}- Extraction: qwen2.5-3b-instruct (Q4_K_M, ~2GB)${NC}"
+  echo -e "    ${DIM}- Summary:    phi-3.5-mini-instruct (Q4_K_M, ~2.5GB)${NC}"
+  prompt_value "LM_STUDIO_URL" "LM Studio API URL" "http://host.docker.internal:1234/v1"
+  prompt_value "LM_STUDIO_MODEL" "LM Studio model name" "local-model"
 
   echo -e "\n  ${BOLD}--- Network / Tailscale ---${NC}"
   prompt_value "BIND_ADDRESS" "Bind address (127.0.0.1 for local, Tailscale IP for remote)" "127.0.0.1"
@@ -122,13 +184,13 @@ env_setup() {
   mcp_default=$(generate_secret)
   prompt_value "MCP_AUTH_TOKEN" "MCP bearer token" "${mcp_default}" "true"
 
-  echo -e "\n  ${BOLD}--- Optional Services ---${NC}"
-  prompt_value "LM_STUDIO_URL" "LM Studio URL (for local LLM)" "http://host.docker.internal:1234"
-  prompt_value "OLLAMA_HOST" "Ollama host URL" "http://host.docker.internal:11434"
-
   echo -e "\n${GREEN}${BOLD}Environment configuration complete${NC}"
   echo -e "  File: ${ENV_FILE}"
-  echo -e "  Edit manually: ${DIM}nano ${ENV_FILE}${NC}\n"
+  echo -e "  Edit manually: ${DIM}nano ${ENV_FILE}${NC}"
+  echo -e "\n${BOLD}  Quick verification tips:${NC}"
+  echo -e "    ${DIM}$0 config${NC}              Validate compose config"
+  echo -e "    ${DIM}$0 deploy --dry-run${NC}    Dry-run deployment"
+  echo -e "    ${DIM}$0 health${NC}              Check service health after start\n"
 }
 
 usage() {

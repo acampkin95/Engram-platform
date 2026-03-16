@@ -479,10 +479,15 @@ class AIRouter:
             providers.append(OpenAIProvider(api_key=openai_key))
             logger.debug("AIRouter: added OpenAIProvider")
 
+        lm_studio_url = getattr(settings, "lm_studio_url", None)
+        if lm_studio_url:
+            providers.append(LMStudioProvider(base_url=lm_studio_url))
+            logger.debug("AIRouter: added LMStudioProvider")
+
         if not providers:
             logger.warning(
                 "AIRouter.from_settings: no providers configured — "
-                "set OLLAMA_HOST, DEEPINFRA_API_KEY, or OPENAI_API_KEY"
+                "set OLLAMA_HOST, DEEPINFRA_API_KEY, OPENAI_API_KEY, or LM_STUDIO_URL"
             )
 
         return cls(providers=providers)

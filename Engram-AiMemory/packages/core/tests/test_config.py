@@ -120,7 +120,7 @@ class TestSettingsValidation:
 
     def test_embedding_provider_valid_options(self):
         """Test all valid embedding provider options."""
-        valid_providers = ["openai", "cohere", "local", "ollama", "nomic", "deepinfra"]
+        valid_providers = ["openai", "local", "ollama", "nomic", "deepinfra"]
         for provider in valid_providers:
             settings = Settings(embedding_provider=provider, jwt_secret="test-secret")
             assert settings.embedding_provider == provider
