@@ -586,6 +586,85 @@ class MemorySystem:
             offset=offset,
         )
 
+    async def update(
+        self,
+        memory_id: UUID | str,
+        tier: MemoryTier,
+        tenant_id: str | None = None,
+        content: str | None = None,
+        importance: float | None = None,
+        tags: list[str] | None = None,
+        metadata_updates: dict[str, Any] | None = None,
+    ) -> bool:
+        """Update a memory with change tracking.
+
+        Writes updated fields to Weaviate and appends a modification record
+        to the memory's metadata so the change history is preserved.
+        Re-embeds content when it changes.
+        """
+        self._require_initialized()
+        if isinstance(memory_id, str):
+            memory_id = UUID(memory_id)
+
+        tenant = tenant_id or self.settings.default_tenant_id
+        existing = await self._weaviate.get_memory(memory_id, tier, tenant)
+        if not existing:
+            return False
+
+        fields: dict[str, Any] = {}
+        change_record: dict[str, Any] = {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "changes": [],
+        }
+
+        if content is not None and content != existing.content:
+            embedding = await self._get_embedding(content)
+            fields["content"] = content
+            fields["vector"] = embedding
+            change_record["changes"].append("content")
+
+        if importance is not None and importance != existing.importance:
+            fields["importance"] = importance
+            change_record["changes"].append("importance")
+
+        if tags is not None and sorted(tags) != sorted(existing.tags):
+            fields["tags"] = tags
+            change_record["changes"].append("tags")
+
+        if not fields and not metadata_updates:
+            return True
+
+        fields["updated_at"] = datetime.now(UTC).isoformat()
+
+        if fields:
+            await self._weaviate.update_memory_fields(
+                memory_id=memory_id,
+                tier=tier,
+                fields=fields,
+                tenant_id=tenant,
+            )
+
+        mod_metadata: dict[str, Any] = metadata_updates or {}
+        if change_record["changes"]:
+            history = existing.metadata.get("modification_history", [])
+            if isinstance(history, list):
+                history.append(change_record)
+            else:
+                history = [change_record]
+            mod_metadata["modification_history"] = history
+
+        if mod_metadata:
+            await self._weaviate.update_memory_metadata(
+                memory_id=memory_id,
+                tier=tier,
+                metadata=mod_metadata,
+                tenant_id=tenant,
+            )
+
+        await self._cache.delete_memory(str(memory_id), tier.value)
+        await self._cache.invalidate_stats(tenant)
+        return True
+
     async def delete(
         self, memory_id: UUID | str, tier: MemoryTier, tenant_id: str | None = None
     ) -> bool:
@@ -1041,11 +1120,46 @@ class MemorySystem:
         Returns:
             Exported data as string
         """
-        console.print("[yellow]Memory export not yet implemented[/yellow]")
+        if not self._initialized:
+            raise RuntimeError("MemorySystem not initialized. Call initialize() first.")
+
+        tenant = tenant_id or self.settings.default_tenant_id
+        memories, _ = await self._weaviate.list_memories(
+            tier=tier, project_id=project_id, tenant_id=tenant, limit=10000
+        )
+
+        if format == "json":
+            import json as json_mod
+
+            data = [m.model_dump(mode="json", exclude={"vector"}) for m in memories]
+            return json_mod.dumps(data, indent=2, default=str)
+
+        if format == "markdown":
+            lines: list[str] = [f"# Memory Export — {tier.name}"]
+            lines.append(f"**Count:** {len(memories)}  ")
+            lines.append(f"**Exported:** {datetime.now(UTC).isoformat()}\n")
+            for m in memories:
+                lines.append(f"## {m.id}")
+                lines.append(
+                    f"**Type:** {m.memory_type} | **Importance:** {m.importance:.2f} | **Confidence:** {m.confidence:.2f}"
+                )
+                if m.tags:
+                    lines.append(f"**Tags:** {', '.join(m.tags)}")
+                lines.append(f"\n{m.content}\n")
+                if m.summary:
+                    lines.append(f"*Summary: {m.summary}*\n")
+                lines.append("---\n")
+            return "\n".join(lines)
+
         return "{}"
 
     async def close(self) -> None:
-        """Close all connections."""
+        """Close all connections and release resources."""
+        if self._ollama and hasattr(self._ollama, "aclose"):
+            try:
+                await self._ollama.aclose()
+            except Exception:
+                pass
         await self._weaviate.close()
         await self._cache.close()
         self._initialized = False
@@ -1058,8 +1172,63 @@ class MemorySystem:
 
     @property
     def is_healthy(self) -> bool:
-        """Check if all components are healthy."""
+        """Check if core components (Weaviate + Redis) are healthy."""
         return self._initialized and self._weaviate.is_connected and self._cache.is_connected
+
+    async def get_system_status(self) -> dict[str, Any]:
+        """Return comprehensive system health and capability status."""
+        components: dict[str, dict[str, Any]] = {}
+
+        components["weaviate"] = {
+            "status": "up" if (self._initialized and self._weaviate.is_connected) else "down",
+        }
+        components["redis"] = {
+            "status": "up" if (self._initialized and self._cache.is_connected) else "down",
+        }
+        components["embedding"] = {
+            "provider": self.settings.embedding_provider,
+            "model": self.settings.embedding_model,
+            "dimensions": self.settings.embedding_dimensions,
+            "status": "active" if (self._nomic_embedder or self._embedding_client) else "mock",
+        }
+
+        ollama_status = "not_configured"
+        if self._ollama:
+            try:
+                available = await self._ollama.is_available()
+                ollama_status = "up" if available else "down"
+            except Exception:
+                ollama_status = "error"
+        components["ollama"] = {
+            "status": ollama_status,
+            "host": self.settings.ollama_host or "N/A",
+            "maintenance_model": self.settings.ollama_maintenance_model,
+            "classifier_model": self.settings.ollama_classifier_model,
+        }
+
+        lm_studio_status = "not_configured"
+        if self.settings.lm_studio_url:
+            lm_studio_status = "configured"
+        components["lm_studio"] = {
+            "status": lm_studio_status,
+            "url": self.settings.lm_studio_url or "N/A",
+        }
+
+        features = {
+            "auto_importance": self.settings.auto_importance_enabled,
+            "contradiction_detection": self.settings.contradiction_detection_enabled,
+            "deduplication": self.settings.deduplication_enabled,
+            "reranking": self.settings.reranker_enabled,
+            "retrieval_mode": self.settings.search_retrieval_mode,
+            "multi_tenancy": self.settings.multi_tenancy_enabled,
+        }
+
+        return {
+            "initialized": self._initialized,
+            "healthy": self.is_healthy,
+            "components": components,
+            "features": features,
+        }
 
     # ---------------------------------------------------------------------------
     # Knowledge Graph delegates

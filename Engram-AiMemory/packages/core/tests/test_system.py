@@ -1253,3 +1253,158 @@ class TestCheckContradictionSync:
         new_mem = _make_memory(content="Some content")
         result = await system._check_contradiction_sync(new_mem, "proj")
         assert result is None
+
+
+class TestUpdateMemory:
+    async def test_update_content_reembeds(self, system):
+        mem_id = uuid4()
+        existing = _make_memory(id=mem_id, content="old content")
+        system._weaviate.get_memory = AsyncMock(return_value=existing)
+        system._cache.get_embedding = AsyncMock(return_value=None)
+        system._cache.set_embedding = AsyncMock()
+
+        result = await system.update(
+            memory_id=mem_id,
+            tier=MemoryTier.PROJECT,
+            content="new content",
+        )
+
+        assert result is True
+        system._weaviate.update_memory_fields.assert_called_once()
+        call_fields = system._weaviate.update_memory_fields.call_args.kwargs["fields"]
+        assert "content" in call_fields
+        assert "vector" in call_fields
+
+    async def test_update_importance_only(self, system):
+        mem_id = uuid4()
+        existing = _make_memory(id=mem_id, importance=0.5)
+        system._weaviate.get_memory = AsyncMock(return_value=existing)
+
+        result = await system.update(
+            memory_id=mem_id,
+            tier=MemoryTier.PROJECT,
+            importance=0.9,
+        )
+
+        assert result is True
+        call_fields = system._weaviate.update_memory_fields.call_args.kwargs["fields"]
+        assert call_fields["importance"] == 0.9
+
+    async def test_update_tracks_modification_history(self, system):
+        mem_id = uuid4()
+        existing = _make_memory(id=mem_id, content="old", metadata={})
+        system._weaviate.get_memory = AsyncMock(return_value=existing)
+        system._cache.get_embedding = AsyncMock(return_value=None)
+        system._cache.set_embedding = AsyncMock()
+
+        await system.update(
+            memory_id=mem_id,
+            tier=MemoryTier.PROJECT,
+            content="new",
+        )
+
+        meta_call = system._weaviate.update_memory_metadata.call_args.kwargs["metadata"]
+        assert "modification_history" in meta_call
+        assert len(meta_call["modification_history"]) == 1
+        assert "content" in meta_call["modification_history"][0]["changes"]
+
+    async def test_update_returns_false_when_not_found(self, system):
+        system._weaviate.get_memory = AsyncMock(return_value=None)
+
+        result = await system.update(
+            memory_id=uuid4(),
+            tier=MemoryTier.PROJECT,
+            content="anything",
+        )
+
+        assert result is False
+
+    async def test_update_noop_when_nothing_changed(self, system):
+        mem_id = uuid4()
+        existing = _make_memory(id=mem_id, content="same", importance=0.5)
+        system._weaviate.get_memory = AsyncMock(return_value=existing)
+
+        result = await system.update(
+            memory_id=mem_id,
+            tier=MemoryTier.PROJECT,
+            content="same",
+            importance=0.5,
+        )
+
+        assert result is True
+        system._weaviate.update_memory_fields.assert_not_called()
+
+
+class TestGetSystemStatus:
+    async def test_returns_component_status(self, system):
+        system._weaviate.is_connected = True
+        system._cache.is_connected = True
+        system.settings.lm_studio_url = None
+
+        status = await system.get_system_status()
+
+        assert status["initialized"] is True
+        assert status["healthy"] is True
+        assert "weaviate" in status["components"]
+        assert "redis" in status["components"]
+        assert "embedding" in status["components"]
+        assert "ollama" in status["components"]
+        assert "lm_studio" in status["components"]
+
+    async def test_reports_feature_flags(self, system):
+        status = await system.get_system_status()
+
+        assert "features" in status
+        assert "auto_importance" in status["features"]
+        assert "contradiction_detection" in status["features"]
+        assert "retrieval_mode" in status["features"]
+
+    async def test_reports_embedding_provider(self, system):
+        status = await system.get_system_status()
+
+        assert status["components"]["embedding"]["provider"] == "nomic"
+        assert status["components"]["embedding"]["dimensions"] == 768
+
+
+class TestExportMemories:
+    async def test_export_json(self, system):
+        mem = _make_memory(content="test export")
+        system._weaviate.list_memories = AsyncMock(return_value=([mem], 1))
+
+        result = await system.export_memories(tier=MemoryTier.PROJECT, format="json")
+
+        import json
+
+        data = json.loads(result)
+        assert len(data) == 1
+        assert data[0]["content"] == "test export"
+
+    async def test_export_markdown(self, system):
+        mem = _make_memory(content="test export md", tags=["tag1"])
+        system._weaviate.list_memories = AsyncMock(return_value=([mem], 1))
+
+        result = await system.export_memories(tier=MemoryTier.PROJECT, format="markdown")
+
+        assert "# Memory Export" in result
+        assert "test export md" in result
+        assert "tag1" in result
+
+    async def test_export_empty(self, system):
+        system._weaviate.list_memories = AsyncMock(return_value=([], 0))
+
+        result = await system.export_memories(tier=MemoryTier.PROJECT, format="json")
+
+        import json
+
+        assert json.loads(result) == []
+
+
+class TestCloseCleanup:
+    async def test_close_cleans_up_ollama(self, system):
+        mock_ollama = AsyncMock()
+        system._ollama = mock_ollama
+
+        await system.close()
+
+        mock_ollama.aclose.assert_called_once()
+        assert system._initialized is False
