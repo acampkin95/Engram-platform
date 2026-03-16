@@ -1,17 +1,22 @@
 """
 Background maintenance service workers.
 
-Runs 7 scheduled jobs via APScheduler:
-1. Score importance (every 5min) — Qwen2.5-0.5B
-2. Summarize new memories (every 15min) — LFM 2.5 1.2B
-3. Contradiction detection (every 1hr) — LFM 2.5 1.2B
-4. Entity extraction (every 6hr) — Qwen2.5-0.5B
+Runs 9 scheduled jobs via APScheduler:
+1. Score importance (every 5min) — Qwen2.5-0.5B via AIRouter
+2. Summarize new memories (every 15min) — LFM 2.5 1.2B via AIRouter
+3. Contradiction detection (every 1hr) — LFM 2.5 1.2B via AIRouter
+4. Entity extraction (every 6hr) — Qwen2.5-0.5B via AIRouter
 5. Decay update (daily 2am) — CPU only
-6. Consolidation scan (daily 3am) — LFM 2.5 1.2B
-7. Delete expired memories (daily 4am) — CPU only
+6. Consolidation scan (daily 3am) — LFM 2.5 1.2B via AIRouter
+7. Delete expired memories (daily 4am) — CPU only, all tenants
+8. Confidence maintenance (daily 4:30am) — CPU + optional LLM
+9. Timeline event extraction (daily 5am) — via AIRouter
+
+All LLM-dependent jobs use the AIRouter fallback chain (Ollama -> DeepInfra -> OpenAI -> LM Studio).
+Jobs gracefully skip when no AI provider is available.
 
 Usage:
-    scheduler = MaintenanceScheduler(memory_system, ollama_client)
+    scheduler = MaintenanceScheduler(memory_system, ai_router=router)
     scheduler.start()
     # ... on shutdown:
     scheduler.stop()
@@ -21,6 +26,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
@@ -58,6 +64,8 @@ class MaintenanceScheduler:
         self._max_concurrent = max_concurrent
         self._scheduler = None
         self._semaphore = asyncio.Semaphore(max_concurrent)
+        self._ai_available: bool | None = None
+        self._ai_last_checked: float = 0.0
         self._stats: dict = {
             "jobs_run": 0,
             "memories_scored": 0,
@@ -67,7 +75,12 @@ class MaintenanceScheduler:
             "memories_decayed": 0,
             "memories_consolidated": 0,
             "memories_deleted": 0,
+            "confidence_updates": 0,
+            "events_extracted": 0,
+            "ai_jobs_skipped": 0,
             "last_run": {},
+            "job_durations": {},
+            "job_errors": {},
         }
 
     def start(self) -> None:
@@ -178,7 +191,7 @@ class MaintenanceScheduler:
         )
 
         self._scheduler.start()
-        console.print("[green]✓ Maintenance scheduler started (7 jobs)[/green]")
+        console.print("[green]✓ Maintenance scheduler started (9 jobs)[/green]")
 
     def stop(self) -> None:
         """Stop the scheduler gracefully."""
@@ -196,6 +209,56 @@ class MaintenanceScheduler:
             **self._stats,
             "scheduler_running": self._scheduler is not None and self._scheduler.running,
         }
+
+    # -------------------------------------------------------------------------
+    # Health-aware AI availability
+    # -------------------------------------------------------------------------
+
+    async def _check_ai_available(self) -> bool:
+        """Check if any AI provider is reachable. Caches result for 5 minutes."""
+        now = time.monotonic()
+        if self._ai_available is not None and (now - self._ai_last_checked) < 300:
+            return self._ai_available
+
+        available = False
+        if self._ai_router:
+            for provider in getattr(self._ai_router, "providers", []):
+                try:
+                    result = provider.is_available()
+                    if asyncio.iscoroutine(result) or asyncio.isfuture(result):
+                        result = await result
+                    if result:
+                        available = True
+                        break
+                except Exception:
+                    continue
+        elif self._ollama:
+            try:
+                result = self._ollama.is_available()
+                if asyncio.iscoroutine(result) or asyncio.isfuture(result):
+                    result = await result
+                available = bool(result)
+            except Exception:
+                available = False
+
+        if not available and not (self._ai_router or self._ollama):
+            available = False
+        elif not self._ai_router and not self._ollama:
+            available = False
+
+        self._ai_available = available
+        self._ai_last_checked = now
+        if not available:
+            logger.debug("No AI providers available — AI-dependent jobs will be skipped")
+        return available
+
+    def _record_job_timing(self, job_name: str, duration: float, error: str | None = None) -> None:
+        """Record per-job duration and error state for observability."""
+        self._stats["job_durations"][job_name] = round(duration, 3)
+        if error:
+            self._stats["job_errors"][job_name] = error
+        elif job_name in self._stats["job_errors"]:
+            del self._stats["job_errors"][job_name]
 
     # -------------------------------------------------------------------------
     # AIRouter adapter helpers
@@ -334,9 +397,13 @@ class MaintenanceScheduler:
 
     async def _job_score_importance(self) -> None:
         """Score importance for recently added memories that haven't been scored yet."""
-        if not (self._ai_router or self._ollama) or not self._ms.settings.auto_importance_enabled:
+        if not self._ms.settings.auto_importance_enabled:
+            return
+        if not await self._check_ai_available():
+            self._stats["ai_jobs_skipped"] += 1
             return
 
+        t0 = time.monotonic()
         async with self._semaphore:
             self._stats["last_run"]["score_importance"] = datetime.now(UTC).isoformat()
             try:
@@ -380,16 +447,20 @@ class MaintenanceScheduler:
                 self._stats["memories_scored"] += scored_count
 
                 if unscored:
-                    logger.info(f"Scored importance for {len(unscored)} memories")
+                    logger.info(f"Scored importance for {scored_count}/{len(unscored)} memories")
                 self._stats["jobs_run"] += 1
+                self._record_job_timing("score_importance", time.monotonic() - t0)
             except Exception as e:
                 logger.error(f"score_importance job failed: {e}")
+                self._record_job_timing("score_importance", time.monotonic() - t0, str(e))
 
     async def _job_summarize(self) -> None:
         """Generate summaries for long memories that don't have one yet."""
-        if not (self._ai_router or self._ollama):
+        if not await self._check_ai_available():
+            self._stats["ai_jobs_skipped"] += 1
             return
 
+        t0 = time.monotonic()
         async with self._semaphore:
             self._stats["last_run"]["summarize"] = datetime.now(UTC).isoformat()
             try:
@@ -417,17 +488,20 @@ class MaintenanceScheduler:
                 if to_summarize:
                     logger.info(f"Summarized {len(to_summarize)} memories")
                 self._stats["jobs_run"] += 1
+                self._record_job_timing("summarize", time.monotonic() - t0)
             except Exception as e:
                 logger.error(f"summarize job failed: {e}")
+                self._record_job_timing("summarize", time.monotonic() - t0, str(e))
 
     async def _job_detect_contradictions(self) -> None:
         """Detect contradictions between recent memories."""
-        if (
-            not (self._ai_router or self._ollama)
-            or not self._ms.settings.contradiction_detection_enabled
-        ):
+        if not self._ms.settings.contradiction_detection_enabled:
+            return
+        if not await self._check_ai_available():
+            self._stats["ai_jobs_skipped"] += 1
             return
 
+        t0 = time.monotonic()
         async with self._semaphore:
             self._stats["last_run"]["contradiction_detection"] = datetime.now(UTC).isoformat()
             try:
@@ -476,14 +550,18 @@ class MaintenanceScheduler:
                             logger.warning(f"Contradiction check failed for pair: {e}")
 
                 self._stats["jobs_run"] += 1
+                self._record_job_timing("contradiction_detection", time.monotonic() - t0)
             except Exception as e:
                 logger.error(f"contradiction_detection job failed: {e}")
+                self._record_job_timing("contradiction_detection", time.monotonic() - t0, str(e))
 
     async def _job_extract_entities(self) -> None:
         """Extract entities from memories and populate knowledge graph."""
-        if not (self._ai_router or self._ollama):
+        if not await self._check_ai_available():
+            self._stats["ai_jobs_skipped"] += 1
             return
 
+        t0 = time.monotonic()
         async with self._semaphore:
             self._stats["last_run"]["entity_extraction"] = datetime.now(UTC).isoformat()
             try:
@@ -520,12 +598,15 @@ class MaintenanceScheduler:
                         logger.warning(f"Entity extraction failed for memory {memory.id}: {e}")
 
                 self._stats["jobs_run"] += 1
+                self._record_job_timing("entity_extraction", time.monotonic() - t0)
             except Exception as e:
                 logger.error(f"entity_extraction job failed: {e}")
+                self._record_job_timing("entity_extraction", time.monotonic() - t0, str(e))
 
     async def _job_event_extraction(self) -> None:
         """Extract temporal events from recent unstructured memories."""
-        if not self._ollama:
+        if not (self._ai_router or self._ollama):
+            self._stats["ai_jobs_skipped"] += 1
             return
 
         async with self._semaphore:
@@ -770,11 +851,78 @@ class MaintenanceScheduler:
                 logger.error(f"delete_expired job failed: {e}")
 
     async def _job_confidence_maintenance(self) -> None:
-        """Placeholder for confidence maintenance job."""
+        """Re-evaluate overall_confidence for memories based on age, access, source, and evidence."""
+        t0 = time.monotonic()
         async with self._semaphore:
             self._stats["last_run"]["confidence_maintenance"] = datetime.now(UTC).isoformat()
             try:
-                logger.info("Confidence maintenance job ran (placeholder)")
+                from memory_system.credibility import SourceCredibilityManager
+
+                credibility = SourceCredibilityManager()
+                total_updated = 0
+                offset = 0
+
+                while True:
+                    memories, total = await self._ms.list_memories(limit=50, offset=offset)
+                    if not memories:
+                        break
+
+                    now = datetime.now(UTC)
+                    for memory in memories:
+                        try:
+                            source_type = str(getattr(memory, "source", "ai_assistant"))
+                            source_id = memory.user_id or "unknown"
+                            source_conf = credibility.calculate_source_confidence(
+                                source_type=source_type,
+                                source_id=source_id,
+                                timestamp=memory.created_at,
+                            )
+
+                            age_days = (now - memory.created_at).total_seconds() / 86400
+                            age_penalty = max(0.0, 1.0 - (age_days / 365.0) * 0.2)
+
+                            access_boost = min(0.15, (memory.access_count or 0) * 0.02)
+
+                            evidence_boost = min(0.1, len(memory.supporting_evidence_ids) * 0.03)
+                            contradiction_penalty = (
+                                -0.15
+                                if memory.contradictions and not memory.contradictions_resolved
+                                else 0.0
+                            )
+
+                            new_confidence = (
+                                source_conf * 0.4
+                                + age_penalty * 0.2
+                                + access_boost
+                                + evidence_boost
+                                + contradiction_penalty
+                                + (memory.decay_factor or 1.0) * 0.2
+                            )
+                            new_confidence = max(0.05, min(0.99, new_confidence))
+
+                            if abs(new_confidence - (memory.overall_confidence or 0.5)) > 0.02:
+                                await self._ms._weaviate.update_memory_fields(
+                                    memory_id=memory.id,
+                                    tier=memory.tier,
+                                    fields={
+                                        "overall_confidence": round(new_confidence, 4),
+                                        "last_confidence_update": now.isoformat(),
+                                    },
+                                    tenant_id=memory.tenant_id,
+                                )
+                                total_updated += 1
+                        except Exception as e:
+                            logger.warning(f"Confidence update failed for {memory.id}: {e}")
+
+                    offset += len(memories)
+                    if offset >= total:
+                        break
+
+                self._stats["confidence_updates"] += total_updated
                 self._stats["jobs_run"] += 1
+                self._record_job_timing("confidence_maintenance", time.monotonic() - t0)
+                if total_updated:
+                    logger.info(f"Updated confidence for {total_updated} memories")
             except Exception as e:
                 logger.error(f"confidence_maintenance job failed: {e}")
+                self._record_job_timing("confidence_maintenance", time.monotonic() - t0, str(e))

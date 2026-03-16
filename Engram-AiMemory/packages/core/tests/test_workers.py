@@ -96,6 +96,35 @@ def _make_mock_system() -> MagicMock:
     return system
 
 
+def _make_mock_ollama() -> MagicMock:
+    """Create a mock OllamaClient that reports as available."""
+    ollama = MagicMock()
+    ollama.is_available = AsyncMock(return_value=True)
+    ollama.score_importance = AsyncMock(return_value=(0.8, "test reason"))
+    ollama.summarize = AsyncMock(return_value="Test summary")
+    ollama.detect_contradiction = AsyncMock(
+        return_value={
+            "contradicts": False,
+            "confidence": 0.0,
+            "more_likely_correct": "neither",
+            "reason": "",
+        }
+    )
+    ollama.extract_entities = AsyncMock(return_value=[])
+    ollama.consolidate_memories = AsyncMock(return_value="Merged content")
+    return ollama
+
+
+def _make_mock_router(available: bool = True) -> MagicMock:
+    """Create a mock AIRouter with an available provider."""
+    mock_router = MagicMock()
+    mock_provider = MagicMock()
+    mock_provider.is_available = AsyncMock(return_value=available)
+    mock_router.providers = [mock_provider]
+    mock_router.chat_completion = AsyncMock(return_value='{"importance": 0.8, "reason": "test"}')
+    return mock_router
+
+
 # ---------------------------------------------------------------------------
 # __init__
 # ---------------------------------------------------------------------------
@@ -911,12 +940,12 @@ class TestJobsWithAIRouter:
     """Cover the AI router code paths in job methods + _router_* helper methods."""
 
     async def test_score_importance_via_ai_router(self) -> None:
-        """Exercises _router_score_importance (lines 186-204) and ai_router branch."""
+        """Exercises _router_score_importance and ai_router branch."""
         system = _make_mock_system()
         mem = _make_memory(importance=0.5)
         system.list_memories = AsyncMock(return_value=([mem], 1))
 
-        mock_router = MagicMock()
+        mock_router = _make_mock_router()
         mock_router.chat_completion = AsyncMock(
             return_value='{"importance": 0.85, "reason": "Critical decision"}'
         )
@@ -934,7 +963,7 @@ class TestJobsWithAIRouter:
         mem = _make_memory(importance=0.5)
         system.list_memories = AsyncMock(return_value=([mem], 1))
 
-        mock_router = MagicMock()
+        mock_router = _make_mock_router()
         mock_router.chat_completion = AsyncMock(return_value="not valid json")
 
         scheduler = MaintenanceScheduler(system, ai_router=mock_router)
@@ -949,7 +978,7 @@ class TestJobsWithAIRouter:
         mem = _make_memory(content="x" * 300, summary=None)
         system.list_memories = AsyncMock(return_value=([mem], 1))
 
-        mock_router = MagicMock()
+        mock_router = _make_mock_router()
         mock_router.chat_completion = AsyncMock(return_value="A concise summary of the content")
 
         scheduler = MaintenanceScheduler(system, ai_router=mock_router)
@@ -964,9 +993,7 @@ class TestJobsWithAIRouter:
         mem = _make_memory(content="short", summary=None)
         system.list_memories = AsyncMock(return_value=([mem], 1))
 
-        mock_router = MagicMock()
-        # Short content means _job_summarize filters it out before calling router
-        # The job itself checks `len(m.content) > 200`
+        mock_router = _make_mock_router()
         scheduler = MaintenanceScheduler(system, ai_router=mock_router)
         await scheduler._job_summarize()
 
@@ -979,7 +1006,7 @@ class TestJobsWithAIRouter:
         mem_b = _make_memory(content="The answer is no")
         system.list_memories = AsyncMock(return_value=([mem_a, mem_b], 2))
 
-        mock_router = MagicMock()
+        mock_router = _make_mock_router()
         mock_router.chat_completion = AsyncMock(
             return_value='{"contradicts": true, "confidence": 0.95, "more_likely_correct": "memory_a", "reason": "Opposite"}'
         )
@@ -997,7 +1024,7 @@ class TestJobsWithAIRouter:
         system.list_memories = AsyncMock(return_value=([mem], 1))
         system.find_entity_by_name = AsyncMock(return_value=None)
 
-        mock_router = MagicMock()
+        mock_router = _make_mock_router()
         mock_router.chat_completion = AsyncMock(
             return_value='{"entities": [{"name": "Python", "type": "TECH", "confidence": 0.9}]}'
         )
@@ -1024,7 +1051,7 @@ class TestJobsWithAIRouter:
         system._weaviate.find_similar_memories_by_vector = AsyncMock(return_value=mems[:3])
         system._weaviate.add_memory = AsyncMock(return_value=uuid4())
 
-        mock_router = MagicMock()
+        mock_router = _make_mock_router()
         mock_router.chat_completion = AsyncMock(
             return_value="Merged: comprehensive summary of topics 0-2"
         )
@@ -1034,3 +1061,150 @@ class TestJobsWithAIRouter:
 
         assert scheduler._stats["memories_consolidated"] == 3
         mock_router.chat_completion.assert_called_once()
+
+
+class TestHealthAwareScheduling:
+    """Test health-aware AI availability checking and graceful job skipping."""
+
+    async def test_skips_score_importance_when_no_ai_available(self) -> None:
+        system = _make_mock_system()
+        mock_router = MagicMock()
+        mock_router.providers = [MagicMock()]
+        mock_router.providers[0].is_available = AsyncMock(return_value=False)
+
+        scheduler = MaintenanceScheduler(system, ai_router=mock_router)
+        await scheduler._job_score_importance()
+
+        assert scheduler._stats["ai_jobs_skipped"] == 1
+        assert scheduler._stats["memories_scored"] == 0
+
+    async def test_skips_summarize_when_no_ai_available(self) -> None:
+        system = _make_mock_system()
+        mock_router = MagicMock()
+        mock_router.providers = [MagicMock()]
+        mock_router.providers[0].is_available = AsyncMock(return_value=False)
+
+        scheduler = MaintenanceScheduler(system, ai_router=mock_router)
+        await scheduler._job_summarize()
+
+        assert scheduler._stats["ai_jobs_skipped"] == 1
+
+    async def test_proceeds_when_ai_is_available(self) -> None:
+        system = _make_mock_system()
+        mem = _make_memory(importance=0.5)
+        system.list_memories = AsyncMock(return_value=([mem], 1))
+
+        mock_router = MagicMock()
+        mock_router.providers = [MagicMock()]
+        mock_router.providers[0].is_available = AsyncMock(return_value=True)
+        mock_router.chat_completion = AsyncMock(
+            return_value='{"importance": 0.8, "reason": "test"}'
+        )
+
+        scheduler = MaintenanceScheduler(system, ai_router=mock_router)
+        await scheduler._job_score_importance()
+
+        assert scheduler._stats["ai_jobs_skipped"] == 0
+        assert scheduler._stats["memories_scored"] == 1
+
+    async def test_caches_availability_check(self) -> None:
+        system = _make_mock_system()
+        mock_provider = MagicMock()
+        mock_provider.is_available = AsyncMock(return_value=True)
+        mock_router = MagicMock()
+        mock_router.providers = [mock_provider]
+
+        scheduler = MaintenanceScheduler(system, ai_router=mock_router)
+
+        result1 = await scheduler._check_ai_available()
+        result2 = await scheduler._check_ai_available()
+
+        assert result1 is True
+        assert result2 is True
+        mock_provider.is_available.assert_called_once()
+
+
+class TestConfidenceMaintenance:
+    """Test the real confidence maintenance job implementation."""
+
+    async def test_updates_confidence_for_memories(self) -> None:
+        system = _make_mock_system()
+        mem = _make_memory(content="Test memory", importance=0.7)
+        mem.overall_confidence = 0.5
+        mem.supporting_evidence_ids = []
+        mem.contradictions = []
+        mem.contradictions_resolved = False
+        mem.decay_factor = 0.9
+        mem.user_id = "user-1"
+        system.list_memories = AsyncMock(side_effect=[([mem], 1), ([], 0)])
+
+        scheduler = MaintenanceScheduler(system)
+        await scheduler._job_confidence_maintenance()
+
+        assert scheduler._stats["confidence_updates"] >= 0
+        assert scheduler._stats["jobs_run"] == 1
+        assert "confidence_maintenance" in scheduler._stats["job_durations"]
+
+    async def test_skips_when_confidence_unchanged(self) -> None:
+        system = _make_mock_system()
+        system.list_memories = AsyncMock(return_value=([], 0))
+
+        scheduler = MaintenanceScheduler(system)
+        await scheduler._job_confidence_maintenance()
+
+        assert scheduler._stats["confidence_updates"] == 0
+        system._weaviate.update_memory_fields.assert_not_called()
+
+    async def test_handles_error_gracefully(self) -> None:
+        system = _make_mock_system()
+        system.list_memories = AsyncMock(side_effect=RuntimeError("DB down"))
+
+        scheduler = MaintenanceScheduler(system)
+        await scheduler._job_confidence_maintenance()
+
+        assert "confidence_maintenance" in scheduler._stats["job_errors"]
+
+
+class TestJobMetrics:
+    """Test per-job timing and error tracking."""
+
+    async def test_records_job_duration(self) -> None:
+        system = _make_mock_system()
+        system.list_memories = AsyncMock(return_value=([], 0))
+
+        scheduler = MaintenanceScheduler(system)
+        await scheduler._job_confidence_maintenance()
+
+        assert "confidence_maintenance" in scheduler._stats["job_durations"]
+        assert scheduler._stats["job_durations"]["confidence_maintenance"] >= 0
+
+    async def test_records_error_on_failure(self) -> None:
+        system = _make_mock_system()
+        system.list_memories = AsyncMock(side_effect=RuntimeError("boom"))
+
+        scheduler = MaintenanceScheduler(system)
+        await scheduler._job_confidence_maintenance()
+
+        assert "confidence_maintenance" in scheduler._stats["job_errors"]
+        assert "boom" in scheduler._stats["job_errors"]["confidence_maintenance"]
+
+    async def test_clears_error_on_success(self) -> None:
+        system = _make_mock_system()
+        scheduler = MaintenanceScheduler(system)
+        scheduler._stats["job_errors"]["confidence_maintenance"] = "old error"
+        system.list_memories = AsyncMock(return_value=([], 0))
+
+        await scheduler._job_confidence_maintenance()
+
+        assert "confidence_maintenance" not in scheduler._stats["job_errors"]
+
+    async def test_stats_include_new_fields(self) -> None:
+        system = _make_mock_system()
+        scheduler = MaintenanceScheduler(system)
+        stats = scheduler.get_stats()
+
+        assert "confidence_updates" in stats
+        assert "events_extracted" in stats
+        assert "ai_jobs_skipped" in stats
+        assert "job_durations" in stats
+        assert "job_errors" in stats
