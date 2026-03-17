@@ -136,6 +136,9 @@ enhance-*.js
 logs/
 recent_sesions_*/
 
+# Marketing Site
+Engram-Marketing/
+
 # Plans directory (if local only)
 plans/
 
