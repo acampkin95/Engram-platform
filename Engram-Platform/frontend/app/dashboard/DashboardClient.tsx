@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Network,
+  Server,
   Search,
   SearchCode,
   Share2,
@@ -52,6 +53,10 @@ const intelligenceNav = [
   { href: '/dashboard/intelligence/investigations', icon: FileSearch, label: 'Investigations' },
   { href: '/dashboard/intelligence/knowledge-graph', icon: Share2, label: 'Knowledge Graph' },
   { href: '/dashboard/intelligence/chat', icon: MessageSquare, label: 'RAG Chat' },
+] as const;
+
+const adminNav = [
+  { href: '/dashboard/system/health', icon: Server, label: 'System Health' },
 ] as const;
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -126,6 +131,20 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
             />
           ))}
         </SidebarGroup>
+
+        <SidebarGroup label="ADMIN" defaultOpen>
+          {adminNav.map((item) => (
+            <NavItem
+              key={item.href}
+              href={item.href}
+              label={item.label}
+              icon={item.icon}
+              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+              section="intelligence"
+              collapsed={collapsed}
+            />
+          ))}
+        </SidebarGroup>
       </nav>
 
       {/* Collapse toggle */}
@@ -161,6 +180,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard/intelligence/investigations')) return 'Investigations';
   if (pathname.startsWith('/dashboard/intelligence/knowledge-graph')) return 'Knowledge Graph';
   if (pathname.startsWith('/dashboard/intelligence/chat')) return 'RAG Chat';
+  if (pathname.startsWith('/dashboard/system/health')) return 'System Health';
   return 'Platform';
 }
 
