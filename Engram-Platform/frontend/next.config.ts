@@ -241,6 +241,27 @@ const nextConfig: NextConfig = {
               chunks: 'all',
               priority: 12,
             },
+            // ECharts chunk (large charting library ~600KB)
+            echarts: {
+              test: /[\\\\/]node_modules[\\\\/](echarts|echarts-for-react|zrender)[\\\\/]/,
+              name: 'echarts',
+              chunks: 'all',
+              priority: 14,
+            },
+            // Visualization chunk (graph/flow libraries)
+            visualization: {
+              test: /[\\\\/]node_modules[\\\\/](@xyflow|d3-force|elkjs|dagre)[\\\\/]/,
+              name: 'visualization',
+              chunks: 'all',
+              priority: 13,
+            },
+            // Framer Motion chunk (animation library)
+            motion: {
+              test: /[\\\\/]node_modules[\\\\/]framer-motion[\\\\/]/,
+              name: 'framer-motion',
+              chunks: 'all',
+              priority: 11,
+            },
           },
         },
       };
