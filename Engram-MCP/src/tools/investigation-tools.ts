@@ -21,7 +21,8 @@ export const INVESTIGATION_TOOLS: Tool[] = [
 			properties: {
 				matter_id: {
 					type: "string",
-					description: "Unique identifier for the matter (e.g., 'CASE-2024-001')",
+					description:
+						"Unique identifier for the matter (e.g., 'CASE-2024-001')",
 				},
 				title: {
 					type: "string",
@@ -213,12 +214,12 @@ export async function handleInvestigationTool(
 							{
 								success: true,
 								matter_id: input.matter_id,
-							query: input.query,
-							total: result.total ?? 0,
-							limit: result.limit ?? input.limit,
-							offset: result.offset ?? input.offset,
-							results: result.results ?? [],
-						},
+								query: input.query,
+								total: result.total ?? 0,
+								limit: result.limit ?? input.limit,
+								offset: result.offset ?? input.offset,
+								results: result.results ?? [],
+							},
 							null,
 							2,
 						),

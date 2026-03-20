@@ -3,7 +3,10 @@
  * Prompts are reusable templates that guide LLM interactions
  */
 
-import type { Prompt, PromptArgument } from "@modelcontextprotocol/sdk/types.js";
+import type {
+	Prompt,
+	PromptArgument,
+} from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * Prompt argument definitions
@@ -49,7 +52,8 @@ export const PROMPTS: Prompt[] = [
 	},
 	{
 		name: "build_project_knowledge",
-		description: "Build comprehensive context about a project from stored memories",
+		description:
+			"Build comprehensive context about a project from stored memories",
 		arguments: [
 			{
 				name: "project_id",
@@ -119,7 +123,8 @@ export const PROMPTS: Prompt[] = [
 	},
 	{
 		name: "session_summary",
-		description: "Create a summary of the current session and store it for future reference",
+		description:
+			"Create a summary of the current session and store it for future reference",
 		arguments: [
 			{
 				name: "summary",
@@ -160,7 +165,10 @@ export const PROMPTS: Prompt[] = [
 /**
  * Prompt message templates
  */
-export const PROMPT_TEMPLATES: Record<string, (args: Record<string, string>) => string> = {
+export const PROMPT_TEMPLATES: Record<
+	string,
+	(args: Record<string, string>) => string
+> = {
 	remember_context: (args) => `Please store the following information in memory:
 
 Content: ${args.content}
@@ -174,7 +182,9 @@ ${args.project_id ? `Scope: Project ${args.project_id}` : ""}
 
 Use the search_memory tool to find relevant information, then summarize what you found.`,
 
-	build_project_knowledge: (args) => `Build comprehensive context for project: ${args.project_id}
+	build_project_knowledge: (
+		args,
+	) => `Build comprehensive context for project: ${args.project_id}
 ${args.focus_area ? `Focus area: ${args.focus_area}` : ""}
 
 Steps:
@@ -202,7 +212,9 @@ Steps:
 2. Look for memories with memory_type="error_solution"
 3. Provide any found solutions or suggest storing the solution once resolved`,
 
-	code_review_context: (args) => `Gather context for reviewing code in: ${args.code_area}
+	code_review_context: (
+		args,
+	) => `Gather context for reviewing code in: ${args.code_area}
 ${args.project_id ? `Project: ${args.project_id}` : ""}
 
 Steps:
@@ -220,7 +232,9 @@ ${args.project_id ? `Project: ${args.project_id}` : ""}
 
 Use add_memory with memory_type="conversation" to store this summary.`,
 
-	entity_context: (args) => `Explore the knowledge graph for: ${args.entity_name}
+	entity_context: (
+		args,
+	) => `Explore the knowledge graph for: ${args.entity_name}
 ${args.depth ? `Depth: ${args.depth}` : ""}
 
 Steps:
@@ -241,7 +255,10 @@ export function getPromptTemplate(
 /**
  * Render a prompt with arguments
  */
-export function renderPrompt(name: string, args: Record<string, string>): string | undefined {
+export function renderPrompt(
+	name: string,
+	args: Record<string, string>,
+): string | undefined {
 	const template = getPromptTemplate(name);
 	if (!template) {
 		return undefined;

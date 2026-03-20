@@ -1,4 +1,5 @@
 """Multi-format document ingestors: PDF (PyMuPDF+pytesseract), Email (MBOX/EML), CSV/Excel."""
+
 from __future__ import annotations
 
 import csv
@@ -16,9 +17,10 @@ console = Console()
 @dataclass
 class IngestedDocument:
     """Normalised document ready for EvidenceClient.ingest_document()."""
+
     content: str
     source_type: str  # "PDF", "EMAIL", "CSV", "EXCEL", "WEB"
-    source_url: str   # file path or original URL
+    source_url: str  # file path or original URL
     matter_id: str
     metadata: dict = field(default_factory=dict)
     page_number: int | None = None
@@ -29,19 +31,22 @@ class IngestedDocument:
 # PDF Ingestor
 # ─────────────────────────────────────────────
 
+
 class PDFIngestor:
     """Extract text from PDF using PyMuPDF (fitz). Falls back to pytesseract OCR for image pages."""
 
     def ingest(self, file_path: str | Path, matter_id: str) -> list[IngestedDocument]:
         """Extract text from all pages. Returns one IngestedDocument per page.
-        
+
         Uses fitz (PyMuPDF) for text extraction.
         Falls back to pytesseract OCR if page text is empty (scanned page).
         """
         try:
             import fitz  # PyMuPDF
         except ImportError as exc:
-            raise ImportError("PyMuPDF (fitz) is required for PDF ingestion. Install: pip install pymupdf") from exc
+            raise ImportError(
+                "PyMuPDF (fitz) is required for PDF ingestion. Install: pip install pymupdf"
+            ) from exc
 
         file_path = Path(file_path)
         if not file_path.exists():
@@ -63,19 +68,21 @@ class PDFIngestor:
                 if not text:
                     continue
 
-                documents.append(IngestedDocument(
-                    content=text,
-                    source_type="PDF",
-                    source_url=str(file_path),
-                    matter_id=matter_id,
-                    page_number=page_num + 1,
-                    metadata={
-                        "filename": file_path.name,
-                        "page": page_num + 1,
-                        "total_pages": doc.page_count,
-                        "ocr_used": not bool(page.get_text("text").strip()),
-                    },
-                ))
+                documents.append(
+                    IngestedDocument(
+                        content=text,
+                        source_type="PDF",
+                        source_url=str(file_path),
+                        matter_id=matter_id,
+                        page_number=page_num + 1,
+                        metadata={
+                            "filename": file_path.name,
+                            "page": page_num + 1,
+                            "total_pages": doc.page_count,
+                            "ocr_used": not bool(page.get_text("text").strip()),
+                        },
+                    )
+                )
 
             doc.close()
         except Exception as exc:
@@ -90,6 +97,7 @@ class PDFIngestor:
         try:
             import pytesseract
             from PIL import Image
+
             # Render page to image at 300 DPI
             mat = page.get_pixmap(dpi=300)
             img_data = mat.tobytes("png")
@@ -97,7 +105,9 @@ class PDFIngestor:
             text = pytesseract.image_to_string(img)
             return text.strip()
         except ImportError:
-            console.print("[yellow]pytesseract/Pillow not available — skipping OCR for image page[/yellow]")
+            console.print(
+                "[yellow]pytesseract/Pillow not available — skipping OCR for image page[/yellow]"
+            )
             return ""
         except Exception as exc:
             console.print(f"[yellow]OCR failed: {exc}[/yellow]")
@@ -107,6 +117,7 @@ class PDFIngestor:
 # ─────────────────────────────────────────────
 # Email Ingestor
 # ─────────────────────────────────────────────
+
 
 class EmailIngestor:
     """Extract emails from MBOX files or individual EML files."""
@@ -148,7 +159,9 @@ class EmailIngestor:
             console.print(f"[red]EML ingestion failed for {file_path}: {exc}[/red]")
             raise
 
-    def _parse_email_message(self, msg, source_path: str, matter_id: str) -> IngestedDocument | None:
+    def _parse_email_message(
+        self, msg, source_path: str, matter_id: str
+    ) -> IngestedDocument | None:
         """Parse an email.message.Message into IngestedDocument."""
         try:
             subject = str(msg.get("Subject", "") or "")
@@ -162,7 +175,9 @@ class EmailIngestor:
             if not body and not subject:
                 return None
 
-            content = f"Subject: {subject}\nFrom: {sender}\nTo: {recipient}\nDate: {date_str}\n\n{body}"
+            content = (
+                f"Subject: {subject}\nFrom: {sender}\nTo: {recipient}\nDate: {date_str}\n\n{body}"
+            )
 
             return IngestedDocument(
                 content=content,
@@ -194,7 +209,9 @@ class EmailIngestor:
                 if content_type == "text/plain":
                     try:
                         charset = part.get_content_charset() or "utf-8"
-                        body_parts.append(part.get_payload(decode=True).decode(charset, errors="replace"))
+                        body_parts.append(
+                            part.get_payload(decode=True).decode(charset, errors="replace")
+                        )
                     except Exception:
                         pass
         else:
@@ -212,6 +229,7 @@ class EmailIngestor:
 # ─────────────────────────────────────────────
 # CSV / Excel Ingestor
 # ─────────────────────────────────────────────
+
 
 class SpreadsheetIngestor:
     """Extract structured data from CSV and Excel files."""
@@ -260,7 +278,9 @@ class SpreadsheetIngestor:
         try:
             import openpyxl
         except ImportError as exc:
-            raise ImportError("openpyxl is required for Excel ingestion. Install: pip install openpyxl") from exc
+            raise ImportError(
+                "openpyxl is required for Excel ingestion. Install: pip install openpyxl"
+            ) from exc
 
         file_path = Path(file_path)
         if not file_path.exists():
@@ -277,16 +297,23 @@ class SpreadsheetIngestor:
 
                 headers = [str(h) if h is not None else "" for h in rows[0]]
                 data_rows = rows[1:]
-                chunk_index = 0
 
-                for i in range(0, len(data_rows), self.ROWS_PER_CHUNK):
+                for chunk_index, i in enumerate(range(0, len(data_rows), self.ROWS_PER_CHUNK)):
                     chunk = data_rows[i : i + self.ROWS_PER_CHUNK]
                     row_dicts = [
-                        {headers[j]: str(cell) if cell is not None else "" for j, cell in enumerate(row)}
+                        {
+                            headers[j]: str(cell) if cell is not None else ""
+                            for j, cell in enumerate(row)
+                        }
                         for row in chunk
                     ]
                     doc = self._rows_to_document(
-                        row_dicts, headers, file_path, matter_id, chunk_index, "EXCEL",
+                        row_dicts,
+                        headers,
+                        file_path,
+                        matter_id,
+                        chunk_index,
+                        "EXCEL",
                         extra_meta={"sheet": sheet_name},
                     )
                     documents.append(doc)
@@ -341,6 +368,7 @@ class SpreadsheetIngestor:
 # Unified ingestor factory
 # ─────────────────────────────────────────────
 
+
 def ingest_file(file_path: str | Path, matter_id: str) -> list[IngestedDocument]:
     """Auto-detect file type and ingest. Returns list of IngestedDocument."""
     file_path = Path(file_path)
@@ -358,4 +386,6 @@ def ingest_file(file_path: str | Path, matter_id: str) -> list[IngestedDocument]
     elif suffix in (".xlsx", ".xls"):
         return SpreadsheetIngestor().ingest_excel(file_path, matter_id)
     else:
-        raise ValueError(f"Unsupported file type: {suffix}. Supported: .pdf, .mbox, .eml, .csv, .xlsx, .xls")
+        raise ValueError(
+            f"Unsupported file type: {suffix}. Supported: .pdf, .mbox, .eml, .csv, .xlsx, .xls"
+        )

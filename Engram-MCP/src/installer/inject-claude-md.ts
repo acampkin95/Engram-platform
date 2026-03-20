@@ -45,6 +45,10 @@ export async function injectClaudeMd(
 	}
 
 	// Append template to existing file
-	await writeFile(claudeMdPath, `${existingContent}\n\n${templateContent}`, "utf-8");
+	await writeFile(
+		claudeMdPath,
+		`${existingContent}\n\n${templateContent}`,
+		"utf-8",
+	);
 	return "updated";
 }

@@ -3,7 +3,12 @@
  */
 
 import type { MemoryAPIClient } from "../client.js";
-import { AddEntitySchema, AddRelationSchema, QueryGraphSchema, validate } from "../schemas.js";
+import {
+	AddEntitySchema,
+	AddRelationSchema,
+	QueryGraphSchema,
+	validate,
+} from "../schemas.js";
 
 export async function handleEntityTool(
 	name: string,
@@ -41,7 +46,10 @@ export async function handleEntityTool(
 			const input = validate(AddRelationSchema, args);
 			const tenantId = input.tenant_id;
 			// Resolve source entity name → ID
-			const sourceEntity = await _client.findEntityByName(input.source_entity, tenantId);
+			const sourceEntity = await _client.findEntityByName(
+				input.source_entity,
+				tenantId,
+			);
 			if (!sourceEntity) {
 				return {
 					content: [
@@ -60,7 +68,10 @@ export async function handleEntityTool(
 				};
 			}
 			// Resolve target entity name → ID
-			const targetEntity = await _client.findEntityByName(input.target_entity, tenantId);
+			const targetEntity = await _client.findEntityByName(
+				input.target_entity,
+				tenantId,
+			);
 			if (!targetEntity) {
 				return {
 					content: [
@@ -106,7 +117,10 @@ export async function handleEntityTool(
 			const input = validate(QueryGraphSchema, args);
 			const tenantId = input.tenant_id;
 			// Resolve entity name → ID
-			const entity = await _client.findEntityByName(input.entity_name, tenantId);
+			const entity = await _client.findEntityByName(
+				input.entity_name,
+				tenantId,
+			);
 			if (!entity) {
 				return {
 					content: [

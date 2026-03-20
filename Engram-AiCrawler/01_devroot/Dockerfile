@@ -48,10 +48,13 @@ WORKDIR /app
 # Create non-root user for production (with home directory for crawl4ai DB)
 RUN groupadd -r appuser && useradd -r -g appuser -m appuser
 
-COPY requirements.txt requirements-face.txt ./
+COPY Engram-AiCrawler/01_devroot/requirements.txt Engram-AiCrawler/01_devroot/requirements-face.txt ./
+COPY engram-shared /tmp/engram-shared
 
 RUN pip install --upgrade pip setuptools wheel && \
-    pip install -r requirements.txt && \
+    pip install /tmp/engram-shared[dev] && \
+    grep -v '^../../engram-shared\[dev\]$' requirements.txt > requirements.docker.txt && \
+    pip install -r requirements.docker.txt && \
     pip install -r requirements-face.txt && \
     pip install python-multipart && \
     playwright install --with-deps chromium
@@ -60,7 +63,7 @@ RUN pip install --upgrade pip setuptools wheel && \
 FROM python-deps as production
 
 # Copy application code
-COPY . .
+COPY Engram-AiCrawler/01_devroot/ .
 
 RUN mkdir -p /app/data/cache /app/data/logs /app/data/tiers/{hot,warm,cold,archive} \
     /app/data/chroma /app/data/face_references /var/log/supervisor
@@ -70,10 +73,10 @@ RUN chmod -R 755 /app/data /var/log/supervisor && \
     chown -R appuser:appuser /app /var/log/supervisor
 
 # Copy configuration files
-COPY config.yml /app/config.yml
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY scripts/start.sh /app/scripts/start.sh
-COPY scripts/healthcheck.sh /app/scripts/healthcheck.sh
+COPY Engram-AiCrawler/01_devroot/config.yml /app/config.yml
+COPY Engram-AiCrawler/01_devroot/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY Engram-AiCrawler/01_devroot/scripts/start.sh /app/scripts/start.sh
+COPY Engram-AiCrawler/01_devroot/scripts/healthcheck.sh /app/scripts/healthcheck.sh
 
 # Make scripts executable
 RUN chmod +x /app/scripts/start.sh /app/scripts/healthcheck.sh

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { HookManager } from "../dist/hooks/hook-manager.js";
-import type { ToolCallContext, ToolResultContext } from "../dist/hooks/types.js";
+import type {
+	ToolCallContext,
+	ToolResultContext,
+} from "../dist/hooks/types.js";
 
 describe("HookManager", () => {
 	describe("registerPreToolHook / onPreToolUse", () => {
@@ -42,7 +45,12 @@ describe("HookManager", () => {
 			});
 
 			const result = { content: [{ type: "text", text: "done" }] };
-			await manager.onPostToolUse("add_memory", { content: "hello" }, result, "req-2");
+			await manager.onPostToolUse(
+				"add_memory",
+				{ content: "hello" },
+				result,
+				"req-2",
+			);
 
 			assert.equal(received.length, 1);
 			assert.equal(received[0]?.toolName, "add_memory");

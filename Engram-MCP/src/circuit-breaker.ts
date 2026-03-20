@@ -39,10 +39,14 @@ export class CircuitBreaker {
 
 	constructor(options: CircuitBreakerOptions = {}) {
 		this.options = {
-			failureThreshold: options.failureThreshold ?? config.circuitBreaker.failureThreshold,
-			resetTimeoutMs: options.resetTimeoutMs ?? config.circuitBreaker.resetTimeoutMs,
-			successThreshold: options.successThreshold ?? config.circuitBreaker.successThreshold,
-			failureWindowMs: options.failureWindowMs ?? config.circuitBreaker.failureWindowMs,
+			failureThreshold:
+				options.failureThreshold ?? config.circuitBreaker.failureThreshold,
+			resetTimeoutMs:
+				options.resetTimeoutMs ?? config.circuitBreaker.resetTimeoutMs,
+			successThreshold:
+				options.successThreshold ?? config.circuitBreaker.successThreshold,
+			failureWindowMs:
+				options.failureWindowMs ?? config.circuitBreaker.failureWindowMs,
 			onStateChange: options.onStateChange ?? this.defaultOnStateChange,
 		};
 	}
@@ -57,7 +61,8 @@ export class CircuitBreaker {
 				this.transitionTo("half-open");
 			} else {
 				const retryAfter = Math.ceil(
-					(this.lastFailureTime + this.options.resetTimeoutMs - Date.now()) / 1000,
+					(this.lastFailureTime + this.options.resetTimeoutMs - Date.now()) /
+						1000,
 				);
 				throw new CircuitOpenError("Circuit breaker is open", {
 					retryAfter: Math.max(1, retryAfter),
@@ -179,7 +184,10 @@ export class CircuitBreaker {
 	/**
 	 * Default state change callback
 	 */
-	private defaultOnStateChange = (state: CircuitState, failures: number): void => {
+	private defaultOnStateChange = (
+		state: CircuitState,
+		failures: number,
+	): void => {
 		logger.circuitBreaker(state, failures);
 	};
 }

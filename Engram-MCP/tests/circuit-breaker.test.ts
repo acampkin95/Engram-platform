@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 import {
 	CircuitBreaker,
-	createCircuitBreaker,
 	type CircuitState,
+	createCircuitBreaker,
 } from "../dist/circuit-breaker.js";
 import { CircuitOpenError } from "../dist/errors.js";
 
@@ -51,7 +51,10 @@ describe("CircuitBreaker", () => {
 
 		it("propagates errors from the wrapped function", async () => {
 			await assert.rejects(
-				() => breaker.execute(async () => { throw new Error("boom"); }),
+				() =>
+					breaker.execute(async () => {
+						throw new Error("boom");
+					}),
 				(err: unknown) => {
 					assert.ok(err instanceof Error);
 					assert.equal(err.message, "boom");
@@ -64,7 +67,9 @@ describe("CircuitBreaker", () => {
 			// 2 failures, threshold is 3
 			for (let i = 0; i < 2; i++) {
 				await assert.rejects(() =>
-					breaker.execute(async () => { throw new Error("fail"); }),
+					breaker.execute(async () => {
+						throw new Error("fail");
+					}),
 				);
 			}
 			assert.equal(breaker.getState(), "closed");
@@ -74,7 +79,9 @@ describe("CircuitBreaker", () => {
 		it("transitions to open at failure threshold", async () => {
 			for (let i = 0; i < 3; i++) {
 				await assert.rejects(() =>
-					breaker.execute(async () => { throw new Error("fail"); }),
+					breaker.execute(async () => {
+						throw new Error("fail");
+					}),
 				);
 			}
 			assert.equal(breaker.getState(), "open");
@@ -87,14 +94,20 @@ describe("CircuitBreaker", () => {
 			// Trip the breaker
 			for (let i = 0; i < 3; i++) {
 				await assert.rejects(() =>
-					breaker.execute(async () => { throw new Error("fail"); }),
+					breaker.execute(async () => {
+						throw new Error("fail");
+					}),
 				);
 			}
 			assert.equal(breaker.getState(), "open");
 
 			let called = false;
 			await assert.rejects(
-				() => breaker.execute(async () => { called = true; return 1; }),
+				() =>
+					breaker.execute(async () => {
+						called = true;
+						return 1;
+					}),
 				(err: unknown) => {
 					assert.ok(err instanceof CircuitOpenError);
 					return true;
@@ -109,7 +122,9 @@ describe("CircuitBreaker", () => {
 			// Trip the breaker
 			for (let i = 0; i < 3; i++) {
 				await assert.rejects(() =>
-					breaker.execute(async () => { throw new Error("fail"); }),
+					breaker.execute(async () => {
+						throw new Error("fail");
+					}),
 				);
 			}
 			assert.equal(breaker.getState(), "open");
@@ -128,7 +143,9 @@ describe("CircuitBreaker", () => {
 			// Trip the breaker
 			for (let i = 0; i < 3; i++) {
 				await assert.rejects(() =>
-					breaker.execute(async () => { throw new Error("fail"); }),
+					breaker.execute(async () => {
+						throw new Error("fail");
+					}),
 				);
 			}
 			assert.equal(breaker.getState(), "open");
@@ -138,7 +155,9 @@ describe("CircuitBreaker", () => {
 
 			// Fail in half-open state
 			await assert.rejects(() =>
-				breaker.execute(async () => { throw new Error("still failing"); }),
+				breaker.execute(async () => {
+					throw new Error("still failing");
+				}),
 			);
 			assert.equal(breaker.getState(), "open");
 		});
@@ -147,7 +166,9 @@ describe("CircuitBreaker", () => {
 			// Trip the breaker
 			for (let i = 0; i < 3; i++) {
 				await assert.rejects(() =>
-					breaker.execute(async () => { throw new Error("fail"); }),
+					breaker.execute(async () => {
+						throw new Error("fail");
+					}),
 				);
 			}
 			assert.equal(breaker.getState(), "open");
@@ -174,7 +195,9 @@ describe("CircuitBreaker", () => {
 			// Trip the breaker
 			for (let i = 0; i < 3; i++) {
 				await assert.rejects(() =>
-					breaker.execute(async () => { throw new Error("fail"); }),
+					breaker.execute(async () => {
+						throw new Error("fail");
+					}),
 				);
 			}
 			assert.equal(breaker.getState(), "open");
@@ -190,7 +213,9 @@ describe("CircuitBreaker", () => {
 			// Trip to open
 			for (let i = 0; i < 3; i++) {
 				await assert.rejects(() =>
-					breaker.execute(async () => { throw new Error("fail"); }),
+					breaker.execute(async () => {
+						throw new Error("fail");
+					}),
 				);
 			}
 			assert.ok(stateChanges.some((c) => c.state === "open"));
@@ -215,7 +240,9 @@ describe("createCircuitBreaker", () => {
 	});
 
 	it("circuit opens after failures through the wrapper", async () => {
-		const fn = async () => { throw new Error("nope"); };
+		const fn = async () => {
+			throw new Error("nope");
+		};
 		const { execute, circuit } = createCircuitBreaker(fn, {
 			failureThreshold: 2,
 			resetTimeoutMs: 100,

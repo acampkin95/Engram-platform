@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { test, vi } from 'vitest';
 import AnalyticsContent from './AnalyticsContent';
 
@@ -82,9 +83,9 @@ vi.mock('@/src/lib/memory-client', () => ({
 
 // Mock Recharts
 vi.mock('recharts', () => {
-  const MockComponent = ({ children }: any) => <div>{children}</div>;
+  const MockComponent = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
   return {
-    ResponsiveContainer: ({ children }: any) => (
+    ResponsiveContainer: ({ children }: { children?: ReactNode }) => (
       <div style={{ width: '100%', height: 300 }}>{children}</div>
     ),
     LineChart: MockComponent,

@@ -6,8 +6,8 @@ import {
 	DEFAULT_OAUTH_CONFIG,
 	DEFAULT_RETRY_CONFIG,
 	DEFAULT_TIMEOUT_CONFIG,
-	loadConfig,
 	type MCPConfig,
+	loadConfig,
 } from "../dist/config.js";
 
 describe("loadConfig", () => {
@@ -219,10 +219,22 @@ describe("default config constants", () => {
 	});
 
 	it("DEFAULT_CIRCUIT_BREAKER_CONFIG has expected shape", () => {
-		assert.equal(typeof DEFAULT_CIRCUIT_BREAKER_CONFIG.failureThreshold, "number");
-		assert.equal(typeof DEFAULT_CIRCUIT_BREAKER_CONFIG.resetTimeoutMs, "number");
-		assert.equal(typeof DEFAULT_CIRCUIT_BREAKER_CONFIG.successThreshold, "number");
-		assert.equal(typeof DEFAULT_CIRCUIT_BREAKER_CONFIG.failureWindowMs, "number");
+		assert.equal(
+			typeof DEFAULT_CIRCUIT_BREAKER_CONFIG.failureThreshold,
+			"number",
+		);
+		assert.equal(
+			typeof DEFAULT_CIRCUIT_BREAKER_CONFIG.resetTimeoutMs,
+			"number",
+		);
+		assert.equal(
+			typeof DEFAULT_CIRCUIT_BREAKER_CONFIG.successThreshold,
+			"number",
+		);
+		assert.equal(
+			typeof DEFAULT_CIRCUIT_BREAKER_CONFIG.failureWindowMs,
+			"number",
+		);
 	});
 
 	it("DEFAULT_TIMEOUT_CONFIG has expected shape", () => {

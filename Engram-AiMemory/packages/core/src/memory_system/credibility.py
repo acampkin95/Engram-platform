@@ -1,6 +1,7 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 
+from memory_system.compat import UTC
 from memory_system.memory import Memory, SourceType
 
 

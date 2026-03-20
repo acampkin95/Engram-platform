@@ -7,7 +7,6 @@ export default function SignUpPage() {
         appearance={{
           baseTheme: {
             // @ts-expect-error
-            // @ts-expect-error
             colors: {
               background: '#03020a',
               pageBackground: '#03020a',
@@ -22,7 +21,6 @@ export default function SignUpPage() {
             colorBackground: '#03020a',
             colorPrimary: '#f2a93b',
             colorText: '#f0eef8',
-            // @ts-expect-error
             // @ts-expect-error
             colorTextPlaceholder: '#a09bb8',
             colorInputBackground: 'rgba(255, 255, 255, 0.08)',

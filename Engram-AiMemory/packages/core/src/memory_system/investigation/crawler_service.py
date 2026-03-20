@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 import signal
 
@@ -41,7 +42,6 @@ async def run_crawler_service() -> None:
     # Setup Weaviate client
     weaviate_client = None
     matter_client = None
-    evidence_client = None
 
     try:
         from memory_system.client import WeaviateMemoryClient
@@ -52,14 +52,14 @@ async def run_crawler_service() -> None:
         await wc.connect()
         weaviate_client = wc._client
         matter_client = MatterClient(weaviate_client)
-        evidence_client = EvidenceClient(weaviate_client, matter_client)
+        EvidenceClient(weaviate_client, matter_client)
         console.print("[green]Weaviate connected[/green]")
     except Exception as exc:
         console.print(f"[red]Weaviate connection failed: {exc}[/red]")
         console.print("[yellow]Crawler service will retry on next iteration[/yellow]")
 
     from memory_system.investigation.crawler import InvestigationCrawler
-    crawler = InvestigationCrawler(redis_client=redis_client)
+    InvestigationCrawler(redis_client=redis_client)
 
     shutdown_event = asyncio.Event()
 
@@ -89,13 +89,11 @@ async def run_crawler_service() -> None:
                 console.print(f"[yellow]Crawler: API poll failed: {exc}[/yellow]")
 
         # Wait for next poll interval or shutdown
-        try:
+        with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(
                 shutdown_event.wait(),
                 timeout=CRAWLER_POLL_INTERVAL
             )
-        except TimeoutError:
-            pass
 
     console.print("[cyan]Investigation Crawler Service stopped[/cyan]")
 

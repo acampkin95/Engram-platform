@@ -126,9 +126,7 @@ async function fetchFirstJson(candidates: string[]): Promise<Record<string, unkn
       });
       if (!response.ok) continue;
       return (await response.json()) as Record<string, unknown>;
-    } catch {
-      continue;
-    }
+    } catch {}
   }
 
   return null;
@@ -201,7 +199,11 @@ export function buildSevenDayHistory(logLines: string[], now = new Date()): Hist
     const match = line.match(/\[(\d{4}-\d{2}-\d{2})\s/);
     if (!match) continue;
     const date = new Date(`${match[1]}T00:00:00Z`);
-    const key = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    const key = date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    });
     const bucket = byDay.get(key);
     if (!bucket) continue;
 
@@ -239,11 +241,7 @@ export async function getRecentLogs(service = 'all', lines = 200) {
     .map((line, index) => ({
       id: `${Date.now()}-${index}`,
       line,
-      level: /error|exception|failed/i.test(line)
-        ? 'error'
-        : /warn/i.test(line)
-          ? 'warn'
-          : 'info',
+      level: /error|exception|failed/i.test(line) ? 'error' : /warn/i.test(line) ? 'warn' : 'info',
     }));
 }
 
@@ -309,7 +307,10 @@ export async function getSystemHealthSnapshot(): Promise<SystemSnapshot> {
     },
     services,
     resources,
-    maintenance: memoryDetailed?.maintenance_queue ?? crawlerStats ?? {},
+    maintenance: (memoryDetailed?.maintenance_queue ?? crawlerStats ?? {}) as Record<
+      string,
+      unknown
+    >,
   };
 }
 
@@ -325,9 +326,7 @@ export async function runMaintenanceAction(action: MaintenanceAction) {
       if (response.ok) {
         return await response.json().catch(() => ({ ok: true }));
       }
-    } catch {
-      continue;
-    }
+    } catch {}
   }
 
   throw new Error(`Failed to execute maintenance action: ${action}`);
@@ -354,7 +353,12 @@ export async function runSystemControl(input: { target: ServiceTarget; action: S
   }
 
   const dockerAction = action === 'start' ? ['up', '-d', target] : [action, target];
-  const { stdout, stderr } = await runCommand('docker', ['compose', '-f', COMPOSE_FILE, ...dockerAction]);
+  const { stdout, stderr } = await runCommand('docker', [
+    'compose',
+    '-f',
+    COMPOSE_FILE,
+    ...dockerAction,
+  ]);
   return { ok: true, output: stdout || stderr };
 }
 

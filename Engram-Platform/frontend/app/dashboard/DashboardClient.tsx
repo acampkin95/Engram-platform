@@ -14,9 +14,9 @@ import {
   LayoutDashboard,
   MessageSquare,
   Network,
-  Server,
   Search,
   SearchCode,
+  Server,
   Share2,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
@@ -66,7 +66,7 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 bg-[#090818] border-r border-white/[0.06] transition-all duration-300 overflow-hidden"
+      className="flex flex-col flex-shrink-0 bg-[var(--color-deep)] border-r border-white/[0.06] transition-all duration-300 overflow-hidden"
       style={{ width: collapsed ? 64 : 240 }}
     >
       {/* Logo */}
@@ -77,10 +77,10 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <h1 className="text-sm font-bold leading-none tracking-[0.2em] text-[#F2A93B] font-display">
+              <h1 className="text-sm font-bold leading-none tracking-[0.2em] text-[var(--color-amber)] font-display">
                 ENGRAM
               </h1>
-              <p className="text-[10px] text-[#5c5878] mt-0.5 leading-none font-mono tracking-widest uppercase">
+              <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5 leading-none font-mono tracking-widest uppercase">
                 PLATFORM
               </p>
             </div>
@@ -89,7 +89,7 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-1">
+      <nav aria-label="Main navigation" className="flex-1 px-2 py-3 overflow-y-auto space-y-1">
         <SidebarGroup label="CRAWLER" defaultOpen>
           {crawlerNav.map((item) => (
             <NavItem
@@ -140,7 +140,7 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
               label={item.label}
               icon={item.icon}
               isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
-              section="intelligence"
+              section="admin"
               collapsed={collapsed}
             />
           ))}
@@ -148,11 +148,11 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
       </nav>
 
       {/* Collapse toggle */}
-      <div className="px-2 py-3 border-t border-[#1e1e3a] flex-shrink-0">
+      <div className="px-2 py-3 border-t border-white/[0.06] flex-shrink-0">
         <button
           type="button"
           onClick={toggleSidebar}
-          className="flex items-center justify-center w-full h-8 rounded-lg text-[#5c5878] hover:text-[#f0eef8] hover:bg-white/[0.06] transition-colors"
+          className="flex items-center justify-center w-full h-8 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-white/[0.06] transition-colors"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -173,6 +173,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard/crawler/knowledge-graph')) return 'Knowledge Graph';
   if (pathname.startsWith('/dashboard/memory/home')) return 'Memory Overview';
   if (pathname.startsWith('/dashboard/memory/memories')) return 'Memories';
+  if (pathname.startsWith('/dashboard/memory/timeline')) return 'Timeline';
   if (pathname.startsWith('/dashboard/memory/matters')) return 'Matters';
   if (pathname.startsWith('/dashboard/memory/graph')) return 'Memory Graph';
   if (pathname.startsWith('/dashboard/memory/analytics')) return 'Analytics';
@@ -189,24 +190,26 @@ function Header({ pathname }: Readonly<{ pathname: string }>) {
   const title = getPageTitle(pathname);
 
   return (
-    <header className="h-14 bg-[#070710]/80 backdrop-blur-xl border-b border-[#1e1e3a] px-5 flex items-center justify-between flex-shrink-0 z-10">
+    <header className="h-14 bg-[var(--color-void)]/80 backdrop-blur-xl border-b border-white/[0.06] px-5 flex items-center justify-between flex-shrink-0 z-10">
       {/* Breadcrumb / page title */}
       <div className="flex items-center gap-3">
-        <div className="w-1.5 h-1.5 rounded-full bg-[#F2A93B] shadow-[0_0_8px_rgba(242,169,59,0.8)]" />
-        <h2 className="text-sm font-medium text-[#f0eef8] tracking-wide font-display">{title}</h2>
+        <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-amber)] shadow-[0_0_8px_rgba(242,169,59,0.8)]" />
+        <h2 className="text-sm font-medium text-[var(--color-text-primary)] tracking-wide font-display">
+          {title}
+        </h2>
       </div>
 
       {/* Service status dots and theme toggle */}
       <div className="flex items-center gap-4">
         <ThemeToggle />
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono text-[#5c5878] tracking-widest uppercase">
+          <span className="text-[10px] font-mono text-[var(--color-text-muted)] tracking-widest uppercase">
             CRAWLER
           </span>
           <StatusDot variant={serviceStatus.crawler} />
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono text-[#5c5878] tracking-widest uppercase">
+          <span className="text-[10px] font-mono text-[var(--color-text-muted)] tracking-widest uppercase">
             MEMORY
           </span>
           <StatusDot variant={serviceStatus.memory} />
@@ -224,10 +227,18 @@ export function DashboardClient({ children }: Readonly<{ children: ReactNode }>)
 
   return (
     <MotionProvider>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-amber)] focus:text-[var(--color-void)] focus:font-semibold focus:text-sm"
+      >
+        Skip to main content
+      </a>
       <Sidebar pathname={pathname} collapsed={collapsed} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header pathname={pathname} />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main id="main-content" className="flex-1 overflow-y-auto p-6">
+          {children}
+        </main>
       </div>
     </MotionProvider>
   );

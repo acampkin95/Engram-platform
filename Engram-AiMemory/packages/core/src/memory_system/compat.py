@@ -12,23 +12,21 @@ These files can be synced to/from the Weaviate memory system.
 
 import json
 import re
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
-
-try:
-    from enum import StrEnum
-except ImportError:
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 from rich.console import Console
+
+# Python 3.11+ compatibility: datetime.UTC
+if sys.version_info >= (3, 11):
+    from datetime import UTC
+else:
+    from datetime import timezone
+    UTC = timezone.utc
 
 console = Console()
 

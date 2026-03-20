@@ -1,10 +1,20 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { imageSizes, LazyLoad, OptimizedImage } from '../OptimizedImage';
 
 vi.mock('next/image', () => ({
-  // biome-ignore lint/suspicious/noExplicitAny: test mock needs to accept Next.js image props
-  default: ({ alt, fill: _fill, priority: _priority, quality: _quality, ...props }: any) => (
+  default: ({
+    alt,
+    fill: _fill,
+    priority: _priority,
+    quality: _quality,
+    ...props
+  }: React.ImgHTMLAttributes<HTMLImageElement> & {
+    fill?: boolean;
+    priority?: boolean;
+    quality?: number;
+  }) => (
     // biome-ignore lint/performance/noImgElement: mock component
     <img alt={alt} {...props} />
   ),

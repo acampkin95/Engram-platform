@@ -256,7 +256,7 @@ function MemoryMatterCard({ matter }: { matter: Matter }) {
         <div className="flex items-center gap-4 mt-3 text-[11px] text-[#5c5878] font-mono">
           <span className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            {formatDate(matter.created_at)}
+            {formatDate(matter.created_at ?? '')}
           </span>
           {matter.lead_investigator && (
             <span className="truncate max-w-[160px]">{matter.lead_investigator}</span>

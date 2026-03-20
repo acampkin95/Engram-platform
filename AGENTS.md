@@ -77,14 +77,12 @@ cd Engram-Platform/frontend && npm run dev  # port 3002
 
 ## TESTING
 
-| Project | Runner | Coverage |
-|---------|--------|----------|
-| AiMemory Python | pytest | 79.8% minimum |
-| AiMemory TS | vitest | — |
-| AiCrawler Python | pytest | — |
-| AiCrawler React | vitest | — |
-| Platform | vitest + playwright | — |
-| MCP | node --test | — |
+| Project | Runner | Coverage | Tests | Last Baselined |
+|---------|--------|----------|-------|----------------|
+| AiMemory Python | pytest | 78% (4049 stmts) | 883 pass, 18 fail | 2026-03-17 |
+| AiCrawler Python | pytest | 81% (12468 stmts) | 2393 pass | 2026-03-17 |
+| Platform | vitest + playwright | 79% stmts, 72% branch | 318 pass | 2026-03-17 |
+| MCP | node --test | unmeasured | 381 pass | 2026-03-17 |
 
 ## KEY ENV VARS
 
@@ -106,24 +104,24 @@ MCP_AUTH_TOKEN=<MCP bearer token>
 
 ## CURRENT PROJECT STATE
 
-**Status:** 70% Complete (as of 2026-03-11, after roadmap refresh)
+**Status:** 75% Complete (as of 2026-03-17, after baseline refresh)
 
 ### Component Maturity
 
 | Component | Test Coverage | Security | Performance | Docs | Overall |
 |-----------|--------------|----------|-------------|------|---------|
-| **AiMemory** | Baseline refresh needed (stretch 95%) | 60% | 80% | 50% | 70% |
-| **AiCrawler** | 57.82% (75% enforced, 85% stretch) | 75% | 85% | 40% | 65% |
-| **MCP Server** | Baseline not yet reported (161 tests) | 85% | 90% | 60% | 80% |
-| **Platform** | Coverage reporting configured; tested surface still needs baseline | 70% | 75% | 30% | 45% |
+| **AiMemory** | 78% (4049 stmts, 18 failing tests) | 60% | 80% | 50% | 70% |
+| **AiCrawler** | 81% (12468 stmts, 2393 pass) | 75% | 85% | 40% | 75% |
+| **MCP Server** | 381 tests pass, coverage unmeasured | 85% | 90% | 60% | 80% |
+| **Platform** | 79% stmts, 72% branch (318 pass) | 70% | 75% | 30% | 60% |
 
 ### Critical Gaps
 
 1. **Test Coverage**
-   - AiMemory: refresh the real baseline, then drive in-scope coverage toward 85%+ with 95% as a stretch target
-   - AiCrawler: 57.82% → Need 75% minimum first, then continue toward 85%
-   - Platform: coverage reporting exists, but the trusted baseline and tested critical surface still need to be established
-   - MCP: test suite is healthy, but coverage reporting still needs to be surfaced
+   - AiMemory: 78% baseline established; 18 failing tests to fix, then drive toward 85%+ in-scope
+   - AiCrawler: 81% baseline established (exceeds 75% enforced minimum); continue toward 85%
+   - Platform: 79% stmts baseline established; coverage reporting now works correctly
+   - MCP: 381 tests healthy; coverage metric reporting still needs to be surfaced
 
 2. **Security (NIST Compliance)**
    - ❌ No encryption at rest (Weaviate, Redis)
@@ -133,14 +131,14 @@ MCP_AUTH_TOKEN=<MCP bearer token>
    - ❌ No MFA for admin users
 
 3. **Dashboard (2026 Standards)**
-   - ⚠️ `nuqs` is installed, but URL-state rollout is incomplete
-   - ⚠️ Sentry packages and instrumentation exist, but full runtime rollout is incomplete
+   - ✅ `nuqs` provider and shared hooks exist; rollout is partial rather than absent
+   - ✅ Sentry client and runtime instrumentation exist; operational verification remains incomplete
    - ❌ Inconsistent memoization
    - ❌ No component documentation (Storybook missing)
 
 4. **MCP Framework**
-   - ~88% compliant (missing pagination; Zod input validation IS implemented)
-   - In-memory OAuth token store (volatile on restart)
+   - ~88% compliant (pagination remains incomplete; Zod input validation IS implemented)
+   - Redis-backed OAuth storage exists; startup validation bootstrap bug was fixed on 2026-03-18
 
 5. **Performance (i5/16GB/1TB)**
    - Current: 10.5GB (65% of 16GB)
@@ -276,8 +274,8 @@ MCP_AUTH_TOKEN=<MCP bearer token>
 **MCP Framework Compliance:** ~88%
 - ✅ Dual transport, OAuth 2.1, error hierarchy
 - ✅ Input validation via Zod (`src/schemas.ts`, 283 LOC — validates all 27 tool inputs on every invocation)
-- ❌ No pagination support
-- ❌ Resource content not fully implemented
+- ✅ Static and dynamic resource support implemented in `src/resources/`
+- ❌ No broad pagination model across MCP-facing list/search surfaces
 
 ---
 

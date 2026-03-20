@@ -1,11 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import type React from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import HomeContent from './HomeContent';
 
 const mockSetServiceStatus = vi.fn();
 
 vi.mock('@/src/components/DraggableGrid', () => ({
-  DraggableGrid: ({ items }: { items: Array<{ title?: string; children: unknown }> }) => (
+  DraggableGrid: ({ items }: { items: Array<{ title?: string; children: React.ReactNode }> }) => (
     <div>
       {items.map((item) => (
         <section key={item.title ?? 'untitled'}>

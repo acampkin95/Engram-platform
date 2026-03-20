@@ -1,6 +1,8 @@
 """FastAPI router for investigation matters — /matters/** endpoints."""
+
 from __future__ import annotations
 
+# ruff: noqa: B008  # FastAPI Depends() in function defaults is standard pattern
 import ipaddress
 from urllib.parse import urlparse
 
@@ -29,6 +31,7 @@ investigation_router = APIRouter()
 def _get_weaviate_client():
     """Dependency: get the shared Weaviate client from app state."""
     from memory_system.api import app
+
     return app.state.weaviate_client
 
 
@@ -57,8 +60,8 @@ async def create_matter(
         return await matter_client.create_matter(matter)
     except ValueError as exc:
         if "already exists" in str(exc):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 @investigation_router.get("/", response_model=list[MatterResponse])
@@ -78,7 +81,9 @@ async def get_matter(
     """Get a matter by ID."""
     matter = await matter_client.get_matter(matter_id)
     if matter is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Matter '{matter_id}' not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Matter '{matter_id}' not found"
+        )
     return matter
 
 
@@ -92,7 +97,7 @@ async def update_matter_status(
     try:
         return await matter_client.update_matter_status(matter_id, new_status)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 @investigation_router.delete("/{matter_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -103,7 +108,10 @@ async def delete_matter(
     """Delete a matter and all its tenant data."""
     deleted = await matter_client.delete_matter(matter_id)
     if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Matter '{matter_id}' not found or delete failed")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Matter '{matter_id}' not found or delete failed",
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +119,11 @@ async def delete_matter(
 # ---------------------------------------------------------------------------
 
 
-@investigation_router.post("/{matter_id}/evidence", response_model=list[EvidenceResponse], status_code=status.HTTP_201_CREATED)
+@investigation_router.post(
+    "/{matter_id}/evidence",
+    response_model=list[EvidenceResponse],
+    status_code=status.HTTP_201_CREATED,
+)
 async def ingest_evidence(
     matter_id: str,
     ingest: EvidenceIngest,
@@ -122,7 +134,7 @@ async def ingest_evidence(
     try:
         return await evidence_client.ingest_document(ingest)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 @investigation_router.post("/{matter_id}/evidence/search", response_model=SearchResponse)
@@ -136,7 +148,9 @@ async def search_evidence(
     return await evidence_client.search_evidence(search)
 
 
-@investigation_router.delete("/{matter_id}/evidence/{document_hash}", status_code=status.HTTP_204_NO_CONTENT)
+@investigation_router.delete(
+    "/{matter_id}/evidence/{document_hash}", status_code=status.HTTP_204_NO_CONTENT
+)
 async def delete_evidence(
     matter_id: str,
     document_hash: str,
@@ -145,7 +159,9 @@ async def delete_evidence(
     """Delete all chunks for a document by hash."""
     count = await evidence_client.delete_document(matter_id, document_hash)
     if count == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Document '{document_hash}' not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Document '{document_hash}' not found"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -153,7 +169,9 @@ async def delete_evidence(
 # ---------------------------------------------------------------------------
 
 
-@investigation_router.post("/registry/persons", response_model=SubjectPersonResponse, status_code=status.HTTP_201_CREATED)
+@investigation_router.post(
+    "/registry/persons", response_model=SubjectPersonResponse, status_code=status.HTTP_201_CREATED
+)
 async def upsert_person(
     person: SubjectPersonCreate,
     registry_client: GlobalRegistryClient = Depends(_get_registry_client),
@@ -162,7 +180,11 @@ async def upsert_person(
     return await registry_client.upsert_person(person)
 
 
-@investigation_router.post("/registry/organisations", response_model=SubjectOrgResponse, status_code=status.HTTP_201_CREATED)
+@investigation_router.post(
+    "/registry/organisations",
+    response_model=SubjectOrgResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def upsert_organisation(
     org: SubjectOrgCreate,
     registry_client: GlobalRegistryClient = Depends(_get_registry_client),
@@ -204,11 +226,14 @@ async def trigger_crawl(
     max_depth: int = 2,
 ) -> dict:
     """Trigger an OSINT crawl job for a matter. Returns job metadata (async, non-blocking)."""
+
     # SSRF protection: validate all seed URLs before accepting the job
     def _validate_url(url: str) -> str:
         parsed = urlparse(url)
         if parsed.scheme not in ("http", "https"):
-            raise HTTPException(400, f"Invalid URL scheme: {parsed.scheme!r}. Only http/https allowed.")
+            raise HTTPException(
+                400, f"Invalid URL scheme: {parsed.scheme!r}. Only http/https allowed."
+            )
         host = parsed.hostname or ""
         try:
             ip = ipaddress.ip_address(host)
@@ -221,6 +246,7 @@ async def trigger_crawl(
     validated_urls = [_validate_url(u) for u in seed_urls]
 
     from memory_system.investigation.crawler import CrawlJob
+
     CrawlJob(
         matter_id=matter_id,
         seed_urls=validated_urls,

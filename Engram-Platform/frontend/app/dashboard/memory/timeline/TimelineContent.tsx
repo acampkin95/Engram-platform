@@ -32,7 +32,7 @@ export default function TimelineContent() {
   const [filters, setFilters] = useState<FilterValues>({});
   const [timeRange, setTimeRange] = useState([0, 100]); // 0 to 100% of the loaded events timespan
 
-  // SWR key for timeline search
+  // SWR key for timeline search (status filter maps to matter/project for filtering)
   const swrKey = swrKeys.memory.memories({
     search: filters.search ?? '',
     matterId: filters.status ?? undefined,
@@ -55,7 +55,7 @@ export default function TimelineContent() {
 
   const matters = mattersRes?.data?.matters ?? [];
   const matterStatusOptions = useMemo(
-    () => matters.map((m) => ({ value: m.matter_id, label: m.title })),
+    () => matters.map((m) => ({ value: m.matter_id, label: m.title ?? 'Untitled' })),
     [matters],
   );
 
@@ -66,8 +66,8 @@ export default function TimelineContent() {
     return [...events].sort((a, b) => {
       // In a real implementation we'd parse temporal_bounds.start_time
       // But for fallback we'll use created_at
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
+      const dateA = new Date(a.created_at ?? 0).getTime();
+      const dateB = new Date(b.created_at ?? 0).getTime();
       return dateB - dateA;
     });
   }, [events]);
@@ -91,7 +91,7 @@ export default function TimelineContent() {
       {events.length > 0 && (
         <div className="mb-4 px-1">
           <Slider value={timeRange} onValueChange={setTimeRange} min={0} max={100} step={1} />
-          <p className="text-xs text-[#5c5878] mt-1">
+          <p className="text-xs text-muted mt-1">
             Viewing {timeRange[0]}% to {timeRange[1]}% of events
           </p>
         </div>
@@ -101,8 +101,8 @@ export default function TimelineContent() {
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full" />
+            {Array.from({ length: 5 }, (_, index) => `timeline-skeleton-${index}`).map((key) => (
+              <Skeleton key={key} className="h-20 w-full" />
             ))}
           </div>
         ) : error ? (
@@ -127,11 +127,11 @@ export default function TimelineContent() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <h4 className="text-sm font-semibold text-[#f0eef8] truncate">
+                      <h4 className="text-sm font-semibold text-foreground truncate">
                         {event.content}
                       </h4>
-                      <span className="text-xs text-[#5c5878] font-mono whitespace-nowrap">
-                        {formatDate(event.created_at)}
+                      <span className="text-xs text-muted font-mono whitespace-nowrap">
+                        {event.created_at ? formatDate(event.created_at) : '—'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -143,12 +143,13 @@ export default function TimelineContent() {
                             </Badge>
                           ))}
                           {event.tags.length > 3 && (
-                            <span className="text-xs text-[#5c5878]">+{event.tags.length - 3}</span>
+                            <span className="text-xs text-muted">+{event.tags.length - 3}</span>
                           )}
                         </div>
                       )}
-                      <span className="text-xs text-[#5c5878] font-mono ml-auto">
-                        Importance: {event.importance.toFixed(2)}
+                      <span className="text-xs text-muted font-mono ml-auto">
+                        Importance:{' '}
+                        {typeof event.importance === 'number' ? event.importance.toFixed(2) : '—'}
                       </span>
                     </div>
                   </div>

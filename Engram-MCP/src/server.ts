@@ -18,11 +18,19 @@ import {
 
 import { MemoryAPIClient } from "./client.js";
 import type { MCPConfig } from "./config.js";
-import { InternalServerError, InvalidInputError, NotFoundError, isMemoryError } from "./errors.js";
+import {
+	InternalServerError,
+	InvalidInputError,
+	NotFoundError,
+	isMemoryError,
+} from "./errors.js";
 import type { HookManager } from "./hooks/hook-manager.js";
 import { generateRequestId, logger } from "./logger.js";
 import { PROMPTS, renderPrompt } from "./prompts.js";
-import { RESOURCE_TEMPLATES, STATIC_RESOURCES } from "./resources/enhanced-resources.js";
+import {
+	RESOURCE_TEMPLATES,
+	STATIC_RESOURCES,
+} from "./resources/enhanced-resources.js";
 import { handleResourceRequest } from "./resources/memory-resources.js";
 import { handleEntityTool } from "./tools/entity-tools.js";
 import { handleInvestigationTool } from "./tools/investigation-tools.js";
@@ -65,8 +73,12 @@ export function createMCPServer(options: CreateServerOptions): Server {
 			if (isMemoryError(error)) throw error;
 			const cause = error instanceof Error ? error : undefined;
 			const message = cause?.message ?? String(error);
-			logger.error("Failed to list tools", { error: { message, stack: cause?.stack } });
-			throw new InternalServerError(`Failed to list tools: ${message}`, { cause });
+			logger.error("Failed to list tools", {
+				error: { message, stack: cause?.stack },
+			});
+			throw new InternalServerError(`Failed to list tools: ${message}`, {
+				cause,
+			});
 		}
 	});
 
@@ -83,12 +95,17 @@ export function createMCPServer(options: CreateServerOptions): Server {
 
 			logger.toolStart(name, args, requestId);
 
-			let result: { content: Array<{ type: string; text: string }> } | null | undefined;
+			let result:
+				| { content: Array<{ type: string; text: string }> }
+				| null
+				| undefined;
 
 			if (name === "health_check") {
 				const health = await apiClient.healthCheck();
 				const includeDetails =
-					typeof args.include_details === "boolean" ? args.include_details : false;
+					typeof args.include_details === "boolean"
+						? args.include_details
+						: false;
 
 				result = {
 					content: [
@@ -128,7 +145,13 @@ export function createMCPServer(options: CreateServerOptions): Server {
 
 			// Post-tool hook
 			if (hookManager) {
-				await hookManager.onPostToolUse(name, args, result, requestId, Date.now() - startedAt);
+				await hookManager.onPostToolUse(
+					name,
+					args,
+					result,
+					requestId,
+					Date.now() - startedAt,
+				);
 			}
 
 			return result;
@@ -158,8 +181,12 @@ export function createMCPServer(options: CreateServerOptions): Server {
 			if (isMemoryError(error)) throw error;
 			const cause = error instanceof Error ? error : undefined;
 			const message = cause?.message ?? String(error);
-			logger.error("Failed to list resources", { error: { message, stack: cause?.stack } });
-			throw new InternalServerError(`Failed to list resources: ${message}`, { cause });
+			logger.error("Failed to list resources", {
+				error: { message, stack: cause?.stack },
+			});
+			throw new InternalServerError(`Failed to list resources: ${message}`, {
+				cause,
+			});
 		}
 	});
 
@@ -173,7 +200,10 @@ export function createMCPServer(options: CreateServerOptions): Server {
 			logger.error("Failed to list resource templates", {
 				error: { message, stack: cause?.stack },
 			});
-			throw new InternalServerError(`Failed to list resource templates: ${message}`, { cause });
+			throw new InternalServerError(
+				`Failed to list resource templates: ${message}`,
+				{ cause },
+			);
 		}
 	});
 
@@ -188,8 +218,12 @@ export function createMCPServer(options: CreateServerOptions): Server {
 			if (isMemoryError(error)) throw error;
 			const cause = error instanceof Error ? error : undefined;
 			const message = cause?.message ?? String(error);
-			logger.error("Failed to list prompts", { error: { message, stack: cause?.stack } });
-			throw new InternalServerError(`Failed to list prompts: ${message}`, { cause });
+			logger.error("Failed to list prompts", {
+				error: { message, stack: cause?.stack },
+			});
+			throw new InternalServerError(`Failed to list prompts: ${message}`, {
+				cause,
+			});
 		}
 	});
 
@@ -219,8 +253,12 @@ export function createMCPServer(options: CreateServerOptions): Server {
 			if (isMemoryError(error)) throw error;
 			const cause = error instanceof Error ? error : undefined;
 			const message = cause?.message ?? String(error);
-			logger.error("Failed to get prompt", { error: { message, stack: cause?.stack } });
-			throw new InternalServerError(`Failed to get prompt: ${message}`, { cause });
+			logger.error("Failed to get prompt", {
+				error: { message, stack: cause?.stack },
+			});
+			throw new InternalServerError(`Failed to get prompt: ${message}`, {
+				cause,
+			});
 		}
 	});
 
@@ -239,7 +277,10 @@ export function createMCPServer(options: CreateServerOptions): Server {
 				resource: request.params.uri,
 				error: { message, stack: cause?.stack },
 			});
-			throw new InternalServerError(`Resource ${request.params.uri} failed: ${message}`, { cause });
+			throw new InternalServerError(
+				`Resource ${request.params.uri} failed: ${message}`,
+				{ cause },
+			);
 		}
 	});
 

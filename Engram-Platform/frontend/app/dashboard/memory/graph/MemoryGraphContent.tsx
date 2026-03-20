@@ -55,7 +55,7 @@ function EntityNode({ data, selected }: NodeProps<Node<EntityNodeData>>) {
       >
         {data.entityType}
       </div>
-      <div className="text-[#f0eef8] font-medium text-xs leading-tight max-w-[160px] truncate">
+      <div className="text-foreground font-medium text-xs leading-tight max-w-[160px] truncate">
         {data.label}
       </div>
     </div>
@@ -88,12 +88,12 @@ function transformToFlow(
     label: rel.relation_type,
     style: edgeStyle,
     labelStyle: {
-      fill: '#5c5878',
+      fill: 'var(--color-text-muted)',
       fontSize: 10,
       fontFamily: 'IBM Plex Mono, monospace',
     },
     labelBgStyle: {
-      fill: '#0d0b1a',
+      fill: 'var(--color-panel)',
       fillOpacity: 0.8,
       stroke: 'color-mix(in srgb, var(--color-teal) 50%, transparent)',
       strokeWidth: 1,
@@ -126,7 +126,7 @@ function EntityDetailPanel({ entity, onClose }: EntityDetailPanelProps) {
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded hover:bg-white/[0.06] text-[#5c5878] hover:text-[#a09bb8] transition-colors flex-shrink-0"
+          className="p-1 rounded hover:bg-white/[0.06] text-muted hover:text-secondary-foreground transition-colors flex-shrink-0"
         >
           <X className="w-3.5 h-3.5" />
         </button>
@@ -134,29 +134,31 @@ function EntityDetailPanel({ entity, onClose }: EntityDetailPanelProps) {
 
       <div className="p-4 space-y-4 overflow-y-auto flex-1">
         <div>
-          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-1.5">
+          <p className="text-[10px] font-mono text-muted uppercase tracking-wider mb-1.5">
             Entity Type
           </p>
           <Badge variant="memory">{entity.entity_type}</Badge>
         </div>
 
         <div>
-          <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-1">
+          <p className="text-[10px] font-mono text-muted uppercase tracking-wider mb-1">
             Entity ID
           </p>
-          <p className="text-xs font-mono text-[#a09bb8] break-all">{entity.entity_id}</p>
+          <p className="text-xs font-mono text-secondary-foreground break-all">
+            {entity.entity_id}
+          </p>
         </div>
 
         {propertyEntries.length > 0 && (
           <div>
-            <p className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider mb-2">
+            <p className="text-[10px] font-mono text-muted uppercase tracking-wider mb-2">
               Properties
             </p>
             <dl className="space-y-1.5">
               {propertyEntries.map(([key, value]) => (
                 <div key={key} className="flex flex-col gap-0.5">
-                  <dt className="text-[10px] font-mono text-[#5c5878]">{key}</dt>
-                  <dd className="text-xs text-[#a09bb8] break-words">
+                  <dt className="text-[10px] font-mono text-muted">{key}</dt>
+                  <dd className="text-xs text-secondary-foreground break-words">
                     {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                   </dd>
                 </div>
@@ -166,22 +168,20 @@ function EntityDetailPanel({ entity, onClose }: EntityDetailPanelProps) {
         )}
 
         <div className="pt-4 border-t border-[#1e1e3a] mt-4">
-          <p className="text-xs font-mono text-[#a09bb8] mb-1">Created</p>
-          <p className="text-xs font-mono text-[#a09bb8]">
-            {new Date(entity.created_at).toLocaleDateString('en-AU', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            })}
+          <p className="text-xs font-mono text-secondary-foreground mb-1">Created</p>
+          <p className="text-xs font-mono text-secondary-foreground">
+            {typeof entity.created_at === 'string'
+              ? new Date(entity.created_at).toLocaleDateString('en-AU', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })
+              : '—'}
           </p>
         </div>
 
         <div className="pt-4 border-t border-[#1e1e3a] mt-4">
-          <Button
-            variant="secondary"
-            className="w-full justify-center gap-2"
-            onClick={() => setIsRelViewerOpen(true)}
-          >
+          <Button variant="secondary" className="w-full justify-center gap-2" onClick={onClose}>
             <Network className="w-4 h-4" />
             Explore Relationships
           </Button>
@@ -295,14 +295,14 @@ function GraphContent({ matters }: GraphContentProps) {
 
       <div className="flex items-center gap-4 mb-4">
         <div className="flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-[#5c5878]" />
+          <Layers className="w-3.5 h-3.5 text-muted" />
           <select
             value={selectedMatterId}
             onChange={(e) => {
               setSelectedMatterId(e.target.value);
               clearSelectedEntity();
             }}
-            className="bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-[#a09bb8] px-3 py-1.5 font-mono focus:outline-none focus:border-[rgba(46,196,196,0.4)] transition-colors"
+            className="bg-white/[0.04] border border-white/[0.08] rounded-lg text-xs text-secondary-foreground px-3 py-1.5 font-mono focus:outline-none focus:border-[rgba(46,196,196,0.4)] transition-colors"
           >
             <option value="">All Matters</option>
             {matters.map((m) => (
@@ -315,17 +315,17 @@ function GraphContent({ matters }: GraphContentProps) {
 
         {!isLoading && (
           <div className="flex items-center gap-3 ml-auto">
-            <span className="text-xs font-mono text-[#5c5878]">
-              <span className="text-[#2EC4C4]">{entityCount}</span> entities
+            <span className="text-xs font-mono text-muted">
+              <span className="text-teal">{entityCount}</span> entities
             </span>
-            <span className="text-xs font-mono text-[#5c5878]">
-              <span className="text-[#2EC4C4]">{edgeCount}</span> relations
+            <span className="text-xs font-mono text-muted">
+              <span className="text-teal">{edgeCount}</span> relations
             </span>
           </div>
         )}
       </div>
 
-      <div className="flex flex-1 gap-4 min-h-0">
+      <div className="flex flex-1 gap-4 min-h-0 relative">
         <div className="flex-1 rounded-xl border border-white/[0.06] overflow-hidden min-h-[500px]">
           {isLoading ? (
             <LoadingState label="Loading knowledge graph..." />
@@ -357,7 +357,7 @@ function GraphContent({ matters }: GraphContentProps) {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 50, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute right-0 top-0 bottom-0 z-10 w-80 shadow-2xl"
+              className="flex-shrink-0 w-80 z-10 shadow-2xl"
             >
               <EntityDetailPanel entity={selectedEntity} onClose={clearSelectedEntity} />
             </motion.div>

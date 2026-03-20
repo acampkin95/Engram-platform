@@ -1,5 +1,5 @@
-
-content = open("client.py").read()
+with open("client.py") as f:
+    content = f.read()
 
 # Update _ensure_schemas
 old_props = """            Property(name="updated_at", data_type=DataType.DATE, index_filterable=True),

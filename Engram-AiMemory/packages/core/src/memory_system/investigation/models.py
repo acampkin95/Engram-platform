@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -13,13 +13,13 @@ from pydantic import BaseModel, Field
 # ---------------------------------------------------------------------------
 
 
-class MatterStatus(str, Enum):
+class MatterStatus(StrEnum):
     ACTIVE = "ACTIVE"
     CLOSED = "CLOSED"
     ARCHIVED = "ARCHIVED"
 
 
-class SourceType(str, Enum):
+class SourceType(StrEnum):
     PDF = "PDF"
     EMAIL = "EMAIL"
     CSV = "CSV"
@@ -27,7 +27,7 @@ class SourceType(str, Enum):
     MANUAL = "MANUAL"
 
 
-class ReportType(str, Enum):
+class ReportType(StrEnum):
     ENTITY_SUMMARY = "ENTITY_SUMMARY"
     TIMELINE_SUMMARY = "TIMELINE_SUMMARY"
     CONTRADICTION_SUMMARY = "CONTRADICTION_SUMMARY"

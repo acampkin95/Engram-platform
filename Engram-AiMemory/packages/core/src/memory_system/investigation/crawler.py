@@ -1,12 +1,15 @@
 """OSINT crawler for investigation matters using Crawl4AI with Redis URL deduplication."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from urllib.parse import urlparse
 
 from rich.console import Console
+
+from memory_system.compat import UTC
 
 console = Console()
 
@@ -14,6 +17,7 @@ console = Console()
 @dataclass
 class CrawlResult:
     """Result of crawling a single URL."""
+
     url: str
     matter_id: str
     content: str
@@ -29,6 +33,7 @@ class CrawlResult:
 @dataclass
 class CrawlJob:
     """A crawl job for a matter."""
+
     matter_id: str
     seed_urls: list[str]
     max_depth: int = 2
@@ -63,7 +68,7 @@ class InvestigationCrawler:
 
         browser_config = BrowserConfig(
             headless=True,
-            text_mode=True,   # Disable images for speed
+            text_mode=True,  # Disable images for speed
             light_mode=True,  # Reduce background features
         )
 
@@ -136,10 +141,17 @@ class InvestigationCrawler:
                     # Enqueue discovered links if within depth limit
                     if depth < job.max_depth and result.links:
                         for link_info in result.links.get("internal", []):
-                            href = link_info.get("href", "") if isinstance(link_info, dict) else str(link_info)
-                            if href and href.startswith("http"):
-                                if not await self._is_seen(job.matter_id, href):
-                                    queue.append((href, depth + 1))
+                            href = (
+                                link_info.get("href", "")
+                                if isinstance(link_info, dict)
+                                else str(link_info)
+                            )
+                            if (
+                                href
+                                and href.startswith("http")
+                                and not await self._is_seen(job.matter_id, href)
+                            ):
+                                queue.append((href, depth + 1))
 
                 except Exception as exc:
                     console.print(f"[red]Crawl error for {url}: {exc}[/red]")
@@ -152,7 +164,9 @@ class InvestigationCrawler:
                         error=str(exc),
                     )
 
-        console.print(f"[green]Crawl complete: {pages_crawled} pages for matter {job.matter_id}[/green]")
+        console.print(
+            f"[green]Crawl complete: {pages_crawled} pages for matter {job.matter_id}[/green]"
+        )
 
     async def crawl_single(self, url: str, matter_id: str) -> CrawlResult:
         """Crawl a single URL. Does not use deduplication."""
@@ -173,8 +187,12 @@ class InvestigationCrawler:
                 result = await crawler.arun(url, config=run_config)
                 if not result.success:
                     return CrawlResult(
-                        url=url, matter_id=matter_id, content="", markdown="",
-                        success=False, error=result.error_message or "Unknown error",
+                        url=url,
+                        matter_id=matter_id,
+                        content="",
+                        markdown="",
+                        success=False,
+                        error=result.error_message or "Unknown error",
                     )
                 markdown_content = result.markdown or ""
                 title = ""
@@ -191,8 +209,12 @@ class InvestigationCrawler:
         except Exception as exc:
             console.print(f"[red]crawl_single error for {url}: {exc}[/red]")
             return CrawlResult(
-                url=url, matter_id=matter_id, content="", markdown="",
-                success=False, error=str(exc),
+                url=url,
+                matter_id=matter_id,
+                content="",
+                markdown="",
+                success=False,
+                error=str(exc),
             )
 
     async def _is_seen(self, matter_id: str, url: str) -> bool:
@@ -232,6 +254,8 @@ class InvestigationCrawler:
         try:
             parsed = urlparse(url)
             domain = parsed.netloc.lower()
-            return any(domain == d.lower() or domain.endswith(f".{d.lower()}") for d in allowed_domains)
+            return any(
+                domain == d.lower() or domain.endswith(f".{d.lower()}") for d in allowed_domains
+            )
         except Exception:
             return False

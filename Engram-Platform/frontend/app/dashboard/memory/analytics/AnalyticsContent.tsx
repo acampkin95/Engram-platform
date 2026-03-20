@@ -69,10 +69,11 @@ type MemoryItem = ListMemoriesResponse['memories'][number];
 function buildMemoryGrowthOptions(memories: MemoryItem[]) {
   const grouped: Record<string, number> = {};
   const sorted = [...memories].sort(
-    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    (a, b) => new Date(a.created_at ?? '').getTime() - new Date(b.created_at ?? '').getTime(),
   );
   let cumulative = 0;
   for (const m of sorted) {
+    if (!m.created_at) continue;
     const date = m.created_at.slice(0, 10);
     cumulative += 1;
     grouped[date] = cumulative;
@@ -122,7 +123,8 @@ function buildMatterDistributionOptions(
 
   if (matters?.matters) {
     for (const matter of matters.matters) {
-      matterCounts[matter.title] = 0;
+      const title = matter.title || 'Untitled';
+      matterCounts[title] = 0;
     }
   }
 
@@ -131,7 +133,8 @@ function buildMatterDistributionOptions(
     if (matterId && matters?.matters) {
       const matter = matters.matters.find((m) => m.matter_id === matterId);
       if (matter) {
-        matterCounts[matter.title] = (matterCounts[matter.title] ?? 0) + 1;
+        const title = matter.title || 'Untitled';
+        matterCounts[title] = (matterCounts[title] ?? 0) + 1;
       }
     }
   }
@@ -238,12 +241,15 @@ const activityBadgeStyle: Record<ActivityType, { bg: string; text: string }> = {
 };
 
 function ActivityFeed({ memories }: Readonly<{ memories: MemoryItem[] }>) {
-  const items: ActivityItem[] = memories.slice(0, 10).map((m) => ({
-    id: m.memory_id,
-    type: 'Created' as ActivityType,
-    content: m.content.slice(0, 80) + (m.content.length > 80 ? '…' : ''),
-    timestamp: m.created_at,
-  }));
+  const items: ActivityItem[] = memories
+    .slice(0, 10)
+    .filter((m) => m.id && m.content && m.created_at)
+    .map((m) => ({
+      id: m.id,
+      type: 'Created' as ActivityType,
+      content: (m.content || '').slice(0, 80) + ((m.content || '').length > 80 ? '…' : ''),
+      timestamp: m.created_at || new Date().toISOString(),
+    }));
 
   if (items.length === 0) {
     return (
@@ -327,7 +333,7 @@ export default function AnalyticsContent() {
 
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      result = result.filter((m) => m.content.toLowerCase().includes(q));
+      result = result.filter((m) => (m.content || '').toLowerCase().includes(q));
     }
 
     if (filters.status) {
@@ -336,18 +342,24 @@ export default function AnalyticsContent() {
 
     if (filters.dateFrom) {
       const from = filters.dateFrom.getTime();
-      result = result.filter((m) => new Date(m.created_at).getTime() >= from);
+      result = result.filter((m) => {
+        if (!m.created_at) return false;
+        return new Date(m.created_at).getTime() >= from;
+      });
     }
 
     if (filters.dateTo) {
       const to = filters.dateTo.getTime();
-      result = result.filter((m) => new Date(m.created_at).getTime() <= to);
+      result = result.filter((m) => {
+        if (!m.created_at) return false;
+        return new Date(m.created_at).getTime() <= to;
+      });
     }
 
     if (filters.scoreRange) {
       const [min, max] = filters.scoreRange;
       result = result.filter((m) => {
-        const score = (m.importance ?? 0) * 100;
+        const score = ((m as unknown as { importance?: number }).importance ?? 0) * 100;
         return score >= min && score <= max;
       });
     }
@@ -362,7 +374,7 @@ export default function AnalyticsContent() {
   // Build matter options for filter status dropdown
   const matterOptions = (matters?.matters ?? []).map((m) => ({
     value: m.matter_id,
-    label: m.title,
+    label: m.title || 'Untitled',
   }));
 
   const memoryGrowthOptions = useMemo(
@@ -481,7 +493,7 @@ export default function AnalyticsContent() {
                 key={tier}
                 className="flex flex-col items-center gap-1 px-5 py-3 rounded-lg bg-[rgba(155,125,224,0.06)] border border-[rgba(155,125,224,0.15)]"
               >
-                <span className="text-lg font-bold text-[#9B7DE0]">{count}</span>
+                <span className="text-lg font-bold text-[#9B7DE0]">{String(count ?? 0)}</span>
                 <span className="text-[10px] font-mono text-[#5c5878] uppercase">Tier {tier}</span>
               </div>
             ))}

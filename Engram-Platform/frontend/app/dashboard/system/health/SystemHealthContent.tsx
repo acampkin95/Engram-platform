@@ -1,28 +1,26 @@
 'use client';
 
-import { Activity, Bell, Database, Play, RefreshCw, RotateCcw, Server, ShieldAlert, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import { Button } from '@/src/design-system/components/Button';
-import { Card } from '@/src/design-system/components/Card';
-import { DataTable, type Column } from '@/src/design-system/components/DataTable';
-import { SearchInput } from '@/src/design-system/components/SearchInput';
-import { StatusDot } from '@/src/design-system/components/StatusDot';
-import { StatCard } from '@/src/design-system/components/StatCard';
-import { addToast } from '@/src/design-system/components/Toast';
+  Activity,
+  Bell,
+  Database,
+  Play,
+  RefreshCw,
+  RotateCcw,
+  Server,
+  ShieldAlert,
+  Trash2,
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FadeIn } from '@/src/components/animations/PageTransition';
 import { StaggerContainer, StaggerItem } from '@/src/components/animations/stagger';
+import { Button } from '@/src/design-system/components/Button';
+import { Card } from '@/src/design-system/components/Card';
+import { type Column, DataTable } from '@/src/design-system/components/DataTable';
+import { SearchInput } from '@/src/design-system/components/SearchInput';
+import { StatCard } from '@/src/design-system/components/StatCard';
+import { StatusDot } from '@/src/design-system/components/StatusDot';
+import { addToast } from '@/src/design-system/components/Toast';
 import { systemClient } from '@/src/lib/system-client';
 
 type Snapshot = {
@@ -52,7 +50,14 @@ const serviceColumns: Column<Snapshot['services'][number]>[] = [
   {
     key: 'health',
     header: 'Health',
-    render: (row) => <StatusDot variant={row.health === 'healthy' ? 'online' : row.health === 'degraded' ? 'degraded' : 'offline'} label={row.health} />,
+    render: (row) => (
+      <StatusDot
+        variant={
+          row.health === 'healthy' ? 'online' : row.health === 'degraded' ? 'degraded' : 'offline'
+        }
+        label={row.health}
+      />
+    ),
   },
   { key: 'state', header: 'State' },
   { key: 'source', header: 'Source' },
@@ -200,13 +205,24 @@ export default function SystemHealthContent() {
       <FadeIn className="flex items-center justify-between gap-4" delay={0.02}>
         <div>
           <div className="mb-2 flex items-center gap-3">
-            <StatusDot variant={summary?.status === 'healthy' ? 'online' : summary?.status === 'degraded' ? 'degraded' : 'offline'} label="Live" />
+            <StatusDot
+              variant={
+                summary?.status === 'healthy'
+                  ? 'online'
+                  : summary?.status === 'degraded'
+                    ? 'degraded'
+                    : 'offline'
+              }
+              label="Live"
+            />
             <span className="rounded-full border border-[#2EC4C4]/20 bg-[#2EC4C4]/10 px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.22em] text-[#2EC4C4]">
               Realtime Admin Surface
             </span>
           </div>
           <h1 className="text-2xl font-bold text-[#f0eef8] font-display">System Health</h1>
-          <p className="text-sm text-[#a09bb8]">Unified operational control surface for the Engram stack.</p>
+          <p className="text-sm text-[#a09bb8]">
+            Unified operational control surface for the Engram stack.
+          </p>
         </div>
         <Button variant="secondary" onClick={() => void load()} loading={loading}>
           <RefreshCw className="h-4 w-4" /> Refresh
@@ -214,212 +230,337 @@ export default function SystemHealthContent() {
       </FadeIn>
 
       <StaggerItem variant="card">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Overall Status" value={summary?.status ?? 'unknown'} icon={<Activity className="h-4 w-4" />} accent="teal" />
-        <StatCard label="Healthy Services" value={`${summary?.healthyServices ?? 0}/${summary?.totalServices ?? 0}`} icon={<Server className="h-4 w-4" />} accent="blue" />
-        <StatCard label="Open Incidents" value={summary?.incidentCount ?? 0} icon={<ShieldAlert className="h-4 w-4" />} accent="rose" />
-        <StatCard label="Maintenance Runs" value={maintenanceRuns} icon={<Database className="h-4 w-4" />} accent="amber" />
-      </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label="Overall Status"
+            value={summary?.status ?? 'unknown'}
+            icon={<Activity className="h-4 w-4" />}
+            accent="teal"
+          />
+          <StatCard
+            label="Healthy Services"
+            value={`${summary?.healthyServices ?? 0}/${summary?.totalServices ?? 0}`}
+            icon={<Server className="h-4 w-4" />}
+            accent="blue"
+          />
+          <StatCard
+            label="Open Incidents"
+            value={summary?.incidentCount ?? 0}
+            icon={<ShieldAlert className="h-4 w-4" />}
+            accent="rose"
+          />
+          <StatCard
+            label="Maintenance Runs"
+            value={maintenanceRuns}
+            icon={<Database className="h-4 w-4" />}
+            accent="amber"
+          />
+        </div>
       </StaggerItem>
 
       <StaggerItem variant="card">
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <Card
-          variant="elevated"
-          header={<div className="text-sm font-medium text-[#f0eef8]">7-Day Service Activity</div>}
-        >
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="h-72" data-testid="line-chart">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={history}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
-                  <XAxis dataKey="day" stroke="#a09bb8" />
-                  <YAxis stroke="#a09bb8" allowDecimals={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="incidents" stroke="#E07D9B" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="h-72" data-testid="area-chart">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
-                  <XAxis dataKey="day" stroke="#a09bb8" />
-                  <YAxis stroke="#a09bb8" allowDecimals={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Area type="monotone" dataKey="maintenanceRuns" stroke="#2EC4C4" fill="#2EC4C4" fillOpacity={0.2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </Card>
-
-        <Card variant="elevated" header={<div className="text-sm font-medium text-[#f0eef8]">Service Control</div>}>
-          <div className="space-y-3">
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Button onClick={() => void runControl('all', 'restart')} loading={busyAction === 'restart:all'}>
-                <RotateCcw className="h-4 w-4" /> Restart All
-              </Button>
-              <Button variant="secondary" onClick={() => void runControl('all', 'start')} loading={busyAction === 'start:all'}>
-                <Play className="h-4 w-4" /> Start All
-              </Button>
-              <Button variant="danger" onClick={() => void runControl('all', 'stop')} loading={busyAction === 'stop:all'}>
-                <Trash2 className="h-4 w-4" /> Stop All
-              </Button>
-              <Button variant="secondary" onClick={() => void sendTestNotification()} loading={busyAction === 'notify'}>
-                <Bell className="h-4 w-4" /> Send Test Notification
-              </Button>
-            </div>
-
-            <div className="grid gap-2">
-              {controlTargets.filter((item) => item !== 'all').map((service) => (
-                <div key={service} className="flex items-center justify-between rounded-lg border border-[#1e1e3a] bg-[#0d0d1a] px-3 py-2">
-                  <span className="text-sm text-[#f0eef8]">{service}</span>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="secondary" onClick={() => void runControl(service, 'start')} loading={busyAction === `start:${service}`}>
-                      Start
-                    </Button>
-                    <Button size="sm" variant="secondary" onClick={() => void runControl(service, 'restart')} loading={busyAction === `restart:${service}`}>
-                      Restart
-                    </Button>
-                    <Button size="sm" variant="danger" onClick={() => void runControl(service, 'stop')} loading={busyAction === `stop:${service}`}>
-                      Stop
-                    </Button>
+        <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+          <Card
+            variant="elevated"
+            header={
+              <div className="text-sm font-medium text-[#f0eef8]">7-Day Service Activity</div>
+            }
+          >
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="h-72 overflow-auto" data-testid="line-chart">
+                <div className="flex h-full flex-col justify-between gap-4 p-4">
+                  <div className="text-xs text-[#a09bb8]">Incidents (7 days)</div>
+                  <div className="space-y-2">
+                    {history.map((point) => (
+                      <div key={point.day} className="flex items-center gap-2">
+                        <span className="min-w-8 text-xs text-[#5c5878]">{point.day}</span>
+                        <div
+                          className="h-6 rounded-sm bg-[#E07D9B]"
+                          style={{
+                            width: `${Math.max(20, (point.incidents / Math.max(...history.map((h) => h.incidents), 1)) * 100)}px`,
+                          }}
+                        />
+                        <span className="text-xs text-[#a09bb8]">{point.incidents}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-      </div>
-      </StaggerItem>
-
-      <StaggerItem variant="card">
-      <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-        <Card variant="elevated" header={<div className="text-sm font-medium text-[#f0eef8]">Maintenance Actions</div>}>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Button variant="secondary" onClick={() => void runMaintenance('decay')} loading={busyAction === 'maintenance:decay'}>
-              Run Decay
-            </Button>
-            <Button variant="secondary" onClick={() => void runMaintenance('consolidate')} loading={busyAction === 'maintenance:consolidate'}>
-              Run Consolidation
-            </Button>
-            <Button variant="secondary" onClick={() => void runMaintenance('cleanup')} loading={busyAction === 'maintenance:cleanup'}>
-              Cleanup Expired
-            </Button>
-            <Button variant="secondary" onClick={() => void runMaintenance('confidence-maintenance')} loading={busyAction === 'maintenance:confidence-maintenance'}>
-              Confidence Refresh
-            </Button>
-          </div>
-        </Card>
-
-        <Card variant="elevated" header={<div className="text-sm font-medium text-[#f0eef8]">Current Resource Metrics</div>}>
-          <DataTable columns={resourceColumns} data={snapshot?.resources ?? []} emptyMessage="No resource metrics yet" />
-        </Card>
-      </div>
-      </StaggerItem>
-
-      <StaggerItem variant="card">
-      <Card variant="elevated" header={<div className="text-sm font-medium text-[#f0eef8]">Service Status</div>}>
-        <DataTable columns={serviceColumns} data={snapshot?.services ?? []} emptyMessage="No service snapshot yet" />
-      </Card>
-      </StaggerItem>
-
-      <StaggerItem variant="card">
-      <Card
-        variant="elevated"
-        header={
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-medium text-[#f0eef8]">Live Error Logs</span>
-            <select
-              aria-label="Log service filter"
-              value={activeService}
-              onChange={(e) => setActiveService(e.target.value)}
-              className="rounded-md border border-[#2a2a50] bg-[#090818] px-3 py-1.5 text-xs text-[#f0eef8]"
-            >
-              <option value="all">All services</option>
-              {controlTargets.filter((item) => item !== 'all').map((service) => (
-                <option key={service} value={service}>
-                  {service}
-                </option>
-              ))}
-            </select>
-          </div>
-        }
-      >
-        <div className="rounded-xl border border-[#1e1e3a] bg-[#090818] p-3">
-          <div className="mb-4 space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-mono uppercase tracking-widest text-[#5c5878]">Streaming via SSE</span>
-                <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/10 px-2.5 py-1 text-[11px] text-[#a09bb8]">
-                  <span>{filteredLogs.length} visible</span>
-                  <span className="text-[#5c5878]">/</span>
-                  <span>{logs.length} total</span>
+              </div>
+              <div className="h-72 overflow-auto" data-testid="area-chart">
+                <div className="flex h-full flex-col justify-between gap-4 p-4">
+                  <div className="text-xs text-[#a09bb8]">Maintenance Runs (7 days)</div>
+                  <div className="space-y-2">
+                    {history.map((point) => (
+                      <div key={point.day} className="flex items-center gap-2">
+                        <span className="min-w-8 text-xs text-[#5c5878]">{point.day}</span>
+                        <div
+                          className="h-6 rounded-sm bg-[#2EC4C4]"
+                          style={{
+                            width: `${Math.max(20, (point.maintenanceRuns / Math.max(...history.map((h) => h.maintenanceRuns), 1)) * 100)}px`,
+                          }}
+                        />
+                        <span className="text-xs text-[#a09bb8]">{point.maintenanceRuns}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <Button size="sm" variant="ghost" onClick={() => setLogs([])}>
-                Clear
+            </div>
+          </Card>
+
+          <Card
+            variant="elevated"
+            header={<div className="text-sm font-medium text-[#f0eef8]">Service Control</div>}
+          >
+            <div className="space-y-3">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button
+                  onClick={() => void runControl('all', 'restart')}
+                  loading={busyAction === 'restart:all'}
+                >
+                  <RotateCcw className="h-4 w-4" /> Restart All
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => void runControl('all', 'start')}
+                  loading={busyAction === 'start:all'}
+                >
+                  <Play className="h-4 w-4" /> Start All
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => void runControl('all', 'stop')}
+                  loading={busyAction === 'stop:all'}
+                >
+                  <Trash2 className="h-4 w-4" /> Stop All
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => void sendTestNotification()}
+                  loading={busyAction === 'notify'}
+                >
+                  <Bell className="h-4 w-4" /> Send Test Notification
+                </Button>
+              </div>
+
+              <div className="grid gap-2">
+                {controlTargets
+                  .filter((item) => item !== 'all')
+                  .map((service) => (
+                    <div
+                      key={service}
+                      className="flex items-center justify-between rounded-lg border border-[#1e1e3a] bg-[#0d0d1a] px-3 py-2"
+                    >
+                      <span className="text-sm text-[#f0eef8]">{service}</span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => void runControl(service, 'start')}
+                          loading={busyAction === `start:${service}`}
+                        >
+                          Start
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => void runControl(service, 'restart')}
+                          loading={busyAction === `restart:${service}`}
+                        >
+                          Restart
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          onClick={() => void runControl(service, 'stop')}
+                          loading={busyAction === `stop:${service}`}
+                        >
+                          Stop
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+      </StaggerItem>
+
+      <StaggerItem variant="card">
+        <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+          <Card
+            variant="elevated"
+            header={<div className="text-sm font-medium text-[#f0eef8]">Maintenance Actions</div>}
+          >
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button
+                variant="secondary"
+                onClick={() => void runMaintenance('decay')}
+                loading={busyAction === 'maintenance:decay'}
+              >
+                Run Decay
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => void runMaintenance('consolidate')}
+                loading={busyAction === 'maintenance:consolidate'}
+              >
+                Run Consolidation
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => void runMaintenance('cleanup')}
+                loading={busyAction === 'maintenance:cleanup'}
+              >
+                Cleanup Expired
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => void runMaintenance('confidence-maintenance')}
+                loading={busyAction === 'maintenance:confidence-maintenance'}
+              >
+                Confidence Refresh
               </Button>
             </div>
+          </Card>
 
-            <div className="flex flex-wrap gap-2">
-              {(['all', 'error', 'warn', 'info'] as const).map((level) => (
-                <Button
-                  key={level}
-                  size="sm"
-                  variant={logLevel === level ? 'primary' : 'secondary'}
-                  onClick={() => setLogLevel(level)}
-                >
-                  {level === 'all' ? 'All' : level === 'error' ? 'Errors' : level === 'warn' ? 'Warnings' : 'Info'}
-                  {level !== 'all' ? (
-                    <span className="ml-1 rounded bg-black/20 px-1.5 py-0.5 text-[10px]">
-                      {logStats[level]}
-                    </span>
-                  ) : null}
-                </Button>
-              ))}
+          <Card
+            variant="elevated"
+            header={
+              <div className="text-sm font-medium text-[#f0eef8]">Current Resource Metrics</div>
+            }
+          >
+            <DataTable
+              columns={resourceColumns}
+              data={snapshot?.resources ?? []}
+              emptyMessage="No resource metrics yet"
+            />
+          </Card>
+        </div>
+      </StaggerItem>
+
+      <StaggerItem variant="card">
+        <Card
+          variant="elevated"
+          header={<div className="text-sm font-medium text-[#f0eef8]">Service Status</div>}
+        >
+          <DataTable
+            columns={serviceColumns}
+            data={snapshot?.services ?? []}
+            emptyMessage="No service snapshot yet"
+          />
+        </Card>
+      </StaggerItem>
+
+      <StaggerItem variant="card">
+        <Card
+          variant="elevated"
+          header={
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-medium text-[#f0eef8]">Live Error Logs</span>
+              <select
+                aria-label="Log service filter"
+                value={activeService}
+                onChange={(e) => setActiveService(e.target.value)}
+                className="rounded-md border border-[#2a2a50] bg-[#090818] px-3 py-1.5 text-xs text-[#f0eef8]"
+              >
+                <option value="all">All services</option>
+                {controlTargets
+                  .filter((item) => item !== 'all')
+                  .map((service) => (
+                    <option key={service} value={service}>
+                      {service}
+                    </option>
+                  ))}
+              </select>
             </div>
+          }
+        >
+          <div className="rounded-xl border border-[#1e1e3a] bg-[#090818] p-3">
+            <div className="mb-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-mono uppercase tracking-widest text-[#5c5878]">
+                    Streaming via SSE
+                  </span>
+                  <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/10 px-2.5 py-1 text-[11px] text-[#a09bb8]">
+                    <span>{filteredLogs.length} visible</span>
+                    <span className="text-[#5c5878]">/</span>
+                    <span>{logs.length} total</span>
+                  </div>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => setLogs([])}>
+                  Clear
+                </Button>
+              </div>
 
-            <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
-              <SearchInput
-                value={logQuery}
-                onChange={setLogQuery}
-                placeholder="Search log lines"
-                debounceMs={0}
-              />
               <div className="flex flex-wrap gap-2">
-                {controlTargets.map((service) => (
+                {(['all', 'error', 'warn', 'info'] as const).map((level) => (
                   <Button
-                    key={service}
+                    key={level}
                     size="sm"
-                    variant={activeService === service ? 'primary' : 'secondary'}
-                    onClick={() => setActiveService(service)}
+                    variant={logLevel === level ? 'primary' : 'secondary'}
+                    onClick={() => setLogLevel(level)}
                   >
-                    {service === 'all' ? 'All services' : service}
+                    {level === 'all'
+                      ? 'All'
+                      : level === 'error'
+                        ? 'Errors'
+                        : level === 'warn'
+                          ? 'Warnings'
+                          : 'Info'}
+                    {level !== 'all' ? (
+                      <span className="ml-1 rounded bg-black/20 px-1.5 py-0.5 text-[10px]">
+                        {logStats[level]}
+                      </span>
+                    ) : null}
                   </Button>
                 ))}
               </div>
+
+              <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
+                <SearchInput
+                  value={logQuery}
+                  onChange={setLogQuery}
+                  placeholder="Search log lines"
+                  debounceMs={0}
+                />
+                <div className="flex flex-wrap gap-2">
+                  {controlTargets.map((service) => (
+                    <Button
+                      key={service}
+                      size="sm"
+                      variant={activeService === service ? 'primary' : 'secondary'}
+                      onClick={() => setActiveService(service)}
+                    >
+                      {service === 'all' ? 'All services' : service}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="max-h-[24rem] overflow-auto rounded-lg bg-black/20 p-3 font-mono text-xs leading-6">
+              {filteredLogs.length === 0 ? (
+                <p className="text-[#5c5878]">No log lines received yet.</p>
+              ) : (
+                filteredLogs.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className={
+                      entry.level === 'error'
+                        ? 'animate-pulse text-[#E07D9B]'
+                        : entry.level === 'warn'
+                          ? 'text-[#F2A93B]'
+                          : 'text-[#a09bb8]'
+                    }
+                  >
+                    {entry.line}
+                  </div>
+                ))
+              )}
             </div>
           </div>
-          <div className="max-h-[24rem] overflow-auto rounded-lg bg-black/20 p-3 font-mono text-xs leading-6">
-            {filteredLogs.length === 0 ? (
-              <p className="text-[#5c5878]">No log lines received yet.</p>
-            ) : (
-              filteredLogs.map((entry) => (
-                <div
-                  key={entry.id}
-                  className={entry.level === 'error' ? 'animate-pulse text-[#E07D9B]' : entry.level === 'warn' ? 'text-[#F2A93B]' : 'text-[#a09bb8]'}
-                >
-                  {entry.line}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </Card>
+        </Card>
       </StaggerItem>
     </StaggerContainer>
   );

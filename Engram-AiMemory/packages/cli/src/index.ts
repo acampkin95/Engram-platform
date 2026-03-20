@@ -6,11 +6,11 @@ import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import {
+  SERVICE_NAME,
+  type SystemInfo,
   detectSystem,
   dockerCompose,
   installServiceFile,
-  SERVICE_NAME,
-  type SystemInfo,
   serviceFileExists,
   systemctl,
   uninstallServiceFile,

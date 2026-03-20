@@ -356,32 +356,38 @@ class TestMCPServerTools:
 
     def test_add_memory_tool_schema(self):
         """Test add_memory tool schema structure."""
-        import json
         from pathlib import Path
 
-        # Read the TypeScript tool definitions as JSON reference
         tools_path = (
-            Path(__file__).parent.parent.parent / "mcp-server" / "src" / "tools" / "memory-tools.ts"
+            Path(__file__).parent.parent.parent.parent.parent
+            / "Engram-MCP"
+            / "src"
+            / "tools"
+            / "memory-tools.ts"
         )
         assert tools_path.exists(), f"MCP tools file not found: {tools_path}"
 
         content = tools_path.read_text()
         # Verify the tool definition exists in the source
         assert '"add_memory"' in content
-        assert '"content"' in content
+        assert "input.content" in content  # TypeScript property access, not JSON
 
     def test_search_memory_tool_schema(self):
         """Test search_memory tool schema structure."""
         from pathlib import Path
 
         tools_path = (
-            Path(__file__).parent.parent.parent / "mcp-server" / "src" / "tools" / "memory-tools.ts"
+            Path(__file__).parent.parent.parent.parent.parent
+            / "Engram-MCP"
+            / "src"
+            / "tools"
+            / "memory-tools.ts"
         )
         assert tools_path.exists(), f"MCP tools file not found: {tools_path}"
 
         content = tools_path.read_text()
         assert '"search_memory"' in content
-        assert '"query"' in content
+        assert "input.query" in content  # TypeScript property access, not JSON
 
 
 class TestAPIErrorHandling:

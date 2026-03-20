@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import uuid4
 
 from rich.console import Console
+
+from memory_system.compat import UTC
 
 from memory_system.config import SUBJECT_ORGANISATION, SUBJECT_PERSON
 from memory_system.investigation.models import (
@@ -29,7 +31,7 @@ class GlobalRegistryClient:
 
     async def upsert_person(self, person: SubjectPersonCreate) -> SubjectPersonResponse:
         """Insert or update person.
-        
+
         Uses near_text with certainty > 0.95 on canonical_name.
         If result found above threshold: update matter_ids and aliases.
         Otherwise insert new.

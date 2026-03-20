@@ -2,7 +2,13 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ReactNode } from 'react';
-import { type FieldValues, type Path, type RegisterOptions, useForm } from 'react-hook-form';
+import {
+  type DefaultValues,
+  type FieldValues,
+  type Path,
+  type RegisterOptions,
+  useForm,
+} from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -25,6 +31,9 @@ export interface FormFieldConfig<T extends FieldValues> {
   description?: string;
   required?: boolean;
   disabled?: boolean;
+  maxLength?: number;
+  minLength?: number;
+  pattern?: string;
   options?: RegisterOptions<T>;
 }
 
@@ -55,6 +64,9 @@ export function FormInput<T extends FieldValues>({
                 {...field}
                 placeholder={config.placeholder}
                 disabled={config.disabled}
+                required={config.required}
+                maxLength={config.maxLength}
+                minLength={config.minLength}
                 rows={4}
               />
             ) : (
@@ -63,6 +75,10 @@ export function FormInput<T extends FieldValues>({
                 type={config.type ?? 'text'}
                 placeholder={config.placeholder}
                 disabled={config.disabled}
+                required={config.required}
+                maxLength={config.maxLength}
+                minLength={config.minLength}
+                pattern={config.pattern}
                 value={field.value ?? ''}
               />
             )}
@@ -98,17 +114,17 @@ export function AutoForm<T extends FieldValues>({
 }: AutoFormProps<T>) {
   const form = useForm<T>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues as T,
+    defaultValues: defaultValues as DefaultValues<T>,
   });
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => onSubmit(data))}
+        onSubmit={form.handleSubmit((data) => onSubmit(data as T))}
         className={`space-y-6 ${className}`}
       >
         {fields.map((field) => (
-          <FormInput key={field.name} control={form.control} config={field} />
+          <FormInput<T> key={field.name} control={form.control} config={field} />
         ))}
         {children}
         <Button type="submit" disabled={isSubmitting || form.formState.isSubmitting}>

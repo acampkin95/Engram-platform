@@ -2,7 +2,10 @@
  * Enhanced MCP resources with dynamic capabilities
  */
 
-import type { Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types.js";
+import type {
+	Resource,
+	ResourceTemplate,
+} from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * Static resources - always available
@@ -113,7 +116,11 @@ export function parseResourceUri(uri: string): {
 	const patterns: Array<[RegExp, string, string[]]> = [
 		[/^memory:\/\/recent\/(\d+)$/, "recent", ["limit"]],
 		[/^memory:\/\/project\/([^/]+)$/, "project", ["projectId"]],
-		[/^memory:\/\/project\/([^/]+)\/recent\/(\d+)$/, "projectRecent", ["projectId", "limit"]],
+		[
+			/^memory:\/\/project\/([^/]+)\/recent\/(\d+)$/,
+			"projectRecent",
+			["projectId", "limit"],
+		],
 		[/^memory:\/\/user\/([^/]+)$/, "user", ["userId"]],
 		[/^memory:\/\/tier\/([123])$/, "tier", ["tier"]],
 		[/^memory:\/\/type\/(\w+)$/, "type", ["memoryType"]],
@@ -156,7 +163,9 @@ export function buildResourceUri(
 export type ResourceHandler = (
 	params: Record<string, string> | undefined,
 	client: unknown,
-) => Promise<{ contents: Array<{ uri: string; mimeType: string; text: string }> }>;
+) => Promise<{
+	contents: Array<{ uri: string; mimeType: string; text: string }>;
+}>;
 
 /**
  * Tier documentation
@@ -210,7 +219,12 @@ export const TIER_DOCUMENTATION = {
 			description:
 				"Shared knowledge available to all users. Best for common patterns, best practices, and general knowledge.",
 			isolation: "None - shared across all users and tenants",
-			useCases: ["Best practices", "Common patterns", "Documentation", "General knowledge"],
+			useCases: [
+				"Best practices",
+				"Common patterns",
+				"Documentation",
+				"General knowledge",
+			],
 			examples: {
 				addMemory: {
 					content: "Always use semantic HTML for accessibility",

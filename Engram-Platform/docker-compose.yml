@@ -9,8 +9,8 @@ services:
   # ==========================================
   crawler-api:
     build:
-      context: ../Engram-AiCrawler/01_devroot
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: Engram-AiCrawler/01_devroot/Dockerfile
       target: production
     image: crawl4ai-engram:latest
     container_name: engram-crawler-api
@@ -112,8 +112,8 @@ services:
   # ==========================================
   memory-api:
     build:
-      context: ../Engram-AiMemory
-      dockerfile: docker/Dockerfile.memory-api
+      context: ..
+      dockerfile: Engram-AiMemory/docker/Dockerfile.memory-api
     image: engram-memory-api:latest
     container_name: engram-memory-api
     restart: unless-stopped
@@ -194,7 +194,7 @@ services:
       MULTI_TENANCY_ENABLED: "true"
       REPLICATION_FACTOR: "1"
       # Performance tuning
-      GOMEMLIMIT: "1.2GiB"
+      GOMEMLIMIT: "1200MiB"
       GOMAXPROCS: "2"
       ENABLE_TurboBoost: "true"
       # Connection pool
@@ -302,6 +302,9 @@ services:
       MCP_SERVER_VERSION: "1.0.0"
       MCP_SERVER_PORT: "3000"
       MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
+      OAUTH_ENABLED: ${OAUTH_ENABLED:-true}
+      OAUTH_ISSUER: ${OAUTH_ISSUER:-https://dv-syd-host01.icefish-discus.ts.net}
+      OAUTH_SECRET: ${OAUTH_SECRET:-}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://memory.velocitydigi.com,https://engram.velocitydigi.com,http://localhost:3002,http://localhost:3001,http://localhost:3000}
       AI_MEMORY_API_KEY: ${MEMORY_API_KEY:-}
       OAUTH_REDIS_URL: redis://memory-redis:6379

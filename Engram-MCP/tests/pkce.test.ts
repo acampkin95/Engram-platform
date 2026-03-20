@@ -42,7 +42,11 @@ describe("verifyCodeChallenge", () => {
 
 	it("returns false when challenge does not match verifier", async () => {
 		const verifier = generateCodeVerifier();
-		const result = await verifyCodeChallenge(verifier, "wrong-challenge", "S256");
+		const result = await verifyCodeChallenge(
+			verifier,
+			"wrong-challenge",
+			"S256",
+		);
 		assert.equal(result, false);
 	});
 

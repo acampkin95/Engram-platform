@@ -3,9 +3,9 @@ import { describe, it } from "node:test";
 import { InvalidInputError } from "../dist/errors.js";
 import {
 	CreateMatterSchema,
-	createSafeParser,
 	IngestDocumentSchema,
 	SearchMatterSchema,
+	createSafeParser,
 	validate,
 } from "../dist/schemas.js";
 
@@ -118,7 +118,14 @@ describe("IngestDocumentSchema", () => {
 	});
 
 	it("accepts valid source_type values", () => {
-		for (const sourceType of ["WEB", "PDF", "EMAIL", "CSV", "EXCEL", "MANUAL"] as const) {
+		for (const sourceType of [
+			"WEB",
+			"PDF",
+			"EMAIL",
+			"CSV",
+			"EXCEL",
+			"MANUAL",
+		] as const) {
 			const input = {
 				matter_id: "case-001",
 				content: "Content",

@@ -29,7 +29,10 @@ https.globalAgent = new https.Agent({ keepAlive: true, maxSockets: 50 });
  * Wraps fetch with AbortController timeout, retry, and circuit breaker.
  * All client methods should use this instead of raw fetch.
  */
-async function resilientFetch(url: string, options: RequestInit): Promise<Response> {
+async function resilientFetch(
+	url: string,
+	options: RequestInit,
+): Promise<Response> {
 	const timeoutMs = config.timeout.requestMs;
 
 	return apiCircuitBreaker.execute(async () => {
@@ -198,7 +201,11 @@ export class MemoryAPIClient {
 		return this.parseJSON<SearchResult>(response);
 	}
 
-	async getMemory(memoryId: string, tier: number, tenantId?: string): Promise<Memory | null> {
+	async getMemory(
+		memoryId: string,
+		tier: number,
+		tenantId?: string,
+	): Promise<Memory | null> {
 		const url = new URL(`${this.baseUrl}/memories/${memoryId}`);
 		url.searchParams.set("tier", String(tier));
 		if (tenantId) {
@@ -220,7 +227,11 @@ export class MemoryAPIClient {
 		return this.parseJSON<Memory>(response);
 	}
 
-	async deleteMemory(memoryId: string, tier: number, tenantId?: string): Promise<boolean> {
+	async deleteMemory(
+		memoryId: string,
+		tier: number,
+		tenantId?: string,
+	): Promise<boolean> {
 		const url = new URL(`${this.baseUrl}/memories/${memoryId}`);
 		url.searchParams.set("tier", String(tier));
 		if (tenantId) {
@@ -263,7 +274,11 @@ export class MemoryAPIClient {
 		if (!response.ok) {
 			throw createErrorFromStatus(response.status, response.statusText);
 		}
-		return this.parseJSON<{ status: string; weaviate: boolean; redis: boolean }>(response);
+		return this.parseJSON<{
+			status: string;
+			weaviate: boolean;
+			redis: boolean;
+		}>(response);
 	}
 
 	async batchAddMemories(data: {
@@ -288,7 +303,11 @@ export class MemoryAPIClient {
 			throw createErrorFromStatus(response.status, response.statusText);
 		}
 
-		return this.parseJSON<{ memory_ids: string[]; failed: number; total: number }>(response);
+		return this.parseJSON<{
+			memory_ids: string[];
+			failed: number;
+			total: number;
+		}>(response);
 	}
 
 	async buildContext(params: {
@@ -309,7 +328,11 @@ export class MemoryAPIClient {
 			throw createErrorFromStatus(response.status, response.statusText);
 		}
 
-		return this.parseJSON<{ query: string; context: string; token_estimate: number }>(response);
+		return this.parseJSON<{
+			query: string;
+			context: string;
+			token_estimate: number;
+		}>(response);
 	}
 
 	async ragQuery(params: {
@@ -348,11 +371,14 @@ export class MemoryAPIClient {
 		project_id?: string;
 		tenant_id?: string;
 	}): Promise<{ processed: number }> {
-		const response = await resilientFetch(`${this.baseUrl}/memories/consolidate`, {
-			method: "POST",
-			headers: this.getHeaders(),
-			body: JSON.stringify(params),
-		});
+		const response = await resilientFetch(
+			`${this.baseUrl}/memories/consolidate`,
+			{
+				method: "POST",
+				headers: this.getHeaders(),
+				body: JSON.stringify(params),
+			},
+		);
 
 		if (!response.ok) {
 			throw createErrorFromStatus(response.status, response.statusText);
@@ -361,7 +387,9 @@ export class MemoryAPIClient {
 		return this.parseJSON<{ processed: number }>(response);
 	}
 
-	async cleanupExpired(params: { tenant_id?: string }): Promise<{ removed: number }> {
+	async cleanupExpired(params: { tenant_id?: string }): Promise<{
+		removed: number;
+	}> {
 		const response = await resilientFetch(`${this.baseUrl}/memories/cleanup`, {
 			method: "POST",
 			headers: this.getHeaders(),
@@ -375,7 +403,9 @@ export class MemoryAPIClient {
 		return this.parseJSON<{ removed: number }>(response);
 	}
 
-	async runDecay(params: { tenant_id?: string }): Promise<{ processed: number }> {
+	async runDecay(params: { tenant_id?: string }): Promise<{
+		processed: number;
+	}> {
 		const response = await resilientFetch(`${this.baseUrl}/memories/decay`, {
 			method: "POST",
 			headers: this.getHeaders(),
@@ -389,165 +419,191 @@ export class MemoryAPIClient {
 		return this.parseJSON<{ processed: number }>(response);
 	}
 
+	async exportMemories(params: {
+		tenant_id?: string;
+		project_id?: string;
+		tier?: number;
+		format?: "json" | "csv" | "markdown";
+	}): Promise<unknown> {
+		const url = new URL(`${this.baseUrl}/memories/export`);
+		if (params.tenant_id) url.searchParams.set("tenant_id", params.tenant_id);
+		if (params.project_id)
+			url.searchParams.set("project_id", params.project_id);
+		if (params.tier) url.searchParams.set("tier", String(params.tier));
+		if (params.format) url.searchParams.set("format", params.format);
 
-        async exportMemories(params: {
-                tenant_id?: string;
-                project_id?: string;
-                tier?: number;
-                format?: "json" | "csv" | "markdown";
-        }): Promise<unknown> {
-                const url = new URL(`${this.baseUrl}/memories/export`);
-                if (params.tenant_id) url.searchParams.set("tenant_id", params.tenant_id);
-                if (params.project_id) url.searchParams.set("project_id", params.project_id);
-                if (params.tier) url.searchParams.set("tier", String(params.tier));
-                if (params.format) url.searchParams.set("format", params.format);
+		const response = await resilientFetch(url.toString(), {
+			headers: this.getHeaders(),
+		});
 
-                const response = await resilientFetch(url.toString(), {
-                        headers: this.getHeaders(),
-                });
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
 
-                if (!response.ok) {
-                        throw createErrorFromStatus(response.status, response.statusText);
-                }
+		return this.parseJSON<unknown>(response);
+	}
 
-                return this.parseJSON<unknown>(response);
-        }
+	async bulkDeleteMemories(params: {
+		memory_ids?: string[];
+		project_id?: string;
+		tenant_id?: string;
+		tier?: number;
+		before_date?: string;
+	}): Promise<{ deleted_count: number }> {
+		const response = await resilientFetch(`${this.baseUrl}/memories/bulk`, {
+			method: "DELETE",
+			headers: this.getHeaders(),
+			body: JSON.stringify(params),
+		});
 
-        async bulkDeleteMemories(params: {
-                memory_ids?: string[];
-                project_id?: string;
-                tenant_id?: string;
-                tier?: number;
-                before_date?: string;
-        }): Promise<{ deleted_count: number }> {
-                const response = await resilientFetch(`${this.baseUrl}/memories/bulk`, {
-                        method: "DELETE",
-                        headers: this.getHeaders(),
-                        body: JSON.stringify(params),
-                });
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
 
-                if (!response.ok) {
-                        throw createErrorFromStatus(response.status, response.statusText);
-                }
+		return this.parseJSON<{ deleted_count: number }>(response);
+	}
 
-                return this.parseJSON<{ deleted_count: number }>(response);
-        }
+	async triggerConfidenceMaintenance(params: { tenant_id?: string }): Promise<{
+		processed: number;
+		contradictions_found: number;
+	}> {
+		const url = new URL(`${this.baseUrl}/memories/confidence-maintenance`);
+		if (params.tenant_id) {
+			url.searchParams.set("tenant_id", params.tenant_id);
+		}
+		const response = await resilientFetch(url.toString(), {
+			method: "POST",
+			headers: this.getHeaders(),
+		});
 
-        async triggerConfidenceMaintenance(params: { tenant_id?: string }): Promise<{ processed: number; contradictions_found: number }> {
-                const url = new URL(`${this.baseUrl}/memories/confidence-maintenance`);
-                if (params.tenant_id) {
-                        url.searchParams.set("tenant_id", params.tenant_id);
-                }
-                const response = await resilientFetch(url.toString(), {
-                        method: "POST",
-                        headers: this.getHeaders(),
-                });
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
 
-                if (!response.ok) {
-                        throw createErrorFromStatus(response.status, response.statusText);
-                }
+		return this.parseJSON<{ processed: number; contradictions_found: number }>(
+			response,
+		);
+	}
 
-                return this.parseJSON<{ processed: number; contradictions_found: number }>(response);
-        }
+	async getMemoryGrowthAnalytics(tenantId?: string): Promise<unknown> {
+		const url = new URL(`${this.baseUrl}/analytics/memory-growth`);
+		if (tenantId) url.searchParams.set("tenant_id", tenantId);
+		const response = await resilientFetch(url.toString(), {
+			headers: this.getHeaders(),
+		});
+		if (!response.ok)
+			throw createErrorFromStatus(response.status, response.statusText);
+		return this.parseJSON<unknown>(response);
+	}
 
+	async getActivityTimeline(tenantId?: string): Promise<unknown> {
+		const url = new URL(`${this.baseUrl}/analytics/activity-timeline`);
+		if (tenantId) url.searchParams.set("tenant_id", tenantId);
+		const response = await resilientFetch(url.toString(), {
+			headers: this.getHeaders(),
+		});
+		if (!response.ok)
+			throw createErrorFromStatus(response.status, response.statusText);
+		return this.parseJSON<unknown>(response);
+	}
 
-        async getMemoryGrowthAnalytics(tenantId?: string): Promise<unknown> {
-                const url = new URL(`${this.baseUrl}/analytics/memory-growth`);
-                if (tenantId) url.searchParams.set("tenant_id", tenantId);
-                const response = await resilientFetch(url.toString(), { headers: this.getHeaders() });
-                if (!response.ok) throw createErrorFromStatus(response.status, response.statusText);
-                return this.parseJSON<unknown>(response);
-        }
+	async getSearchStats(tenantId?: string): Promise<unknown> {
+		const url = new URL(`${this.baseUrl}/analytics/search-stats`);
+		if (tenantId) url.searchParams.set("tenant_id", tenantId);
+		const response = await resilientFetch(url.toString(), {
+			headers: this.getHeaders(),
+		});
+		if (!response.ok)
+			throw createErrorFromStatus(response.status, response.statusText);
+		return this.parseJSON<unknown>(response);
+	}
 
-        async getActivityTimeline(tenantId?: string): Promise<unknown> {
-                const url = new URL(`${this.baseUrl}/analytics/activity-timeline`);
-                if (tenantId) url.searchParams.set("tenant_id", tenantId);
-                const response = await resilientFetch(url.toString(), { headers: this.getHeaders() });
-                if (!response.ok) throw createErrorFromStatus(response.status, response.statusText);
-                return this.parseJSON<unknown>(response);
-        }
+	async getKnowledgeGraphStats(tenantId?: string): Promise<unknown> {
+		const url = new URL(`${this.baseUrl}/analytics/knowledge-graph-stats`);
+		if (tenantId) url.searchParams.set("tenant_id", tenantId);
+		const response = await resilientFetch(url.toString(), {
+			headers: this.getHeaders(),
+		});
+		if (!response.ok)
+			throw createErrorFromStatus(response.status, response.statusText);
+		return this.parseJSON<unknown>(response);
+	}
+	async getAnalytics(tenantId?: string): Promise<unknown> {
+		const url = new URL(`${this.baseUrl}/analytics`);
+		if (tenantId) url.searchParams.set("tenant_id", tenantId);
 
-        async getSearchStats(tenantId?: string): Promise<unknown> {
-                const url = new URL(`${this.baseUrl}/analytics/search-stats`);
-                if (tenantId) url.searchParams.set("tenant_id", tenantId);
-                const response = await resilientFetch(url.toString(), { headers: this.getHeaders() });
-                if (!response.ok) throw createErrorFromStatus(response.status, response.statusText);
-                return this.parseJSON<unknown>(response);
-        }
+		const response = await resilientFetch(url.toString(), {
+			headers: this.getHeaders(),
+		});
 
-        async getKnowledgeGraphStats(tenantId?: string): Promise<unknown> {
-                const url = new URL(`${this.baseUrl}/analytics/knowledge-graph-stats`);
-                if (tenantId) url.searchParams.set("tenant_id", tenantId);
-                const response = await resilientFetch(url.toString(), { headers: this.getHeaders() });
-                if (!response.ok) throw createErrorFromStatus(response.status, response.statusText);
-                return this.parseJSON<unknown>(response);
-        }
-async getAnalytics(tenantId?: string): Promise<unknown> {
-                const url = new URL(`${this.baseUrl}/analytics`);
-                if (tenantId) url.searchParams.set("tenant_id", tenantId);
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
 
-                const response = await resilientFetch(url.toString(), {
-                        headers: this.getHeaders(),
-                });
+		return this.parseJSON<unknown>(response);
+	}
 
-                if (!response.ok) {
-                        throw createErrorFromStatus(response.status, response.statusText);
-                }
+	async getSystemMetrics(): Promise<unknown> {
+		const response = await resilientFetch(
+			`${this.baseUrl}/analytics/system-metrics`,
+			{
+				headers: this.getHeaders(),
+			},
+		);
 
-                return this.parseJSON<unknown>(response);
-        }
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
 
-        async getSystemMetrics(): Promise<unknown> {
-                const response = await resilientFetch(`${this.baseUrl}/analytics/system-metrics`, {
-                        headers: this.getHeaders(),
-                });
+		return this.parseJSON<unknown>(response);
+	}
 
-                if (!response.ok) {
-                        throw createErrorFromStatus(response.status, response.statusText);
-                }
+	async createTenant(data: {
+		tenant_id: string;
+		name: string;
+		config?: Record<string, unknown>;
+	}): Promise<{ tenant_id: string }> {
+		const response = await resilientFetch(`${this.baseUrl}/tenants`, {
+			method: "POST",
+			headers: this.getHeaders(),
+			body: JSON.stringify(data),
+		});
 
-                return this.parseJSON<unknown>(response);
-        }
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
 
-        async createTenant(data: { tenant_id: string; name: string; config?: Record<string, unknown> }): Promise<{ tenant_id: string }> {
-                const response = await resilientFetch(`${this.baseUrl}/tenants`, {
-                        method: "POST",
-                        headers: this.getHeaders(),
-                        body: JSON.stringify(data),
-                });
+		return this.parseJSON<{ tenant_id: string }>(response);
+	}
 
-                if (!response.ok) {
-                        throw createErrorFromStatus(response.status, response.statusText);
-                }
+	async listTenants(): Promise<{ tenants: unknown[] }> {
+		const response = await resilientFetch(`${this.baseUrl}/tenants`, {
+			headers: this.getHeaders(),
+		});
 
-                return this.parseJSON<{ tenant_id: string }>(response);
-        }
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
 
-        async listTenants(): Promise<{ tenants: unknown[] }> {
-                const response = await resilientFetch(`${this.baseUrl}/tenants`, {
-                        headers: this.getHeaders(),
-                });
+		return this.parseJSON<{ tenants: unknown[] }>(response);
+	}
 
-                if (!response.ok) {
-                        throw createErrorFromStatus(response.status, response.statusText);
-                }
+	async deleteTenant(tenantId: string): Promise<{ success: boolean }> {
+		const response = await resilientFetch(
+			`${this.baseUrl}/tenants/${tenantId}`,
+			{
+				method: "DELETE",
+				headers: this.getHeaders(),
+			},
+		);
 
-                return this.parseJSON<{ tenants: unknown[] }>(response);
-        }
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
 
-        async deleteTenant(tenantId: string): Promise<{ success: boolean }> {
-                const response = await resilientFetch(`${this.baseUrl}/tenants/${tenantId}`, {
-                        method: "DELETE",
-                        headers: this.getHeaders(),
-                });
-
-                if (!response.ok) {
-                        throw createErrorFromStatus(response.status, response.statusText);
-                }
-
-                return this.parseJSON<{ success: boolean }>(response);
-        }
-async addEntity(data: {
+		return this.parseJSON<{ success: boolean }>(response);
+	}
+	async addEntity(data: {
 		name: string;
 		entity_type: string;
 		description?: string;
@@ -603,7 +659,10 @@ async addEntity(data: {
 		return this.parseJSON<GraphQueryResult>(response);
 	}
 
-	async getEntity(entityId: string, tenantId?: string): Promise<KnowledgeEntity | null> {
+	async getEntity(
+		entityId: string,
+		tenantId?: string,
+	): Promise<KnowledgeEntity | null> {
 		const url = new URL(`${this.baseUrl}/graph/entities/${entityId}`);
 		if (tenantId) {
 			url.searchParams.set("tenant_id", tenantId);
@@ -681,11 +740,14 @@ async addEntity(data: {
 		source_type?: string;
 		metadata?: Record<string, unknown>;
 	}): Promise<unknown[]> {
-		const response = await resilientFetch(`${this.baseUrl}/matters/${data.matter_id}/evidence`, {
-			method: "POST",
-			headers: this.getHeaders(),
-			body: JSON.stringify(data),
-		});
+		const response = await resilientFetch(
+			`${this.baseUrl}/matters/${data.matter_id}/evidence`,
+			{
+				method: "POST",
+				headers: this.getHeaders(),
+				body: JSON.stringify(data),
+			},
+		);
 		if (!response.ok) {
 			throw createErrorFromStatus(response.status, response.statusText);
 		}
@@ -697,7 +759,12 @@ async addEntity(data: {
 		query: string;
 		limit?: number;
 		offset?: number;
-	}): Promise<{ total: number; limit: number; offset: number; results: unknown[] }> {
+	}): Promise<{
+		total: number;
+		limit: number;
+		offset: number;
+		results: unknown[];
+	}> {
 		const response = await resilientFetch(
 			`${this.baseUrl}/matters/${data.matter_id}/evidence/search`,
 			{
@@ -714,6 +781,11 @@ async addEntity(data: {
 		if (!response.ok) {
 			throw createErrorFromStatus(response.status, response.statusText);
 		}
-		return this.parseJSON<{ total: number; limit: number; offset: number; results: unknown[] }>(response);
+		return this.parseJSON<{
+			total: number;
+			limit: number;
+			offset: number;
+			results: unknown[];
+		}>(response);
 	}
 }

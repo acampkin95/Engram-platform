@@ -86,7 +86,10 @@ export class MemoryError extends Error {
  * Network/Transient errors
  */
 export class NetworkError extends MemoryError {
-	constructor(message: string, options?: { cause?: Error; context?: Record<string, unknown> }) {
+	constructor(
+		message: string,
+		options?: { cause?: Error; context?: Record<string, unknown> },
+	) {
 		super(message, ErrorCode.NETWORK_ERROR, ErrorCategory.TRANSIENT, {
 			retryable: true,
 			...options,
@@ -96,7 +99,10 @@ export class NetworkError extends MemoryError {
 }
 
 export class TimeoutError extends MemoryError {
-	constructor(message: string, options?: { cause?: Error; context?: Record<string, unknown> }) {
+	constructor(
+		message: string,
+		options?: { cause?: Error; context?: Record<string, unknown> },
+	) {
 		super(message, ErrorCode.TIMEOUT, ErrorCategory.TRANSIENT, {
 			retryable: true,
 			...options,
@@ -108,7 +114,11 @@ export class TimeoutError extends MemoryError {
 export class ServiceUnavailableError extends MemoryError {
 	constructor(
 		message: string,
-		options?: { cause?: Error; retryAfter?: number; context?: Record<string, unknown> },
+		options?: {
+			cause?: Error;
+			retryAfter?: number;
+			context?: Record<string, unknown>;
+		},
 	) {
 		super(message, ErrorCode.SERVICE_UNAVAILABLE, ErrorCategory.TRANSIENT, {
 			retryable: true,
@@ -137,17 +147,26 @@ export class RateLimitedError extends MemoryError {
  * Client errors (not retryable)
  */
 export class InvalidInputError extends MemoryError {
-	constructor(message: string, options?: { context?: Record<string, unknown>; issues?: string[] }) {
+	constructor(
+		message: string,
+		options?: { context?: Record<string, unknown>; issues?: string[] },
+	) {
 		super(message, ErrorCode.INVALID_INPUT, ErrorCategory.CLIENT, {
 			retryable: false,
-			context: options?.issues ? { issues: options.issues, ...options.context } : options?.context,
+			context: options?.issues
+				? { issues: options.issues, ...options.context }
+				: options?.context,
 		});
 		this.name = "InvalidInputError";
 	}
 }
 
 export class NotFoundError extends MemoryError {
-	constructor(resource: string, id?: string, options?: { context?: Record<string, unknown> }) {
+	constructor(
+		resource: string,
+		id?: string,
+		options?: { context?: Record<string, unknown> },
+	) {
 		super(
 			`${resource}${id ? ` '${id}'` : ""} not found`,
 			ErrorCode.NOT_FOUND,
@@ -159,7 +178,10 @@ export class NotFoundError extends MemoryError {
 }
 
 export class UnauthorizedError extends MemoryError {
-	constructor(message = "Unauthorized", options?: { context?: Record<string, unknown> }) {
+	constructor(
+		message = "Unauthorized",
+		options?: { context?: Record<string, unknown> },
+	) {
 		super(message, ErrorCode.UNAUTHORIZED, ErrorCategory.CLIENT, {
 			retryable: false,
 			...options,
@@ -169,7 +191,10 @@ export class UnauthorizedError extends MemoryError {
 }
 
 export class ForbiddenError extends MemoryError {
-	constructor(message = "Forbidden", options?: { context?: Record<string, unknown> }) {
+	constructor(
+		message = "Forbidden",
+		options?: { context?: Record<string, unknown> },
+	) {
 		super(message, ErrorCode.FORBIDDEN, ErrorCategory.CLIENT, {
 			retryable: false,
 			...options,
@@ -182,7 +207,10 @@ export class ForbiddenError extends MemoryError {
  * Server errors
  */
 export class InternalServerError extends MemoryError {
-	constructor(message: string, options?: { cause?: Error; context?: Record<string, unknown> }) {
+	constructor(
+		message: string,
+		options?: { cause?: Error; context?: Record<string, unknown> },
+	) {
 		super(message, ErrorCode.INTERNAL_ERROR, ErrorCategory.TRANSIENT, {
 			retryable: true,
 			...options,
@@ -192,7 +220,10 @@ export class InternalServerError extends MemoryError {
 }
 
 export class BadGatewayError extends MemoryError {
-	constructor(message: string, options?: { cause?: Error; context?: Record<string, unknown> }) {
+	constructor(
+		message: string,
+		options?: { cause?: Error; context?: Record<string, unknown> },
+	) {
 		super(message, ErrorCode.BAD_GATEWAY, ErrorCategory.TRANSIENT, {
 			retryable: true,
 			...options,
@@ -202,7 +233,10 @@ export class BadGatewayError extends MemoryError {
 }
 
 export class GatewayTimeoutError extends MemoryError {
-	constructor(message: string, options?: { cause?: Error; context?: Record<string, unknown> }) {
+	constructor(
+		message: string,
+		options?: { cause?: Error; context?: Record<string, unknown> },
+	) {
 		super(message, ErrorCode.GATEWAY_TIMEOUT, ErrorCategory.TRANSIENT, {
 			retryable: true,
 			...options,
@@ -238,7 +272,9 @@ export function createErrorFromStatus(
 ): MemoryError {
 	const context = body ? { responseBody: body.slice(0, 500) } : undefined;
 	const retryAfter = headers?.get("Retry-After");
-	const retryAfterSeconds = retryAfter ? Number.parseInt(retryAfter, 10) : undefined;
+	const retryAfterSeconds = retryAfter
+		? Number.parseInt(retryAfter, 10)
+		: undefined;
 
 	switch (status) {
 		case 400:
@@ -250,7 +286,9 @@ export function createErrorFromStatus(
 		case 404:
 			return new NotFoundError("Resource", undefined, { context });
 		case 429:
-			return new RateLimitedError(body || statusText, retryAfterSeconds || 60, { context });
+			return new RateLimitedError(body || statusText, retryAfterSeconds || 60, {
+				context,
+			});
 		case 500:
 			return new InternalServerError(body || statusText, { context });
 		case 502:

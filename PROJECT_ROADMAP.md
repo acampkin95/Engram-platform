@@ -15,7 +15,8 @@ The previous 12-week roadmap mixed true release blockers with enterprise-grade e
 
 - AiCrawler CI/CD is not missing; GitHub Actions workflows exist in `Engram-AiCrawler/.github/workflows/ci.yml` and `Engram-AiCrawler/01_devroot/.github/workflows/ci.yml`.
 - MCP input validation is not missing; Zod validation is already implemented.
-- Platform does not lack `nuqs` and Sentry packages; both are present, but rollout is incomplete.
+- MCP resource support is already present; pagination remains the main protocol-surface gap.
+- Platform does not lack `nuqs` and Sentry packages; both are present and partially wired, but rollout/verification is incomplete.
 - AiCrawler's enforceable Python coverage minimum is 75% in `.coveragerc`; 85% remains the stretch target.
 - AiMemory is no longer a missing submodule; it is present and now needs hygiene review, verification, and a new baseline.
 
@@ -46,24 +47,24 @@ The following do not block the first production release and should not own the c
 
 ## Current State Snapshot
 
-### Corrected Delivery Scorecard
+### Corrected Delivery Scorecard (2026-03-17 Baseline Refresh)
 
 | Area | Current State | Release Target | Notes |
 |------|---------------|----------------|-------|
-| AiMemory | Code restored; baseline needs re-audit | Verified build, clean bootstrap, 85%+ in-scope coverage | Hygiene and verification first |
-| AiCrawler | 57.82% Python coverage, frontend gaps documented | 75% enforced minimum, frontend buildable, CI simplified | Largest testing gap |
-| MCP | Strongest component, OAuth store volatile | Redis-backed OAuth, pagination, measurable coverage | Zod already present |
-| Platform | CI exists, coverage config exists, rollout gaps remain | Reliable coverage reporting, Sentry active, key dashboard flows tested | `nuqs` present but not rolled out |
-| Deployment | Compose exists, installer fragmented | Repeatable deploy + smoke validation on target host | One-shot installer can wait |
+| AiMemory | 78% coverage (4049 stmts), 18 failing tests | Fix failures, 85%+ in-scope coverage | Baseline established |
+| AiCrawler | 81% coverage (12468 stmts), 2393 pass | Maintain 81%+, push toward 85% | Exceeds 75% enforced minimum |
+| MCP | 382 tests pass, 79.83% coverage, Redis OAuth verified | pagination remaining gap, coverage tracked | OAuth bootstrap fixed, coverage measured 2026-03-18 |
+| Platform | 79% stmts / 72% branch (318 pass) | verify Sentry, extend nuqs rollout, expand critical surface | Coverage reporting now works |
+| Deployment | Compose validated, smoke test script + release checklist created | Repeatable deploy + smoke validation on target host | One-shot installer can wait |
 
 ### Release Blockers
 
-1. Coverage baselines and thresholds are inconsistent with the documentation.
-2. MCP OAuth state is still in-memory only.
-3. AiMemory needs hygiene cleanup and a reproducible baseline bootstrap.
-4. Platform coverage reporting and real tested surface are not trustworthy enough.
-5. AiCrawler still needs focused coverage work and workflow consolidation.
-6. Cross-service release verification is not yet captured as a single repeatable checklist.
+1. ~~Coverage baselines and thresholds are inconsistent with the documentation.~~ **RESOLVED 2026-03-17** — baselines re-measured.
+2. ~~MCP OAuth restart-safe validation needed verification because Redis support exists but boot ordering was brittle.~~ **RESOLVED 2026-03-18** — `initializeOAuthTokenStore()` added, regression test passing.
+3. ~~AiMemory needs hygiene cleanup and a reproducible baseline bootstrap.~~ **RESOLVED 2026-03-18** — 901 pass, 0 fail, 3 skipped (require live services).
+4. ~~Platform coverage reporting and real tested surface are not trustworthy enough.~~ **RESOLVED 2026-03-17** — 79% stmts, reporting works.
+5. ~~AiCrawler still needs focused coverage work and workflow consolidation.~~ **RESOLVED 2026-03-17** — 81% coverage, single CI workflow.
+6. ~~Cross-service release verification is not yet captured as a single repeatable checklist.~~ **RESOLVED 2026-03-18** — `docs/RELEASE_CHECKLIST.md` + `scripts/release-smoke-test.sh` created.
 
 ---
 
@@ -126,7 +127,7 @@ The following do not block the first production release and should not own the c
 
 ### Track D - MCP Release Safety
 
-- Replace the in-memory OAuth token store with Redis-backed persistence.
+- Verify and keep Redis-backed OAuth persistence active across restart and `/mcp` auth validation paths.
 - Add coverage measurement or reporting for the Node test suite.
 - Validate dual transport plus auth paths against smoke tests.
 
@@ -134,7 +135,7 @@ The following do not block the first production release and should not own the c
 
 - AiMemory bootstrap is reproducible from docs.
 - AiCrawler CI is single-source and green.
-- MCP OAuth tokens survive service restart.
+- MCP OAuth tokens survive service restart and validate correctly before any `/oauth/*` route traffic.
 - Platform coverage reporting is visible in CI.
 - Full-stack smoke test passes locally.
 
@@ -149,7 +150,7 @@ The following do not block the first production release and should not own the c
 - Raise AiMemory toward 85%+ in-scope coverage with emphasis on client, system, and worker paths.
 - Raise AiCrawler coverage from 57.82% to at least the enforced 75% minimum, then continue toward 80% where practical.
 - Raise Platform coverage to a credible baseline across stores, hooks, clients, and core dashboard flows.
-- Add MCP pagination support and cover it with tests.
+- Add MCP pagination support across remaining list/search surfaces and cover it with tests.
 - Wire Sentry end-to-end for Platform runtime errors.
 - Tune Docker resource limits to the i5/16GB/1TB target profile.
 - Add dependency auditing (`npm audit`/`pip-audit` or equivalent) into CI where practical.
@@ -223,12 +224,12 @@ These items remain valuable, but they should not block the first production rele
 
 ## Target Metrics
 
-| Component | Current | Beta Gate | RC Gate | Post-1.0 Stretch |
-|-----------|---------|-----------|---------|------------------|
-| AiMemory coverage | baseline refresh needed | baseline established + gaps ranked | 85%+ in-scope | 90-95% in-scope |
-| AiCrawler coverage | 57.82% | 70% | 75% | 80-85% |
-| Platform coverage | reporting broken | reporting fixed + baseline established | 30-45% targeted critical surface | 60-80% |
-| MCP coverage | unknown | baseline established | meaningful tracked metric | 85%+ |
+| Component | Current (2026-03-17) | Beta Gate | RC Gate | Post-1.0 Stretch |
+|-----------|----------------------|-----------|---------|------------------|
+| AiMemory coverage | 78% (4049 stmts, 901 pass, 0 fail) | gaps ranked | 85%+ in-scope | 90-95% in-scope |
+| AiCrawler coverage | 81% (12468 stmts, 2393 pass) | 81% maintained | 85% | 85-90% |
+| Platform coverage | 79% stmts, 72% branch (318 pass) | maintained + critical surface expanded | 80%+ | 85%+ |
+| MCP coverage | 382 pass, 79.83% lines | baseline established | 80%+ | 85%+ |
 | Target memory budget | 10.5GB current | under 9.5GB | 8.5GB target | optimized further |
 
 ---

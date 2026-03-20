@@ -9,11 +9,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY packages/core/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY Engram-AiMemory/packages/core/requirements.txt ./requirements.txt
+COPY engram-shared /tmp/engram-shared
+RUN pip install --no-cache-dir /tmp/engram-shared[dev] && \
+    grep -v '^../../../engram-shared\[dev\]$' requirements.txt > requirements.docker.txt && \
+    pip install --no-cache-dir -r requirements.docker.txt
 
 # Copy source code
-COPY packages/core/src/memory_system ./memory_system
+COPY Engram-AiMemory/packages/core/src/memory_system ./memory_system
 
 # Expose port
 EXPOSE 8000

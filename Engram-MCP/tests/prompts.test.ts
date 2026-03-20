@@ -4,9 +4,13 @@
  * Tests all prompt generators with various argument combinations.
  */
 
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { getPromptTemplate, renderPrompt, PROMPT_TEMPLATES } from "../dist/prompts.js";
+import { describe, it } from "node:test";
+import {
+	PROMPT_TEMPLATES,
+	getPromptTemplate,
+	renderPrompt,
+} from "../dist/prompts.js";
 
 describe("Prompt Templates", () => {
 	describe("getPromptTemplate", () => {
@@ -24,7 +28,10 @@ describe("Prompt Templates", () => {
 			const templateNames = Object.keys(PROMPT_TEMPLATES);
 			for (const name of templateNames) {
 				const template = getPromptTemplate(name);
-				assert.ok(typeof template === "function", `Template ${name} should be a function`);
+				assert.ok(
+					typeof template === "function",
+					`Template ${name} should be a function`,
+				);
 			}
 		});
 	});
@@ -35,14 +42,14 @@ describe("Prompt Templates", () => {
 				query: "test query",
 				project_id: "proj-456",
 			});
-			assert.ok(result!.includes("test query"));
-			assert.ok(result!.includes("Scope: Project proj-456"));
+			assert.ok(result?.includes("test query"));
+			assert.ok(result?.includes("Scope: Project proj-456"));
 		});
 
 		it("renders recall_context without project scope", () => {
 			const result = renderPrompt("recall_context", { query: "test" });
-			assert.ok(result!.includes("test"));
-			assert.ok(!result!.includes("Scope:"));
+			assert.ok(result?.includes("test"));
+			assert.ok(!result?.includes("Scope:"));
 		});
 
 		it("renders build_project_knowledge with focus area", () => {
@@ -50,8 +57,8 @@ describe("Prompt Templates", () => {
 				project_id: "proj-789",
 				focus_area: "authentication",
 			});
-			assert.ok(result!.includes("proj-789"));
-			assert.ok(result!.includes("Focus area: authentication"));
+			assert.ok(result?.includes("proj-789"));
+			assert.ok(result?.includes("Focus area: authentication"));
 		});
 
 		it("renders learn_pattern with code example", () => {
@@ -61,9 +68,9 @@ describe("Prompt Templates", () => {
 				code_example: "class Singleton { }",
 				tier: "2",
 			});
-			assert.ok(result!.includes("Singleton"));
-			assert.ok(result!.includes("Ensure single instance"));
-			assert.ok(result!.includes("class Singleton"));
+			assert.ok(result?.includes("Singleton"));
+			assert.ok(result?.includes("Ensure single instance"));
+			assert.ok(result?.includes("class Singleton"));
 		});
 
 		it("renders learn_pattern without code example", () => {
@@ -71,8 +78,8 @@ describe("Prompt Templates", () => {
 				pattern_name: "Factory",
 				description: "Create objects",
 			});
-			assert.ok(result!.includes("Factory"));
-			assert.ok(!result!.includes("Example:"));
+			assert.ok(result?.includes("Factory"));
+			assert.ok(!result?.includes("Example:"));
 		});
 
 		it("renders troubleshoot with error type", () => {
@@ -80,8 +87,8 @@ describe("Prompt Templates", () => {
 				error_description: "Connection refused",
 				error_type: "NetworkError",
 			});
-			assert.ok(result!.includes("Connection refused"));
-			assert.ok(result!.includes("Type: NetworkError"));
+			assert.ok(result?.includes("Connection refused"));
+			assert.ok(result?.includes("Type: NetworkError"));
 		});
 
 		it("renders code_review_context with project", () => {
@@ -89,8 +96,8 @@ describe("Prompt Templates", () => {
 				code_area: "authentication",
 				project_id: "proj-123",
 			});
-			assert.ok(result!.includes("authentication"));
-			assert.ok(result!.includes("Project: proj-123"));
+			assert.ok(result?.includes("authentication"));
+			assert.ok(result?.includes("Project: proj-123"));
 		});
 
 		it("renders session_summary with all fields", () => {
@@ -100,16 +107,16 @@ describe("Prompt Templates", () => {
 				next_steps: "Add tests",
 				project_id: "proj-456",
 			});
-			assert.ok(result!.includes("Completed API integration"));
-			assert.ok(result!.includes("Use OAuth 2.0"));
-			assert.ok(result!.includes("Add tests"));
+			assert.ok(result?.includes("Completed API integration"));
+			assert.ok(result?.includes("Use OAuth 2.0"));
+			assert.ok(result?.includes("Add tests"));
 		});
 
 		it("renders session_summary with minimal fields", () => {
 			const result = renderPrompt("session_summary", {
 				summary: "Test summary",
 			});
-			assert.ok(result!.includes("Test summary"));
+			assert.ok(result?.includes("Test summary"));
 		});
 
 		it("renders entity_context with depth", () => {
@@ -117,8 +124,8 @@ describe("Prompt Templates", () => {
 				entity_name: "User",
 				depth: "3",
 			});
-			assert.ok(result!.includes("User"));
-			assert.ok(result!.includes("Depth: 3"));
+			assert.ok(result?.includes("User"));
+			assert.ok(result?.includes("Depth: 3"));
 		});
 
 		it("returns undefined for invalid prompt name", () => {
@@ -147,24 +154,24 @@ describe("Prompt Templates", () => {
 	});
 });
 
-	describe("remember_context", () => {
-		it("renders with all optional fields", () => {
-			const result = renderPrompt("remember_context", {
-				content: "Important concept",
-				importance: 0.8,
-				project_id: "proj-123",
-			});
-			assert.ok(result!.includes("Important concept"));
-			assert.ok(result!.includes("Importance: 0.8"));
-			assert.ok(result!.includes("Project: proj-123"));
+describe("remember_context", () => {
+	it("renders with all optional fields", () => {
+		const result = renderPrompt("remember_context", {
+			content: "Important concept",
+			importance: 0.8,
+			project_id: "proj-123",
 		});
-
-		it("renders with content only", () => {
-			const result = renderPrompt("remember_context", {
-				content: "Basic info",
-			});
-			assert.ok(result!.includes("Basic info"));
-			assert.ok(!result!.includes("Importance:"));
-			assert.ok(!result!.includes("Project:"));
-		});
+		assert.ok(result?.includes("Important concept"));
+		assert.ok(result?.includes("Importance: 0.8"));
+		assert.ok(result?.includes("Project: proj-123"));
 	});
+
+	it("renders with content only", () => {
+		const result = renderPrompt("remember_context", {
+			content: "Basic info",
+		});
+		assert.ok(result?.includes("Basic info"));
+		assert.ok(!result?.includes("Importance:"));
+		assert.ok(!result?.includes("Project:"));
+	});
+});

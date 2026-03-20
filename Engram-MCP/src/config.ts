@@ -151,7 +151,8 @@ function envFloat(value: string | undefined, fallback: number): number {
 // ---------------------------------------------------------------------------
 
 export function loadConfig(): MCPConfig {
-	const logLevel = (process.env.MCP_LOG_LEVEL as LoggingConfig["level"]) || "info";
+	const logLevel =
+		(process.env.MCP_LOG_LEVEL as LoggingConfig["level"]) || "info";
 
 	const corsRaw = process.env.CORS_ORIGINS ?? "";
 	const corsOrigins = corsRaw
@@ -183,19 +184,32 @@ export function loadConfig(): MCPConfig {
 			secret: process.env.OAUTH_SECRET || "",
 			accessTokenTtl: envInt(process.env.OAUTH_ACCESS_TOKEN_TTL, 3600),
 			refreshTokenTtl: envInt(process.env.OAUTH_REFRESH_TOKEN_TTL, 86400),
-			redisUrl: process.env.OAUTH_REDIS_URL || process.env.REDIS_URL || undefined,
+			redisUrl:
+				process.env.OAUTH_REDIS_URL || process.env.REDIS_URL || undefined,
 			redisKeyPrefix: process.env.OAUTH_REDIS_KEY_PREFIX || "mcp:oauth:",
 		},
 
 		retry: {
-			maxRetries: envInt(process.env.MCP_RETRY_MAX, DEFAULT_RETRY_CONFIG.maxRetries),
-			initialDelayMs: envInt(process.env.MCP_RETRY_INITIAL_MS, DEFAULT_RETRY_CONFIG.initialDelayMs),
-			maxDelayMs: envInt(process.env.MCP_RETRY_MAX_MS, DEFAULT_RETRY_CONFIG.maxDelayMs),
+			maxRetries: envInt(
+				process.env.MCP_RETRY_MAX,
+				DEFAULT_RETRY_CONFIG.maxRetries,
+			),
+			initialDelayMs: envInt(
+				process.env.MCP_RETRY_INITIAL_MS,
+				DEFAULT_RETRY_CONFIG.initialDelayMs,
+			),
+			maxDelayMs: envInt(
+				process.env.MCP_RETRY_MAX_MS,
+				DEFAULT_RETRY_CONFIG.maxDelayMs,
+			),
 			backoffMultiplier: envFloat(
 				process.env.MCP_RETRY_BACKOFF,
 				DEFAULT_RETRY_CONFIG.backoffMultiplier,
 			),
-			jitterFactor: envFloat(process.env.MCP_RETRY_JITTER, DEFAULT_RETRY_CONFIG.jitterFactor),
+			jitterFactor: envFloat(
+				process.env.MCP_RETRY_JITTER,
+				DEFAULT_RETRY_CONFIG.jitterFactor,
+			),
 		},
 
 		circuitBreaker: {
@@ -218,9 +232,18 @@ export function loadConfig(): MCPConfig {
 		},
 
 		timeout: {
-			requestMs: envInt(process.env.MCP_TIMEOUT_MS, DEFAULT_TIMEOUT_CONFIG.requestMs),
-			connectionMs: envInt(process.env.MCP_CONNECT_TIMEOUT_MS, DEFAULT_TIMEOUT_CONFIG.connectionMs),
-			readMs: envInt(process.env.MCP_READ_TIMEOUT_MS, DEFAULT_TIMEOUT_CONFIG.readMs),
+			requestMs: envInt(
+				process.env.MCP_TIMEOUT_MS,
+				DEFAULT_TIMEOUT_CONFIG.requestMs,
+			),
+			connectionMs: envInt(
+				process.env.MCP_CONNECT_TIMEOUT_MS,
+				DEFAULT_TIMEOUT_CONFIG.connectionMs,
+			),
+			readMs: envInt(
+				process.env.MCP_READ_TIMEOUT_MS,
+				DEFAULT_TIMEOUT_CONFIG.readMs,
+			),
 		},
 
 		logging: {

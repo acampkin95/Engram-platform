@@ -127,3 +127,56 @@ All notable changes to the Engram Platform orchestration layer are documented he
   - `docker-compose.yml` MCP_SERVER_VERSION: `1.0.0`
   - `Engram-MCP/package.json`: `1.0.0`
   - `Engram-AiMemory/pyproject.toml`: `1.0.0`
+
+## [Unreleased] - 2026-03-20
+
+### Added - Test Coverage for System API Routes
+- **test: comprehensive unit tests for all 7 API routes** (app/api/system/__tests__/routes.test.ts)
+  - 36 tests covering 100% of route handlers with 0% pre-existing coverage
+  - Tests for POST /api/system/control - service control with auth validation, Zod schema validation
+  - Tests for GET /api/system/health - health snapshot retrieval with auth checks
+  - Tests for GET /api/system/history - 7-day history with auth checks and error handling
+  - Tests for GET /api/system/logs - log retrieval with service filtering and query params
+  - Tests for GET /api/system/logs/stream - Server-Sent Events streaming with auth validation
+  - Tests for POST /api/system/maintenance - maintenance action execution with auth
+  - Tests for POST /api/system/notifications - admin notifications with Zod email/length validation
+  - Test patterns cover: happy path (200), auth failures (401/403), validation errors (400), server errors (500)
+  - Proper mocking of requireAdminAccess, auth, and system-admin dependencies
+  - All tests pass: 36 passed, 0 failed, 297ms duration
+
+
+## 2026-03-20 - Test Coverage Enhancement
+
+### Tests Added
+- **`src/hooks/__tests__/useURLState.test.ts`** (19 tests)
+  - `useDashboardURLState()` hook tests (3 tests)
+  - `usePaginationState()` hook tests (5 tests)  
+  - `useSearchFilterState()` hook tests (11 tests)
+  - Coverage improved from 0% to ~63% for useURLState.ts
+
+- **`src/design-system/components/__tests__/Toast.test.tsx`** (24 tests)
+  - Toast component tests (9 tests)
+  - ToastContainer tests (8 tests)
+  - addToast utility tests (7 tests)
+  - Tests cover success/error/warning/info variants, dismissal, auto-removal, duration handling
+
+- **`src/components/ui/__tests__/Slider.test.tsx`** (29 tests)
+  - Slider component rendering tests (4 tests)
+  - Props and styling tests (8 tests)
+  - Accessibility and focus tests (6 tests)
+  - Edge cases and integration tests (11 tests)
+
+### Total Tests Created: 72
+
+### Testing Best Practices Applied
+- Used vitest + @testing-library/react conventions
+- Mocked external dependencies (Radix UI, nuqs) appropriately
+- Tested component variants and state changes with `act()`
+- Comprehensive coverage of edge cases and special characters
+- Tests follow existing project patterns and naming conventions
+
+### Files Created
+- `/src/hooks/__tests__/useURLState.test.ts`
+- `/src/design-system/components/__tests__/Toast.test.tsx`
+- `/src/components/ui/__tests__/Slider.test.tsx`
+

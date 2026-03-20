@@ -26,7 +26,11 @@ export async function detectClient(): Promise<DetectedClient> {
 	// 1. Check Claude Code
 	const claudeCodePath = join(home, ".claude", "settings.json");
 	if (await fileExists(claudeCodePath)) {
-		return { client: "claude-code", settingsPath: claudeCodePath, exists: true };
+		return {
+			client: "claude-code",
+			settingsPath: claudeCodePath,
+			exists: true,
+		};
 	}
 
 	// 2. Check Claude Desktop

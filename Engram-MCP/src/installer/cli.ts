@@ -32,7 +32,8 @@ rl.on("SIGINT", () => {
 /** Prompt the user for input, returning the default if they press Enter */
 function prompt(question: string, defaultValue?: string): Promise<string> {
 	return new Promise((resolve) => {
-		const suffix = defaultValue !== undefined ? ` ${dim(`[${defaultValue}]`)}: ` : ": ";
+		const suffix =
+			defaultValue !== undefined ? ` ${dim(`[${defaultValue}]`)}: ` : ": ";
 		rl.question(question + suffix, (answer) => {
 			resolve(answer.trim() || defaultValue || "");
 		});
@@ -48,7 +49,13 @@ function defaultSettingsPath(client: MCPClient): string {
 		case "claude-desktop":
 			return process.platform === "linux"
 				? join(home, ".config", "Claude", "claude_desktop_config.json")
-				: join(home, "Library", "Application Support", "Claude", "claude_desktop_config.json");
+				: join(
+						home,
+						"Library",
+						"Application Support",
+						"Claude",
+						"claude_desktop_config.json",
+					);
 		case "cursor":
 			return join(home, ".cursor", "mcp.json");
 		default:
@@ -77,7 +84,9 @@ async function main(): Promise<void> {
 	let settingsPath = detected.settingsPath;
 
 	if (client === "unknown" || !settingsPath) {
-		console.log(dim("  No MCP client settings file detected. Defaulting to Claude Code."));
+		console.log(
+			dim("  No MCP client settings file detected. Defaulting to Claude Code."),
+		);
 		client = "claude-code";
 		settingsPath = defaultSettingsPath("claude-code");
 	}
@@ -91,7 +100,8 @@ async function main(): Promise<void> {
 	console.log("  1) stdio (recommended for local use)");
 	console.log("  2) HTTP streaming (for remote/multi-client use)");
 	const transportChoice = await prompt("Choice", "1");
-	const transport: "stdio" | "http" = transportChoice === "2" ? "http" : "stdio";
+	const transport: "stdio" | "http" =
+		transportChoice === "2" ? "http" : "stdio";
 
 	// ── Step 3: Memory API URL ───────────────────────────────────────────────
 	const apiUrl = await prompt("Memory API URL", "http://localhost:8000");
@@ -109,7 +119,13 @@ async function main(): Promise<void> {
 
 	// ── Step 5: Inject MCP config ────────────────────────────────────────────
 	try {
-		await injectMCPConfig({ client, settingsPath, transport, apiUrl, serverPort });
+		await injectMCPConfig({
+			client,
+			settingsPath,
+			transport,
+			apiUrl,
+			serverPort,
+		});
 		console.log(`${green("✓")} MCP config injected into ${settingsPath}`);
 	} catch (err) {
 		hadErrors = true;
@@ -122,7 +138,9 @@ async function main(): Promise<void> {
 	const claudeDir = join(process.cwd(), ".claude");
 	try {
 		const copied = await createHookifyRules(claudeDir);
-		console.log(`${green("✓")} Hookify rules copied to .claude/ (${copied.length} files)`);
+		console.log(
+			`${green("✓")} Hookify rules copied to .claude/ (${copied.length} files)`,
+		);
 	} catch (err) {
 		hadErrors = true;
 		console.log(
@@ -138,7 +156,9 @@ async function main(): Promise<void> {
 			updated: "CLAUDE.md updated",
 			skipped: "CLAUDE.md already has memory instructions (skipped)",
 		};
-		console.log(`${green("✓")} ${resultMessages[result] ?? "CLAUDE.md processed"}`);
+		console.log(
+			`${green("✓")} ${resultMessages[result] ?? "CLAUDE.md processed"}`,
+		);
 	} catch (err) {
 		hadErrors = true;
 		console.log(
@@ -149,7 +169,12 @@ async function main(): Promise<void> {
 	// ── Step 8: Validation ───────────────────────────────────────────────────
 	console.log("");
 	console.log("Running validation...");
-	const validation = await validateInstall({ transport, serverPort, apiUrl, settingsPath });
+	const validation = await validateInstall({
+		transport,
+		serverPort,
+		apiUrl,
+		settingsPath,
+	});
 
 	for (const check of validation.checks) {
 		const icon = check.passed ? green("✓") : red("✗");
@@ -159,7 +184,9 @@ async function main(): Promise<void> {
 	if (!validation.success) {
 		hadErrors = true;
 		console.log(
-			dim("\n  Some checks failed - see above. Start all services and re-run to verify."),
+			dim(
+				"\n  Some checks failed - see above. Start all services and re-run to verify.",
+			),
 		);
 	}
 
@@ -174,7 +201,9 @@ async function main(): Promise<void> {
 	console.log("Next steps:");
 	console.log(`  1. Start the memory backend ${dim("(see README)")}`);
 	const serverCmd =
-		transport === "http" ? "npx @engram/mcp --transport http" : "npx @engram/mcp --transport stdio";
+		transport === "http"
+			? "npx @engram/mcp --transport http"
+			: "npx @engram/mcp --transport stdio";
 	console.log(`  2. Start the MCP server: ${cyan(serverCmd)}`);
 	console.log("  3. Restart your MCP client");
 	console.log("");
@@ -183,7 +212,10 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-	console.error(red("Fatal error:"), err instanceof Error ? err.message : String(err));
+	console.error(
+		red("Fatal error:"),
+		err instanceof Error ? err.message : String(err),
+	);
 	rl.close();
 	process.exit(1);
 });

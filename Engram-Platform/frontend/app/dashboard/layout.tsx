@@ -6,7 +6,7 @@ import { DashboardClient } from './DashboardClient';
 
 export default function DashboardLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <div className="flex h-screen bg-[#03020a] overflow-hidden">
+    <div className="flex h-screen bg-[var(--color-void)] overflow-hidden">
       <DashboardClient>{children}</DashboardClient>
     </div>
   );

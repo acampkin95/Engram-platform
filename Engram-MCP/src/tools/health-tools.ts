@@ -35,17 +35,27 @@ export async function handleHealthCheck(
 	const memoryCheck =
 		memoryResult.status === "fulfilled"
 			? memoryResult.value
-			: { name: "memory_api", status: "error", error: String(memoryResult.reason) };
+			: {
+					name: "memory_api",
+					status: "error",
+					error: String(memoryResult.reason),
+				};
 	const weaviateCheck =
 		weaviateResult.status === "fulfilled"
 			? weaviateResult.value
-			: { name: "weaviate", status: "error", error: String(weaviateResult.reason) };
+			: {
+					name: "weaviate",
+					status: "error",
+					error: String(weaviateResult.reason),
+				};
 	const redisCheck =
 		redisResult.status === "fulfilled"
 			? redisResult.value
 			: { name: "redis", status: "error", error: String(redisResult.reason) };
 
-	const allHealthy = [memoryCheck, weaviateCheck, redisCheck].every((c) => c.status === "healthy");
+	const allHealthy = [memoryCheck, weaviateCheck, redisCheck].every(
+		(c) => c.status === "healthy",
+	);
 
 	const result: Record<string, unknown> = {
 		status: allHealthy ? "healthy" : "degraded",
@@ -53,17 +63,23 @@ export async function handleHealthCheck(
 		checks: {
 			memory_api: {
 				status: memoryCheck.status,
-				...(includeDetails && memoryCheck.details ? { details: memoryCheck.details } : {}),
+				...(includeDetails && memoryCheck.details
+					? { details: memoryCheck.details }
+					: {}),
 				...(memoryCheck.error ? { error: memoryCheck.error } : {}),
 			},
 			weaviate: {
 				status: weaviateCheck.status,
-				...(includeDetails && weaviateCheck.details ? { details: weaviateCheck.details } : {}),
+				...(includeDetails && weaviateCheck.details
+					? { details: weaviateCheck.details }
+					: {}),
 				...(weaviateCheck.error ? { error: weaviateCheck.error } : {}),
 			},
 			redis: {
 				status: redisCheck.status,
-				...(includeDetails && redisCheck.details ? { details: redisCheck.details } : {}),
+				...(includeDetails && redisCheck.details
+					? { details: redisCheck.details }
+					: {}),
 				...(redisCheck.error ? { error: redisCheck.error } : {}),
 			},
 		},

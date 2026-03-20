@@ -29,10 +29,14 @@ export interface RetryOptions {
 function calculateDelay(
 	attempt: number,
 	config: Required<
-		Pick<RetryOptions, "initialDelayMs" | "maxDelayMs" | "backoffMultiplier" | "jitterFactor">
+		Pick<
+			RetryOptions,
+			"initialDelayMs" | "maxDelayMs" | "backoffMultiplier" | "jitterFactor"
+		>
 	>,
 ): number {
-	const baseDelay = config.initialDelayMs * config.backoffMultiplier ** (attempt - 1);
+	const baseDelay =
+		config.initialDelayMs * config.backoffMultiplier ** (attempt - 1);
 	const cappedDelay = Math.min(baseDelay, config.maxDelayMs);
 	const jitter = cappedDelay * config.jitterFactor * Math.random();
 	return Math.round(cappedDelay + jitter);
@@ -48,17 +52,25 @@ function sleep(ms: number): Promise<void> {
 /**
  * Execute a function with retry logic
  */
-export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
+export async function withRetry<T>(
+	fn: () => Promise<T>,
+	options: RetryOptions = {},
+): Promise<T> {
 	const retryConfig: Required<
 		Pick<
 			RetryOptions,
-			"maxRetries" | "initialDelayMs" | "maxDelayMs" | "backoffMultiplier" | "jitterFactor"
+			| "maxRetries"
+			| "initialDelayMs"
+			| "maxDelayMs"
+			| "backoffMultiplier"
+			| "jitterFactor"
 		>
 	> = {
 		maxRetries: options.maxRetries ?? config.retry.maxRetries,
 		initialDelayMs: options.initialDelayMs ?? config.retry.initialDelayMs,
 		maxDelayMs: options.maxDelayMs ?? config.retry.maxDelayMs,
-		backoffMultiplier: options.backoffMultiplier ?? config.retry.backoffMultiplier,
+		backoffMultiplier:
+			options.backoffMultiplier ?? config.retry.backoffMultiplier,
 		jitterFactor: options.jitterFactor ?? config.retry.jitterFactor,
 	};
 
@@ -74,7 +86,10 @@ export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions =
 			lastError = error instanceof Error ? error : new Error(String(error));
 
 			// Check if we should retry
-			if (attempt > retryConfig.maxRetries || !shouldRetry(lastError, attempt)) {
+			if (
+				attempt > retryConfig.maxRetries ||
+				!shouldRetry(lastError, attempt)
+			) {
 				throw lastError;
 			}
 
@@ -120,7 +135,9 @@ export function retry(options: RetryOptions = {}) {
 	return (
 		_target: unknown,
 		_propertyKey: string,
-		descriptor: TypedPropertyDescriptor<(...args: unknown[]) => Promise<unknown>>,
+		descriptor: TypedPropertyDescriptor<
+			(...args: unknown[]) => Promise<unknown>
+		>,
 	) => {
 		const originalMethod = descriptor.value;
 		if (!originalMethod) {

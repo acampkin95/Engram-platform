@@ -25,7 +25,11 @@ import { HookManager } from "../hooks/hook-manager.js";
 import { registerMemoryHooks } from "../hooks/memory-hooks.js";
 import { generateRequestId, logger } from "../logger.js";
 import { createMCPServer } from "../server.js";
-import { RequestBodyAbortedError, RequestBodyTooLargeError, readBody } from "../utils/read-body.js";
+import {
+	RequestBodyAbortedError,
+	RequestBodyTooLargeError,
+	readBody,
+} from "../utils/read-body.js";
 
 // ---------------------------------------------------------------------------
 // Active session registry
@@ -121,7 +125,13 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 				});
 				res.end(JSON.stringify(payload));
 			}
-			logger.apiResponse(method, url.pathname, statusCode, Date.now() - startedAt, requestId);
+			logger.apiResponse(
+				method,
+				url.pathname,
+				statusCode,
+				Date.now() - startedAt,
+				requestId,
+			);
 		};
 
 		try {
@@ -129,7 +139,13 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 			if (method === "OPTIONS") {
 				res.writeHead(204, baseHeaders);
 				res.end();
-				logger.apiResponse(method, url.pathname, 204, Date.now() - startedAt, requestId);
+				logger.apiResponse(
+					method,
+					url.pathname,
+					204,
+					Date.now() - startedAt,
+					requestId,
+				);
 				return;
 			}
 
@@ -150,7 +166,13 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 					...baseHeaders,
 				});
 				res.end(body);
-				logger.apiResponse(method, url.pathname, 200, Date.now() - startedAt, requestId);
+				logger.apiResponse(
+					method,
+					url.pathname,
+					200,
+					Date.now() - startedAt,
+					requestId,
+				);
 				return;
 			}
 
@@ -160,7 +182,11 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 				url.pathname === "/.well-known/oauth-authorization-server"
 			) {
 				await oauthRouter(req, res, url, baseHeaders);
-				logger.debug("OAuth route handled", { requestId, method, path: url.pathname });
+				logger.debug("OAuth route handled", {
+					requestId,
+					method,
+					path: url.pathname,
+				});
 				return;
 			}
 
@@ -182,9 +208,20 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 								: "Bearer",
 							...baseHeaders,
 						});
-						res.end(JSON.stringify({ error: "unauthorized", message: authResult.error }));
+						res.end(
+							JSON.stringify({
+								error: "unauthorized",
+								message: authResult.error,
+							}),
+						);
 					}
-					logger.apiResponse(method, url.pathname, 401, Date.now() - startedAt, requestId);
+					logger.apiResponse(
+						method,
+						url.pathname,
+						401,
+						Date.now() - startedAt,
+						requestId,
+					);
 					return;
 				}
 
@@ -208,8 +245,14 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 						const newTransport = new StreamableHTTPServerTransport({
 							sessionIdGenerator: () => crypto.randomUUID(),
 							onsessioninitialized: (id) => {
-								sessions.set(id, { transport: newTransport, lastActivity: Date.now() });
-								logger.info("MCP session initialized", { sessionId: id, requestId });
+								sessions.set(id, {
+									transport: newTransport,
+									lastActivity: Date.now(),
+								});
+								logger.info("MCP session initialized", {
+									sessionId: id,
+									requestId,
+								});
 							},
 							onsessionclosed: (id) => {
 								sessions.delete(id);
@@ -252,12 +295,19 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 							return;
 						}
 
-						const message = error instanceof Error ? error.message : String(error);
+						const message =
+							error instanceof Error ? error.message : String(error);
 						logger.error("Failed to parse MCP POST body", {
 							requestId,
-							error: { message, stack: error instanceof Error ? error.stack : undefined },
+							error: {
+								message,
+								stack: error instanceof Error ? error.stack : undefined,
+							},
 						});
-						respondJson(500, { error: "internal_error", message: "Failed to parse request body" });
+						respondJson(500, {
+							error: "internal_error",
+							message: "Failed to parse request body",
+						});
 						return;
 					}
 
@@ -271,9 +321,15 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 						const message = err instanceof Error ? err.message : String(err);
 						logger.error("MCP POST handler error", {
 							requestId,
-							error: { message, stack: err instanceof Error ? err.stack : undefined },
+							error: {
+								message,
+								stack: err instanceof Error ? err.stack : undefined,
+							},
 						});
-						respondJson(500, { error: "internal_error", message: "Internal server error" });
+						respondJson(500, {
+							error: "internal_error",
+							message: "Internal server error",
+						});
 					}
 					return;
 				}
@@ -289,22 +345,34 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 					}
 					const entry = sessions.get(sessionId);
 					if (!entry) {
-						respondJson(500, { error: "internal_error", message: "Session registry inconsistent" });
+						respondJson(500, {
+							error: "internal_error",
+							message: "Session registry inconsistent",
+						});
 						return;
 					}
 					entry.lastActivity = Date.now();
 					const transport = entry.transport;
 					try {
 						await transport.handleRequest(req, res);
-						logger.debug("MCP GET/SSE request handled", { requestId, sessionId });
+						logger.debug("MCP GET/SSE request handled", {
+							requestId,
+							sessionId,
+						});
 					} catch (err) {
 						const message = err instanceof Error ? err.message : String(err);
 						logger.error("MCP GET/SSE handler error", {
 							requestId,
 							sessionId,
-							error: { message, stack: err instanceof Error ? err.stack : undefined },
+							error: {
+								message,
+								stack: err instanceof Error ? err.stack : undefined,
+							},
 						});
-						respondJson(500, { error: "internal_error", message: "Internal server error" });
+						respondJson(500, {
+							error: "internal_error",
+							message: "Internal server error",
+						});
 					}
 					return;
 				}
@@ -318,21 +386,33 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 					}
 					const entry = sessions.get(sessionId);
 					if (!entry) {
-						respondJson(500, { error: "internal_error", message: "Session registry inconsistent" });
+						respondJson(500, {
+							error: "internal_error",
+							message: "Session registry inconsistent",
+						});
 						return;
 					}
 					const transport = entry.transport;
 					try {
 						await transport.handleRequest(req, res);
-						logger.debug("MCP DELETE request handled", { requestId, sessionId });
+						logger.debug("MCP DELETE request handled", {
+							requestId,
+							sessionId,
+						});
 					} catch (err) {
 						const message = err instanceof Error ? err.message : String(err);
 						logger.error("MCP DELETE handler error", {
 							requestId,
 							sessionId,
-							error: { message, stack: err instanceof Error ? err.stack : undefined },
+							error: {
+								message,
+								stack: err instanceof Error ? err.stack : undefined,
+							},
 						});
-						respondJson(500, { error: "internal_error", message: "Internal server error" });
+						respondJson(500, {
+							error: "internal_error",
+							message: "Internal server error",
+						});
 						return;
 					}
 					sessions.delete(sessionId);
@@ -345,7 +425,13 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 					...baseHeaders,
 				});
 				res.end();
-				logger.apiResponse(method, url.pathname, 405, Date.now() - startedAt, requestId);
+				logger.apiResponse(
+					method,
+					url.pathname,
+					405,
+					Date.now() - startedAt,
+					requestId,
+				);
 				return;
 			}
 
@@ -357,9 +443,15 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 				requestId,
 				path: url.pathname,
 				method,
-				error: { message, stack: error instanceof Error ? error.stack : undefined },
+				error: {
+					message,
+					stack: error instanceof Error ? error.stack : undefined,
+				},
 			});
-			respondJson(500, { error: "internal_error", message: "Internal server error" });
+			respondJson(500, {
+				error: "internal_error",
+				message: "Internal server error",
+			});
 		}
 	});
 

@@ -130,7 +130,10 @@ function AddMemoryModal({ isOpen, onClose, onSuccess, matterOptions }: AddMemory
             placeholder="Enter memory content…"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            required
+            maxLength={10000}
           />
+          <p className="text-xs text-[#5c5878] mt-1">{content.length}/10000 characters</p>
         </div>
 
         {matterOptions.length > 0 && (
@@ -165,7 +168,9 @@ function AddMemoryModal({ isOpen, onClose, onSuccess, matterOptions }: AddMemory
             placeholder="e.g. important, review, osint"
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
+            maxLength={500}
           />
+          <p className="text-xs text-[#5c5878] mt-1">{tagsInput.length}/500 characters</p>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
@@ -198,7 +203,7 @@ function DetailModal({ memory, onClose, onDelete, onEdit }: DetailModalProps) {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await onDelete(memory.memory_id);
+      await onDelete(memory.memory_id ?? memory.id);
       onClose();
     } finally {
       setDeleting(false);
@@ -261,20 +266,28 @@ function DetailModal({ memory, onClose, onDelete, onEdit }: DetailModalProps) {
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] px-3 py-2">
             <p className="text-xs text-[#5c5878] font-mono">Importance</p>
-            <p className="text-sm font-semibold text-[#2EC4C4] mt-0.5">{memory.importance}</p>
+            <p className="text-sm font-semibold text-[#2EC4C4] mt-0.5">
+              {String(memory.importance ?? '—')}
+            </p>
           </div>
           <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] px-3 py-2">
             <p className="text-xs text-[#5c5878] font-mono">Confidence</p>
-            <p className="text-sm font-semibold text-[#2EC4C4] mt-0.5">{memory.confidence}</p>
+            <p className="text-sm font-semibold text-[#2EC4C4] mt-0.5">
+              {String(memory.confidence ?? '—')}
+            </p>
           </div>
           <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] px-3 py-2">
             <p className="text-xs text-[#5c5878] font-mono">Tier</p>
-            <p className="text-sm font-semibold text-[#2EC4C4] mt-0.5">{memory.tier}</p>
+            <p className="text-sm font-semibold text-[#2EC4C4] mt-0.5">
+              {String(memory.tier ?? '—')}
+            </p>
           </div>
         </div>
 
         {/* Created date */}
-        <p className="text-xs text-[#5c5878] font-mono">Created: {formatDate(memory.created_at)}</p>
+        <p className="text-xs text-[#5c5878] font-mono">
+          Created: {memory.created_at ? formatDate(memory.created_at) : '—'}
+        </p>
 
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
@@ -319,7 +332,7 @@ function EditModal({ memory, onClose, onSuccess }: EditModalProps) {
         .map((t) => t.trim())
         .filter(Boolean);
 
-      const result = await memoryClient.updateMemory(memory.memory_id, {
+      const result = await memoryClient.updateMemory(memory.memory_id ?? memory.id, {
         content: content.trim(),
         tags,
       });
@@ -358,7 +371,10 @@ function EditModal({ memory, onClose, onSuccess }: EditModalProps) {
             rows={5}
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            required
+            maxLength={10000}
           />
+          <p className="text-xs text-[#5c5878] mt-1">{content.length}/10000 characters</p>
         </div>
 
         <div>
@@ -371,7 +387,9 @@ function EditModal({ memory, onClose, onSuccess }: EditModalProps) {
             className={inputClass}
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
+            maxLength={500}
           />
+          <p className="text-xs text-[#5c5878] mt-1">{tagsInput.length}/500 characters</p>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
@@ -455,12 +473,12 @@ export default function MemoriesContent() {
   const matters = mattersRes?.data?.matters ?? [];
 
   const matterStatusOptions = useMemo(
-    () => matters.map((m) => ({ value: m.matter_id, label: m.title })),
+    () => matters.map((m) => ({ value: m.matter_id, label: m.title ?? 'Untitled' })),
     [matters],
   );
 
   const matterAddOptions = useMemo(
-    () => matters.map((m) => ({ matter_id: m.matter_id, title: m.title })),
+    () => matters.map((m) => ({ matter_id: m.matter_id, title: m.title ?? 'Untitled' })),
     [matters],
   );
 

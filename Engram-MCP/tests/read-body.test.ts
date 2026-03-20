@@ -1,8 +1,12 @@
-import { describe, it, beforeEach, mock } from "node:test";
 import assert from "node:assert";
 import { EventEmitter } from "node:events";
 import type { IncomingMessage } from "node:http";
-import { readBody, RequestBodyTooLargeError, RequestBodyAbortedError } from "../dist/utils/read-body.js";
+import { beforeEach, describe, it, mock } from "node:test";
+import {
+	RequestBodyAbortedError,
+	RequestBodyTooLargeError,
+	readBody,
+} from "../dist/utils/read-body.js";
 
 class MockIncomingMessage extends EventEmitter {
 	headers: Record<string, string>;
@@ -70,20 +74,14 @@ describe("readBody", () => {
 			const promise = readBody(mockReq as IncomingMessage);
 			mockReq.emit("error", new Error("connection failed"));
 
-			await assert.rejects(
-				async () => await promise,
-				Error
-			);
+			await assert.rejects(async () => await promise, Error);
 		});
 
 		it("rejects with RequestBodyAbortedError on aborted", async () => {
 			const promise = readBody(mockReq as IncomingMessage);
 			mockReq.emit("aborted");
 
-			await assert.rejects(
-				async () => await promise,
-				RequestBodyAbortedError
-			);
+			await assert.rejects(async () => await promise, RequestBodyAbortedError);
 		});
 
 		it("rejects with RequestBodyTooLargeError when body exceeds limit", async () => {
@@ -91,10 +89,7 @@ describe("readBody", () => {
 			const maxBytes = 64 * 1024;
 			mockReq.emit("data", Buffer.alloc(maxBytes + 1, "a"));
 
-			await assert.rejects(
-				async () => await promise,
-				RequestBodyTooLargeError
-			);
+			await assert.rejects(async () => await promise, RequestBodyTooLargeError);
 		});
 	});
 
@@ -103,10 +98,7 @@ describe("readBody", () => {
 			const promise = readBody(mockReq as IncomingMessage);
 			mockReq.emit("error", new Error("first error"));
 
-			await assert.rejects(
-				async () => await promise,
-				Error
-			);
+			await assert.rejects(async () => await promise, Error);
 
 			mockReq.emit("data", Buffer.from("ignored"));
 			mockReq.emit("end");
@@ -116,10 +108,7 @@ describe("readBody", () => {
 			const promise = readBody(mockReq as IncomingMessage);
 			mockReq.emit("aborted");
 
-			await assert.rejects(
-				async () => await promise,
-				RequestBodyAbortedError
-			);
+			await assert.rejects(async () => await promise, RequestBodyAbortedError);
 
 			mockReq.emit("data", Buffer.from("ignored"));
 			mockReq.emit("end");
@@ -131,10 +120,7 @@ describe("readBody", () => {
 			mockReq.emit("data", Buffer.alloc(maxBytes + 1, "a"));
 			mockReq.emit("end");
 
-			await assert.rejects(
-				async () => await promise,
-				RequestBodyTooLargeError
-			);
+			await assert.rejects(async () => await promise, RequestBodyTooLargeError);
 		});
 	});
 

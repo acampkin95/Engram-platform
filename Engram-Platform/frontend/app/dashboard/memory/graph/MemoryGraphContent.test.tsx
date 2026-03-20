@@ -30,10 +30,14 @@ vi.mock('@/src/stores/uiStore', () => {
       },
     })) as unknown as typeof useUIStore;
 
-  hook.getState = () => state;
-  hook.setState = (next: Partial<typeof state>) => {
-    state = { ...state, ...next };
-  };
+  hook.getState = (() => state) as typeof useUIStore.getState;
+  hook.setState = ((next: unknown) => {
+    if (typeof next === 'function') {
+      state = { ...state, ...(next as (s: typeof state) => typeof state)(state) };
+    } else {
+      state = { ...state, ...(next as Partial<typeof state>) };
+    }
+  }) as typeof useUIStore.setState;
 
   return { useUIStore: hook };
 });

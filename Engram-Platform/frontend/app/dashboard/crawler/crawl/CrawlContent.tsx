@@ -69,6 +69,7 @@ export default function CrawlContent() {
             tooltip="The main URL to start crawling from"
             helpText="Must be a valid, accessible web address starting with http:// or https://"
             error={errors.url?.message}
+            required
             {...register('url')}
           />
 

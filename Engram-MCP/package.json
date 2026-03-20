@@ -37,13 +37,7 @@
 	"engines": {
 		"node": ">=20.0.0"
 	},
-	"files": [
-		"dist",
-		"hookify",
-		"templates",
-		"install.sh",
-		"README.md"
-	],
+	"files": ["dist", "hookify", "templates", "install.sh", "README.md"],
 	"keywords": [
 		"mcp",
 		"model-context-protocol",

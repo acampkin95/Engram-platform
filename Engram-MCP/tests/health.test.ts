@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawn, type ChildProcess } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import { after, before, describe, it } from "node:test";
 
 /**
@@ -14,24 +14,20 @@ describe("Health endpoint (integration)", () => {
 	let serverReady = false;
 
 	before(async () => {
-		server = spawn(
-			"node",
-			["dist/index.js", "--transport", "http"],
-			{
-				cwd: process.cwd(),
-				env: {
-					...process.env,
-					MCP_SERVER_PORT: String(TEST_PORT),
-					MCP_TRANSPORT: "http",
-					MCP_LOG_LEVEL: "error",
-					// Disable OAuth for the health test
-					OAUTH_ENABLED: "false",
-					// Prevent API connection attempts
-					MEMORY_API_URL: "http://127.0.0.1:19999",
-				},
-				stdio: ["pipe", "pipe", "pipe"],
+		server = spawn("node", ["dist/index.js", "--transport", "http"], {
+			cwd: process.cwd(),
+			env: {
+				...process.env,
+				MCP_SERVER_PORT: String(TEST_PORT),
+				MCP_TRANSPORT: "http",
+				MCP_LOG_LEVEL: "error",
+				// Disable OAuth for the health test
+				OAUTH_ENABLED: "false",
+				// Prevent API connection attempts
+				MEMORY_API_URL: "http://127.0.0.1:19999",
 			},
-		);
+			stdio: ["pipe", "pipe", "pipe"],
+		});
 
 		// Wait for server to be ready (max 5 seconds)
 		const deadline = Date.now() + 5000;
@@ -73,7 +69,7 @@ describe("Health endpoint (integration)", () => {
 	it("returns expected response shape", async () => {
 		if (!serverReady) return;
 		const res = await fetch(`http://127.0.0.1:${TEST_PORT}/health`);
-		const body = await res.json() as Record<string, unknown>;
+		const body = (await res.json()) as Record<string, unknown>;
 
 		assert.equal(body.status, "ok");
 		assert.equal(typeof body.service, "string");

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { describe, it, beforeEach, afterEach, mock } from "node:test";
-import { validateOAuthToken } from "../dist/auth/oauth-server.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { afterEach, beforeEach, describe, it, mock } from "node:test";
+import { validateOAuthToken } from "../dist/auth/oauth-server.js";
 
 // Mock request/response helpers
 function createMockRequest(options: {

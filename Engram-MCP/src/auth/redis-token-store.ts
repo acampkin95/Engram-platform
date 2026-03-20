@@ -1,4 +1,4 @@
-import { createClient, type RedisClientType } from "redis";
+import { type RedisClientType, createClient } from "redis";
 
 import type {
 	AccessToken,
@@ -7,7 +7,11 @@ import type {
 	RefreshToken,
 } from "./token-store.js";
 
-type StoredEntity = OAuthClient | AuthorizationCode | AccessToken | RefreshToken;
+type StoredEntity =
+	| OAuthClient
+	| AuthorizationCode
+	| AccessToken
+	| RefreshToken;
 
 interface RedisLikeClient {
 	connect(): Promise<unknown>;
@@ -34,7 +38,9 @@ export class RedisTokenStore {
 		this.keyPrefix = config.keyPrefix ?? "mcp:oauth:";
 		this.client =
 			config.client ??
-			(createClient({ url: config.url ?? "redis://localhost:6379" }) as RedisClientType);
+			(createClient({
+				url: config.url ?? "redis://localhost:6379",
+			}) as RedisClientType);
 	}
 
 	async connect(): Promise<void> {
@@ -76,12 +82,20 @@ export class RedisTokenStore {
 	async markCodeUsed(code: string): Promise<void> {
 		const stored = await this.getCode(code);
 		if (stored !== undefined) {
-			await this.setExpiringJson(this.codeKey(code), { ...stored, used: true }, stored.expiresAt);
+			await this.setExpiringJson(
+				this.codeKey(code),
+				{ ...stored, used: true },
+				stored.expiresAt,
+			);
 		}
 	}
 
 	async storeAccessToken(token: AccessToken): Promise<void> {
-		await this.setExpiringJson(this.accessTokenKey(token.token), token, token.expiresAt);
+		await this.setExpiringJson(
+			this.accessTokenKey(token.token),
+			token,
+			token.expiresAt,
+		);
 	}
 
 	async revokeAccessTokensByRefreshToken(refreshToken: string): Promise<void> {
@@ -107,7 +121,11 @@ export class RedisTokenStore {
 	}
 
 	async storeRefreshToken(token: RefreshToken): Promise<void> {
-		await this.setExpiringJson(this.refreshTokenKey(token.token), token, token.expiresAt);
+		await this.setExpiringJson(
+			this.refreshTokenKey(token.token),
+			token,
+			token.expiresAt,
+		);
 	}
 
 	async getRefreshToken(token: string): Promise<RefreshToken | undefined> {
@@ -120,7 +138,11 @@ export class RedisTokenStore {
 			const keys = await this.client.keys(`${this.keyPrefix}${pattern}`);
 			for (const key of keys) {
 				const entity = await this.getJson<StoredEntity>(key);
-				if (entity !== undefined && "expiresAt" in entity && Date.now() > entity.expiresAt) {
+				if (
+					entity !== undefined &&
+					"expiresAt" in entity &&
+					Date.now() > entity.expiresAt
+				) {
 					await this.client.del(key);
 				}
 			}
@@ -138,7 +160,11 @@ export class RedisTokenStore {
 		await this.client.set(key, JSON.stringify(value));
 	}
 
-	private async setExpiringJson(key: string, value: StoredEntity, expiresAt: number): Promise<void> {
+	private async setExpiringJson(
+		key: string,
+		value: StoredEntity,
+		expiresAt: number,
+	): Promise<void> {
 		await this.connect();
 		const ttlSeconds = Math.ceil((expiresAt - Date.now()) / 1000);
 		if (ttlSeconds <= 0) {

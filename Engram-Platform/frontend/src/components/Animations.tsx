@@ -1,17 +1,15 @@
 'use client';
 
-import { type HTMLMotionProps, motion, useReducedMotion } from 'framer-motion';
+import { type HTMLMotionProps, motion, useReducedMotion, type Variants } from 'framer-motion';
 import type { ReactNode } from 'react';
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 
-// @ts-expect-error - Framer Motion variants type complexity
-const fadeInVariant = {
+const fadeInVariant: Variants = {
   hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } },
 };
 
-// @ts-expect-error - Framer Motion variants type complexity
 const slideInVariant = {
   up: {
     hidden: { opacity: 0, y: 20 },
@@ -31,7 +29,7 @@ const slideInVariant = {
   },
 };
 
-const cardStaggerVariant = {
+const cardStaggerVariant: { container: Variants; item: Variants } = {
   container: {
     hidden: { opacity: 0 },
     show: {
@@ -50,7 +48,7 @@ const cardStaggerVariant = {
   },
 };
 
-const fastStaggerVariant = {
+const fastStaggerVariant: { container: Variants; item: Variants } = {
   container: {
     hidden: { opacity: 0 },
     show: {

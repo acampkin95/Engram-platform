@@ -133,7 +133,6 @@ export function FilterBar({
   return (
     <form
       onSubmit={onSubmit}
-      role="search"
       aria-label="Filter and search"
       className={cn(
         'flex flex-wrap items-center gap-2.5 p-3.5 rounded-xl',
@@ -294,9 +293,8 @@ export function FilterBar({
 
       {/* ── Score Range Slider ── */}
       {showScoreRange && (
-        <div
-          className="flex items-center gap-3 min-w-[200px]"
-          role="group"
+        <fieldset
+          className="flex items-center gap-3 min-w-[200px] border-0 p-0 m-0"
           aria-label="Score range filter"
         >
           <div className="flex items-center gap-1.5 shrink-0">
@@ -321,7 +319,7 @@ export function FilterBar({
             aria-valuemax={100}
             aria-valuenow={scoreRange[0]}
           />
-        </div>
+        </fieldset>
       )}
 
       {/* ── Clear button ── */}

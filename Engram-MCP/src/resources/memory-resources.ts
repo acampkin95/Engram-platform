@@ -1,13 +1,19 @@
 import type { MemoryAPIClient } from "../client.js";
 import { config } from "../config.js";
-import { STATIC_RESOURCES, TIER_DOCUMENTATION, parseResourceUri } from "./enhanced-resources.js";
+import {
+	STATIC_RESOURCES,
+	TIER_DOCUMENTATION,
+	parseResourceUri,
+} from "./enhanced-resources.js";
 
 export { STATIC_RESOURCES as MEMORY_RESOURCES };
 
 export async function handleResourceRequest(
 	uri: string,
 	client: MemoryAPIClient,
-): Promise<{ contents: Array<{ uri: string; mimeType: string; text: string }> }> {
+): Promise<{
+	contents: Array<{ uri: string; mimeType: string; text: string }>;
+}> {
 	const parsed = parseResourceUri(uri);
 
 	if (parsed.type === "static") {
@@ -189,13 +195,20 @@ export async function handleResourceRequest(
 		}
 
 		case "entity": {
-			const entity = await client.findEntityByName(params.entityName ?? "", "default");
+			const entity = await client.findEntityByName(
+				params.entityName ?? "",
+				"default",
+			);
 			return {
 				contents: [
 					{
 						uri,
 						mimeType: "application/json",
-						text: JSON.stringify(entity ?? { error: "Entity not found" }, null, 2),
+						text: JSON.stringify(
+							entity ?? { error: "Entity not found" },
+							null,
+							2,
+						),
 					},
 				],
 			};
@@ -203,7 +216,10 @@ export async function handleResourceRequest(
 
 		case "graph": {
 			const depth = Number.parseInt(params.depth ?? "1", 10);
-			const entity = await client.findEntityByName(params.entityName ?? "", "default");
+			const entity = await client.findEntityByName(
+				params.entityName ?? "",
+				"default",
+			);
 			if (!entity) {
 				return {
 					contents: [

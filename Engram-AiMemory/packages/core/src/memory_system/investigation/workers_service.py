@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 import signal
-from datetime import UTC, datetime
+from datetime import datetime
 
 from rich.console import Console
+
+from memory_system.compat import UTC
 
 console = Console()
 
@@ -73,13 +76,11 @@ async def run_workers_service() -> None:
             await connect_weaviate()
 
         # Wait for next interval or shutdown
-        try:
+        with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(
                 shutdown_event.wait(),
                 timeout=WORKERS_INTERVAL * 60
             )
-        except TimeoutError:
-            pass
 
     console.print("[cyan]Investigation Workers Service stopped[/cyan]")
 

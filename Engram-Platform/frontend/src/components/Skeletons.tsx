@@ -91,7 +91,7 @@ export function SkeletonDataTable({ rows = 5, className }: { rows?: number; clas
 
 export function SkeletonDashboardHome() {
   return (
-    <div className="space-y-8">
+    <output className="block space-y-8" aria-busy="true" aria-label="Loading dashboard">
       {/* Title */}
       <div>
         <Skeleton className="h-7 w-48 rounded bg-white/[0.06]" />
@@ -128,7 +128,7 @@ export function SkeletonDashboardHome() {
           ))}
         </div>
       </section>
-    </div>
+    </output>
   );
 }
 
@@ -136,7 +136,7 @@ export function SkeletonDashboardHome() {
 
 export function SkeletonAnalytics() {
   return (
-    <div className="space-y-6">
+    <output className="block space-y-6" aria-busy="true" aria-label="Loading analytics">
       {/* Header */}
       <Skeleton className="h-6 w-32 rounded bg-white/[0.06]" />
 
@@ -190,7 +190,7 @@ export function SkeletonAnalytics() {
           </div>
         </div>
       </div>
-    </div>
+    </output>
   );
 }
 
@@ -218,12 +218,12 @@ export function SkeletonFilterBar({ className }: { className?: string }) {
 export function SkeletonChatView({ messages = 8 }) {
   return (
     <div className="space-y-4">
-      {Array.from({ length: messages }).map((_, i) => (
-        <div
-          key={`skel-chat-${i}`}
-          className={cn('flex gap-3', i % 2 === 0 ? 'justify-start' : 'justify-end')}
-        >
-          {i % 2 === 0 ? (
+      {Array.from({ length: messages }, (_, i) => ({
+        id: `skel-chat-${i}`,
+        alignLeft: i % 2 === 0,
+      })).map(({ id, alignLeft }) => (
+        <div key={id} className={cn('flex gap-3', alignLeft ? 'justify-start' : 'justify-end')}>
+          {alignLeft ? (
             <>
               <Skeleton className="h-10 w-10 rounded-full bg-white/[0.04]" />
               <div className="flex-1 space-y-2">
@@ -252,8 +252,8 @@ export function SkeletonGraphView() {
         <Skeleton className="h-8 w-48 mx-auto rounded bg-white/[0.06]" />
         <Skeleton className="h-4 w-64 mx-auto rounded bg-white/[0.04]" />
         <div className="flex justify-center gap-2 mt-8">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={`skel-node-${i}`} className="h-16 w-16 rounded-full bg-white/[0.04]" />
+          {Array.from({ length: 6 }, (_, i) => `skel-node-${i}`).map((key) => (
+            <Skeleton key={key} className="h-16 w-16 rounded-full bg-white/[0.04]" />
           ))}
         </div>
       </div>

@@ -12,7 +12,10 @@ import { timingSafeEqual } from "node:crypto";
 import type { IncomingMessage } from "node:http";
 
 import type { MCPConfig } from "../config.js";
-import { validateOAuthToken } from "./oauth-server.js";
+import {
+	initializeOAuthTokenStore,
+	validateOAuthToken,
+} from "./oauth-server.js";
 
 /**
  * Constant-time string equality check to prevent timing attacks.
@@ -56,7 +59,9 @@ export interface AuthResult {
  *
  * @param headerValue - The raw `Authorization` header string.
  */
-function extractBearerToken(headerValue: string | string[] | undefined): string | undefined {
+function extractBearerToken(
+	headerValue: string | string[] | undefined,
+): string | undefined {
 	const raw = Array.isArray(headerValue) ? headerValue[0] : headerValue;
 	if (typeof raw !== "string") {
 		return undefined;
@@ -91,7 +96,10 @@ function extractBearerToken(headerValue: string | string[] | undefined): string 
  * @param req    - The incoming Node.js HTTP request.
  * @param config - The full server configuration.
  */
-export async function validateAuth(req: IncomingMessage, config: MCPConfig): Promise<AuthResult> {
+export async function validateAuth(
+	req: IncomingMessage,
+	config: MCPConfig,
+): Promise<AuthResult> {
 	const oauthEnabled = config.oauth.enabled;
 	const staticToken = config.authToken;
 
@@ -104,12 +112,18 @@ export async function validateAuth(req: IncomingMessage, config: MCPConfig): Pro
 	const token = extractBearerToken(req.headers.authorization);
 
 	if (token === undefined) {
-		return { valid: false, error: "Missing Authorization: Bearer <token> header" };
+		return {
+			valid: false,
+			error: "Missing Authorization: Bearer <token> header",
+		};
 	}
 
 	// 3. OAuth token check
-	if (oauthEnabled && (await validateOAuthToken(token))) {
-		return { valid: true };
+	if (oauthEnabled) {
+		await initializeOAuthTokenStore(config);
+		if (await validateOAuthToken(token)) {
+			return { valid: true };
+		}
 	}
 
 	// 4. Static shared-secret fallback

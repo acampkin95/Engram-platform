@@ -47,11 +47,14 @@ if (config.transport === "stdio") {
 
 // Global error handlers — catch truly unexpected failures
 process.on("uncaughtException", (error) => {
-	logger.error("Uncaught exception", { error: { message: error.stack ?? error.message } });
+	logger.error("Uncaught exception", {
+		error: { message: error.stack ?? error.message },
+	});
 	process.exit(1);
 });
 process.on("unhandledRejection", (reason) => {
-	const message = reason instanceof Error ? (reason.stack ?? reason.message) : String(reason);
+	const message =
+		reason instanceof Error ? (reason.stack ?? reason.message) : String(reason);
 	logger.error("Unhandled rejection", { error: { message } });
 	process.exit(1);
 });

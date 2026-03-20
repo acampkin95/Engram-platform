@@ -9,8 +9,10 @@ Provides:
 """
 
 import hmac
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any
+
+from memory_system.compat import UTC
 
 # Using bcrypt directly — passlib 1.7.4 is incompatible with bcrypt 5.x
 import bcrypt as _bcrypt_lib

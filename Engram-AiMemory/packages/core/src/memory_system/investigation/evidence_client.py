@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import uuid4
 
 from rich.console import Console
+
+from memory_system.compat import UTC
 
 from memory_system.config import EVIDENCE_DOCUMENT
 from memory_system.investigation.models import (

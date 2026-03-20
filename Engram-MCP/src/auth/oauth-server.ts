@@ -52,6 +52,12 @@ async function getTokenStore(config?: MCPConfig): Promise<OAuthStore> {
 	tokenStore = new TokenStore();
 	return tokenStore;
 }
+
+export async function initializeOAuthTokenStore(
+	config?: MCPConfig,
+): Promise<void> {
+	await getTokenStore(config);
+}
 // ---------------------------------------------------------------------------
 // Public validator (used by oauth-middleware.ts)
 // ---------------------------------------------------------------------------
@@ -119,7 +125,9 @@ rateBucketPruneTimer.unref();
  * For form-encoded bodies every value is a `string`.  JSON bodies may
  * contain arrays or nested objects (e.g. `redirect_uris`).
  */
-async function parseBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+async function parseBody(
+	req: IncomingMessage,
+): Promise<Record<string, unknown>> {
 	const raw = await readBody(req);
 	const contentType = req.headers["content-type"] ?? "";
 
@@ -135,7 +143,11 @@ async function parseBody(req: IncomingMessage): Promise<Record<string, unknown>>
 	// Treat everything else as JSON
 	try {
 		const parsed: unknown = JSON.parse(raw);
-		if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+		if (
+			typeof parsed === "object" &&
+			parsed !== null &&
+			!Array.isArray(parsed)
+		) {
 			return parsed as Record<string, unknown>;
 		}
 	} catch {
@@ -206,14 +218,22 @@ export function createOAuthRouter(
 		const method = req.method ?? "GET";
 
 		if (!oauth.enabled) {
-			sendJSON(res, 404, { error: "not_found", message: "OAuth is not enabled" }, corsHeaders);
+			sendJSON(
+				res,
+				404,
+				{ error: "not_found", message: "OAuth is not enabled" },
+				corsHeaders,
+			);
 			return;
 		}
 
 		// -----------------------------------------------------------------------
 		// GET /.well-known/oauth-authorization-server  (RFC 8414 metadata)
 		// -----------------------------------------------------------------------
-		if (pathname === "/.well-known/oauth-authorization-server" && method === "GET") {
+		if (
+			pathname === "/.well-known/oauth-authorization-server" &&
+			method === "GET"
+		) {
 			const metadata = {
 				issuer: oauth.issuer,
 				authorization_endpoint: `${oauth.issuer}/oauth/authorize`,
@@ -240,7 +260,10 @@ export function createOAuthRouter(
 				sendJSON(
 					res,
 					429,
-					{ error: "too_many_requests", error_description: "Rate limit exceeded" },
+					{
+						error: "too_many_requests",
+						error_description: "Rate limit exceeded",
+					},
 					corsHeaders,
 				);
 				return;
@@ -250,7 +273,10 @@ export function createOAuthRouter(
 				sendJSON(
 					res,
 					503,
-					{ error: "service_unavailable", error_description: "Client registration limit reached" },
+					{
+						error: "service_unavailable",
+						error_description: "Client registration limit reached",
+					},
 					corsHeaders,
 				);
 				return;
@@ -262,7 +288,10 @@ export function createOAuthRouter(
 				sendJSON(
 					res,
 					413,
-					{ error: "request_entity_too_large", error_description: "Request body too large" },
+					{
+						error: "request_entity_too_large",
+						error_description: "Request body too large",
+					},
 					corsHeaders,
 				);
 				return;
@@ -275,7 +304,8 @@ export function createOAuthRouter(
 					400,
 					{
 						error: "invalid_request",
-						error_description: "redirect_uris is required and must be a non-empty array",
+						error_description:
+							"redirect_uris is required and must be a non-empty array",
 					},
 					corsHeaders,
 				);
@@ -291,7 +321,9 @@ export function createOAuthRouter(
 					: ["authorization_code", "refresh_token"];
 
 			const responseTypes =
-				strArray(body.response_types).length > 0 ? strArray(body.response_types) : ["code"];
+				strArray(body.response_types).length > 0
+					? strArray(body.response_types)
+					: ["code"];
 
 			const scope = str(body.scope) || "memory:read memory:write";
 
@@ -337,7 +369,8 @@ export function createOAuthRouter(
 			const redirectUri = url.searchParams.get("redirect_uri") ?? "";
 			const responseType = url.searchParams.get("response_type") ?? "";
 			const codeChallenge = url.searchParams.get("code_challenge") ?? "";
-			const codeChallengeMethod = url.searchParams.get("code_challenge_method") ?? "";
+			const codeChallengeMethod =
+				url.searchParams.get("code_challenge_method") ?? "";
 			const scope = url.searchParams.get("scope") ?? "";
 			const state = url.searchParams.get("state") ?? "";
 
@@ -363,7 +396,8 @@ export function createOAuthRouter(
 					400,
 					{
 						error: "invalid_request",
-						error_description: "redirect_uri does not match any registered URI for this client",
+						error_description:
+							"redirect_uri does not match any registered URI for this client",
 					},
 					corsHeaders,
 				);
@@ -393,7 +427,10 @@ export function createOAuthRouter(
 
 			if (!codeChallenge) {
 				res.writeHead(302, {
-					Location: errorRedirect("invalid_request", "code_challenge is required"),
+					Location: errorRedirect(
+						"invalid_request",
+						"code_challenge is required",
+					),
 					...corsHeaders,
 				});
 				res.end();
@@ -415,7 +452,9 @@ export function createOAuthRouter(
 			// Validate requested scopes are a subset of the client's registered scopes
 			const requestedScopes = scope.split(" ").filter(Boolean);
 			const allowedScopes = new Set(client.scope.split(" ").filter(Boolean));
-			const invalidScopes = requestedScopes.filter((s) => !allowedScopes.has(s));
+			const invalidScopes = requestedScopes.filter(
+				(s) => !allowedScopes.has(s),
+			);
 			if (invalidScopes.length > 0) {
 				res.writeHead(302, {
 					Location: errorRedirect(
@@ -464,7 +503,10 @@ export function createOAuthRouter(
 				sendJSON(
 					res,
 					429,
-					{ error: "too_many_requests", error_description: "Rate limit exceeded" },
+					{
+						error: "too_many_requests",
+						error_description: "Rate limit exceeded",
+					},
 					corsHeaders,
 				);
 				return;
@@ -479,7 +521,10 @@ export function createOAuthRouter(
 				sendJSON(
 					res,
 					413,
-					{ error: "request_entity_too_large", error_description: "Request body too large" },
+					{
+						error: "request_entity_too_large",
+						error_description: "Request body too large",
+					},
 					corsHeaders,
 				);
 				return;
@@ -540,7 +585,8 @@ export function createOAuthRouter(
 						400,
 						{
 							error: "invalid_grant",
-							error_description: "client_id does not match the authorization code",
+							error_description:
+								"client_id does not match the authorization code",
 						},
 						corsHeaders,
 					);
@@ -553,7 +599,8 @@ export function createOAuthRouter(
 						400,
 						{
 							error: "invalid_grant",
-							error_description: "redirect_uri does not match the authorization code",
+							error_description:
+								"redirect_uri does not match the authorization code",
 						},
 						corsHeaders,
 					);
@@ -695,7 +742,8 @@ export function createOAuthRouter(
 				400,
 				{
 					error: "unsupported_grant_type",
-					error_description: "Supported grant types: authorization_code, refresh_token",
+					error_description:
+						"Supported grant types: authorization_code, refresh_token",
 				},
 				corsHeaders,
 			);

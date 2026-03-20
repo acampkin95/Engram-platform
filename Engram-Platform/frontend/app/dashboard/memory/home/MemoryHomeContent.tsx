@@ -43,19 +43,18 @@ function truncate(text: string, max: number): string {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function RecentMemoryCard({ memory }: Readonly<{ memory: SearchResult }>) {
+  const content = memory.content || memory.snippet || '';
   return (
     <Card className="hover:border-[rgba(46,196,196,0.2)] transition-colors">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-[#a09bb8] leading-relaxed flex-1">
-          {truncate(memory.content, 100)}
-        </p>
+        <p className="text-sm text-[#a09bb8] leading-relaxed flex-1">{truncate(content, 100)}</p>
         {memory.project_id && (
           <Badge variant="memory" className="flex-shrink-0">
             {memory.project_id}
           </Badge>
         )}
       </div>
-      <p className="text-xs text-[#5c5878] font-mono mt-3">{formatDate(memory.created_at)}</p>
+      <p className="text-xs text-[#5c5878] font-mono mt-3">{formatDate(memory.created_at ?? '')}</p>
     </Card>
   );
 }
@@ -173,7 +172,7 @@ export default function MemoryHomeContent() {
                     <div className="flex items-center gap-3">
                       <Badge variant="memory">{matter.status}</Badge>
                       <span className="text-xs text-[#5c5878] font-mono">
-                        {formatDate(matter.created_at)}
+                        {matter.created_at ? formatDate(matter.created_at) : '—'}
                       </span>
                     </div>
                   </div>

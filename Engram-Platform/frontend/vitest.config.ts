@@ -16,7 +16,7 @@ export default defineConfig({
     fileParallelism: !coverageVisibilityMode,
     pool: coverageVisibilityMode ? 'threads' : 'forks',
     maxWorkers: coverageVisibilityMode ? 1 : undefined,
-    minWorkers: coverageVisibilityMode ? 1 : undefined,
+    // minWorkers removed - not a valid vitest option
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

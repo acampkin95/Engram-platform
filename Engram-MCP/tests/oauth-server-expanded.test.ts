@@ -5,14 +5,20 @@
  * rate limiting, and PKCE verification.
  */
 
-import { describe, it, beforeEach, afterEach, mock } from "node:test";
 import assert from "node:assert/strict";
-import { createOAuthRouter, validateOAuthToken } from "../dist/auth/oauth-server.js";
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { EventEmitter } from "node:events";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { afterEach, beforeEach, describe, it, mock } from "node:test";
+import {
+	createOAuthRouter,
+	validateOAuthToken,
+} from "../dist/auth/oauth-server.js";
 import type { MCPConfig } from "../dist/config.js";
 
-function createMockConfig(overrides: Partial<MCPConfig["oauth"]> = {}): MCPConfig {	return {
+function createMockConfig(
+	overrides: Partial<MCPConfig["oauth"]> = {},
+): MCPConfig {
+	return {
 		serverName: "test-server",
 		serverVersion: "1.0.0",
 		apiUrl: "http://localhost:8000",
@@ -39,7 +45,8 @@ class MockRequest extends EventEmitter implements Partial<IncomingMessage> {
 		headers?: Record<string, string>;
 		body?: Record<string, unknown> | string;
 		socket?: { remoteAddress?: string };
-	}) {	super();
+	}) {
+		super();
 		this.method = options.method ?? "GET";
 		this.url = options.url ?? "/";
 		this.headers = {
@@ -54,9 +61,10 @@ class MockRequest extends EventEmitter implements Partial<IncomingMessage> {
 			setImmediate(() => this.emit("end"));
 		} else {
 			setImmediate(() => {
-				const body = typeof options.body === "string" 
-					? options.body 
-					: JSON.stringify(options.body ?? {});
+				const body =
+					typeof options.body === "string"
+						? options.body
+						: JSON.stringify(options.body ?? {});
 				if (body) {
 					this.emit("data", Buffer.from(body));
 				}
@@ -84,10 +92,14 @@ function createMockResponse(): {
 			}
 		}),
 		end: mock.fn((data?: string | Buffer) => {
-			(res as{ _body?: string })._body = data ? (typeof data === "string" ? data : data.toString()) : "";
+			(res as { _body?: string })._body = data
+				? typeof data === "string"
+					? data
+					: data.toString()
+				: "";
 		}),
 	};
-	const getBody = () => (res as{_body?: string })._body ?? "";
+	const getBody = () => (res as { _body?: string })._body ?? "";
 	return { res, headers, getBody };
 }
 
@@ -118,14 +130,11 @@ describe("OAuth Server", () => {
 				method: "GET",
 			});
 			const { res } = createMockResponse();
-			const url = new URL("http://localhost:3000/.well-known/oauth-authorization-server");
-
-			await router(
-				req as IncomingMessage,
-				res as ServerResponse,
-				url,
-				{}
+			const url = new URL(
+				"http://localhost:3000/.well-known/oauth-authorization-server",
 			);
+
+			await router(req as IncomingMessage, res as ServerResponse, url, {});
 
 			assert.strictEqual(res.statusCode, 200);
 		});
@@ -138,45 +147,48 @@ describe("OAuth Server", () => {
 				method: "GET",
 			});
 			const { res } = createMockResponse();
-			const url = new URL("http://localhost:3000/.well-known/oauth-authorization-server");
-
-			await router(
-				req as IncomingMessage,
-				res as ServerResponse,
-				url,
-				{}
+			const url = new URL(
+				"http://localhost:3000/.well-known/oauth-authorization-server",
 			);
+
+			await router(req as IncomingMessage, res as ServerResponse, url, {});
 
 			assert.strictEqual(res.statusCode, 404);
 		});
 
 		it("metadata includes required RFC 8414 fields", async () => {
-			const config = createMockConfig({ enabled: true, issuer: "http://localhost:3000" });
+			const config = createMockConfig({
+				enabled: true,
+				issuer: "http://localhost:3000",
+			});
 			const router = createOAuthRouter(config);
 			const req = new MockRequest({
 				url: "/.well-known/oauth-authorization-server",
 				method: "GET",
 			});
 			const { res, getBody } = createMockResponse();
-			const url = new URL("http://localhost:3000/.well-known/oauth-authorization-server");
-
-			await router(
-				req as IncomingMessage,
-				res as ServerResponse,
-				url,
-				{}
+			const url = new URL(
+				"http://localhost:3000/.well-known/oauth-authorization-server",
 			);
 
+			await router(req as IncomingMessage, res as ServerResponse, url, {});
+
 			assert.strictEqual(res.statusCode, 200, "Should return 200 status");
-			
+
 			const body = getBody();
 			assert.ok(body.length > 0, "Response body should not be empty");
-			
+
 			const metadata = JSON.parse(body);
 			assert.ok(metadata.issuer, "Should have issuer");
-			assert.ok(metadata.authorization_endpoint, "Should have authorization_endpoint");
+			assert.ok(
+				metadata.authorization_endpoint,
+				"Should have authorization_endpoint",
+			);
 			assert.ok(metadata.token_endpoint, "Should have token_endpoint");
-			assert.ok(Array.isArray(metadata.response_types_supported), "Should have response_types_supported array");
+			assert.ok(
+				Array.isArray(metadata.response_types_supported),
+				"Should have response_types_supported array",
+			);
 		});
 	});
 
@@ -204,12 +216,7 @@ describe("OAuth Server", () => {
 			const { res } = createMockResponse();
 			const url = new URL("http://localhost:3000/oauth/register");
 
-			await router(
-				req as IncomingMessage,
-				res as ServerResponse,
-				url,
-				{}
-			);
+			await router(req as IncomingMessage, res as ServerResponse, url, {});
 
 			assert.strictEqual(res.statusCode, 201);
 		});
@@ -228,12 +235,7 @@ describe("OAuth Server", () => {
 			const { res } = createMockResponse();
 			const url = new URL("http://localhost:3000/oauth/register");
 
-			await router(
-				req as IncomingMessage,
-				res as ServerResponse,
-				url,
-				{}
-			);
+			await router(req as IncomingMessage, res as ServerResponse, url, {});
 
 			assert.strictEqual(res.statusCode, 400);
 		});
@@ -255,17 +257,20 @@ describe("OAuth Server", () => {
 				const { res } = createMockResponse();
 				const url = new URL("http://localhost:3000/oauth/register");
 
-				await router(
-					req as IncomingMessage,
-					res as ServerResponse,
-					url,
-					{}
-				);
+				await router(req as IncomingMessage, res as ServerResponse, url, {});
 
 				if (i < 20) {
-					assert.strictEqual(res.statusCode, 201, `Request ${i} should succeed (got ${res.statusCode})`);
+					assert.strictEqual(
+						res.statusCode,
+						201,
+						`Request ${i} should succeed (got ${res.statusCode})`,
+					);
 				} else {
-					assert.strictEqual(res.statusCode, 429, `Request ${i} should be rate limited (got ${res.statusCode})`);
+					assert.strictEqual(
+						res.statusCode,
+						429,
+						`Request ${i} should be rate limited (got ${res.statusCode})`,
+					);
 				}
 			}
 		});
@@ -280,14 +285,11 @@ describe("OAuth Server", () => {
 				method: "GET",
 			});
 			const { res } = createMockResponse();
-			const url = new URL("http://localhost:3000/oauth/authorize?client_id=invalid&redirect_uri=http://localhost:8080/callback&response_type=code&code_challenge=test&code_challenge_method=S256");
-
-			await router(
-				req as IncomingMessage,
-				res as ServerResponse,
-				url,
-				{}
+			const url = new URL(
+				"http://localhost:3000/oauth/authorize?client_id=invalid&redirect_uri=http://localhost:8080/callback&response_type=code&code_challenge=test&code_challenge_method=S256",
 			);
+
+			await router(req as IncomingMessage, res as ServerResponse, url, {});
 
 			assert.strictEqual(res.statusCode, 400);
 		});
@@ -316,14 +318,10 @@ describe("OAuth Server", () => {
 			const { res } = createMockResponse();
 			const url = new URL("http://localhost:3000/oauth/register");
 
-			await router(
-				req as IncomingMessage,
-				res as ServerResponse,
-				url,
-				{}
-			);
+			await router(req as IncomingMessage, res as ServerResponse, url, {});
 
-			assert.ok(res.statusCode! >= 400 && res.statusCode! < 500);
+			const status = res.statusCode ?? 0;
+			assert.ok(status >= 400 && status < 500);
 		});
 	});
 });

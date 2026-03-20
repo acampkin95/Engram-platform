@@ -7,7 +7,9 @@ Recency score formula: 2^(-age_days / half_life_days)
 from __future__ import annotations
 
 import math
-from datetime import UTC, datetime
+from datetime import datetime
+
+from memory_system.compat import UTC
 
 
 class MemoryDecay:

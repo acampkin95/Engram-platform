@@ -11,8 +11,10 @@ import time
 import traceback
 from collections import Counter, deque
 from contextlib import asynccontextmanager, suppress
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any
+
+from memory_system.compat import UTC
 
 from fastapi import (
     Depends,
@@ -776,10 +778,10 @@ async def search_memories(request_obj: Request, request: SearchRequest):
     start_dt = None
     end_dt = None
     if request.start_date:
-        with contextlib.suppress(ValueError, TypeError):
+        with suppress(ValueError, TypeError):
             start_dt = datetime.fromisoformat(request.start_date.replace("Z", "+00:00"))
     if request.end_date:
-        with contextlib.suppress(ValueError, TypeError):
+        with suppress(ValueError, TypeError):
             end_dt = datetime.fromisoformat(request.end_date.replace("Z", "+00:00"))
 
     results = await _memory_system.search(

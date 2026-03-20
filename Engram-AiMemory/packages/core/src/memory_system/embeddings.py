@@ -124,7 +124,7 @@ class OllamaEmbedder:
             self._client_pool[self._host] = httpx.AsyncClient(
                 base_url=self._host.rstrip("/"),
                 timeout=60.0,
-                limits=httpx.Limits(max_connections=10, max_keepalive=30),
+                limits=httpx.Limits(max_connections=10, max_keepalive_connections=30),
             )
         return self._client_pool[self._host]
 
@@ -155,6 +155,8 @@ class OllamaEmbedder:
     ) -> list[list[float]]:
         """Embed multiple texts efficiently (sequential for Ollama)."""
         return await self.embed(texts, task=task)
+
+
 # Singleton provider cache with memory limit
 _PROVIDER_CACHE_MAX_SIZE = 100
 _provider_cache: dict[str, "NomicEmbedder | OllamaEmbedder"] = {}
@@ -216,7 +218,10 @@ def get_embedding_provider(
         lru_key = _provider_cache_order.pop(0)
         old_provider = _provider_cache.pop(lru_key)
         # Clean up the specific client for this provider
-        if isinstance(old_provider, OllamaEmbedder) and old_provider._host in OllamaEmbedder._client_pool:
+        if (
+            isinstance(old_provider, OllamaEmbedder)
+            and old_provider._host in OllamaEmbedder._client_pool
+        ):
             OllamaEmbedder._client_pool[old_provider._host].close()
             del OllamaEmbedder._client_pool[old_provider._host]
         logger.warning(f"Evicted LRU embedding provider: {lru_key}")

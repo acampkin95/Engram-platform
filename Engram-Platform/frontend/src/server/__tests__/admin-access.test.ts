@@ -45,7 +45,10 @@ describe('admin-access', () => {
     authMock.mockResolvedValue({ userId: 'user_ops', sessionClaims: null, orgRole: null });
     const { requireAdminAccess } = await import('../admin-access');
 
-    await expect(requireAdminAccess()).resolves.toMatchObject({ userId: 'user_ops', mode: 'allowlist' });
+    await expect(requireAdminAccess()).resolves.toMatchObject({
+      userId: 'user_ops',
+      mode: 'allowlist',
+    });
   });
 
   it('allows admin role from session claims metadata', async () => {
@@ -56,7 +59,10 @@ describe('admin-access', () => {
     });
     const { requireAdminAccess } = await import('../admin-access');
 
-    await expect(requireAdminAccess()).resolves.toMatchObject({ userId: 'user_meta_admin', mode: 'metadata' });
+    await expect(requireAdminAccess()).resolves.toMatchObject({
+      userId: 'user_meta_admin',
+      mode: 'metadata',
+    });
   });
 
   it('rejects authenticated non-admin users', async () => {

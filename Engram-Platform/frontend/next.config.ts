@@ -33,7 +33,6 @@ const nextConfig: NextConfig = {
       'echarts',
       'echarts-for-react',
       '@xyflow/react',
-      'vis-network',
       'react-markdown',
       '@tanstack/react-table',
     ],
@@ -111,7 +110,7 @@ const nextConfig: NextConfig = {
           {
             key: 'X-Content-Security-Policy',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com; connect-src 'self' https://*.clerk.com https://clerk.com; font-src 'self' data:;",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://img.clerk.com https://clerk.com; connect-src 'self' https://*.clerk.com https://clerk.com; font-src 'self' data:;",
           },
         ],
       },
@@ -258,12 +257,12 @@ const nextConfig: NextConfig = {
   // TYPESCRIPT CONFIGURATION
   // =============================================================================
   typescript: {
-    // Don't fail build on type errors in production (CI should catch these)
-    ignoreBuildErrors: process.env.NODE_ENV === 'production',
+    // All TS errors resolved - fail build on regressions
+    ignoreBuildErrors: false,
   },
 
   eslint: {
-    // Don't fail build on eslint errors in production
+    // Using Biome instead of ESLint
     ignoreDuringBuilds: true,
   },
 

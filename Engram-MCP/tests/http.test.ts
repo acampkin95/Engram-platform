@@ -4,8 +4,8 @@
  * Tests HTTP streaming transport session management, CORS, and request handling.
  */
 
-import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
+import { afterEach, beforeEach, describe, it } from "node:test";
 
 describe("HTTP Transport", () => {
 	describe("CORS handling", () => {

@@ -25,6 +25,8 @@ export type SystemMetricsHistoryPoint = {
 
 export async function persistSystemMetricsSnapshot(snapshot: {
   summary: SnapshotSummary;
+  services?: unknown[];
+  resources?: unknown[];
   maintenance?: Record<string, unknown>;
 }) {
   const now = new Date();
@@ -73,7 +75,9 @@ function emptyHistory(now = new Date()): SystemMetricsHistoryPoint[] {
   return rows;
 }
 
-export async function getSystemMetricsHistory(now = new Date()): Promise<SystemMetricsHistoryPoint[]> {
+export async function getSystemMetricsHistory(
+  now = new Date(),
+): Promise<SystemMetricsHistoryPoint[]> {
   try {
     const start = new Date(now);
     start.setUTCDate(now.getUTCDate() - 6);
@@ -93,21 +97,26 @@ export async function getSystemMetricsHistory(now = new Date()): Promise<SystemM
     const rows = emptyHistory(now);
     const byDay = new Map(rows.map((row) => [row.day, row]));
 
-    stdout
+    String(stdout)
       .split('\n')
-      .map((line) => line.trim())
+      .map((line: string) => line.trim())
       .filter(Boolean)
-      .forEach((line) => {
+      .forEach((line: string) => {
         try {
           const parsed = JSON.parse(line) as PersistedSnapshot;
           const d = new Date(parsed.timestamp);
-          const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+          const key = d.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'UTC',
+          });
           const bucket = byDay.get(key);
           if (!bucket) return;
           bucket.incidents = Math.max(bucket.incidents, parsed.summary.incidentCount || 0);
-          const jobsRun = parsed.maintenance && typeof parsed.maintenance.jobs_run === 'number'
-            ? parsed.maintenance.jobs_run
-            : 0;
+          const jobsRun =
+            parsed.maintenance && typeof parsed.maintenance.jobs_run === 'number'
+              ? parsed.maintenance.jobs_run
+              : 0;
           bucket.maintenanceRuns = Math.max(bucket.maintenanceRuns, jobsRun);
         } catch {
           // ignore malformed rows

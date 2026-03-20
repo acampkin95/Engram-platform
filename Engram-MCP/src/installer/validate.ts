@@ -33,7 +33,11 @@ function httpGetStatus(urlString: string): Promise<number> {
 		}
 
 		const isHttps = parsedUrl.protocol === "https:";
-		const port = parsedUrl.port ? Number.parseInt(parsedUrl.port, 10) : isHttps ? 443 : 80;
+		const port = parsedUrl.port
+			? Number.parseInt(parsedUrl.port, 10)
+			: isHttps
+				? 443
+				: 80;
 
 		const options = {
 			hostname: parsedUrl.hostname,
@@ -61,7 +65,9 @@ function httpGetStatus(urlString: string): Promise<number> {
 	});
 }
 
-export async function validateInstall(options: ValidateOptions): Promise<ValidationResult> {
+export async function validateInstall(
+	options: ValidateOptions,
+): Promise<ValidationResult> {
 	const checks: Array<{ name: string; passed: boolean; message: string }> = [];
 	const { transport, serverPort, apiUrl } = options;
 
@@ -142,7 +148,11 @@ export async function validateInstall(options: ValidateOptions): Promise<Validat
 
 	// ── Check 4: Hookify rules present ────────────────────────────────────────
 	try {
-		const hookifyRulePath = join(process.cwd(), ".claude", "hookify.memory-recall.local.md");
+		const hookifyRulePath = join(
+			process.cwd(),
+			".claude",
+			"hookify.memory-recall.local.md",
+		);
 		await stat(hookifyRulePath);
 		checks.push({
 			name: "Hookify rules present",
@@ -153,7 +163,8 @@ export async function validateInstall(options: ValidateOptions): Promise<Validat
 		checks.push({
 			name: "Hookify rules present",
 			passed: false,
-			message: ".claude/hookify.memory-recall.local.md not found — did hookify rules copy succeed?",
+			message:
+				".claude/hookify.memory-recall.local.md not found — did hookify rules copy succeed?",
 		});
 	}
 

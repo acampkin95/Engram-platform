@@ -146,7 +146,9 @@ export type ListMemoriesInput = z.infer<typeof ListMemoriesSchema>;
 export type BatchAddMemoriesInput = z.infer<typeof BatchAddMemoriesSchema>;
 export type BuildContextInput = z.infer<typeof BuildContextSchema>;
 export type RagQueryInput = z.infer<typeof RagQuerySchema>;
-export type ConsolidateMemoriesInput = z.infer<typeof ConsolidateMemoriesSchema>;
+export type ConsolidateMemoriesInput = z.infer<
+	typeof ConsolidateMemoriesSchema
+>;
 export type CleanupExpiredInput = z.infer<typeof CleanupExpiredSchema>;
 
 export type AddEntityInput = z.infer<typeof AddEntitySchema>;
@@ -157,7 +159,14 @@ export type QueryGraphInput = z.infer<typeof QueryGraphSchema>;
 // Investigation tool schemas
 // ============================================
 
-export const SourceTypeSchema = z.enum(["WEB", "PDF", "EMAIL", "CSV", "EXCEL", "MANUAL"]);
+export const SourceTypeSchema = z.enum([
+	"WEB",
+	"PDF",
+	"EMAIL",
+	"CSV",
+	"EXCEL",
+	"MANUAL",
+]);
 
 export const CreateMatterSchema = z.object({
 	matter_id: z.string().min(1, "Matter ID is required"),
@@ -218,7 +227,9 @@ export function validate<T>(schema: z.ZodSchema<T>, input: unknown): T {
 export function createSafeParser<T>(schema: z.ZodSchema<T>) {
 	return (
 		input: unknown,
-	): { success: true; data: T } | { success: false; error: InvalidInputError } => {
+	):
+		| { success: true; data: T }
+		| { success: false; error: InvalidInputError } => {
 		const result = schema.safeParse(input);
 
 		if (!result.success) {
@@ -229,7 +240,10 @@ export function createSafeParser<T>(schema: z.ZodSchema<T>) {
 
 			return {
 				success: false,
-				error: new InvalidInputError(`Validation failed: ${issues.join("; ")}`, { issues }),
+				error: new InvalidInputError(
+					`Validation failed: ${issues.join("; ")}`,
+					{ issues },
+				),
 			};
 		}
 
@@ -241,44 +255,48 @@ export const RunDecaySchema = z.object({
 	tenant_id: z.string().optional(),
 });
 
-
 // ============================================
 // Enhancement schemas
 // ============================================
 
 export const ExportMemoriesSchema = z.object({
-        format: z.enum(["json", "csv", "markdown"]).optional().default("json"),
-        tenant_id: z.string().optional(),
-        project_id: z.string().optional(),
-        tier: z.number().optional(),
+	format: z.enum(["json", "csv", "markdown"]).optional().default("json"),
+	tenant_id: z.string().optional(),
+	project_id: z.string().optional(),
+	tier: z.number().optional(),
 });
 
 export const BulkDeleteMemoriesSchema = z.object({
-        memory_ids: z.array(z.string()).optional(),
-        project_id: z.string().optional(),
-        tenant_id: z.string().optional(),
-        tier: z.number().optional(),
-        before_date: z.string().optional(),
+	memory_ids: z.array(z.string()).optional(),
+	project_id: z.string().optional(),
+	tenant_id: z.string().optional(),
+	tier: z.number().optional(),
+	before_date: z.string().optional(),
 });
 
 export const TriggerConfidenceSchema = z.object({
-        tenant_id: z.string().optional(),
+	tenant_id: z.string().optional(),
 });
 
 export const GetAnalyticsSchema = z.object({
-        tenant_id: z.string().optional(),
+	tenant_id: z.string().optional(),
 });
 
 export const GetSystemMetricsSchema = z.object({});
 
 export const ManageTenantSchema = z.object({
-        action: z.enum(["create", "list", "delete"]),
-        tenant_id: z.string().optional(),
-        name: z.string().optional(),
+	action: z.enum(["create", "list", "delete"]),
+	tenant_id: z.string().optional(),
+	name: z.string().optional(),
 });
 
-
-export const MemoryGrowthSchema = z.object({ tenant_id: z.string().optional() });
-export const ActivityTimelineSchema = z.object({ tenant_id: z.string().optional() });
+export const MemoryGrowthSchema = z.object({
+	tenant_id: z.string().optional(),
+});
+export const ActivityTimelineSchema = z.object({
+	tenant_id: z.string().optional(),
+});
 export const SearchStatsSchema = z.object({ tenant_id: z.string().optional() });
-export const KnowledgeGraphStatsSchema = z.object({ tenant_id: z.string().optional() });
+export const KnowledgeGraphStatsSchema = z.object({
+	tenant_id: z.string().optional(),
+});

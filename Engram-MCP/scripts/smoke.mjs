@@ -1,8 +1,8 @@
 import { PROMPTS, renderPrompt } from "../dist/prompts.js";
 import {
-	parseResourceUri,
 	RESOURCE_TEMPLATES,
 	STATIC_RESOURCES,
+	parseResourceUri,
 } from "../dist/resources/enhanced-resources.js";
 import { handleResourceRequest } from "../dist/resources/memory-resources.js";
 import { handleEntityTool } from "../dist/tools/entity-tools.js";
@@ -42,11 +42,21 @@ try {
 		await handleMemoryTool("add_memory", {}, mockClient);
 		assert(false, "add_memory should reject invalid input");
 	} catch (e) {
-		assert(String(e.message).includes("Validation failed"), "add_memory validates input");
+		assert(
+			String(e.message).includes("Validation failed"),
+			"add_memory validates input",
+		);
 	}
 
-	const okAdd = await handleMemoryTool("add_memory", { content: "hello" }, mockClient);
-	assert(!!okAdd && Array.isArray(okAdd.content), "add_memory works with valid input");
+	const okAdd = await handleMemoryTool(
+		"add_memory",
+		{ content: "hello" },
+		mockClient,
+	);
+	assert(
+		!!okAdd && Array.isArray(okAdd.content),
+		"add_memory works with valid input",
+	);
 
 	try {
 		await handleEntityTool(
@@ -56,12 +66,19 @@ try {
 		);
 		assert(false, "add_relation should reject invalid target entity");
 	} catch (e) {
-		assert(String(e.message).includes("Validation failed"), "add_relation validates input");
+		assert(
+			String(e.message).includes("Validation failed"),
+			"add_relation validates input",
+		);
 	}
 
-	assert(Array.isArray(ALL_TOOLS) && ALL_TOOLS.length > 0, "tool definitions exported");
 	assert(
-		Array.isArray(STATIC_RESOURCES) && STATIC_RESOURCES.some((r) => r.uri === "memory://stats"),
+		Array.isArray(ALL_TOOLS) && ALL_TOOLS.length > 0,
+		"tool definitions exported",
+	);
+	assert(
+		Array.isArray(STATIC_RESOURCES) &&
+			STATIC_RESOURCES.some((r) => r.uri === "memory://stats"),
 		"static resources exported",
 	);
 	assert(
@@ -78,11 +95,17 @@ try {
 	);
 
 	const tiers = await handleResourceRequest("memory://tiers", mockClient);
-	assert(tiers.contents[0].text.includes("Project"), "tiers resource returns docs");
+	assert(
+		tiers.contents[0].text.includes("Project"),
+		"tiers resource returns docs",
+	);
 
 	assert(Array.isArray(PROMPTS) && PROMPTS.length > 0, "prompts exported");
 	const rendered = renderPrompt("remember_context", { content: "x" });
-	assert(typeof rendered === "string" && rendered.includes("store"), "prompt rendering works");
+	assert(
+		typeof rendered === "string" && rendered.includes("store"),
+		"prompt rendering works",
+	);
 
 	console.log(`SMOKE_RESULT failures=${failures}`);
 	process.exit(failures ? 1 : 0);

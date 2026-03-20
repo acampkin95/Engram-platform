@@ -261,12 +261,12 @@ See [`docs/01-deployment-manual.md`](docs/01-deployment-manual.md) and [`PRODUCT
 
 ## Status
 
-**Current:** ~70% complete -- In active development
+**Current:** ~75% complete -- In active development (baselined 2026-03-17)
 **Roadmap:** [`PROJECT_ROADMAP.md`](PROJECT_ROADMAP.md)
 
-| Component | Test Coverage | Overall |
-|-----------|--------------|---------|
-| AiMemory | ~80% (target 95%) | 70% |
-| AiCrawler | ~58% (target 85%) | 65% |
-| MCP Server | 381 tests passing | 80% |
-| Platform | Baseline needed (target 80%) | 45% |
+| Component | Test Coverage | Tests | Overall |
+|-----------|--------------|-------|---------|
+| AiMemory | 78% (4049 stmts) | 883 pass, 18 fail | 70% |
+| AiCrawler | 81% (12468 stmts) | 2393 pass | 75% |
+| MCP Server | unmeasured | 381 pass | 80% |
+| Platform | 79% stmts, 72% branch | 318 pass | 60% |

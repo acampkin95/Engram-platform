@@ -63,6 +63,15 @@ fi
 python -m ruff check app/ || print_error "Crawler Ruff Linter"
 print_success "AI Crawler"
 
+# 5. Shell script checks
+print_step "Checking shell scripts (ShellCheck)"
+if command -v shellcheck &>/dev/null; then
+    shellcheck -S warning "$ROOT_DIR/scripts/deploy-unified.sh" "$ROOT_DIR/scripts/quality-gate.sh" || print_error "ShellCheck"
+    print_success "Shell Scripts"
+else
+    echo -e "${YELLOW}⚠ shellcheck not installed — skipping (install: brew install shellcheck)${NC}"
+fi
+
 echo -e "\n${GREEN}=======================================${NC}"
 echo -e "${GREEN}      ALL QUALITY GATES PASSED!        ${NC}"
 echo -e "${GREEN}=======================================${NC}"

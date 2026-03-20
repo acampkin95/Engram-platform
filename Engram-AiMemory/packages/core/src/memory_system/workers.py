@@ -27,10 +27,13 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from rich.console import Console
+
+from memory_system.compat import UTC
+from memory_system.temporal import TemporalExtractor
 
 if TYPE_CHECKING:
     from memory_system.ai_provider import AIRouter
@@ -241,9 +244,7 @@ class MaintenanceScheduler:
             except Exception:
                 available = False
 
-        if not available and not (self._ai_router or self._ollama):
-            available = False
-        elif not self._ai_router and not self._ollama:
+        if not available and not (self._ai_router or self._ollama) or not self._ai_router and not self._ollama:
             available = False
 
         self._ai_available = available

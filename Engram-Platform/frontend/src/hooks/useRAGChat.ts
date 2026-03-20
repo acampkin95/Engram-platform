@@ -128,7 +128,7 @@ export function useRAGChat({
         });
         if (searchData?.results) {
           contextMemories = searchData.results;
-          contextMemoryIds = contextMemories.map((m) => m.memory_id);
+          contextMemoryIds = contextMemories.map((m) => m.memory_id ?? m.id).filter(Boolean);
         }
       } catch {
         // Memory search failed — degrade gracefully, continue without context

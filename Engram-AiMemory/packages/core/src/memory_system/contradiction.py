@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from datetime import UTC
 from enum import StrEnum
 from typing import Any
 
+from memory_system.compat import UTC
 from memory_system.memory import Memory
 
 
@@ -43,7 +43,9 @@ class MultiFactorResolver:
         # Direction of diff: positive means A > B
         conf_direction = 1 if memory_a.overall_confidence > memory_b.overall_confidence else -1
 
-        corroboration_diff = (len(memory_a.supporting_evidence_ids) - len(memory_b.supporting_evidence_ids)) * 0.20
+        corroboration_diff = (
+            len(memory_a.supporting_evidence_ids) - len(memory_b.supporting_evidence_ids)
+        ) * 0.20
         # Positive means A > B
 
         # Simplified temporal relevance: newer is better
@@ -51,8 +53,10 @@ class MultiFactorResolver:
         time_b = memory_b.updated_at or memory_b.created_at
 
         # Make them tz-aware for comparison if needed
-        if time_a.tzinfo is None: time_a = time_a.replace(tzinfo=UTC)
-        if time_b.tzinfo is None: time_b = time_b.replace(tzinfo=UTC)
+        if time_a.tzinfo is None:
+            time_a = time_a.replace(tzinfo=UTC)
+        if time_b.tzinfo is None:
+            time_b = time_b.replace(tzinfo=UTC)
 
         time_diff_days = (time_a - time_b).total_seconds() / 86400.0
         temporal_relevance = min(1.0, max(-1.0, time_diff_days / 30.0)) * 0.20
@@ -102,7 +106,7 @@ class MultiFactorResolver:
                             memory_id_b=str(similar.id),
                             contradiction_type=ContradictionType.FACTUAL_CONTRADICTION,
                             confidence=0.8,
-                            details={"method": "llm_detection"}
+                            details={"method": "llm_detection"},
                         )
                     )
             except Exception:

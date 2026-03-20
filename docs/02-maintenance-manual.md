@@ -15,11 +15,12 @@
 5. [Log Management](#log-management)
 6. [Resource Monitoring](#resource-monitoring)
 7. [Update Procedures](#update-procedures)
-8. [Performance Tuning](#performance-tuning)
-9. [Memory System Maintenance](#memory-system-maintenance)
-10. [Container Maintenance](#container-maintenance)
-11. [Security Maintenance](#security-maintenance)
-12. [Disaster Recovery](#disaster-recovery)
+8. [Codemods and One-Time Fix Scripts](#codemods-and-one-time-fix-scripts)
+9. [Performance Tuning](#performance-tuning)
+10. [Memory System Maintenance](#memory-system-maintenance)
+11. [Container Maintenance](#container-maintenance)
+12. [Security Maintenance](#security-maintenance)
+13. [Disaster Recovery](#disaster-recovery)
 
 ---
 
@@ -617,6 +618,35 @@ docker compose up -d
 
 echo "Rollback completed. Verify services."
 ```
+
+---
+
+## Codemods and One-Time Fix Scripts
+
+During development, various `fix_*.py` and `fix_*.js` scripts were used for one-time refactoring operations such as syntax corrections, type fixes, and client code transformations. These were not database migrations or repeatable operations.
+
+### Current Status
+
+All fix scripts have been archived to `archive/2026-03/` as of March 2026. No `make migrate` or equivalent migration command is needed for deployment. The codebase does not use a formal migration framework for application code.
+
+### Historical Script Locations
+
+| Archive Path | Original Location | Purpose |
+|-------------|-------------------|---------|
+| `archive/2026-03/platform-fix-scripts/` | `Engram-Platform/` | Client syntax fixes, type fixes, perf fixes |
+| `archive/2026-03/root-session-docs/` | Repository root | Session changelogs and QA summaries |
+| `archive/2026-03/engram-aimemory/` | `Engram-AiMemory/` | Research prototypes, stale patches |
+
+### If You Need to Write a New Fix Script
+
+1. Place it in a `scripts/` subdirectory of the relevant subproject, not in the project root.
+2. Add a brief header comment explaining what it does and when it should be run.
+3. Run it, verify the result, then either delete it or move it to `archive/` with a note.
+4. Do not leave fix scripts in source roots where they may confuse contributors.
+
+### Database Schema Changes
+
+Weaviate schema changes are handled via `update_weaviate_schema.py` in `Engram-AiMemory/packages/core/src/memory_system/`. This script is idempotent and can be re-run safely. It is not part of the deployment pipeline but can be invoked manually if schema drift is suspected.
 
 ---
 

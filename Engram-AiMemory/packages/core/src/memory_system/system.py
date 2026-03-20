@@ -3,11 +3,14 @@ Main MemorySystem class - orchestrates all memory operations.
 """
 
 import asyncio
+import contextlib
 import hashlib
 from collections import Counter
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any
 from uuid import UUID
+
+from memory_system.compat import UTC
 
 from rich.console import Console
 
@@ -1156,10 +1159,8 @@ class MemorySystem:
     async def close(self) -> None:
         """Close all connections and release resources."""
         if self._ollama and hasattr(self._ollama, "aclose"):
-            try:
+            with contextlib.suppress(Exception):
                 await self._ollama.aclose()
-            except Exception:
-                pass
         await self._weaviate.close()
         await self._cache.close()
         self._initialized = False

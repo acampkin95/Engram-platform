@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { type ElementType, memo } from 'react';
 import { cn } from '@/src/lib/utils';
 
-type SystemSection = 'crawler' | 'memory' | 'intelligence';
+type SystemSection = 'crawler' | 'memory' | 'intelligence' | 'admin';
 
 interface NavItemProps {
   href: string;
@@ -15,16 +15,18 @@ interface NavItemProps {
   collapsed?: boolean;
 }
 
-const sectionActiveColors = {
-  crawler: 'text-[#9B7DE0] bg-[#9B7DE0]/10',
-  memory: 'text-[#2EC4C4] bg-[#2EC4C4]/10',
-  intelligence: 'text-[#F2A93B] bg-[#F2A93B]/10',
+const sectionActiveColors: Record<SystemSection, string> = {
+  crawler: 'text-[var(--color-violet-bright)] bg-[var(--color-violet-bright)]/10',
+  memory: 'text-[var(--color-teal)] bg-[var(--color-teal)]/10',
+  intelligence: 'text-[var(--color-amber)] bg-[var(--color-amber)]/10',
+  admin: 'text-[var(--color-rose)] bg-[var(--color-rose)]/10',
 };
 
-const sectionIconColors = {
-  crawler: 'text-[#9B7DE0]',
-  memory: 'text-[#2EC4C4]',
-  intelligence: 'text-[#F2A93B]',
+const sectionIconColors: Record<SystemSection, string> = {
+  crawler: 'text-[var(--color-violet-bright)]',
+  memory: 'text-[var(--color-teal)]',
+  intelligence: 'text-[var(--color-amber)]',
+  admin: 'text-[var(--color-rose)]',
 };
 
 export const NavItem = memo(function NavItem({
@@ -36,7 +38,11 @@ export const NavItem = memo(function NavItem({
   collapsed = false,
 }: NavItemProps) {
   return (
-    <Link href={href} title={collapsed ? label : undefined}>
+    <Link
+      href={href}
+      title={collapsed ? label : undefined}
+      aria-current={isActive ? 'page' : undefined}
+    >
       <m.div
         whileHover={{ x: isActive ? 0 : 2 }}
         transition={{ duration: 0.12 }}
@@ -45,13 +51,13 @@ export const NavItem = memo(function NavItem({
           collapsed ? 'px-2 py-2.5 justify-center' : 'px-3 py-2.5',
           isActive
             ? sectionActiveColors[section]
-            : 'text-[#5c5878] hover:text-[#f0eef8] hover:bg-[#1e1e3a]/50',
+            : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-white/[0.04]',
         )}
       >
         <Icon
           className={cn(
             'w-4 h-4 flex-shrink-0',
-            isActive ? sectionIconColors[section] : 'text-[#5c5878]',
+            isActive ? sectionIconColors[section] : 'text-[var(--color-text-muted)]',
           )}
         />
         {!collapsed && <span className="truncate">{label}</span>}

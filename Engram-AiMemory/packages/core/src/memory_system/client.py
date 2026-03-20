@@ -4,7 +4,7 @@ Weaviate client with 3-tier memory schema management.
 
 import json
 import os
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from weaviate import WeaviateClient
 from rich.console import Console
 from tenacity import retry, stop_after_attempt, wait_exponential
+
+from memory_system.compat import UTC
 
 from memory_system.config import (
     ENTITY_COLLECTION,

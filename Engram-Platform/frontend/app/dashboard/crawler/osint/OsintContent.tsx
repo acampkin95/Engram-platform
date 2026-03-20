@@ -178,7 +178,18 @@ export default function OsintContent() {
 
   const handleLaunch = async () => {
     const trimmed = target.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      setLaunchError('Target URL is required');
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(trimmed);
+    } catch {
+      setLaunchError('Invalid URL. Please enter a valid URL (e.g., https://example.com)');
+      return;
+    }
 
     setIsLaunching(true);
     setLaunchError(null);
@@ -316,14 +327,19 @@ export default function OsintContent() {
       <SectionHeader title="OSINT" breadcrumb={['CRAWLER', 'OSINT']} />
 
       {/* Search bar */}
-      <SearchInput
-        placeholder="Enter target URL, domain, or keyword..."
-        value={target}
-        onChange={setTarget}
-        onSearch={setTarget}
-        debounceMs={0}
-        className="w-full"
-      />
+      <div>
+        <SearchInput
+          placeholder="Enter target URL, domain, or keyword..."
+          value={target}
+          onChange={setTarget}
+          onSearch={setTarget}
+          debounceMs={0}
+          className="w-full"
+        />
+        <p className="text-xs text-[#5c5878] mt-1.5">
+          Examples: https://example.com, example.com, or keywords for domain discovery
+        </p>
+      </div>
 
       {/* Crawl configuration */}
       <Card>

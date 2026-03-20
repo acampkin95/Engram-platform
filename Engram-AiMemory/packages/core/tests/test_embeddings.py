@@ -8,8 +8,9 @@ test the real logic (prefixing, dimension handling, factory routing).
 from __future__ import annotations
 
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
+import httpx
 import pytest
 
 from memory_system.embeddings import (
@@ -46,9 +47,7 @@ class TestNomicEmbedder:
             embedder = NomicEmbedder()
             embedder._load()
 
-        mock_st_class.assert_called_once_with(
-            NomicEmbedder.MODEL_NAME, trust_remote_code=True
-        )
+        mock_st_class.assert_called_once_with(NomicEmbedder.MODEL_NAME, trust_remote_code=True)
         assert embedder._model is mock_model
 
     def test_load_only_once(self) -> None:
@@ -86,7 +85,14 @@ class TestNomicEmbedder:
         embedder = NomicEmbedder()
         embedder._model = mock_model
 
-        with patch.dict(sys.modules, {"torch": mock_torch_module, "torch.nn": mock_torch_module.nn, "torch.nn.functional": mock_functional}):
+        with patch.dict(
+            sys.modules,
+            {
+                "torch": mock_torch_module,
+                "torch.nn": mock_torch_module.nn,
+                "torch.nn.functional": mock_functional,
+            },
+        ):
             result = embedder.embed(["hello", "world"], task="search_document")
 
         # Verify model.encode was called with prefixed texts
@@ -175,27 +181,30 @@ class TestBGEReranker:
 
 
 class TestOllamaEmbedder:
-    def test_init_creates_httpx_client(self) -> None:
-        with patch("httpx.Client") as mock_client_cls:
-            embedder = OllamaEmbedder(host="http://localhost:11434")
-        mock_client_cls.assert_called_once()
-        call_kwargs = mock_client_cls.call_args
-        assert call_kwargs[1]["base_url"] == "http://localhost:11434"
-    def test_init_strips_trailing_slash(self) -> None:
-        with patch("httpx.Client") as mock_client_cls:
-            embedder = OllamaEmbedder(host="http://localhost:11434/")
-        call_args = mock_client_cls.call_args
-        assert call_args[1]["base_url"] == "http://localhost:11434"
+    def test_init_creates_pooled_client_on_first_use(self) -> None:
+        """Client is created lazily via _get_client(), not in __init__."""
+        embedder = OllamaEmbedder(host="http://localhost:11434")
+        assert "http://localhost:11434" not in OllamaEmbedder._client_pool
+        client = embedder._get_client()
+        assert "http://localhost:11434" in OllamaEmbedder._client_pool
+        assert isinstance(client, httpx.AsyncClient)
+
+    def test_init_stores_host_strips_slash(self) -> None:
+        embedder = OllamaEmbedder(host="http://localhost:11434/")
+        assert embedder._host == "http://localhost:11434/"
+
     def test_embed_one_calls_api(self) -> None:
-        mock_client = MagicMock()
+        mock_client = AsyncMock()
         mock_response = MagicMock()
         mock_response.json.return_value = {"embedding": [0.1, 0.2, 0.3]}
-        mock_client.post.return_value = mock_response
+        mock_client.post = AsyncMock(return_value=mock_response)
 
-        with patch("httpx.Client", return_value=mock_client):
-            embedder = OllamaEmbedder(host="http://localhost:11434")
+        embedder = OllamaEmbedder(host="http://localhost:11434")
+        OllamaEmbedder._client_pool["http://localhost:11434"] = mock_client
 
-        result = embedder._embed_one("test text")
+        import asyncio
+
+        result = asyncio.get_event_loop().run_until_complete(embedder._embed_one("test text"))
 
         mock_client.post.assert_called_once_with(
             "/api/embeddings",
@@ -203,52 +212,67 @@ class TestOllamaEmbedder:
         )
         mock_response.raise_for_status.assert_called_once()
         assert result == [0.1, 0.2, 0.3]
-    def test_embed_processes_multiple_texts_sequentially(self) -> None:
-        mock_client = MagicMock()
+
+    async def test_embed_processes_multiple_texts_sequentially(self) -> None:
+        mock_client = AsyncMock()
         responses = [
             MagicMock(json=MagicMock(return_value={"embedding": [0.1]})),
             MagicMock(json=MagicMock(return_value={"embedding": [0.2]})),
         ]
-        mock_client.post.side_effect = responses
+        mock_client.post = AsyncMock(side_effect=responses)
 
-        with patch("httpx.Client", return_value=mock_client):
-            embedder = OllamaEmbedder(host="http://localhost:11434")
+        embedder = OllamaEmbedder(host="http://localhost:11434")
+        OllamaEmbedder._client_pool["http://localhost:11434"] = mock_client
 
-        result = embedder.embed(["text1", "text2"])
+        result = await embedder.embed(["text1", "text2"])
         assert result == [[0.1], [0.2]]
         assert mock_client.post.call_count == 2
-    def test_embed_query_delegates(self) -> None:
-        with patch("httpx.Client"):
-            embedder = OllamaEmbedder(host="http://localhost:11434")
-        embedder._embed_one = MagicMock(return_value=[0.5])
-        result = embedder.embed_query("query text")
+
+    async def test_embed_query_delegates(self) -> None:
+        embedder = OllamaEmbedder(host="http://localhost:11434")
+        embedder._embed_one = AsyncMock(return_value=[0.5])
+        result = await embedder.embed_query("query text")
         embedder._embed_one.assert_called_once_with("query text")
         assert result == [0.5]
-    def test_embed_document_delegates(self) -> None:
-        with patch("httpx.Client"):
-            embedder = OllamaEmbedder(host="http://localhost:11434")
-        embedder._embed_one = MagicMock(return_value=[0.5])
-        result = embedder.embed_document("doc text")
+
+    async def test_embed_document_delegates(self) -> None:
+        embedder = OllamaEmbedder(host="http://localhost:11434")
+        embedder._embed_one = AsyncMock(return_value=[0.5])
+        result = await embedder.embed_document("doc text")
         embedder._embed_one.assert_called_once_with("doc text")
-    def test_embed_batch_delegates_to_embed(self) -> None:
-        with patch("httpx.Client"):
-            embedder = OllamaEmbedder(host="http://localhost:11434")
-        embedder.embed = MagicMock(return_value=[[0.1], [0.2]])
-        result = embedder.embed_batch(["a", "b"])
+        assert result == [0.5]
+
+    async def test_embed_batch_delegates_to_embed(self) -> None:
+        embedder = OllamaEmbedder(host="http://localhost:11434")
+        embedder.embed = AsyncMock(return_value=[[0.1], [0.2]])
+        result = await embedder.embed_batch(["a", "b"])
         embedder.embed.assert_called_once_with(["a", "b"], task="search_document")
-    def test_close_closes_client(self) -> None:
+
+    def test_close_via_cache_clear(self) -> None:
         mock_client = MagicMock()
-        with patch("httpx.Client", return_value=mock_client):
-            embedder = OllamaEmbedder(host="http://localhost:11434")
-        embedder.close()
-        mock_client.close.assert_called_once()
+        mock_client.close = MagicMock()
+        OllamaEmbedder._client_pool["http://localhost:11434"] = mock_client
+
+        embedder = OllamaEmbedder(host="http://localhost:11434")
+        from memory_system.embeddings import (
+            _provider_cache,
+            _provider_cache_order,
+            clear_embedding_provider_cache,
+        )
+
+        _provider_cache["ollama"] = embedder
+        _provider_cache_order.append("ollama")
+
+        clear_embedding_provider_cache()
+
+        mock_client.close.assert_called()
+
     def test_custom_model_and_dimension(self) -> None:
-        with patch("httpx.Client"):
-            embedder = OllamaEmbedder(
-                host="http://localhost:11434",
-                model="custom-model",
-                dimension=512,
-            )
+        embedder = OllamaEmbedder(
+            host="http://localhost:11434",
+            model="custom-model",
+            dimension=512,
+        )
         assert embedder._model == "custom-model"
         assert embedder._dimension == 512
         assert embedder.DIMENSION == 512

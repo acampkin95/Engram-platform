@@ -1,6 +1,6 @@
 {
-  "reporter": ["text", "html", "json-summary"],
-  "all": true,
-  "include": ["src/**/*.ts"],
-  "exclude": ["dist/**", "tests/**"]
+	"reporter": ["text", "html", "json-summary"],
+	"all": true,
+	"include": ["src/**/*.ts"],
+	"exclude": ["dist/**", "tests/**"]
 }

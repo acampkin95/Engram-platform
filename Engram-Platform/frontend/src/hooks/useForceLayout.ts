@@ -5,9 +5,13 @@ import {
   forceSimulation,
   forceX,
   forceY,
+  type SimulationLinkDatum,
   type SimulationNodeDatum,
 } from 'd3-force';
 import { useEffect } from 'react';
+
+/** D3 simulation node with React Flow node fields preserved */
+type SimNode = SimulationNodeDatum & { id: string; position: { x: number; y: number } };
 
 type UseForceLayoutOptions = {
   strength?: number;
@@ -26,27 +30,28 @@ export function useForceLayout({ strength = -300, distance = 100 }: UseForceLayo
     // Filter out nodes that don't need layout (like parents/children if using groups)
     const nodesToLayout = nodes.filter((n) => !n.parentId);
 
-    const simulationNodes = nodesToLayout.map((node) => ({
+    const simulationNodes: SimNode[] = nodesToLayout.map((node) => ({
       ...node,
       x: node.position.x || Math.random() * 500,
       y: node.position.y || Math.random() * 500,
     }));
 
-    const simulationLinks = edges
+    const simulationLinks: SimulationLinkDatum<SimNode>[] = edges
       .map((edge) => ({
-        // biome-ignore lint/suspicious/noExplicitAny: D3 node reference
-        source: simulationNodes.find((n) => n.id === edge.source) as any,
-        // biome-ignore lint/suspicious/noExplicitAny: D3 node reference
-        target: simulationNodes.find((n) => n.id === edge.target) as any,
+        source: simulationNodes.find((n) => n.id === edge.source) as SimNode | undefined,
+        target: simulationNodes.find((n) => n.id === edge.target) as SimNode | undefined,
       }))
-      .filter((link) => link.source && link.target);
+      .filter(
+        (link): link is { source: SimNode; target: SimNode } =>
+          link.source !== undefined && link.target !== undefined,
+      );
 
-    const simulation = forceSimulation(simulationNodes as import('d3-force').SimulationNodeDatum[])
+    const simulation = forceSimulation<SimNode>(simulationNodes)
       .force('charge', forceManyBody().strength(strength))
       .force(
         'link',
-        forceLink(simulationLinks)
-          .id((d: SimulationNodeDatum) => d.id)
+        forceLink<SimNode, SimulationLinkDatum<SimNode>>(simulationLinks)
+          .id((d) => d.id)
           .distance(distance),
       )
       .force('x', forceX(0).strength(0.05))
@@ -55,7 +60,7 @@ export function useForceLayout({ strength = -300, distance = 100 }: UseForceLayo
         setNodes((currentNodes) => {
           return currentNodes.map((node) => {
             const simNode = simulationNodes.find((n) => n.id === node.id);
-            if (simNode) {
+            if (simNode && simNode.x !== undefined && simNode.y !== undefined) {
               return {
                 ...node,
                 position: { x: simNode.x, y: simNode.y },

@@ -186,7 +186,8 @@ export const MEMORY_TOOLS: Tool[] = [
 	},
 	{
 		name: "list_memories",
-		description: "Get statistics and overview of stored memories across all tiers.",
+		description:
+			"Get statistics and overview of stored memories across all tiers.",
 		inputSchema: {
 			type: "object",
 			properties: {
@@ -401,110 +402,173 @@ export const MEMORY_TOOLS: Tool[] = [
 		},
 	},
 
-        {
-                name: "export_memories",
-                description: "Export memories to a specific format (json, csv, markdown).",
-                inputSchema: {
-                        type: "object",
-                        properties: {
-                                format: {
-                                        type: "string",
-                                        enum: ["json", "csv", "markdown"],
-                                        description: "Format to export to",
-                                        default: "json",
-                                },
-                                tenant_id: { type: "string" },
-                                project_id: { type: "string" },
-                                tier: { type: "number" },
-                        },
-                },
-                annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-        },
-        {
-                name: "bulk_delete_memories",
-                description: "Bulk delete memories matching specific criteria.",
-                inputSchema: {
-                        type: "object",
-                        properties: {
-                                memory_ids: { type: "array", items: { type: "string" } },
-                                project_id: { type: "string" },
-                                tenant_id: { type: "string" },
-                                tier: { type: "number" },
-                                before_date: { type: "string", description: "ISO date string" },
-                        },
-                },
-                annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
-        },
-        {
-                name: "trigger_confidence_maintenance",
-                description: "Trigger confidence maintenance and contradiction detection.",
-                inputSchema: {
-                        type: "object",
-                        properties: {
-                                tenant_id: { type: "string" },
-                        },
-                },
-                annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-        },
-        {
-                name: "get_analytics",
-                description: "Get aggregated analytics for the memory system.",
-                inputSchema: {
-                        type: "object",
-                        properties: {
-                                tenant_id: { type: "string" },
-                        },
-                },
-                annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-        },
-        {
-                name: "get_system_metrics",
-                description: "Get detailed system metrics and performance data.",
-                inputSchema: {
-                        type: "object",
-                        properties: {},
-                },
-                annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-        },
-        {
-                name: "manage_tenant",
-                description: "Create, list, or delete tenants for multi-tenant deployments.",
-                inputSchema: {
-                        type: "object",
-                        properties: {
-                                action: { type: "string", enum: ["create", "list", "delete"] },
-                                tenant_id: { type: "string" },
-                                name: { type: "string" },
-                        },
-                        required: ["action"],
-                },
-                annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
-        },
+	{
+		name: "export_memories",
+		description: "Export memories to a specific format (json, csv, markdown).",
+		inputSchema: {
+			type: "object",
+			properties: {
+				format: {
+					type: "string",
+					enum: ["json", "csv", "markdown"],
+					description: "Format to export to",
+					default: "json",
+				},
+				tenant_id: { type: "string" },
+				project_id: { type: "string" },
+				tier: { type: "number" },
+			},
+		},
+		annotations: {
+			readOnlyHint: true,
+			destructiveHint: false,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	},
+	{
+		name: "bulk_delete_memories",
+		description: "Bulk delete memories matching specific criteria.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				memory_ids: { type: "array", items: { type: "string" } },
+				project_id: { type: "string" },
+				tenant_id: { type: "string" },
+				tier: { type: "number" },
+				before_date: { type: "string", description: "ISO date string" },
+			},
+		},
+		annotations: {
+			readOnlyHint: false,
+			destructiveHint: true,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	},
+	{
+		name: "trigger_confidence_maintenance",
+		description: "Trigger confidence maintenance and contradiction detection.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				tenant_id: { type: "string" },
+			},
+		},
+		annotations: {
+			readOnlyHint: false,
+			destructiveHint: false,
+			idempotentHint: false,
+			openWorldHint: false,
+		},
+	},
+	{
+		name: "get_analytics",
+		description: "Get aggregated analytics for the memory system.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				tenant_id: { type: "string" },
+			},
+		},
+		annotations: {
+			readOnlyHint: true,
+			destructiveHint: false,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	},
+	{
+		name: "get_system_metrics",
+		description: "Get detailed system metrics and performance data.",
+		inputSchema: {
+			type: "object",
+			properties: {},
+		},
+		annotations: {
+			readOnlyHint: true,
+			destructiveHint: false,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	},
+	{
+		name: "manage_tenant",
+		description:
+			"Create, list, or delete tenants for multi-tenant deployments.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				action: { type: "string", enum: ["create", "list", "delete"] },
+				tenant_id: { type: "string" },
+				name: { type: "string" },
+			},
+			required: ["action"],
+		},
+		annotations: {
+			readOnlyHint: false,
+			destructiveHint: true,
+			idempotentHint: false,
+			openWorldHint: false,
+		},
+	},
 
-        {
-                name: "get_memory_growth",
-                description: "Get memory growth analytics data.",
-                inputSchema: { type: "object", properties: { tenant_id: { type: "string" } } },
-                annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-        },
-        {
-                name: "get_activity_timeline",
-                description: "Get user activity timeline analytics.",
-                inputSchema: { type: "object", properties: { tenant_id: { type: "string" } } },
-                annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-        },
-        {
-                name: "get_search_stats",
-                description: "Get memory search statistics.",
-                inputSchema: { type: "object", properties: { tenant_id: { type: "string" } } },
-                annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-        },
-        {
-                name: "get_kg_stats",
-                description: "Get knowledge graph statistics.",
-                inputSchema: { type: "object", properties: { tenant_id: { type: "string" } } },
-                annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-        },
+	{
+		name: "get_memory_growth",
+		description: "Get memory growth analytics data.",
+		inputSchema: {
+			type: "object",
+			properties: { tenant_id: { type: "string" } },
+		},
+		annotations: {
+			readOnlyHint: true,
+			destructiveHint: false,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	},
+	{
+		name: "get_activity_timeline",
+		description: "Get user activity timeline analytics.",
+		inputSchema: {
+			type: "object",
+			properties: { tenant_id: { type: "string" } },
+		},
+		annotations: {
+			readOnlyHint: true,
+			destructiveHint: false,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	},
+	{
+		name: "get_search_stats",
+		description: "Get memory search statistics.",
+		inputSchema: {
+			type: "object",
+			properties: { tenant_id: { type: "string" } },
+		},
+		annotations: {
+			readOnlyHint: true,
+			destructiveHint: false,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	},
+	{
+		name: "get_kg_stats",
+		description: "Get knowledge graph statistics.",
+		inputSchema: {
+			type: "object",
+			properties: { tenant_id: { type: "string" } },
+		},
+		annotations: {
+			readOnlyHint: true,
+			destructiveHint: false,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	},
 ];
 
 /**
@@ -552,7 +616,8 @@ export const ENTITY_TOOLS: Tool[] = [
 	},
 	{
 		name: "add_relation",
-		description: "Add a relationship between two entities in the knowledge graph.",
+		description:
+			"Add a relationship between two entities in the knowledge graph.",
 		inputSchema: {
 			type: "object",
 			properties: {
@@ -562,7 +627,8 @@ export const ENTITY_TOOLS: Tool[] = [
 				},
 				relation_type: {
 					type: "string",
-					description: "Type of relationship (e.g., works_on, depends_on, knows, uses)",
+					description:
+						"Type of relationship (e.g., works_on, depends_on, knows, uses)",
 				},
 				target_entity: {
 					type: "string",
@@ -592,7 +658,8 @@ export const ENTITY_TOOLS: Tool[] = [
 	},
 	{
 		name: "query_graph",
-		description: "Query the knowledge graph for entities and their relationships.",
+		description:
+			"Query the knowledge graph for entities and their relationships.",
 		inputSchema: {
 			type: "object",
 			properties: {
@@ -631,7 +698,8 @@ export const ENTITY_TOOLS: Tool[] = [
 			properties: {
 				include_details: {
 					type: "boolean",
-					description: "Whether to include detailed component health information",
+					description:
+						"Whether to include detailed component health information",
 					default: false,
 				},
 			},
@@ -645,4 +713,8 @@ export const ENTITY_TOOLS: Tool[] = [
 	},
 ];
 
-export const ALL_TOOLS: Tool[] = [...MEMORY_TOOLS, ...ENTITY_TOOLS, ...INVESTIGATION_TOOLS];
+export const ALL_TOOLS: Tool[] = [
+	...MEMORY_TOOLS,
+	...ENTITY_TOOLS,
+	...INVESTIGATION_TOOLS,
+];

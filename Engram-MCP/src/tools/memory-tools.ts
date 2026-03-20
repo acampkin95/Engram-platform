@@ -1,32 +1,32 @@
-import { z } from "zod";
+import type { z } from "zod";
 /**
  * Memory tools for MCP server
  */
 
 import type { MemoryAPIClient } from "../client.js";
 import {
-        AddMemorySchema,
-        BatchAddMemoriesSchema,
-        BuildContextSchema,
-        CleanupExpiredSchema,
-        ConsolidateMemoriesSchema,
-        DeleteMemorySchema,
-        GetMemorySchema,
-        ListMemoriesSchema,
-        RagQuerySchema,
-        RunDecaySchema,
-        SearchMemorySchema,
-        ExportMemoriesSchema,
-        BulkDeleteMemoriesSchema,
-        TriggerConfidenceSchema,
-        GetAnalyticsSchema,
-        GetSystemMetricsSchema,
-        ManageTenantSchema,
-        MemoryGrowthSchema,
-        ActivityTimelineSchema,
-        SearchStatsSchema,
-        KnowledgeGraphStatsSchema,
-        validate,
+	ActivityTimelineSchema,
+	AddMemorySchema,
+	BatchAddMemoriesSchema,
+	BuildContextSchema,
+	BulkDeleteMemoriesSchema,
+	CleanupExpiredSchema,
+	ConsolidateMemoriesSchema,
+	DeleteMemorySchema,
+	ExportMemoriesSchema,
+	GetAnalyticsSchema,
+	GetMemorySchema,
+	GetSystemMetricsSchema,
+	KnowledgeGraphStatsSchema,
+	ListMemoriesSchema,
+	ManageTenantSchema,
+	MemoryGrowthSchema,
+	RagQuerySchema,
+	RunDecaySchema,
+	SearchMemorySchema,
+	SearchStatsSchema,
+	TriggerConfidenceSchema,
+	validate,
 } from "../schemas.js";
 
 export async function handleMemoryTool(
@@ -90,7 +90,11 @@ export async function handleMemoryTool(
 
 		case "get_memory": {
 			const input = validate(GetMemorySchema, args);
-			const memory = await client.getMemory(input.memory_id, input.tier, input.tenant_id);
+			const memory = await client.getMemory(
+				input.memory_id,
+				input.tier,
+				input.tenant_id,
+			);
 
 			if (!memory) {
 				return {
@@ -119,7 +123,11 @@ export async function handleMemoryTool(
 
 		case "delete_memory": {
 			const input = validate(DeleteMemorySchema, args);
-			const success = await client.deleteMemory(input.memory_id, input.tier, input.tenant_id);
+			const success = await client.deleteMemory(
+				input.memory_id,
+				input.tier,
+				input.tenant_id,
+			);
 
 			return {
 				content: [
@@ -330,91 +338,238 @@ export async function handleMemoryTool(
 			};
 		}
 
+		case "export_memories": {
+			const input = validate(ExportMemoriesSchema, args) as z.infer<
+				typeof ExportMemoriesSchema
+			>;
+			const result = await client.exportMemories({
+				format: input.format,
+				tenant_id: input.tenant_id,
+				project_id: input.project_id,
+				tier: input.tier,
+			});
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify(
+							{ ...((result as Record<string, unknown>) ?? {}), success: true },
+							null,
+							2,
+						),
+					},
+				],
+			};
+		}
 
-                case "export_memories": {
-                        const input = validate(ExportMemoriesSchema, args) as z.infer<typeof ExportMemoriesSchema>;
-                        const result = await client.exportMemories({
-                                format: input.format,
-                                tenant_id: input.tenant_id,
-                                project_id: input.project_id,
-                                tier: input.tier,
-                        });
-                        return { content: [{ type: "text", text: JSON.stringify({ ...((result as any) || {}), success: true }, null, 2) }] };
-                }
+		case "bulk_delete_memories": {
+			const input = validate(BulkDeleteMemoriesSchema, args) as z.infer<
+				typeof BulkDeleteMemoriesSchema
+			>;
+			const result = await client.bulkDeleteMemories({
+				memory_ids: input.memory_ids,
+				project_id: input.project_id,
+				tenant_id: input.tenant_id,
+				tier: input.tier,
+				before_date: input.before_date,
+			});
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify(
+							{
+								success: true,
+								message: `Deleted ${result.deleted_count} memories`,
+							},
+							null,
+							2,
+						),
+					},
+				],
+			};
+		}
 
-                case "bulk_delete_memories": {
-                        const input = validate(BulkDeleteMemoriesSchema, args) as z.infer<typeof BulkDeleteMemoriesSchema>;
-                        const result = await client.bulkDeleteMemories({
-                                memory_ids: input.memory_ids,
-                                project_id: input.project_id,
-                                tenant_id: input.tenant_id,
-                                tier: input.tier,
-                                before_date: input.before_date,
-                        });
-                        return { content: [{ type: "text", text: JSON.stringify({ success: true, message: `Deleted ${result.deleted_count} memories` }, null, 2) }] };
-                }
+		case "trigger_confidence_maintenance": {
+			const input = validate(TriggerConfidenceSchema, args) as z.infer<
+				typeof TriggerConfidenceSchema
+			>;
+			const result = await client.triggerConfidenceMaintenance({
+				tenant_id: input.tenant_id,
+			});
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify(
+							{ ...((result as Record<string, unknown>) ?? {}), success: true },
+							null,
+							2,
+						),
+					},
+				],
+			};
+		}
 
-                case "trigger_confidence_maintenance": {
-                        const input = validate(TriggerConfidenceSchema, args) as z.infer<typeof TriggerConfidenceSchema>;
-                        const result = await client.triggerConfidenceMaintenance({ tenant_id: input.tenant_id });
-                        return { content: [{ type: "text", text: JSON.stringify({ ...((result as any) || {}), success: true }, null, 2) }] };
-                }
+		case "get_analytics": {
+			const input = validate(GetAnalyticsSchema, args) as z.infer<
+				typeof GetAnalyticsSchema
+			>;
+			const result = await client.getAnalytics(input.tenant_id);
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify({ success: true, analytics: result }, null, 2),
+					},
+				],
+			};
+		}
 
-                case "get_analytics": {
-                        const input = validate(GetAnalyticsSchema, args) as z.infer<typeof GetAnalyticsSchema>;
-                        const result = await client.getAnalytics(input.tenant_id);
-                        return { content: [{ type: "text", text: JSON.stringify({ success: true, analytics: result }, null, 2) }] };
-                }
+		case "get_system_metrics": {
+			validate(GetSystemMetricsSchema, args);
+			const result = await client.getSystemMetrics();
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify({ success: true, metrics: result }, null, 2),
+					},
+				],
+			};
+		}
 
-                case "get_system_metrics": {
-                        validate(GetSystemMetricsSchema, args);
-                        const result = await client.getSystemMetrics();
-                        return { content: [{ type: "text", text: JSON.stringify({ success: true, metrics: result }, null, 2) }] };
-                }
+		case "manage_tenant": {
+			const input = validate(ManageTenantSchema, args) as {
+				action: string;
+				tenant_id?: string;
+				name?: string;
+			};
+			if (input.action === "create") {
+				if (!input.tenant_id || !input.name)
+					throw new Error("tenant_id and name are required for create");
+				const result = await client.createTenant({
+					tenant_id: input.tenant_id,
+					name: input.name,
+				});
+				return {
+					content: [
+						{
+							type: "text",
+							text: JSON.stringify(
+								{
+									...((result as Record<string, unknown>) ?? {}),
+									success: true,
+								},
+								null,
+								2,
+							),
+						},
+					],
+				};
+			}
+			if (input.action === "list") {
+				const result = await client.listTenants();
+				return {
+					content: [
+						{
+							type: "text",
+							text: JSON.stringify(
+								{
+									...((result as Record<string, unknown>) ?? {}),
+									success: true,
+								},
+								null,
+								2,
+							),
+						},
+					],
+				};
+			}
+			if (input.action === "delete") {
+				if (!input.tenant_id)
+					throw new Error("tenant_id is required for delete");
+				const result = await client.deleteTenant(input.tenant_id);
+				return {
+					content: [
+						{
+							type: "text",
+							text: JSON.stringify(
+								{
+									...((result as Record<string, unknown>) ?? {}),
+									success: true,
+								},
+								null,
+								2,
+							),
+						},
+					],
+				};
+			}
+			return null;
+		}
 
-                case "manage_tenant": {
-                        const input = validate(ManageTenantSchema, args) as { action: string; tenant_id?: string; name?: string };
-                        if (input.action === "create") {
-                                if (!input.tenant_id || !input.name) throw new Error("tenant_id and name are required for create");
-                                const result = await client.createTenant({ tenant_id: input.tenant_id, name: input.name });
-                                return { content: [{ type: "text", text: JSON.stringify({ ...((result as any) || {}), success: true }, null, 2) }] };
-                        } else if (input.action === "list") {
-                                const result = await client.listTenants();
-                                return { content: [{ type: "text", text: JSON.stringify({ ...((result as any) || {}), success: true }, null, 2) }] };
-                        } else if (input.action === "delete") {
-                                if (!input.tenant_id) throw new Error("tenant_id is required for delete");
-                                const result = await client.deleteTenant(input.tenant_id);
-                                return { content: [{ type: "text", text: JSON.stringify({ ...((result as any) || {}), success: true }, null, 2) }] };
-                        }
-                        return null;
-                }
+		case "get_memory_growth": {
+			const input = validate(MemoryGrowthSchema, args) as z.infer<
+				typeof MemoryGrowthSchema
+			>;
+			const result = await client.getMemoryGrowthAnalytics(input.tenant_id);
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify({ success: true, data: result }, null, 2),
+					},
+				],
+			};
+		}
 
+		case "get_activity_timeline": {
+			const input = validate(ActivityTimelineSchema, args) as z.infer<
+				typeof ActivityTimelineSchema
+			>;
+			const result = await client.getActivityTimeline(input.tenant_id);
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify({ success: true, data: result }, null, 2),
+					},
+				],
+			};
+		}
 
-                case "get_memory_growth": {
-                        const input = validate(MemoryGrowthSchema, args) as z.infer<typeof MemoryGrowthSchema>;
-                        const result = await client.getMemoryGrowthAnalytics(input.tenant_id);
-                        return { content: [{ type: "text", text: JSON.stringify({ success: true, data: result }, null, 2) }] };
-                }
+		case "get_search_stats": {
+			const input = validate(SearchStatsSchema, args) as z.infer<
+				typeof SearchStatsSchema
+			>;
+			const result = await client.getSearchStats(input.tenant_id);
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify({ success: true, data: result }, null, 2),
+					},
+				],
+			};
+		}
 
-                case "get_activity_timeline": {
-                        const input = validate(ActivityTimelineSchema, args) as z.infer<typeof ActivityTimelineSchema>;
-                        const result = await client.getActivityTimeline(input.tenant_id);
-                        return { content: [{ type: "text", text: JSON.stringify({ success: true, data: result }, null, 2) }] };
-                }
+		case "get_kg_stats": {
+			const input = validate(KnowledgeGraphStatsSchema, args) as z.infer<
+				typeof KnowledgeGraphStatsSchema
+			>;
+			const result = await client.getKnowledgeGraphStats(input.tenant_id);
+			return {
+				content: [
+					{
+						type: "text",
+						text: JSON.stringify({ success: true, data: result }, null, 2),
+					},
+				],
+			};
+		}
 
-                case "get_search_stats": {
-                        const input = validate(SearchStatsSchema, args) as z.infer<typeof SearchStatsSchema>;
-                        const result = await client.getSearchStats(input.tenant_id);
-                        return { content: [{ type: "text", text: JSON.stringify({ success: true, data: result }, null, 2) }] };
-                }
-
-                case "get_kg_stats": {
-                        const input = validate(KnowledgeGraphStatsSchema, args) as z.infer<typeof KnowledgeGraphStatsSchema>;
-                        const result = await client.getKnowledgeGraphStats(input.tenant_id);
-                        return { content: [{ type: "text", text: JSON.stringify({ success: true, data: result }, null, 2) }] };
-                }
-
-                default:
+		default:
 			return null;
 	}
 }

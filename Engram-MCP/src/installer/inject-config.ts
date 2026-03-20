@@ -71,7 +71,11 @@ export async function injectMCPConfig(options: InjectOptions): Promise<void> {
 	try {
 		const raw = await readFile(settingsPath, "utf-8");
 		const parsed: unknown = JSON.parse(raw);
-		if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+		if (
+			typeof parsed === "object" &&
+			parsed !== null &&
+			!Array.isArray(parsed)
+		) {
 			existingConfig = parsed as Record<string, unknown>;
 		}
 	} catch (err: unknown) {
@@ -108,5 +112,9 @@ export async function injectMCPConfig(options: InjectOptions): Promise<void> {
 		},
 	};
 
-	await writeFile(settingsPath, `${JSON.stringify(newConfig, null, 2)}\n`, "utf-8");
+	await writeFile(
+		settingsPath,
+		`${JSON.stringify(newConfig, null, 2)}\n`,
+		"utf-8",
+	);
 }

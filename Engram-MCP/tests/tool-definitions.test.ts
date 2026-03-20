@@ -1,22 +1,38 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import {
 	ALL_TOOLS,
 	ENTITY_TOOLS,
 	MEMORY_TOOLS,
 } from "../dist/tools/tool-definitions.js";
-import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // ============================================
 // Structural validation helpers
 // ============================================
 
 function assertValidTool(tool: Tool): void {
-	assert.ok(typeof tool.name === "string" && tool.name.length > 0, `Tool name must be non-empty string, got: ${tool.name}`);
-	assert.ok(typeof tool.description === "string" && tool.description.length > 0, `Tool '${tool.name}' must have a non-empty description`);
-	assert.ok(tool.inputSchema !== undefined, `Tool '${tool.name}' must have inputSchema`);
-	assert.equal(tool.inputSchema.type, "object", `Tool '${tool.name}' inputSchema.type must be 'object'`);
-	assert.ok(tool.inputSchema.properties !== undefined, `Tool '${tool.name}' must have properties`);
+	assert.ok(
+		typeof tool.name === "string" && tool.name.length > 0,
+		`Tool name must be non-empty string, got: ${tool.name}`,
+	);
+	assert.ok(
+		typeof tool.description === "string" && tool.description.length > 0,
+		`Tool '${tool.name}' must have a non-empty description`,
+	);
+	assert.ok(
+		tool.inputSchema !== undefined,
+		`Tool '${tool.name}' must have inputSchema`,
+	);
+	assert.equal(
+		tool.inputSchema.type,
+		"object",
+		`Tool '${tool.name}' inputSchema.type must be 'object'`,
+	);
+	assert.ok(
+		tool.inputSchema.properties !== undefined,
+		`Tool '${tool.name}' must have properties`,
+	);
 }
 
 // ============================================
@@ -56,25 +72,46 @@ describe("MEMORY_TOOLS", () => {
 
 	it("all tools have annotations", () => {
 		for (const tool of MEMORY_TOOLS) {
-			assert.ok(tool.annotations !== undefined, `Tool '${tool.name}' missing annotations`);
+			assert.ok(
+				tool.annotations !== undefined,
+				`Tool '${tool.name}' missing annotations`,
+			);
 		}
 	});
 
 	it("read-only tools are annotated correctly", () => {
-		const readOnlyTools = ["search_memory", "get_memory", "list_memories", "build_context", "rag_query"];
+		const readOnlyTools = [
+			"search_memory",
+			"get_memory",
+			"list_memories",
+			"build_context",
+			"rag_query",
+		];
 		for (const name of readOnlyTools) {
 			const tool = MEMORY_TOOLS.find((t) => t.name === name);
 			assert.ok(tool !== undefined, `Tool '${name}' not found`);
-			assert.equal(tool.annotations?.readOnlyHint, true, `Tool '${name}' should be readOnlyHint=true`);
+			assert.equal(
+				tool.annotations?.readOnlyHint,
+				true,
+				`Tool '${name}' should be readOnlyHint=true`,
+			);
 		}
 	});
 
 	it("destructive tools are annotated correctly", () => {
-		const destructiveTools = ["delete_memory", "consolidate_memories", "cleanup_expired"];
+		const destructiveTools = [
+			"delete_memory",
+			"consolidate_memories",
+			"cleanup_expired",
+		];
 		for (const name of destructiveTools) {
 			const tool = MEMORY_TOOLS.find((t) => t.name === name);
 			assert.ok(tool !== undefined, `Tool '${name}' not found`);
-			assert.equal(tool.annotations?.destructiveHint, true, `Tool '${name}' should be destructiveHint=true`);
+			assert.equal(
+				tool.annotations?.destructiveHint,
+				true,
+				`Tool '${name}' should be destructiveHint=true`,
+			);
 		}
 	});
 
@@ -131,7 +168,11 @@ describe("ALL_TOOLS", () => {
 	it("has no duplicate tool names", () => {
 		const names = ALL_TOOLS.map((t) => t.name);
 		const uniqueNames = new Set(names);
-		assert.equal(names.length, uniqueNames.size, `Duplicate tool names found: ${names.filter((n, i) => names.indexOf(n) !== i)}`);
+		assert.equal(
+			names.length,
+			uniqueNames.size,
+			`Duplicate tool names found: ${names.filter((n, i) => names.indexOf(n) !== i)}`,
+		);
 	});
 
 	it("every tool has valid structure", () => {
@@ -142,7 +183,11 @@ describe("ALL_TOOLS", () => {
 
 	it("every tool name uses snake_case convention", () => {
 		for (const tool of ALL_TOOLS) {
-			assert.match(tool.name, /^[a-z][a-z0-9_]*$/, `Tool '${tool.name}' should be snake_case`);
+			assert.match(
+				tool.name,
+				/^[a-z][a-z0-9_]*$/,
+				`Tool '${tool.name}' should be snake_case`,
+			);
 		}
 	});
 });

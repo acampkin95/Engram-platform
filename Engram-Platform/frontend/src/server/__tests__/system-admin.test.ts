@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { execShellMock } = vi.hoisted(() => ({
@@ -15,9 +16,16 @@ describe('system-admin', () => {
   });
 
   it('aggregates service health and controller status', async () => {
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'healthy', initialized: true }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'healthy', maintenance_queue: { jobs_run: 12 } }) })
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'healthy', initialized: true }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'healthy', maintenance_queue: { jobs_run: 12 } }),
+      })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'healthy' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ total_jobs: 42 }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'healthy' }) });
@@ -52,26 +60,29 @@ describe('system-admin', () => {
   it('rejects unsupported service control actions', async () => {
     const { runSystemControl } = await import('../system-admin');
 
-    await expect(runSystemControl({ target: 'memory-api', action: 'destroy' as never })).rejects.toThrow(
-      'Unsupported action',
-    );
+    await expect(
+      runSystemControl({ target: 'memory-api', action: 'destroy' as never }),
+    ).rejects.toThrow('Unsupported action');
   });
 
   it('rejects unsupported service targets', async () => {
     const { runSystemControl } = await import('../system-admin');
 
-    await expect(runSystemControl({ target: 'postgres', action: 'restart' })).rejects.toThrow(
-      'Unsupported target',
-    );
+    await expect(
+      runSystemControl({ target: 'postgres' as never, action: 'restart' }),
+    ).rejects.toThrow('Unsupported target');
   });
 
   it('builds seven day history buckets', async () => {
     const { buildSevenDayHistory } = await import('../system-admin');
-    const history = buildSevenDayHistory([
-      '[2026-03-10 10:00:00] [WARN] SERVICE UNHEALTHY memory-api',
-      '[2026-03-10 11:00:00] [ERROR] CRASH LOOP DETECTED crawler-api',
-      '[2026-03-12 09:00:00] [INFO] maintenance decay',
-    ], new Date('2026-03-16T12:00:00Z'));
+    const history = buildSevenDayHistory(
+      [
+        '[2026-03-10 10:00:00] [WARN] SERVICE UNHEALTHY memory-api',
+        '[2026-03-10 11:00:00] [ERROR] CRASH LOOP DETECTED crawler-api',
+        '[2026-03-12 09:00:00] [INFO] maintenance decay',
+      ],
+      new Date('2026-03-16T12:00:00Z'),
+    );
 
     expect(history).toHaveLength(7);
     expect(history.some((d) => d.incidents > 0)).toBe(true);

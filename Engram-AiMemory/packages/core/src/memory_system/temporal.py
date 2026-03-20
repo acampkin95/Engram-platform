@@ -19,10 +19,10 @@ class TemporalExtractor:
             return []
 
         prompt = f"""
-        Extract all chronological events from the following text. 
-        Format as a strict JSON list of objects with the keys: 
+        Extract all chronological events from the following text.
+        Format as a strict JSON list of objects with the keys:
         "event", "start_time" (ISO format), "end_time" (ISO format or null), "is_ongoing" (boolean).
-        
+
         Text: {text}
         """
 

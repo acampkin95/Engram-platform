@@ -230,14 +230,9 @@ export default function RootLayout({
                 function registerSW() {
                   // Delay SW registration to prioritize critical resources
                   setTimeout(function() {
-                    navigator.serviceWorker.register('/sw.js').then(
-                      function(registration) {
-                        console.log('SW registered: ', registration.scope);
-                      },
-                      function(err) {
-                        console.log('SW registration failed: ', err);
-                      }
-                    );
+                    navigator.serviceWorker.register('/sw.js').catch(function() {
+                      // SW registration failed silently
+                    });
                   }, 3000); // 3 second delay
                 }
               }
@@ -255,13 +250,15 @@ export default function RootLayout({
                 window.performance.mark('navigation-start');
               }
 
-              // Report Core Web Vitals to console in development
-              if (location.hostname === 'localhost' || location.hostname.includes('3002')) {
-                new PerformanceObserver((list) => {
-                  for (const entry of list.getEntries()) {
-                    console.log('[Web Vitals]', entry.name, entry.value);
-                  }
-                }).observe({ type: 'web-vitals' });
+              // Report Core Web Vitals in development only
+              if (location.hostname === 'localhost') {
+                try {
+                  new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                      console.debug('[Web Vitals]', entry.name, entry.value);
+                    }
+                  }).observe({ type: 'web-vitals' });
+                } catch(e) { /* web-vitals not supported */ }
               }
             `,
           }}

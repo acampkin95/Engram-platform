@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { withRetry, createRetryWrapper } from "../dist/retry.js";
 import { InvalidInputError, NetworkError } from "../dist/errors.js";
+import { createRetryWrapper, withRetry } from "../dist/retry.js";
 
 describe("withRetry", () => {
 	it("returns result on first success", async () => {
@@ -34,7 +34,9 @@ describe("withRetry", () => {
 		await assert.rejects(
 			() =>
 				withRetry(
-					async () => { throw new NetworkError("always fails"); },
+					async () => {
+						throw new NetworkError("always fails");
+					},
 					{
 						maxRetries: 2,
 						initialDelayMs: 1,
@@ -79,23 +81,22 @@ describe("withRetry", () => {
 
 	it("respects custom shouldRetry predicate", async () => {
 		let attempts = 0;
-		await assert.rejects(
-			() =>
-				withRetry(
-					async () => {
-						attempts++;
-						throw new NetworkError("fail");
-					},
-					{
-						maxRetries: 5,
-						initialDelayMs: 1,
-						maxDelayMs: 5,
-						backoffMultiplier: 1,
-						jitterFactor: 0,
-						shouldRetry: (_err, attempt) => attempt < 2,
-						onRetry: () => {},
-					},
-				),
+		await assert.rejects(() =>
+			withRetry(
+				async () => {
+					attempts++;
+					throw new NetworkError("fail");
+				},
+				{
+					maxRetries: 5,
+					initialDelayMs: 1,
+					maxDelayMs: 5,
+					backoffMultiplier: 1,
+					jitterFactor: 0,
+					shouldRetry: (_err, attempt) => attempt < 2,
+					onRetry: () => {},
+				},
+			),
 		);
 		// shouldRetry returns false when attempt >= 2, so only 2 attempts
 		assert.equal(attempts, 2);

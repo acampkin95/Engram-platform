@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 
-import type { AccessToken, OAuthClient } from "../src/auth/token-store.ts";
 import { RedisTokenStore } from "../src/auth/redis-token-store.ts";
+import type { AccessToken, OAuthClient } from "../src/auth/token-store.ts";
 
 class FakeRedisClient {
 	private readonly values = new Map<string, string>();
@@ -40,7 +40,9 @@ class FakeRedisClient {
 	}
 
 	async keys(pattern: string): Promise<string[]> {
-		const regex = new RegExp(`^${pattern.replace(/[-/\\^$+?.()|[\]{}]/g, "\\$&").replace(/\*/g, ".*")}$`);
+		const regex = new RegExp(
+			`^${pattern.replace(/[-/\\^$+?.()|[\]{}]/g, "\\$&").replace(/\*/g, ".*")}$`,
+		);
 		const result: string[] = [];
 		for (const key of this.values.keys()) {
 			this.deleteIfExpired(key);
@@ -128,7 +130,10 @@ describe("RedisTokenStore", () => {
 		});
 		await restartedStore.connect();
 
-		assert.equal(await restartedStore.getAccessToken(expiredToken.token), undefined);
+		assert.equal(
+			await restartedStore.getAccessToken(expiredToken.token),
+			undefined,
+		);
 		assert.equal(await restartedStore.isTokenValid(expiredToken.token), false);
 	});
 });

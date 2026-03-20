@@ -13,7 +13,8 @@
       "!.turbo",
       "!coverage",
       "!playwright-report",
-      "!test-results"
+      "!test-results",
+      "!.omc"
     ],
     "ignoreUnknown": true
   },
@@ -23,6 +24,18 @@
       "recommended": true
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",

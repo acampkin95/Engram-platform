@@ -39,7 +39,11 @@ describe("MemoryError", () => {
 	});
 
 	it("defaults retryable based on category (TRANSIENT = true)", () => {
-		const err = new MemoryError("t", ErrorCode.UNKNOWN, ErrorCategory.TRANSIENT);
+		const err = new MemoryError(
+			"t",
+			ErrorCode.UNKNOWN,
+			ErrorCategory.TRANSIENT,
+		);
 		assert.equal(err.retryable, true);
 	});
 
@@ -61,30 +65,50 @@ describe("MemoryError", () => {
 	});
 
 	it("stores retryAfter", () => {
-		const err = new MemoryError("x", ErrorCode.UNKNOWN, ErrorCategory.TRANSIENT, {
-			retryAfter: 30,
-		});
+		const err = new MemoryError(
+			"x",
+			ErrorCode.UNKNOWN,
+			ErrorCategory.TRANSIENT,
+			{
+				retryAfter: 30,
+			},
+		);
 		assert.equal(err.retryAfter, 30);
 	});
 
 	it("stores cause", () => {
 		const cause = new Error("root");
-		const err = new MemoryError("x", ErrorCode.UNKNOWN, ErrorCategory.TRANSIENT, { cause });
+		const err = new MemoryError(
+			"x",
+			ErrorCode.UNKNOWN,
+			ErrorCategory.TRANSIENT,
+			{ cause },
+		);
 		assert.equal(err.cause, cause);
 	});
 
 	it("stores context", () => {
-		const err = new MemoryError("x", ErrorCode.UNKNOWN, ErrorCategory.TRANSIENT, {
-			context: { key: "value" },
-		});
+		const err = new MemoryError(
+			"x",
+			ErrorCode.UNKNOWN,
+			ErrorCategory.TRANSIENT,
+			{
+				context: { key: "value" },
+			},
+		);
 		assert.deepEqual(err.context, { key: "value" });
 	});
 
 	it("toJSON returns serializable object", () => {
-		const err = new MemoryError("test", ErrorCode.NETWORK_ERROR, ErrorCategory.TRANSIENT, {
-			retryAfter: 5,
-			context: { foo: "bar" },
-		});
+		const err = new MemoryError(
+			"test",
+			ErrorCode.NETWORK_ERROR,
+			ErrorCategory.TRANSIENT,
+			{
+				retryAfter: 5,
+				context: { foo: "bar" },
+			},
+		);
 		const json = err.toJSON();
 		assert.equal(json.name, "MemoryError");
 		assert.equal(json.message, "test");
@@ -160,7 +184,9 @@ describe("Transient error subclasses", () => {
 
 describe("Client error subclasses", () => {
 	it("InvalidInputError is CLIENT and not retryable", () => {
-		const err = new InvalidInputError("bad input", { issues: ["missing field"] });
+		const err = new InvalidInputError("bad input", {
+			issues: ["missing field"],
+		});
 		assert.equal(err.name, "InvalidInputError");
 		assert.equal(err.code, ErrorCode.INVALID_INPUT);
 		assert.equal(err.category, ErrorCategory.CLIENT);
@@ -243,7 +269,10 @@ describe("createErrorFromStatus", () => {
 	it("includes response body in context", () => {
 		const err = createErrorFromStatus(500, "ISE", "some error body");
 		assert.ok(err.context !== undefined);
-		assert.equal((err.context as Record<string, unknown>).responseBody, "some error body");
+		assert.equal(
+			(err.context as Record<string, unknown>).responseBody,
+			"some error body",
+		);
 	});
 
 	it("parses Retry-After header for 429", () => {

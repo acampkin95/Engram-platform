@@ -4,12 +4,14 @@ Memory data models and types.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum, StrEnum
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
+
+from memory_system.compat import UTC
 
 
 class MemoryTier(int, Enum):

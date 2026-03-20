@@ -120,12 +120,12 @@ function transformToFlow(
       label: r.type,
       style: edgeStyle,
       labelStyle: {
-        fill: '#5c5878',
+        fill: 'var(--color-text-muted)',
         fontSize: 10,
         fontFamily: 'IBM Plex Mono, monospace',
       },
       labelBgStyle: {
-        fill: '#0d0b1a',
+        fill: 'var(--color-panel)',
         fillOpacity: 0.8,
       },
       animated: false,
@@ -264,8 +264,8 @@ export default function CrawlerKnowledgeGraphContent() {
             </ReactFlowProvider>
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-2">
-              <Network className="w-8 h-8 text-[#5c5878] mb-2" />
-              <p className="text-sm font-mono text-[#5c5878]">No graph data found</p>
+              <Network className="w-8 h-8 text-muted mb-2" />
+              <p className="text-sm font-mono text-muted">No graph data found</p>
               {filterText && (
                 <Button variant="ghost" size="sm" onClick={() => setFilterText('')}>
                   Clear filter
@@ -293,8 +293,8 @@ export default function CrawlerKnowledgeGraphContent() {
                 <div className="space-y-1.5 text-xs mt-3 pt-3 border-t border-white/[0.06]">
                   {entries.map(([key, val]) => (
                     <div key={key} className="flex flex-col gap-0.5 mb-2">
-                      <span className="text-[10px] font-mono text-[#5c5878] uppercase">{key}</span>
-                      <span className="text-[#a09bb8] break-words">{String(val)}</span>
+                      <span className="text-[10px] font-mono text-muted uppercase">{key}</span>
+                      <span className="text-secondary-foreground break-words">{String(val)}</span>
                     </div>
                   ))}
                 </div>

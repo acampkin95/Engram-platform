@@ -275,7 +275,9 @@ function MatterCard({ matter, isSelected, onSelect, onEdit, onDelete }: MatterCa
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs text-[#5c5878]">
           <Calendar className="w-3 h-3" />
-          <span className="font-mono">{format(new Date(matter.created_at), 'MMM d, yyyy')}</span>
+          <span className="font-mono">
+            {matter.created_at ? format(new Date(matter.created_at), 'MMM d, yyyy') : '—'}
+          </span>
         </div>
         {matter.lead_investigator && (
           <span className="text-xs text-[#5c5878] font-mono truncate max-w-[120px]">
@@ -465,7 +467,7 @@ function MatterDetailPanel({ matter, onClose }: MatterDetailPanelProps) {
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-[#5c5878]" />
             <span className="text-xs font-mono text-[#5c5878]">
-              {format(new Date(matter.created_at), 'MMM d, yyyy')}
+              {matter.created_at ? format(new Date(matter.created_at), 'MMM d, yyyy') : '—'}
             </span>
           </div>
           {matter.status && <Badge variant="memory">{matter.status}</Badge>}

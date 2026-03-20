@@ -69,7 +69,11 @@ class Logger {
 		return rest;
 	}
 
-	private formatEntry(level: LogLevel, message: string, context?: LogContext): LogEntry {
+	private formatEntry(
+		level: LogLevel,
+		message: string,
+		context?: LogContext,
+	): LogEntry {
 		const entry: LogEntry = {
 			level,
 			message,
@@ -79,7 +83,9 @@ class Logger {
 			entry.timestamp = new Date().toISOString();
 		}
 
-		const effectiveContext = this.requestIds ? context : this.omitRequestId(context);
+		const effectiveContext = this.requestIds
+			? context
+			: this.omitRequestId(context);
 
 		if (effectiveContext && Object.keys(effectiveContext).length > 0) {
 			entry.context = effectiveContext;
@@ -98,7 +104,8 @@ class Logger {
 				message: "Failed to serialize log entry",
 				context: {
 					originalMessage: entry.message,
-					serializationError: error instanceof Error ? error.message : String(error),
+					serializationError:
+						error instanceof Error ? error.message : String(error),
 				},
 			});
 		}
@@ -147,7 +154,11 @@ class Logger {
 	/**
 	 * Log tool execution start
 	 */
-	toolStart(tool: string, args: Record<string, unknown>, requestId?: string): void {
+	toolStart(
+		tool: string,
+		args: Record<string, unknown>,
+		requestId?: string,
+	): void {
 		this.debug(`Tool '${tool}' started`, {
 			tool,
 			operation: "start",
@@ -171,7 +182,12 @@ class Logger {
 	/**
 	 * Log tool execution failure
 	 */
-	toolError(tool: string, error: Error, durationMs: number, requestId?: string): void {
+	toolError(
+		tool: string,
+		error: Error,
+		durationMs: number,
+		requestId?: string,
+	): void {
 		this.error(`Tool '${tool}' failed: ${error.message}`, {
 			tool,
 			operation: "error",
@@ -220,7 +236,10 @@ class Logger {
 	/**
 	 * Log circuit breaker state change
 	 */
-	circuitBreaker(state: "open" | "half-open" | "closed", failures: number): void {
+	circuitBreaker(
+		state: "open" | "half-open" | "closed",
+		failures: number,
+	): void {
 		this.warn(`Circuit breaker ${state}`, {
 			operation: "circuit_breaker",
 			state,
@@ -231,7 +250,12 @@ class Logger {
 	/**
 	 * Log retry attempt
 	 */
-	retry(attempt: number, maxAttempts: number, delayMs: number, error: Error): void {
+	retry(
+		attempt: number,
+		maxAttempts: number,
+		delayMs: number,
+		error: Error,
+	): void {
 		this.warn(`Retry attempt ${attempt}/${maxAttempts} after ${delayMs}ms`, {
 			operation: "retry",
 			attempt,
@@ -248,7 +272,14 @@ class Logger {
 	 */
 	private sanitizeArgs(args: Record<string, unknown>): Record<string, unknown> {
 		const sanitized: Record<string, unknown> = {};
-		const sensitiveKeys = ["api_key", "apiKey", "password", "secret", "token", "credential"];
+		const sensitiveKeys = [
+			"api_key",
+			"apiKey",
+			"password",
+			"secret",
+			"token",
+			"credential",
+		];
 
 		for (const [key, value] of Object.entries(args)) {
 			if (sensitiveKeys.some((sk) => key.toLowerCase().includes(sk))) {

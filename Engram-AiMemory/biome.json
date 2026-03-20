@@ -1,7 +1,14 @@
 {
   "files": {
     "include": ["**"],
-    "ignore": ["**/.next/**", "**/node_modules/**", "**/dist/**", "**/.worktrees/**", "**/__tests__/**", "**/globals.css"]
+    "ignore": [
+      "**/.next/**",
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.worktrees/**",
+      "**/__tests__/**",
+      "**/globals.css"
+    ]
   },
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "organizeImports": {
@@ -53,5 +60,17 @@
     "formatter": {
       "indentWidth": 2
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": ["packages/cli/src/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "off"
+          }
+        }
+      }
+    }
+  ]
 }

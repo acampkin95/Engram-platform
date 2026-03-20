@@ -75,12 +75,14 @@ function CrawlerHealthCard({
     {
       label: 'Cache hit rate',
       value:
-        stats?.cache_hit_rate === undefined ? '—' : `${(stats.cache_hit_rate * 100).toFixed(1)}%`,
+        stats?.cache_hit_rate === undefined || stats?.cache_hit_rate === null
+          ? '—'
+          : `${(stats.cache_hit_rate * 100).toFixed(1)}%`,
     },
     {
       label: 'Avg crawl time',
       value:
-        stats?.average_crawl_time_ms === undefined
+        stats?.average_crawl_time_ms === undefined || stats?.average_crawl_time_ms === null
           ? '—'
           : `${stats.average_crawl_time_ms.toFixed(0)} ms`,
     },

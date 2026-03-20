@@ -1,5 +1,5 @@
-import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import { MemoryAPIClient } from "../dist/client.js";
 
 // Store original fetch
@@ -48,7 +48,7 @@ describe("MemoryAPIClient", () => {
 			const c = new MemoryAPIClient("http://localhost:8000");
 			assert.ok(c);
 			if (originalKey === undefined) {
-				delete process.env.AI_MEMORY_API_KEY;
+				process.env.AI_MEMORY_API_KEY = undefined;
 			} else {
 				process.env.AI_MEMORY_API_KEY = originalKey;
 			}
@@ -233,7 +233,9 @@ describe("MemoryAPIClient", () => {
 			};
 
 			client = new MemoryAPIClient("http://localhost:8000");
-			const result = await client.consolidateMemories({ tenant_id: "tenant-1" });
+			const result = await client.consolidateMemories({
+				tenant_id: "tenant-1",
+			});
 
 			assert.strictEqual(result.consolidated, 5);
 		});
@@ -399,7 +401,10 @@ describe("MemoryAPIClient", () => {
 			// @ts-expect-error - mocking fetch
 			global.fetch = async (url: string, options: RequestInit) => {
 				fetchCalls.push({ url, options });
-				return mockResponse({ tenant_id: "new-tenant", name: "Test Tenant" }, 201);
+				return mockResponse(
+					{ tenant_id: "new-tenant", name: "Test Tenant" },
+					201,
+				);
 			};
 
 			client = new MemoryAPIClient("http://localhost:8000");
@@ -550,7 +555,11 @@ describe("MemoryAPIClient", () => {
 			};
 
 			client = new MemoryAPIClient("http://localhost:8000");
-			const result = await client.findEntityByName("Entity", "person", "tenant-1");
+			const result = await client.findEntityByName(
+				"Entity",
+				"person",
+				"tenant-1",
+			);
 
 			assert.strictEqual(result?.name, "Entity");
 		});
@@ -562,7 +571,11 @@ describe("MemoryAPIClient", () => {
 			};
 
 			client = new MemoryAPIClient("http://localhost:8000");
-			const result = await client.findEntityByName("Nonexistent", "person", "tenant-1");
+			const result = await client.findEntityByName(
+				"Nonexistent",
+				"person",
+				"tenant-1",
+			);
 
 			assert.strictEqual(result, null);
 		});
@@ -631,10 +644,7 @@ describe("MemoryAPIClient", () => {
 
 			client = new MemoryAPIClient("http://localhost:8000");
 
-			await assert.rejects(
-				async () => await client.healthCheck(),
-				Error
-			);
+			await assert.rejects(async () => await client.healthCheck(), Error);
 		});
 
 		it("throws on 500 error", async () => {
@@ -656,13 +666,14 @@ describe("MemoryAPIClient", () => {
 
 			client = new MemoryAPIClient("http://localhost:8000");
 
-			await assert.rejects(async () =>
-				await client.addMemory({
-					content: "",
-					memory_type: "episodic",
-					tier: 1,
-					tenant_id: "tenant-1",
-				})
+			await assert.rejects(
+				async () =>
+					await client.addMemory({
+						content: "",
+						memory_type: "episodic",
+						tier: 1,
+						tenant_id: "tenant-1",
+					}),
 			);
 		});
 	});

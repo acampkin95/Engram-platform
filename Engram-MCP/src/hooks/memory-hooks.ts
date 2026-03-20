@@ -49,7 +49,10 @@ const SKIP_RECALL_TOOLS = new Set([
  * A single MemoryAPIClient is created and shared across both hooks.
  * All errors are caught and logged as warnings — hooks must never throw.
  */
-export function registerMemoryHooks(hookManager: HookManager, config: MCPConfig): void {
+export function registerMemoryHooks(
+	hookManager: HookManager,
+	config: MCPConfig,
+): void {
 	const client = new MemoryAPIClient(config.apiUrl);
 
 	// -------------------------------------------------------------------------
@@ -85,7 +88,9 @@ export function registerMemoryHooks(hookManager: HookManager, config: MCPConfig)
 				}
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
-				logger.warn(`Memory recall hook failed for tool "${ctx.toolName}": ${message}`);
+				logger.warn(
+					`Memory recall hook failed for tool "${ctx.toolName}": ${message}`,
+				);
 			}
 		},
 	});
@@ -106,7 +111,9 @@ export function registerMemoryHooks(hookManager: HookManager, config: MCPConfig)
 
 			try {
 				// Extract the first text block from the result content array
-				const firstTextBlock = ctx.result.content.find((block) => block.type === "text");
+				const firstTextBlock = ctx.result.content.find(
+					(block) => block.type === "text",
+				);
 				const resultText = (firstTextBlock?.text ?? "").slice(0, 450);
 
 				// Compose the memory entry and cap at 500 chars
@@ -118,7 +125,9 @@ export function registerMemoryHooks(hookManager: HookManager, config: MCPConfig)
 				});
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
-				logger.warn(`Memory store hook failed for tool "${ctx.toolName}": ${message}`);
+				logger.warn(
+					`Memory store hook failed for tool "${ctx.toolName}": ${message}`,
+				);
 			}
 		},
 	});

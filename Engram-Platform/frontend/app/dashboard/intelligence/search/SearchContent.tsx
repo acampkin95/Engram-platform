@@ -157,18 +157,22 @@ interface MemoryCardProps {
 }
 
 function MemoryCard({ result }: MemoryCardProps) {
+  const content = result.content || result.snippet || result.title || 'No content';
+  const memoryType = (result as unknown as { memory_type?: string }).memory_type || 'Memory';
+  const score = (result as unknown as { score?: number }).score ?? result.relevance_score;
+
   return (
     <div className="p-4 rounded-lg border border-[rgba(46,196,196,0.12)] bg-[rgba(46,196,196,0.04)] hover:border-[rgba(46,196,196,0.2)] hover:bg-[rgba(46,196,196,0.06)] transition-all duration-150 space-y-2.5">
       {/* Content */}
-      <p className="text-sm text-[#f0eef8] leading-relaxed">{truncate(result.content, 120)}</p>
+      <p className="text-sm text-[#f0eef8] leading-relaxed">{truncate(content, 120)}</p>
 
       {/* Meta row */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Badge variant="memory">{result.memory_type}</Badge>
+        <Badge variant="memory">{memoryType}</Badge>
         {result.project_id && <Badge variant="neutral">{result.project_id}</Badge>}
-        {result.score != null && (
+        {score != null && (
           <span className="text-xs text-[#5c5878] font-mono">
-            relevance: {result.score.toFixed(3)}
+            relevance: {(score as number).toFixed(3)}
           </span>
         )}
       </div>
