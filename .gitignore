@@ -172,8 +172,11 @@ session_*.md
 
 # One-off scripts
 add_*.js
+add_*.py
 patch-*.sh
 temp-*.sh
+fix_*.py
+fix_*.js
 
 # SQLite databases (development)
 *.db
@@ -206,3 +209,8 @@ coverage-final.json
 .env.*.bak
 .env.*.backup
 Engram-Platform/.env.backup.20260302-183217
+
+# Orphan/scratch files
+/*/1
+*/*/1
+/1
