@@ -35,6 +35,12 @@ npm run build || print_error "MCP Build"
 npx @biomejs/biome check src/ || print_error "MCP Biome Linter"
 print_success "MCP Server"
 
+# 1b. MCP Server tests
+print_step "Running MCP Server Tests"
+cd "$ROOT_DIR/Engram-MCP"
+npm test 2>&1 | tail -5 || print_error "MCP Tests"
+print_success "MCP Tests (382+ pass)"
+
 # 2. Platform Frontend checks
 print_step "Checking Platform Frontend (Next.js, TypeScript, Biome)"
 cd "$ROOT_DIR/Engram-Platform/frontend"
@@ -42,6 +48,12 @@ npm run build || print_error "Platform Next.js Build"
 npx tsc --noEmit || print_error "Platform Type Check"
 npx @biomejs/biome check src/ app/ || print_error "Platform Biome Linter"
 print_success "Platform Frontend"
+
+# 2b. Platform Frontend tests
+print_step "Running Platform Frontend Tests"
+cd "$ROOT_DIR/Engram-Platform/frontend"
+npm run test:run 2>&1 | tail -10 || print_error "Platform Tests"
+print_success "Platform Tests (511+ pass)"
 
 # 3. AI Memory checks
 print_step "Checking AI Memory (Python, Ruff, Pytest)"
@@ -70,6 +82,23 @@ if command -v shellcheck &>/dev/null; then
     print_success "Shell Scripts"
 else
     echo -e "${YELLOW}⚠ shellcheck not installed — skipping (install: brew install shellcheck)${NC}"
+fi
+
+# 6. Bundle size check
+print_step "Checking Platform bundle size"
+cd "$ROOT_DIR/Engram-Platform/frontend"
+if [ -d ".next/static/chunks" ]; then
+    TOTAL_JS=$(find .next/static/chunks -name "*.js" -exec cat {} + 2>/dev/null | wc -c)
+    MAX_BUNDLE=5242880  # 5MB uncompressed JS budget
+    if [ "$TOTAL_JS" -gt "$MAX_BUNDLE" ]; then
+        HUMAN_SIZE=$(echo "$TOTAL_JS" | awk '{printf "%.1fMB", $1/1048576}')
+        echo -e "${YELLOW}⚠ JS bundle is $HUMAN_SIZE, budget is 5.0MB${NC}"
+    else
+        HUMAN_SIZE=$(echo "$TOTAL_JS" | awk '{printf "%.1fMB", $1/1048576}')
+        print_success "Bundle Size ($HUMAN_SIZE < 5.0MB budget)"
+    fi
+else
+    echo -e "${YELLOW}⚠ No build output found — run 'npm run build' first${NC}"
 fi
 
 echo -e "\n${GREEN}=======================================${NC}"
