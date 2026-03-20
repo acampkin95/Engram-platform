@@ -1,6 +1,6 @@
 {
 	"name": "@engram/mcp",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Engram Unified MCP Server — dual transport (stdio + HTTP streaming), OAuth 2.1, hookify memory hooks, and streamlined installer",
 	"type": "module",
 	"main": "dist/index.js",

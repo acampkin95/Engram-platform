@@ -1,6 +1,6 @@
 [project]
 name = "ai-memory-system"
-version = "1.0.0"
+version = "1.1.0"
 description = "3-Tier AI Memory System with Weaviate, Redis, and MCP"
 readme = "README.md"
 requires-python = ">=3.11"

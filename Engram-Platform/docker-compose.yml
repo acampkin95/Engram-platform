@@ -24,7 +24,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-https://memory.velocitydigi.com,https://engram.velocitydigi.com,http://localhost:3002,http://localhost:5173,http://localhost:3000}
       ENGRAM_API_KEY: ${ENGRAM_API_KEY:-}
       APP_NAME: "crawl4ai-engram"
-      APP_VERSION: "1.0.0"
+      APP_VERSION: "1.1.0"
       DEBUG: "false"
       LOG_LEVEL: "INFO"
       API_HOST: "0.0.0.0"
@@ -299,7 +299,7 @@ services:
     environment:
       MEMORY_API_URL: http://memory-api:8000
       MCP_SERVER_NAME: engram-mcp
-      MCP_SERVER_VERSION: "1.0.0"
+      MCP_SERVER_VERSION: "1.1.0"
       MCP_SERVER_PORT: "3000"
       MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
       OAUTH_ENABLED: ${OAUTH_ENABLED:-true}
