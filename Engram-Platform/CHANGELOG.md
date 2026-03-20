@@ -128,55 +128,50 @@ All notable changes to the Engram Platform orchestration layer are documented he
   - `Engram-MCP/package.json`: `1.0.0`
   - `Engram-AiMemory/pyproject.toml`: `1.0.0`
 
-## [Unreleased] - 2026-03-20
+## [1.1.0] — Bundle Optimisation & Release Preparation
 
-### Added - Test Coverage for System API Routes
-- **test: comprehensive unit tests for all 7 API routes** (app/api/system/__tests__/routes.test.ts)
-  - 36 tests covering 100% of route handlers with 0% pre-existing coverage
-  - Tests for POST /api/system/control - service control with auth validation, Zod schema validation
-  - Tests for GET /api/system/health - health snapshot retrieval with auth checks
-  - Tests for GET /api/system/history - 7-day history with auth checks and error handling
-  - Tests for GET /api/system/logs - log retrieval with service filtering and query params
-  - Tests for GET /api/system/logs/stream - Server-Sent Events streaming with auth validation
-  - Tests for POST /api/system/maintenance - maintenance action execution with auth
-  - Tests for POST /api/system/notifications - admin notifications with Zod email/length validation
-  - Test patterns cover: happy path (200), auth failures (401/403), validation errors (400), server errors (500)
-  - Proper mocking of requireAdminAccess, auth, and system-admin dependencies
-  - All tests pass: 36 passed, 0 failed, 297ms duration
+**Date:** 2026-03-20
 
+### Removed
 
-## 2026-03-20 - Test Coverage Enhancement
+- **12 unused UI components** — Removed shadcn/ui stubs with zero usage: accordion, alert-dialog, alert, aspect-ratio, avatar, breadcrumb, carousel, command, drawer, progress, table, chart
+- **5 dead dependencies** — Removed: recharts, embla-carousel-react, vaul, @radix-ui/react-accordion, @radix-ui/react-alert-dialog, @radix-ui/react-progress, @radix-ui/react-drawer
+- **Orphan files and fix scripts** — Removed temporary Python fix scripts and build artifacts
 
-### Tests Added
-- **`src/hooks/__tests__/useURLState.test.ts`** (19 tests)
-  - `useDashboardURLState()` hook tests (3 tests)
-  - `usePaginationState()` hook tests (5 tests)  
-  - `useSearchFilterState()` hook tests (11 tests)
-  - Coverage improved from 0% to ~63% for useURLState.ts
+### Changed
 
-- **`src/design-system/components/__tests__/Toast.test.tsx`** (24 tests)
-  - Toast component tests (9 tests)
-  - ToastContainer tests (8 tests)
-  - addToast utility tests (7 tests)
-  - Tests cover success/error/warning/info variants, dismissal, auto-removal, duration handling
+- **Webpack chunk splitting** — Isolated echarts (1MB), visualization suite (122KB), framer-motion (35KB) into separate cacheable chunks
+- **Cleaned optimizePackageImports list** — Removed vis-network and other dead entries from `next.config.ts`
+- **Quality gate improvements** — Added test execution verification (MCP 382+ tests, Platform 511+ tests) and bundle size budget enforcement (5MB JS limit)
+- **Version bumped to 1.1.0** — Updated all 4 subproject versions
 
-- **`src/components/ui/__tests__/Slider.test.tsx`** (29 tests)
-  - Slider component rendering tests (4 tests)
-  - Props and styling tests (8 tests)
-  - Accessibility and focus tests (6 tests)
-  - Edge cases and integration tests (11 tests)
+### Added
 
-### Total Tests Created: 72
+- **Environment validation script** (`scripts/validate-env.sh`) — Checks required vars, JWT strength (min 32 chars), and network binding safety
+- **Bundle size budget check** — Added to quality gate with 5MB JS budget threshold
+- **72 new frontend tests** — System API routes (36), URL state hooks (19), Toast component (24), Slider component (29)
+- **System health dashboard** — Error boundaries, loading states, comprehensive system monitoring
+- **Memory client library** (`src/lib/memory-client.ts`) — Encapsulates Memory API calls for consistency
 
-### Testing Best Practices Applied
-- Used vitest + @testing-library/react conventions
-- Mocked external dependencies (Radix UI, nuqs) appropriately
-- Tested component variants and state changes with `act()`
-- Comprehensive coverage of edge cases and special characters
-- Tests follow existing project patterns and naming conventions
+### Fixed
 
-### Files Created
-- `/src/hooks/__tests__/useURLState.test.ts`
-- `/src/design-system/components/__tests__/Toast.test.tsx`
-- `/src/components/ui/__tests__/Slider.test.tsx`
+- **Python 3.11 compatibility** — Added `compat.py` shim in AiMemory to bridge 3.12 syntax; 901 tests now passing (was 883 pass / 18 fail)
+- **MCP OAuth hardening** — Circuit breaker improvements, token refresh logic, PKCE validation
+- **All TypeScript errors resolved** — Replaced Record<string, unknown> stubs with proper interfaces; 255 → 0 TS errors
+- **System shell and metrics store** — Fixed type safety and state management in system admin routes
+- **System admin routes schema validation** — Added Zod schemas for all control/maintenance/notification endpoints
+
+### Test Results
+
+- **AiMemory**: 901 pass, 0 fail (was 883/18)
+- **AiCrawler**: 2393 pass, 0 fail
+- **MCP**: 382 pass, 0 fail
+- **Platform**: 511+ pass, 0 fail
+
+### Version Alignment
+
+- `Engram-Platform/frontend/package.json`: 1.1.0
+- `Engram-Platform/docker-compose.yml` APP_VERSION: 1.1.0
+- `Engram-MCP/package.json`: 1.1.0
+- `Engram-AiMemory/pyproject.toml`: 1.1.0
 
