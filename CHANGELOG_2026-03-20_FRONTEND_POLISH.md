@@ -49,6 +49,14 @@
 - Added `loading.tsx` and `error.tsx` for `/dashboard/system` route group
 - Admin access control (`requireAdminAccess()`) already enforced in system layout
 
+## Stage 7 — Release Preparation
+- Bumped all subproject versions to 1.1.0:
+  - `Engram-Platform/frontend/package.json`: 1.0.0 -> 1.1.0
+  - `Engram-MCP/package.json`: 1.0.0 -> 1.1.0
+  - `Engram-AiMemory/pyproject.toml`: 1.0.0 -> 1.1.0
+  - `Engram-Platform/docker-compose.yml`: APP_VERSION and MCP_SERVER_VERSION both 1.0.0 -> 1.1.0
+- Commit: `040f903 chore: bump version to 1.1.0 across all subprojects`
+
 ---
 
 ## Files Changed
