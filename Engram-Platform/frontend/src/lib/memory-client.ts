@@ -92,58 +92,107 @@ export interface SearchResponse {
   total: number;
 }
 
-const ok = <T>(data: T) => ({ data, error: null as string | null });
+type Result<T> = { data: T | null; error: string | null };
+
+const MEMORY_BASE = process.env.NEXT_PUBLIC_MEMORY_API_URL || '/api/memory';
+const API_KEY = process.env.NEXT_PUBLIC_MEMORY_API_KEY || '';
+
+async function request<T>(path: string, init?: RequestInit): Promise<Result<T>> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
+      ...(init?.headers as Record<string, string> ?? {}),
+    };
+    const response = await fetch(`${MEMORY_BASE}${path}`, { ...init, headers });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      return { data: null, error: (data as { error?: string } | null)?.error ?? `Request failed (${response.status})` };
+    }
+    return { data: data as T, error: null };
+  } catch (error) {
+    return { data: null, error: error instanceof Error ? error.message : 'Network error' };
+  }
+}
+
+function toQueryString(params?: Record<string, unknown>): string {
+  if (!params) return '';
+  const entries = Object.entries(params).filter(([, v]) => v != null);
+  if (entries.length === 0) return '';
+  return '?' + new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
+}
 
 export const memoryClient = {
-  async getHealth() {
-    return ok<HealthResponse>({ status: 'unknown' });
+  getHealth() {
+    return request<HealthResponse>('/health');
   },
-  async getAnalytics() {
-    return ok<AnalyticsResponse>({
-      total_memories: 0,
-      total_entities: 0,
-      total_relations: 0,
-      cache_hit_rate: null,
-      average_crawl_time_ms: null,
+  getAnalytics() {
+    return request<AnalyticsResponse>('/analytics');
+  },
+  getMemories(params?: Record<string, unknown>) {
+    return request<ListMemoriesResponse>(`/memories${toQueryString(params)}`);
+  },
+  searchMemories(query: string, params?: Record<string, unknown>) {
+    return request<SearchResponse>('/memories/search', {
+      method: 'POST',
+      body: JSON.stringify({ query, ...params }),
     });
   },
-  async getMemories(_params?: Record<string, unknown>) {
-    return ok<ListMemoriesResponse>({ memories: [], total: 0 });
+  getMatters() {
+    return request<MatterListResponse>('/graph/query', {
+      method: 'POST',
+      body: JSON.stringify({ query_type: 'matters' }),
+    });
   },
-  async searchMemories(_query: string, _params?: Record<string, unknown>) {
-    return ok<{ results: SearchResult[]; total: number }>({ results: [], total: 0 });
+  getKnowledgeGraph(matterId?: string) {
+    const body: Record<string, unknown> = { query_type: 'full_graph' };
+    if (matterId) body.matter_id = matterId;
+    return request<KnowledgeGraphResponse>('/graph/query', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
   },
-  async getMatters() {
-    return ok<MatterListResponse>({ matters: [], total: 0 });
+  createMemory(payload: AddMemoryRequest) {
+    return request<Record<string, unknown>>('/memories', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
-  async getKnowledgeGraph(_matterId?: string) {
-    return ok<KnowledgeGraphResponse>({ entities: [], relationships: [], relations: [] });
+  updateMemory(memoryId: string, payload: Partial<AddMemoryRequest>) {
+    return request<Record<string, unknown>>(`/memories/${encodeURIComponent(memoryId)}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
   },
-  async createMemory(_payload: AddMemoryRequest) {
-    return ok<Record<string, unknown>>({});
+  deleteMemory(memoryId: string) {
+    return request<Record<string, unknown>>(`/memories/${encodeURIComponent(memoryId)}`, {
+      method: 'DELETE',
+    });
   },
-  async updateMemory(_memoryId: string, _payload: Partial<AddMemoryRequest>) {
-    return ok<Record<string, unknown>>({});
+  runDecay() {
+    return request<Record<string, unknown>>('/memories/decay', { method: 'POST' });
   },
-  async deleteMemory(_memoryId: string) {
-    return ok<Record<string, unknown>>({});
+  consolidateMemories() {
+    return request<Record<string, unknown>>('/memories/consolidate', { method: 'POST' });
   },
-  async runDecay() {
-    return ok<Record<string, unknown>>({});
+  cleanupExpired() {
+    return request<Record<string, unknown>>('/memories/cleanup', { method: 'POST' });
   },
-  async consolidateMemories() {
-    return ok<Record<string, unknown>>({});
+  createMatter(payload: Record<string, unknown>) {
+    return request<Record<string, unknown>>('/graph/entities', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
-  async cleanupExpired() {
-    return ok<Record<string, unknown>>({});
+  updateMatter(matterId: string, payload: Record<string, unknown>) {
+    return request<Record<string, unknown>>(`/graph/entities/${encodeURIComponent(matterId)}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
   },
-  async createMatter(_payload: Record<string, unknown>) {
-    return ok<Record<string, unknown>>({});
-  },
-  async updateMatter(_matterId: string, _payload: Record<string, unknown>) {
-    return ok<Record<string, unknown>>({});
-  },
-  async deleteMatter(_matterId: string) {
-    return ok<Record<string, unknown>>({});
+  deleteMatter(matterId: string) {
+    return request<Record<string, unknown>>(`/graph/entities/${encodeURIComponent(matterId)}`, {
+      method: 'DELETE',
+    });
   },
 };

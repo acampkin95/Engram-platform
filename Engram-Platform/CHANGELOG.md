@@ -4,6 +4,17 @@ All notable changes to the Engram Platform orchestration layer are documented he
 
 ---
 
+## [Unreleased]
+
+### Fixed
+- **Platform API clients now functional** — Replaced stub `memoryClient` and `crawlerClient` with real fetch-based implementations. Dashboard now displays live data from Memory API and Crawler API instead of empty arrays/mock data.
+  - `memory-client.ts`: Routes through `/api/memory/` (nginx proxy) with `X-API-Key` auth header
+  - `crawler-client.ts`: Routes through `/api/crawler/` (nginx proxy), no auth required
+  - Both default to nginx proxy paths; override with `NEXT_PUBLIC_MEMORY_API_URL` / `NEXT_PUBLIC_CRAWLER_API_URL` for local dev
+  - Added `.env.local.example` for running frontend outside Docker
+
+---
+
 ## [1.0.3] — Lighthouse / Core Web Vitals Audit
 
 **Date:** 2026-03-02
