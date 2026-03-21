@@ -263,6 +263,31 @@ export class MemoryAPIClient {
 		return this.parseJSON<Stats>(response);
 	}
 
+	async listMemories(params: {
+		tenant_id?: string;
+		limit?: number;
+		offset?: number;
+		tier?: number;
+		project_id?: string;
+	}): Promise<{ memories: unknown[]; total: number }> {
+		const url = new URL(`${this.baseUrl}/memories/list`);
+		if (params.tenant_id) url.searchParams.set("tenant_id", params.tenant_id);
+		if (params.limit != null) url.searchParams.set("limit", String(params.limit));
+		if (params.offset != null) url.searchParams.set("offset", String(params.offset));
+		if (params.tier != null) url.searchParams.set("tier", String(params.tier));
+		if (params.project_id) url.searchParams.set("project_id", params.project_id);
+
+		const response = await resilientFetch(url.toString(), {
+			headers: this.getHeaders(),
+		});
+
+		if (!response.ok) {
+			throw createErrorFromStatus(response.status, response.statusText);
+		}
+
+		return this.parseJSON<{ memories: unknown[]; total: number }>(response);
+	}
+
 	async healthCheck(): Promise<{
 		status: string;
 		weaviate: boolean;

@@ -65,6 +65,10 @@ export const DeleteMemorySchema = z.object({
 
 export const ListMemoriesSchema = z.object({
 	tenant_id: TenantIdSchema,
+	limit: z.number().int().min(1).max(500).default(50).optional(),
+	offset: z.number().int().min(0).default(0).optional(),
+	tier: z.number().int().min(1).max(3).optional(),
+	project_id: z.string().optional(),
 });
 
 const MemoryItemSchema = z.object({

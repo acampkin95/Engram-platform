@@ -187,7 +187,7 @@ export const MEMORY_TOOLS: Tool[] = [
 	{
 		name: "list_memories",
 		description:
-			"Get statistics and overview of stored memories across all tiers.",
+			"List stored memories with pagination. Returns memory items plus total count. Use limit/offset for pagination.",
 		inputSchema: {
 			type: "object",
 			properties: {
@@ -195,6 +195,24 @@ export const MEMORY_TOOLS: Tool[] = [
 					type: "string",
 					description: "Tenant ID for multi-tenancy",
 					default: "default",
+				},
+				limit: {
+					type: "number",
+					description: "Maximum number of memories to return (1-500, default 50)",
+					default: 50,
+				},
+				offset: {
+					type: "number",
+					description: "Number of memories to skip (default 0)",
+					default: 0,
+				},
+				tier: {
+					type: "number",
+					description: "Filter by tier (1=Project, 2=General, 3=Global)",
+				},
+				project_id: {
+					type: "string",
+					description: "Filter by project ID (tier 1 only)",
 				},
 			},
 		},

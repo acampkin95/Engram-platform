@@ -197,15 +197,12 @@ describe('Slider Component', () => {
     if (typeof root.onValueChange === 'function') {
       root.onValueChange([42]);
       expect(onValueChange).toHaveBeenCalledWith([42]);
-    } else {
-      // Fallback: verify the function reference is passed correctly
-      expect(onValueChange).toBeDefined();
     }
   });
 
-  it('should have no onValueChange called when not provided', () => {
-    // Renders without error when no onValueChange is passed
-    expect(() => render(<Slider />)).not.toThrow();
+  it('renders without error when no onValueChange is provided', () => {
+    const { container } = render(<Slider />);
+    expect(container.firstChild).toBeTruthy();
   });
 
   it('should apply disabled:pointer-events-none and disabled:opacity-50 to thumb', () => {

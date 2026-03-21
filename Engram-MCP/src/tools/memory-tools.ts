@@ -149,7 +149,13 @@ export async function handleMemoryTool(
 
 		case "list_memories": {
 			const input = validate(ListMemoriesSchema, args);
-			const stats = await client.getStats(input.tenant_id);
+			const result = await client.listMemories({
+				tenant_id: input.tenant_id,
+				limit: input.limit,
+				offset: input.offset,
+				tier: input.tier,
+				project_id: input.project_id,
+			});
 
 			return {
 				content: [
@@ -157,16 +163,10 @@ export async function handleMemoryTool(
 						type: "text",
 						text: JSON.stringify(
 							{
-								overview: {
-									total: stats.total_memories,
-									by_tier: {
-										project: stats.tier1_count,
-										general: stats.tier2_count,
-										global: stats.tier3_count,
-									},
-									by_type: stats.by_type,
-									average_importance: stats.avg_importance.toFixed(2),
-								},
+								memories: result.memories,
+								total: result.total,
+								limit: input.limit ?? 50,
+								offset: input.offset ?? 0,
 							},
 							null,
 							2,

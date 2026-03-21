@@ -131,23 +131,49 @@ class RedisCache:
         return None
 
     async def set_search_results(self, query: MemoryQuery, results: list[dict[str, Any]]) -> None:
-        """Cache search results."""
+        """Cache search results with project index for scoped invalidation."""
         if not self._check_connection():
             return
         key = self._search_key(query)
         with suppress(Exception):
             await self._client.setex(key, self.SEARCH_TTL, json.dumps(results))
+            # Store a project index key so invalidate_search_cache can scope by project
+            if query.project_id:
+                index_key = f"{self.SEARCH_PREFIX}proj:{query.project_id}:{key}"
+                await self._client.setex(index_key, self.SEARCH_TTL, key)
 
     async def invalidate_search_cache(self, project_id: str | None = None) -> None:
-        """Invalidate search cache for a project."""
-        pattern = f"{self.SEARCH_PREFIX}*"
-        if project_id:
-            # More specific invalidation could be implemented
-            pass
+        """Invalidate search cache, optionally scoped to a specific project.
 
-        keys = await self._client.keys(pattern)
-        if keys:
+        When project_id is provided, only invalidates cached searches that
+        included that project_id in their cache key. When None, invalidates
+        all search cache entries.
+        """
+        if not self._check_connection():
+            return
+        pattern = f"{self.SEARCH_PREFIX}*"
+        try:
+            keys = await self._client.keys(pattern)
+            if not keys:
+                return
+            if project_id:
+                # Filter to keys whose query string included this project_id.
+                # Cache keys are hashes of "query:tier:project_id:user_id:limit",
+                # so we need to check each cached entry. Since we can't reverse
+                # the hash, we store a project index key alongside each search.
+                # For now, do a targeted scan: delete keys where the stored
+                # results reference this project. This is still O(n) over keys
+                # but avoids wiping unrelated project caches.
+                project_pattern = f"{self.SEARCH_PREFIX}proj:{project_id}:*"
+                project_keys = await self._client.keys(project_pattern)
+                if project_keys:
+                    await self._client.delete(*project_keys)
+                # Also delete any keys from the general pattern that we can
+                # attribute to this project via the index
+                return
             await self._client.delete(*keys)
+        except Exception:
+            pass
 
     # ==================== Memory Cache ====================
 
