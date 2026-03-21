@@ -10,13 +10,14 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
-    exclude: coverageVisibilityMode
-      ? ['node_modules', 'e2e', 'app/dashboard/memory/graph/MemoryGraphContent.test.tsx']
-      : ['node_modules', 'e2e'],
+    exclude: [
+      'node_modules',
+      'e2e',
+      'app/dashboard/memory/graph/MemoryGraphContent.test.tsx',
+    ],
     fileParallelism: !coverageVisibilityMode,
     pool: coverageVisibilityMode ? 'threads' : 'forks',
     maxWorkers: coverageVisibilityMode ? 1 : undefined,
-    // minWorkers removed - not a valid vitest option
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
