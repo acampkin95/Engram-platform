@@ -21,11 +21,20 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
+import {
+  CommandPalette,
+  CommandPaletteHint,
+  KeyboardShortcutsModal,
+  NotificationBell,
+} from '@/src/components/CommandPalette';
+import { OnboardingTour } from '@/src/components/OnboardingTour';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
 import { NavItem } from '@/src/design-system/components/NavItem';
 import { SidebarGroup } from '@/src/design-system/components/SidebarGroup';
 import { StatusDot } from '@/src/design-system/components/StatusDot';
 import { EngramLogo } from '@/src/design-system/EngramLogo';
+import { useCommandPaletteKeyboard } from '@/src/hooks/useKeyboardShortcuts';
 import { MotionProvider } from '@/src/providers/MotionProvider';
 import { useUIStore } from '@/src/stores/uiStore';
 
@@ -199,8 +208,8 @@ function Header({ pathname }: Readonly<{ pathname: string }>) {
         </h2>
       </div>
 
-      {/* Service status dots and theme toggle */}
       <div className="flex items-center gap-4">
+        <NotificationBell />
         <ThemeToggle />
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-mono text-[var(--color-text-muted)] tracking-widest uppercase">
@@ -224,6 +233,14 @@ function Header({ pathname }: Readonly<{ pathname: string }>) {
 export function DashboardClient({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+
+  useCommandPaletteKeyboard(
+    () => setCommandPaletteOpen(true),
+    () => setCommandPaletteOpen(false),
+    commandPaletteOpen,
+  );
 
   return (
     <MotionProvider>
@@ -240,6 +257,17 @@ export function DashboardClient({ children }: Readonly<{ children: ReactNode }>)
           {children}
         </main>
       </div>
+      {commandPaletteOpen && (
+        <CommandPalette
+          onClose={() => setCommandPaletteOpen(false)}
+          onShowShortcuts={() => setShortcutsModalOpen(true)}
+        />
+      )}
+      <CommandPaletteHint />
+      {shortcutsModalOpen && (
+        <KeyboardShortcutsModal onClose={() => setShortcutsModalOpen(false)} />
+      )}
+      <OnboardingTour />
     </MotionProvider>
   );
 }

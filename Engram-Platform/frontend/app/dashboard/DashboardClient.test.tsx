@@ -27,6 +27,14 @@ global.ResizeObserver = class ResizeObserver {
 // Mock Next.js routing hooks
 vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/dashboard'),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+  })),
 }));
 
 vi.mock('@/src/hooks/useHealthPolling', () => ({
