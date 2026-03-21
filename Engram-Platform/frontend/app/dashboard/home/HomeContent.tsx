@@ -300,102 +300,105 @@ export default function HomeContent() {
     void fetchData();
   }, [fetchData]);
 
-  const gridItems: GridItem[] = useMemo(() => [
-    {
-      id: 'stats',
-      title: 'Key Metrics',
-      icon: <BarChart2 className="w-3.5 h-3.5" />,
-      children: <StatsSummaryCard data={data} />,
-      defaultLayout: { x: 0, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
-    },
-    {
-      id: 'quick-links',
-      title: 'Quick Access',
-      icon: <Zap className="w-3.5 h-3.5" />,
-      children: <QuickLinksCard />,
-      defaultLayout: { x: 6, y: 0, w: 6, h: 5, minW: 3, minH: 3 },
-    },
-    {
-      id: 'crawler-health',
-      title: 'Crawler Service',
-      icon: <Globe className="w-3.5 h-3.5 text-[#9B7DE0]" />,
-      children: (
-        <CrawlerHealthCard
-          stats={data?.crawlerStats ?? null}
-          health={data?.crawlerHealth ?? null}
-        />
-      ),
-      defaultLayout: { x: 0, y: 5, w: 6, h: 6, minW: 3, minH: 4 },
-    },
-    {
-      id: 'memory-health',
-      title: 'Memory Service',
-      icon: <Brain className="w-3.5 h-3.5 text-[#2EC4C4]" />,
-      children: (
-        <MemoryHealthCard
-          analytics={data?.memoryAnalytics ?? null}
-          health={data?.memoryHealth ?? null}
-        />
-      ),
-      defaultLayout: { x: 6, y: 5, w: 6, h: 6, minW: 3, minH: 4 },
-    },
-    {
-      id: 'system',
-      title: 'System',
-      icon: <Server className="w-3.5 h-3.5 text-[#F2A93B]" />,
-      children: (
-        <div className="flex flex-col gap-3 h-full">
-          <div className="space-y-2">
-            {[
-              {
-                label: 'Crawler',
-                icon: Globe,
-                color: '#9B7DE0',
-                bg: 'rgba(155,125,224,0.1)',
-                border: 'rgba(155,125,224,0.2)',
-                status: getServiceStatusVariant(
-                  data?.crawlerHealth?.status === 'healthy',
-                  Boolean(data?.crawlerHealth),
-                ),
-              },
-              {
-                label: 'Memory',
-                icon: Brain,
-                color: '#2EC4C4',
-                bg: 'rgba(46,196,196,0.1)',
-                border: 'rgba(46,196,196,0.2)',
-                status: getServiceStatusVariant(
-                  data?.memoryHealth?.status === 'healthy',
-                  Boolean(data?.memoryHealth),
-                ),
-              },
-            ].map((svc) => (
-              <div
-                key={svc.label}
-                className="flex items-center justify-between p-2.5 rounded-lg border bg-[#0d0d1a]"
-                style={{ borderColor: svc.border }}
-              >
-                <div className="flex items-center gap-2">
-                  <svc.icon className="w-3.5 h-3.5" style={{ color: svc.color }} />
-                  <span className="text-xs text-[#a09bb8]">{svc.label}</span>
+  const gridItems: GridItem[] = useMemo(
+    () => [
+      {
+        id: 'stats',
+        title: 'Key Metrics',
+        icon: <BarChart2 className="w-3.5 h-3.5" />,
+        children: <StatsSummaryCard data={data} />,
+        defaultLayout: { x: 0, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
+      },
+      {
+        id: 'quick-links',
+        title: 'Quick Access',
+        icon: <Zap className="w-3.5 h-3.5" />,
+        children: <QuickLinksCard />,
+        defaultLayout: { x: 6, y: 0, w: 6, h: 5, minW: 3, minH: 3 },
+      },
+      {
+        id: 'crawler-health',
+        title: 'Crawler Service',
+        icon: <Globe className="w-3.5 h-3.5 text-[#9B7DE0]" />,
+        children: (
+          <CrawlerHealthCard
+            stats={data?.crawlerStats ?? null}
+            health={data?.crawlerHealth ?? null}
+          />
+        ),
+        defaultLayout: { x: 0, y: 5, w: 6, h: 6, minW: 3, minH: 4 },
+      },
+      {
+        id: 'memory-health',
+        title: 'Memory Service',
+        icon: <Brain className="w-3.5 h-3.5 text-[#2EC4C4]" />,
+        children: (
+          <MemoryHealthCard
+            analytics={data?.memoryAnalytics ?? null}
+            health={data?.memoryHealth ?? null}
+          />
+        ),
+        defaultLayout: { x: 6, y: 5, w: 6, h: 6, minW: 3, minH: 4 },
+      },
+      {
+        id: 'system',
+        title: 'System',
+        icon: <Server className="w-3.5 h-3.5 text-[#F2A93B]" />,
+        children: (
+          <div className="flex flex-col gap-3 h-full">
+            <div className="space-y-2">
+              {[
+                {
+                  label: 'Crawler',
+                  icon: Globe,
+                  color: '#9B7DE0',
+                  bg: 'rgba(155,125,224,0.1)',
+                  border: 'rgba(155,125,224,0.2)',
+                  status: getServiceStatusVariant(
+                    data?.crawlerHealth?.status === 'healthy',
+                    Boolean(data?.crawlerHealth),
+                  ),
+                },
+                {
+                  label: 'Memory',
+                  icon: Brain,
+                  color: '#2EC4C4',
+                  bg: 'rgba(46,196,196,0.1)',
+                  border: 'rgba(46,196,196,0.2)',
+                  status: getServiceStatusVariant(
+                    data?.memoryHealth?.status === 'healthy',
+                    Boolean(data?.memoryHealth),
+                  ),
+                },
+              ].map((svc) => (
+                <div
+                  key={svc.label}
+                  className="flex items-center justify-between p-2.5 rounded-lg border bg-[#0d0d1a]"
+                  style={{ borderColor: svc.border }}
+                >
+                  <div className="flex items-center gap-2">
+                    <svc.icon className="w-3.5 h-3.5" style={{ color: svc.color }} />
+                    <span className="text-xs text-[#a09bb8]">{svc.label}</span>
+                  </div>
+                  <StatusDot variant={svc.status} />
                 </div>
-                <StatusDot variant={svc.status} />
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="mt-auto flex gap-3">
+              <Button type="button" onClick={handleRefresh} variant="ghost" size="sm">
+                Refresh
+              </Button>
+              <Button type="button" onClick={resetLayout} variant="ghost" size="sm">
+                Reset layout
+              </Button>
+            </div>
           </div>
-          <div className="mt-auto flex gap-3">
-            <Button type="button" onClick={handleRefresh} variant="ghost" size="sm">
-              Refresh
-            </Button>
-            <Button type="button" onClick={resetLayout} variant="ghost" size="sm">
-              Reset layout
-            </Button>
-          </div>
-        </div>
-      ),
-      defaultLayout: { x: 0, y: 11, w: 4, h: 5, minW: 3, minH: 4 },
-    },
-  ], [data, handleRefresh, resetLayout]);
+        ),
+        defaultLayout: { x: 0, y: 11, w: 4, h: 5, minW: 3, minH: 4 },
+      },
+    ],
+    [data, handleRefresh, resetLayout],
+  );
 
   if (loading) return <SkeletonDashboardHome />;
   if (error) return <ErrorState message={error} onRetry={fetchData} />;

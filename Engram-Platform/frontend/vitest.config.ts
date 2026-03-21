@@ -10,11 +10,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
-    exclude: [
-      'node_modules',
-      'e2e',
-      'app/dashboard/memory/graph/MemoryGraphContent.test.tsx',
-    ],
+    exclude: ['node_modules', 'e2e', 'app/dashboard/memory/graph/MemoryGraphContent.test.tsx'],
     fileParallelism: !coverageVisibilityMode,
     pool: coverageVisibilityMode ? 'threads' : 'forks',
     maxWorkers: coverageVisibilityMode ? 1 : undefined,

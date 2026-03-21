@@ -133,122 +133,144 @@ export default function MemoryHomeContent() {
   }, []);
 
   // Build grid items
-  const gridItems: GridItem[] = useMemo(() => [
-    {
-      id: 'stats',
-      title: 'Key Metrics',
-      icon: <BarChart2 className="w-3.5 h-3.5" />,
-      children: (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard label="Total Memories" value={analytics?.total_memories ?? '—'} accent="teal" />
-          <StatCard label="Active Matters" value={activeMattersValue} accent="teal" />
-          <StatCard label="Total Entities" value={analytics?.total_entities ?? '—'} accent="teal" />
-        </div>
-      ),
-      defaultLayout: { x: 0, y: 0, w: 12, h: 3, minW: 3, minH: 3 },
-    },
-    {
-      id: 'recent-memories',
-      title: 'Recent Memories',
-      icon: <Brain className="w-3.5 h-3.5" />,
-      children:
-        recentMemories.length === 0 ? (
-          <div className="rounded-xl border border-white/[0.06] bg-[#090818] py-12 flex flex-col items-center gap-3">
-            <Brain className="w-8 h-8 text-[#5c5878]" />
-            <p className="text-sm text-[#5c5878] font-mono">No memories stored yet</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {recentMemories.map((memory) => (
-              <RecentMemoryCard key={memory.memory_id} memory={memory} />
-            ))}
+  const gridItems: GridItem[] = useMemo(
+    () => [
+      {
+        id: 'stats',
+        title: 'Key Metrics',
+        icon: <BarChart2 className="w-3.5 h-3.5" />,
+        children: (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <StatCard
+              label="Total Memories"
+              value={analytics?.total_memories ?? '—'}
+              accent="teal"
+            />
+            <StatCard label="Active Matters" value={activeMattersValue} accent="teal" />
+            <StatCard
+              label="Total Entities"
+              value={analytics?.total_entities ?? '—'}
+              accent="teal"
+            />
           </div>
         ),
-      defaultLayout: { x: 0, y: 3, w: 6, h: 6, minW: 3, minH: 4 },
-    },
-    ...(matters.length > 0
-      ? [
-          {
-            id: 'matters',
-            title: 'Matters Overview',
-            icon: <FileText className="w-3.5 h-3.5" />,
-            children: (
-              <div className="rounded-xl border border-white/[0.06] overflow-hidden">
-                {matters.map((matter, idx) => (
-                  <div
-                    key={matter.matter_id}
-                    className={`flex items-center justify-between px-5 py-4 ${
-                      idx < matters.length - 1 ? 'border-b border-white/[0.04]' : ''
-                    } hover:bg-white/[0.02] transition-colors`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-[#2EC4C4] opacity-60" />
-                      <div>
-                        <p className="text-sm font-medium text-[#f0eef8]">{matter.title}</p>
-                        {matter.description && (
-                          <p className="text-xs text-[#5c5878] mt-0.5">
-                            {truncate(matter.description, 60)}
-                          </p>
-                        )}
+        defaultLayout: { x: 0, y: 0, w: 12, h: 3, minW: 3, minH: 3 },
+      },
+      {
+        id: 'recent-memories',
+        title: 'Recent Memories',
+        icon: <Brain className="w-3.5 h-3.5" />,
+        children:
+          recentMemories.length === 0 ? (
+            <div className="rounded-xl border border-white/[0.06] bg-[#090818] py-12 flex flex-col items-center gap-3">
+              <Brain className="w-8 h-8 text-[#5c5878]" />
+              <p className="text-sm text-[#5c5878] font-mono">No memories stored yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentMemories.map((memory) => (
+                <RecentMemoryCard key={memory.memory_id} memory={memory} />
+              ))}
+            </div>
+          ),
+        defaultLayout: { x: 0, y: 3, w: 6, h: 6, minW: 3, minH: 4 },
+      },
+      ...(matters.length > 0
+        ? [
+            {
+              id: 'matters',
+              title: 'Matters Overview',
+              icon: <FileText className="w-3.5 h-3.5" />,
+              children: (
+                <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+                  {matters.map((matter, idx) => (
+                    <div
+                      key={matter.matter_id}
+                      className={`flex items-center justify-between px-5 py-4 ${
+                        idx < matters.length - 1 ? 'border-b border-white/[0.04]' : ''
+                      } hover:bg-white/[0.02] transition-colors`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#2EC4C4] opacity-60" />
+                        <div>
+                          <p className="text-sm font-medium text-[#f0eef8]">{matter.title}</p>
+                          {matter.description && (
+                            <p className="text-xs text-[#5c5878] mt-0.5">
+                              {truncate(matter.description, 60)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="memory">{matter.status}</Badge>
+                        <span className="text-xs text-[#5c5878] font-mono">
+                          {matter.created_at ? formatDate(matter.created_at) : '—'}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="memory">{matter.status}</Badge>
-                      <span className="text-xs text-[#5c5878] font-mono">
-                        {matter.created_at ? formatDate(matter.created_at) : '—'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ),
-            defaultLayout: { x: 6, y: 3, w: 6, h: 6, minW: 3, minH: 4 },
-          },
-        ]
-      : []),
+                  ))}
+                </div>
+              ),
+              defaultLayout: { x: 6, y: 3, w: 6, h: 6, minW: 3, minH: 4 },
+            },
+          ]
+        : []),
 
-    {
-      id: 'maintenance',
-      title: 'System Maintenance',
-      icon: <Settings2 className="w-3.5 h-3.5" />,
-      children: (
-        <div className="flex flex-col gap-3">
-          <Button
-            variant="secondary"
-            className="w-full justify-between"
-            loading={decaying}
-            onClick={handleRunDecay}
-          >
-            <span>Run Decay Process</span>
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full justify-between"
-            loading={consolidating}
-            onClick={handleConsolidate}
-          >
-            <span>Consolidate Memories</span>
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full justify-between"
-            loading={cleaning}
-            onClick={handleCleanup}
-          >
-            <span>Cleanup Expired</span>
-          </Button>
-        </div>
-      ),
-      defaultLayout: {
-        x: matters.length > 0 ? 0 : 6,
-        y: matters.length > 0 ? 9 : 3,
-        w: 6,
-        h: 5,
-        minW: 4,
-        minH: 5,
+      {
+        id: 'maintenance',
+        title: 'System Maintenance',
+        icon: <Settings2 className="w-3.5 h-3.5" />,
+        children: (
+          <div className="flex flex-col gap-3">
+            <Button
+              variant="secondary"
+              className="w-full justify-between"
+              loading={decaying}
+              onClick={handleRunDecay}
+            >
+              <span>Run Decay Process</span>
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full justify-between"
+              loading={consolidating}
+              onClick={handleConsolidate}
+            >
+              <span>Consolidate Memories</span>
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full justify-between"
+              loading={cleaning}
+              onClick={handleCleanup}
+            >
+              <span>Cleanup Expired</span>
+            </Button>
+          </div>
+        ),
+        defaultLayout: {
+          x: matters.length > 0 ? 0 : 6,
+          y: matters.length > 0 ? 9 : 3,
+          w: 6,
+          h: 5,
+          minW: 4,
+          minH: 5,
+        },
       },
-    },
-  ], [analytics, recentMemories, matters, activeMattersValue, decaying, consolidating, cleaning, resetLayout, handleRunDecay, handleConsolidate, handleCleanup]);
+    ],
+    [
+      analytics,
+      recentMemories,
+      matters,
+      activeMattersValue,
+      decaying,
+      consolidating,
+      cleaning,
+      handleRunDecay,
+      handleConsolidate,
+      handleCleanup,
+    ],
+  );
 
   if (analyticsLoading) {
     return <LoadingState label="Loading memory overview..." />;
