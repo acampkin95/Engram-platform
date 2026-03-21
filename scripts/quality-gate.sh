@@ -101,6 +101,20 @@ else
     echo -e "${YELLOW}⚠ No build output found — run 'npm run build' first${NC}"
 fi
 
+# 7. Smoke test (if Docker services are running)
+print_step "Checking E2E smoke tests"
+SMOKE_SCRIPT="$ROOT_DIR/Engram-Platform/scripts/smoke-test.sh"
+if [ -x "$SMOKE_SCRIPT" ]; then
+    if docker compose -f "$ROOT_DIR/Engram-Platform/docker-compose.yml" ps --quiet 2>/dev/null | head -1 | grep -q .; then
+        "$SMOKE_SCRIPT" || print_error "Smoke Tests"
+        print_success "Smoke Tests"
+    else
+        echo -e "${YELLOW}⚠ Docker services not running — skipping smoke tests${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠ smoke-test.sh not found or not executable — skipping${NC}"
+fi
+
 echo -e "\n${GREEN}=======================================${NC}"
 echo -e "${GREEN}      ALL QUALITY GATES PASSED!        ${NC}"
 echo -e "${GREEN}=======================================${NC}"

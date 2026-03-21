@@ -1,7 +1,7 @@
 'use client';
 
 import { Activity, BarChart2, Brain, FolderSearch, Globe, Server, Zap } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FadeIn, SlideIn } from '@/src/components/Animations';
 import type { GridItem } from '@/src/components/DraggableGrid';
 import { DraggableGrid, useGridLayout } from '@/src/components/DraggableGrid';
@@ -294,14 +294,13 @@ export default function HomeContent() {
     }
   }, [setServiceStatus]);
 
+  const handleRefresh = useCallback(() => void fetchData(), [fetchData]);
+
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
 
-  if (loading) return <SkeletonDashboardHome />;
-  if (error) return <ErrorState message={error} onRetry={fetchData} />;
-
-  const gridItems: GridItem[] = [
+  const gridItems: GridItem[] = useMemo(() => [
     {
       id: 'stats',
       title: 'Key Metrics',
@@ -385,7 +384,7 @@ export default function HomeContent() {
             ))}
           </div>
           <div className="mt-auto flex gap-3">
-            <Button type="button" onClick={() => void fetchData()} variant="ghost" size="sm">
+            <Button type="button" onClick={handleRefresh} variant="ghost" size="sm">
               Refresh
             </Button>
             <Button type="button" onClick={resetLayout} variant="ghost" size="sm">
@@ -396,7 +395,10 @@ export default function HomeContent() {
       ),
       defaultLayout: { x: 0, y: 11, w: 4, h: 5, minW: 3, minH: 4 },
     },
-  ];
+  ], [data, handleRefresh, resetLayout]);
+
+  if (loading) return <SkeletonDashboardHome />;
+  if (error) return <ErrorState message={error} onRetry={fetchData} />;
 
   return (
     <FadeIn className="space-y-6">

@@ -7,6 +7,8 @@ import { useUIStore } from '@/src/stores/uiStore';
 
 export interface WebSocketOptions {
   url: string;
+  /** Auth token appended as `?token=<value>` on the WebSocket URL. */
+  token?: string;
   onMessage?: (data: unknown) => void;
   onConnect?: () => void;
   onDisconnect?: () => void;
@@ -28,6 +30,7 @@ export interface UseWebSocketReturn {
 
 export function useWebSocket({
   url,
+  token,
   onMessage,
   onConnect,
   onDisconnect,
@@ -79,7 +82,10 @@ export function useWebSocket({
       wsRef.current = null;
     }
 
-    const ws = new WebSocket(url);
+    const wsUrl = token
+      ? `${url}${url.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
+      : url;
+    const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -134,7 +140,7 @@ export function useWebSocket({
         setReconnectAttempt(0);
       }
     };
-  }, [url, reconnectDelay, maxReconnectAttempts, setWsConnected]);
+  }, [url, token, reconnectDelay, maxReconnectAttempts, setWsConnected]);
 
   // Connect on mount, disconnect on unmount
   useEffect(() => {

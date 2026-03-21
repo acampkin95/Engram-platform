@@ -1,7 +1,7 @@
 'use client';
 
 import { BarChart2, Brain, FileText, Settings2 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import type { GridItem } from '@/src/components/DraggableGrid';
 import { DraggableGrid, useGridLayout } from '@/src/components/DraggableGrid';
@@ -89,19 +89,6 @@ export default function MemoryHomeContent() {
   const recentMemories = memoriesRes?.data?.memories ?? [];
   const matters = mattersRes?.data?.matters ?? [];
 
-  if (analyticsLoading) {
-    return <LoadingState label="Loading memory overview..." />;
-  }
-
-  if (analyticsError) {
-    return (
-      <ErrorState
-        message="Failed to load memory analytics"
-        onRetry={() => globalThis.location.reload()}
-      />
-    );
-  }
-
   let activeMattersValue: number | string = '—';
   if (matters.length > 0) {
     activeMattersValue = matters.length;
@@ -109,8 +96,44 @@ export default function MemoryHomeContent() {
     activeMattersValue = '0';
   }
 
+  const handleRunDecay = useCallback(async () => {
+    setDecaying(true);
+    try {
+      await memoryClient.runDecay();
+      addToast({ type: 'success', message: 'Decay process completed' });
+    } catch (_e) {
+      addToast({ type: 'error', message: 'Failed to run decay' });
+    } finally {
+      setDecaying(false);
+    }
+  }, []);
+
+  const handleConsolidate = useCallback(async () => {
+    setConsolidating(true);
+    try {
+      await memoryClient.consolidateMemories();
+      addToast({ type: 'success', message: 'Memories consolidated' });
+    } catch (_e) {
+      addToast({ type: 'error', message: 'Failed to consolidate memories' });
+    } finally {
+      setConsolidating(false);
+    }
+  }, []);
+
+  const handleCleanup = useCallback(async () => {
+    setCleaning(true);
+    try {
+      await memoryClient.cleanupExpired();
+      addToast({ type: 'success', message: 'Expired memories cleaned up' });
+    } catch (_e) {
+      addToast({ type: 'error', message: 'Failed to clean up expired memories' });
+    } finally {
+      setCleaning(false);
+    }
+  }, []);
+
   // Build grid items
-  const gridItems: GridItem[] = [
+  const gridItems: GridItem[] = useMemo(() => [
     {
       id: 'stats',
       title: 'Key Metrics',
@@ -194,17 +217,7 @@ export default function MemoryHomeContent() {
             variant="secondary"
             className="w-full justify-between"
             loading={decaying}
-            onClick={async () => {
-              setDecaying(true);
-              try {
-                await memoryClient.runDecay();
-                addToast({ type: 'success', message: 'Decay process completed' });
-              } catch (_e) {
-                addToast({ type: 'error', message: 'Failed to run decay' });
-              } finally {
-                setDecaying(false);
-              }
-            }}
+            onClick={handleRunDecay}
           >
             <span>Run Decay Process</span>
           </Button>
@@ -212,17 +225,7 @@ export default function MemoryHomeContent() {
             variant="secondary"
             className="w-full justify-between"
             loading={consolidating}
-            onClick={async () => {
-              setConsolidating(true);
-              try {
-                await memoryClient.consolidateMemories();
-                addToast({ type: 'success', message: 'Memories consolidated' });
-              } catch (_e) {
-                addToast({ type: 'error', message: 'Failed to consolidate memories' });
-              } finally {
-                setConsolidating(false);
-              }
-            }}
+            onClick={handleConsolidate}
           >
             <span>Consolidate Memories</span>
           </Button>
@@ -230,17 +233,7 @@ export default function MemoryHomeContent() {
             variant="secondary"
             className="w-full justify-between"
             loading={cleaning}
-            onClick={async () => {
-              setCleaning(true);
-              try {
-                await memoryClient.cleanupExpired();
-                addToast({ type: 'success', message: 'Expired memories cleaned up' });
-              } catch (_e) {
-                addToast({ type: 'error', message: 'Failed to clean up expired memories' });
-              } finally {
-                setCleaning(false);
-              }
-            }}
+            onClick={handleCleanup}
           >
             <span>Cleanup Expired</span>
           </Button>
@@ -255,7 +248,20 @@ export default function MemoryHomeContent() {
         minH: 5,
       },
     },
-  ];
+  ], [analytics, recentMemories, matters, activeMattersValue, decaying, consolidating, cleaning, resetLayout, handleRunDecay, handleConsolidate, handleCleanup]);
+
+  if (analyticsLoading) {
+    return <LoadingState label="Loading memory overview..." />;
+  }
+
+  if (analyticsError) {
+    return (
+      <ErrorState
+        message="Failed to load memory analytics"
+        onRetry={() => globalThis.location.reload()}
+      />
+    );
+  }
 
   return (
     <div className="space-y-8 animate-page-enter">

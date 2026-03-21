@@ -19,6 +19,10 @@ export interface UseRAGChatOptions {
   lmStudioUrl?: string; // default: 'http://localhost:1234/v1'
   model?: string; // default: 'local-model'
   contextMemoryCount?: number; // how many memories to inject, default: 5
+  /** Memory API WebSocket URL. Defaults to NEXT_PUBLIC_MEMORY_API_URL/ws/events (http→ws). */
+  memoryWsUrl?: string;
+  /** Auth token passed as ?token= query param on the Memory API WebSocket. */
+  authToken?: string;
 }
 
 export interface UseRAGChatReturn {
@@ -58,6 +62,8 @@ export function useRAGChat({
   lmStudioUrl = 'http://localhost:1234/v1',
   model = 'local-model',
   contextMemoryCount = 5,
+  memoryWsUrl,
+  authToken,
 }: UseRAGChatOptions = {}): UseRAGChatReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -91,6 +97,40 @@ export function useRAGChat({
     }, 10_000);
     return () => clearInterval(interval);
   }, [checkLmStudioConnectivity]);
+
+  // ─── Memory API WebSocket connection ──────────────────────────────────────
+  // Connects to the Memory API /ws/events endpoint for live memory events.
+  // URL is derived from NEXT_PUBLIC_MEMORY_API_URL (http→ws) unless overridden.
+  // No connection is made when neither option nor env var is available.
+
+  useEffect(() => {
+    const baseUrl = process.env.NEXT_PUBLIC_MEMORY_API_URL;
+    const wsUrl =
+      memoryWsUrl ??
+      (baseUrl ? baseUrl.replace(/^http/, 'ws') + '/ws/events' : null);
+    if (!wsUrl) return;
+
+    const fullUrl = authToken
+      ? `${wsUrl}${wsUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(authToken)}`
+      : wsUrl;
+
+    const ws = new WebSocket(fullUrl);
+
+    // Keep-alive: send ping every 30s so the server doesn't close the connection
+    const pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) ws.send('ping');
+    }, 30_000);
+
+    // Message format: { type: 'connected' | 'memory_stored' | ... }
+    ws.onmessage = () => {
+      // Memory events received; future handlers can update state here
+    };
+
+    return () => {
+      clearInterval(pingInterval);
+      ws.close();
+    };
+  }, [memoryWsUrl, authToken]);
 
   // Cleanup rAF on unmount
   useEffect(() => {
