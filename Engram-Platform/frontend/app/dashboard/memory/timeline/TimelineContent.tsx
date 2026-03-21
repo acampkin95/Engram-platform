@@ -116,6 +116,7 @@ export default function TimelineContent() {
             title="No events found"
             description="Try adjusting your filters."
             icon={<Calendar className="w-6 h-6" />}
+            context="memory"
           />
         ) : (
           <div className="space-y-3">

@@ -326,6 +326,7 @@ function CrawlerSection() {
         icon={<FolderSearch className="w-5 h-5" />}
         title="No crawler investigations"
         description="Investigations created in the Crawler system will appear here."
+        context="investigation"
       />
     );
   }
@@ -369,6 +370,7 @@ function MemorySection() {
         icon={<FolderOpen className="w-5 h-5" />}
         title="No memory matters"
         description="Matters created in the Memory system will appear here."
+        context="investigation"
       />
     );
   }

@@ -496,6 +496,7 @@ function MatterDetailPanel({ matter, onClose }: MatterDetailPanelProps) {
                 <EmptyState
                   title="No memories yet"
                   description="Memories associated with this matter will appear here."
+                  context="matter"
                 />
               );
             }
@@ -642,6 +643,7 @@ export default function MattersContent() {
           title="No matters yet"
           description="Create your first matter to organize memories."
           icon={<FolderOpen className="w-6 h-6" />}
+          context="matter"
           action={
             <Button
               size="sm"

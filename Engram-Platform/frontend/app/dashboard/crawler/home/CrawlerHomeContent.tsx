@@ -197,6 +197,7 @@ export default function CrawlerHomeContent() {
           <EmptyState
             title="No crawl jobs yet"
             description="Submit your first crawl to see results here."
+            context="crawler"
             action={
               <Button
                 variant="primary"

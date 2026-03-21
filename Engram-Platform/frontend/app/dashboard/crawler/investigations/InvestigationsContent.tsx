@@ -330,6 +330,7 @@ function DetailPanel({ investigation }: Readonly<DetailPanelProps>) {
         title="Select an investigation to view details"
         description="Click any investigation from the list on the left to view its associated crawl jobs and details."
         className="h-full"
+        context="investigation"
       />
     );
   }
@@ -426,6 +427,7 @@ function DetailPanel({ investigation }: Readonly<DetailPanelProps>) {
             icon={<Globe className="w-5 h-5" />}
             title="No jobs linked"
             description="Crawl jobs associated with this investigation will appear here."
+            context="investigation"
           />
         ) : (
           <DataTable<CrawlRow>
@@ -487,6 +489,7 @@ export default function InvestigationsContent() {
         icon={<FolderSearch className="w-6 h-6" />}
         title="No investigations yet"
         description="Create your first investigation to start tracking OSINT cases."
+        context="investigation"
         action={
           <button
             type="button"

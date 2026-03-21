@@ -687,6 +687,7 @@ export default function MemoriesContent() {
           description={
             searchQuery ? `No results for "${searchQuery}"` : 'Add your first memory to get started'
           }
+          context="memory"
           action={
             <Button onClick={() => setShowAddModal(true)} size="sm">
               Add Memory

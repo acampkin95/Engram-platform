@@ -515,6 +515,7 @@ export default function OsintContent() {
                 ? 'Enter a target URL and launch an OSINT crawl to get started.'
                 : 'Try changing the status filter or search query.'
             }
+            context="crawler"
           />
         ) : (
           <DataTable<OsintResult>

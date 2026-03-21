@@ -336,6 +336,7 @@ function GraphContent({ matters }: GraphContentProps) {
               title="No entities in graph"
               description="Add memories and entities to see the knowledge graph."
               icon={<GitBranch className="w-6 h-6" />}
+              context="memory"
             />
           ) : (
             <ReactFlowProvider>
