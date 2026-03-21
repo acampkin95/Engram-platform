@@ -465,6 +465,15 @@
   }
 }
 
+/* User-triggered motion preference (from preferencesStore) */
+.motion-reduced *,
+.motion-reduced *::before,
+.motion-reduced *::after {
+  animation-duration: calc(var(--motion-duration-multiplier, 1) * 0.01ms) !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: calc(var(--motion-duration-multiplier, 1) * 0.01ms) !important;
+}
+
 /* Conditionally disable animations */
 [data-animations="false"] *,
 :has(#animations-disabled) * {

@@ -2,6 +2,7 @@
 import { ClerkProvider } from '@clerk/nextjs';
 import * as Sentry from '@sentry/nextjs';
 import { SWRConfig } from 'swr';
+import { LiveRegionProvider } from '@/src/components/LiveRegion';
 import { ToastContainer } from '../design-system/components/Toast';
 import { URLStateProvider } from './URLStateProvider';
 
@@ -14,22 +15,24 @@ export function Providers({ children }: ProvidersProps) {
 
   const content = (
     <URLStateProvider>
-      <SWRConfig
-        value={{
-          revalidateOnFocus: false,
-          revalidateOnReconnect: true,
-          dedupingInterval: 5000,
-          errorRetryCount: 3,
-          onError: (error) => {
-            Sentry.captureException(error, {
-              tags: { area: 'swr' },
-            });
-          },
-        }}
-      >
-        {children}
-        <ToastContainer />
-      </SWRConfig>
+      <LiveRegionProvider>
+        <SWRConfig
+          value={{
+            revalidateOnFocus: false,
+            revalidateOnReconnect: true,
+            dedupingInterval: 5000,
+            errorRetryCount: 3,
+            onError: (error) => {
+              Sentry.captureException(error, {
+                tags: { area: 'swr' },
+              });
+            },
+          }}
+        >
+          {children}
+          <ToastContainer />
+        </SWRConfig>
+      </LiveRegionProvider>
     </URLStateProvider>
   );
 

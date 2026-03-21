@@ -28,7 +28,9 @@ import {
   KeyboardShortcutsModal,
   NotificationBell,
 } from '@/src/components/CommandPalette';
+import { FocusTrap } from '@/src/components/FocusTrap';
 import { OnboardingTour } from '@/src/components/OnboardingTour';
+import { PreferencesManager } from '@/src/components/PreferencesManager';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
 import { NavItem } from '@/src/design-system/components/NavItem';
 import { SidebarGroup } from '@/src/design-system/components/SidebarGroup';
@@ -258,16 +260,21 @@ export function DashboardClient({ children }: Readonly<{ children: ReactNode }>)
         </main>
       </div>
       {commandPaletteOpen && (
-        <CommandPalette
-          onClose={() => setCommandPaletteOpen(false)}
-          onShowShortcuts={() => setShortcutsModalOpen(true)}
-        />
+        <FocusTrap active={commandPaletteOpen} onEscape={() => setCommandPaletteOpen(false)}>
+          <CommandPalette
+            onClose={() => setCommandPaletteOpen(false)}
+            onShowShortcuts={() => setShortcutsModalOpen(true)}
+          />
+        </FocusTrap>
       )}
       <CommandPaletteHint />
       {shortcutsModalOpen && (
-        <KeyboardShortcutsModal onClose={() => setShortcutsModalOpen(false)} />
+        <FocusTrap active={shortcutsModalOpen} onEscape={() => setShortcutsModalOpen(false)}>
+          <KeyboardShortcutsModal onClose={() => setShortcutsModalOpen(false)} />
+        </FocusTrap>
       )}
       <OnboardingTour />
+      <PreferencesManager />
     </MotionProvider>
   );
 }
