@@ -123,7 +123,7 @@ check_docker_images() {
 
   pass "Docker daemon running"
 
-  local images=("crawl4ai-engram:latest" "engram-memory-api:latest")
+  local images=("crawl4ai-engram:latest" "engram-memory-api:latest" "engram-platform-frontend:latest")
   local pull_images=("semitechnologies/weaviate:1.27.0" "redis:7-alpine" "nginx:alpine")
 
   for img in "${images[@]}"; do

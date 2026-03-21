@@ -98,39 +98,11 @@ export function useRAGChat({
     return () => clearInterval(interval);
   }, [checkLmStudioConnectivity]);
 
-  // ─── Memory API WebSocket connection ──────────────────────────────────────
-  // Connects to the Memory API /ws/events endpoint for live memory events.
-  // URL is derived from NEXT_PUBLIC_MEMORY_API_URL (http→ws) unless overridden.
-  // No connection is made when neither option nor env var is available.
-
-  useEffect(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_MEMORY_API_URL;
-    const wsUrl =
-      memoryWsUrl ??
-      (baseUrl ? baseUrl.replace(/^http/, 'ws') + '/ws/events' : null);
-    if (!wsUrl) return;
-
-    const fullUrl = authToken
-      ? `${wsUrl}${wsUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(authToken)}`
-      : wsUrl;
-
-    const ws = new WebSocket(fullUrl);
-
-    // Keep-alive: send ping every 30s so the server doesn't close the connection
-    const pingInterval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN) ws.send('ping');
-    }, 30_000);
-
-    // Message format: { type: 'connected' | 'memory_stored' | ... }
-    ws.onmessage = () => {
-      // Memory events received; future handlers can update state here
-    };
-
-    return () => {
-      clearInterval(pingInterval);
-      ws.close();
-    };
-  }, [memoryWsUrl, authToken]);
+  // ─── Memory API WebSocket connection (deferred) ─────────────────────────
+  // When implemented, connect to /ws/events via useWebSocket hook for live
+  // memory events (memory_stored, entity_created, etc.). Options memoryWsUrl
+  // and authToken are already plumbed for this purpose.
+  // TODO: Replace with useWebSocket({ url, onMessage }) when backend handler is ready.
 
   // Cleanup rAF on unmount
   useEffect(() => {
