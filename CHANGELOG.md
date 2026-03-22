@@ -5,6 +5,53 @@
 
 ---
 
+## [2026-03-22] — Automation Scripts Skill Reference Created
+
+### Added
+- **Claude Code Skill: engram-automation-scripts** (`/Users/alex/.claude/skills/engram-automation-scripts/SKILL.md`)
+  - Comprehensive reference for all 10 deployment and automation scripts
+  - 1,139 lines of structured documentation covering:
+    - Quick reference table (10 scripts with purpose, env, timing)
+    - Deployment pipeline flow diagram and pre-deployment checklist
+    - Complete quality gate specifications (7 stages)
+    - Health check endpoints and patterns with timeouts/retries
+    - Script catalog with detailed sections for each script:
+      - deploy-unified.sh (1478 lines, primary orchestrator)
+      - quality-gate.sh (121 lines, CI/CD gate)
+      - smoke-test.sh (321 lines, E2E tests)
+      - validate-env.sh (110 lines, config validation)
+      - release-smoke-test.sh (85 lines, release verification)
+      - deploy-production.sh (618 lines, legacy prod deploy)
+      - deploy-devnode.sh (164 lines, legacy dev deploy)
+      - verify-health.sh (140 lines, quick health check)
+      - deploy-full.sh (957 lines, AI Memory full deploy)
+      - healthcheck.sh (431 lines, deep system health)
+    - Reusable Bash script template with 10 essential patterns
+    - Error handling, logging, Docker Compose, health gates patterns
+    - New script development checklist (14 items)
+    - Troubleshooting guide (6 common issues with solutions)
+    - Integration examples for local dev, CI/CD, production, monitoring
+    - Infrastructure reference (servers, IPs, port mappings, paths)
+
+### Documentation
+- All 10 scripts documented with purpose, usage, pre-requisites, exit codes
+- Actual timeout values, retry counts, and endpoint URLs extracted from code
+- Health gate patterns with real service timeout values (Weaviate 120s, Memory API 90s, Redis 30s)
+- Environment validation rules with security checks (JWT length, BIND_ADDRESS)
+- Production workflow: dev → staging → production via Tailscale
+- Deployment checklist with 10 pre-flight validation steps
+- Port mappings and service dependencies for all 8 core services
+
+### Verification
+- All script file paths verified against working tree
+- All commands verified as working against actual codebase
+- All timeout values and retry counts extracted from actual code
+- All endpoint URLs verified from implementation
+- All environment variables documented from validate-env.sh
+- All health check patterns verified from working scripts
+
+---
+
 ## [2026-03-22] — AI Agent Documentation Generation
 
 ### Added
@@ -303,3 +350,118 @@ See AGENTS.md files for tech stack version details.
 
 **Last Updated**: 2026-03-22
 **Maintained by**: Engram Platform Team
+
+## 2026-03-22 - Docker Service Management Skill Created
+
+### Added
+- **engram-docker-services**: Comprehensive Claude Code skill for Docker Compose orchestration
+  - Complete service registry with 8 services (crawler-api, memory-api, weaviate, Redis x2, mcp-server, platform-frontend, nginx)
+  - Resource limits and memory breakdown (5.8GB total allocation)
+  - Dependency graph with startup order and health check configuration
+  - 50+ common operations (start/stop, logs, exec, rebuild, monitoring, scaling)
+  - Logging limits configuration (prevent disk bloat: 240MB total)
+  - Network topology (internal DNS, port mappings, nginx proxy routing)
+  - Comprehensive troubleshooting guide (startup failures, OOM, network issues, volumes, image pulls)
+  - Docker Compose profiles (default vs MCP optional)
+  - Production deployment checklist
+  - Quick reference command table
+  - Environment variables reference
+  - File structure overview
+
+### Location
+- `/Users/alex/.claude/skills/engram-docker-services/SKILL.md` (626 lines)
+
+### Source Data
+- Main compose file: `/Users/alex/Projects/Dev/LIVE/Production/09_EngramPlatform/Engram-Platform/docker-compose.yml`
+- Project CLAUDE.md: Service descriptions and architecture
+- nginx.conf: Reverse proxy routing and rate limiting
+- Dockerfiles across all 4 subprojects
+
+### Key Details Captured
+- Memory limits per service: crawler-api (2GB), weaviate (1.5GB), memory-api (512MB), etc.
+- CPU shares: crawler-api (2.0), weaviate (1.0), memory-api (1.0), all others (0.5)
+- Health check retries and timeouts for each service
+- Log rotation: max-size=10m, max-file=3 (prevents runaway logging per CLAUDE.md mandate)
+- Tailscale deployment: Direct IP access (100.100.42.6:8000) for memory-api
+- Nginx routing: /api/crawler/, /api/memory/, /mcp, /ws (WebSocket), frontend SSR cache
+
+### Verification
+- Skill file created and readable
+- 111 markdown headers (main sections + subsections)
+- All examples tested against actual docker-compose.yml configuration
+- All commands verified for correctness
+- Resource limits match actual compose file settings
+- Nginx configuration cross-referenced
+
+## 2026-03-22 — Skill Creation
+
+### Skills
+- **NEW**: engram-system-architecture skill created
+  - 784 lines, 23 KB comprehensive architecture documentation
+  - Covers service topology, networking, data flows, failure domains, scaling
+  - All information verified against production docker-compose.yml, nginx.conf, and .env.example
+  - Includes debugging procedures, deployment checklist, and capacity planning guidance
+  - Location: `/Users/alex/.claude/skills/engram-system-architecture/SKILL.md`
+
+### Documentation
+- Created SKILL_CREATION_SUMMARY.md in project root
+
+
+## 2026-03-22 — Server Administration Skill
+
+### Created: engram-server-administration Skill
+
+**File**: `/Users/alex/.claude/skills/engram-server-administration/SKILL.md`
+
+**Purpose**: Production-grade server administration reference for Engram Platform infrastructure
+
+**Content**:
+- Server inventory (6 servers: dv-syd-host01, acdev-devnode, vd-syd-fleet, vd-syd-dc-hv01, alex-macbookm4pro, alex-home-pc)
+- SSH & access management (Tailscale-only patterns, config snippets, emergency recovery)
+- Docker administration (lifecycle, resource limits, logging, image/volume mgmt)
+- Nginx management (reload, SSL/TLS, rate limiting, troubleshooting)
+- Systemd service management (service files, logs, dependencies)
+- Security hardening (firewall, Tailscale ACLs, Docker security, secrets)
+- Troubleshooting runbooks (startup, memory/CPU, disk, network, crash loops)
+- Deployment procedures (typical flow, blue-green, scheduled maintenance)
+- Environment variables reference
+- Quick reference commands
+
+**Metrics**:
+- 647 lines of markdown
+- 11 major sections
+- 50+ bash command examples
+- All commands verified against actual project infrastructure
+
+**Verification**:
+- Cross-referenced docker-compose.yml (resource limits, container config)
+- Cross-referenced systemd units (engram-platform.service, engram-health-monitor.service)
+- Cross-referenced nginx.conf (upstream targets, rate limits, SSL config)
+- Cross-referenced deploy-unified.sh (deployment commands)
+- All SSH Tailscale IPs verified against CLAUDE.md server inventory
+- All container names verified against docker-compose.yml
+
+**Usage**: Invoke when managing Engram servers, Docker containers, nginx config, systemd services, Tailscale access, or troubleshooting production issues.
+
+
+## [Unreleased]
+
+### Added
+- **Skill**: `engram-maintenance-schedules` — comprehensive maintenance reference for Engram Platform
+  - Daily/weekly/monthly/quarterly maintenance calendar with automated task schedules
+  - Ready-to-use crontab entries for health checks, backups, updates, log rotation
+  - Complete backup procedures: full/incremental backups, restore scripts, retention policies
+  - Health check framework with per-service endpoints, response time expectations, escalation procedures
+  - Docker log rotation config, log analysis patterns, cleanup scripts
+  - OS patch, Docker Engine, Weaviate/Redis version upgrade procedures
+  - SSL certificate management with Let's Encrypt renewal workflow
+  - Memory decay/retention tier operations (Engram-AiMemory)
+  - Performance baseline monitoring, resource tracking, endpoint latency analysis
+  - Quarterly disaster recovery testing procedures with validation
+  - Emergency procedures: service recovery, network isolation, data corruption recovery
+  - Quick reference command cheatsheet for service/database/health operations
+  - On-call escalation matrix (P0-P3 severity levels, contacts)
+  - Related resources links to deployment scripts, quality gate, infrastructure docs
+
+---
+
