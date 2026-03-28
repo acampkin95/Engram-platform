@@ -198,7 +198,8 @@ export const MEMORY_TOOLS: Tool[] = [
 				},
 				limit: {
 					type: "number",
-					description: "Maximum number of memories to return (1-500, default 50)",
+					description:
+						"Maximum number of memories to return (1-500, default 50)",
 					default: 50,
 				},
 				offset: {

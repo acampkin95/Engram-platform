@@ -272,10 +272,13 @@ export class MemoryAPIClient {
 	}): Promise<{ memories: unknown[]; total: number }> {
 		const url = new URL(`${this.baseUrl}/memories/list`);
 		if (params.tenant_id) url.searchParams.set("tenant_id", params.tenant_id);
-		if (params.limit != null) url.searchParams.set("limit", String(params.limit));
-		if (params.offset != null) url.searchParams.set("offset", String(params.offset));
+		if (params.limit != null)
+			url.searchParams.set("limit", String(params.limit));
+		if (params.offset != null)
+			url.searchParams.set("offset", String(params.offset));
 		if (params.tier != null) url.searchParams.set("tier", String(params.tier));
-		if (params.project_id) url.searchParams.set("project_id", params.project_id);
+		if (params.project_id)
+			url.searchParams.set("project_id", params.project_id);
 
 		const response = await resilientFetch(url.toString(), {
 			headers: this.getHeaders(),
