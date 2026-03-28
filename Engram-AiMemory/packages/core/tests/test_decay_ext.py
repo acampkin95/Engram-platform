@@ -11,7 +11,6 @@ import sys
 from types import ModuleType
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from memory_system.decay import MemoryReranker
 

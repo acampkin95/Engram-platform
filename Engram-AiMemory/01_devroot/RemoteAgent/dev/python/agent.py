@@ -14,7 +14,7 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 
 from embedding_worker import EmbeddingWorker
-from document_processor import DocumentProcessor, ProcessedDocument
+from document_processor import DocumentProcessor
 from weaviate_client import WeaviateClient
 from state_manager import StateManager
 

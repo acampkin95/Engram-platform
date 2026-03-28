@@ -8,9 +8,7 @@ import os
 import pytest
 import asyncio
 import time
-from datetime import datetime
-from typing import List
-from statistics import mean, median, stdev
+from statistics import mean, median
 
 os.environ["JWT_SECRET"] = "test-secret-key-for-testing-only"
 

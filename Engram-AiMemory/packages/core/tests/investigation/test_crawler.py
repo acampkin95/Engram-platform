@@ -1,7 +1,6 @@
 """Unit tests for investigation crawler (no live crawling)."""
 from __future__ import annotations
 
-import pytest
 
 from memory_system.investigation.crawler import CrawlJob, CrawlResult, InvestigationCrawler
 

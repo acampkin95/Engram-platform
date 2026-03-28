@@ -3,7 +3,7 @@
 import asyncio
 import fnmatch
 from pathlib import Path
-from typing import Callable, List, Optional, Set
+from typing import List, Optional
 
 from rich.console import Console
 from watchdog.events import FileSystemEvent, FileSystemEventHandler

@@ -8,15 +8,13 @@ Run with: pytest tests/test_weaviate_live.py -v --run-live-tests
 
 import os
 import pytest
-import asyncio
-from datetime import datetime, UTC
 from uuid import uuid4
 
 os.environ["JWT_SECRET"] = "test-secret-key-for-testing-only"
 
 from memory_system.client import WeaviateMemoryClient
-from memory_system.config import Settings, get_settings
-from memory_system.memory import Memory, MemoryTier, MemoryType, MemorySource
+from memory_system.config import get_settings
+from memory_system.memory import Memory, MemoryTier, MemoryType
 
 
 # Skip all tests in this file unless --run-live-tests is specified

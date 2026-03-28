@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from rich.console import Console
 from rich.table import Table
 
-from .config import get_settings, Settings
+from .config import get_settings
 from .processor import DocumentProcessor
 
 # Load environment variables

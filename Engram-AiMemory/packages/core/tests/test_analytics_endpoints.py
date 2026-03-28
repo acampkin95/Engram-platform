@@ -2,7 +2,6 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from unittest.mock import AsyncMock, MagicMock
-from datetime import datetime, timezone
 
 # Override auth for all tests — require_auth → always returns "test-user"
 async def _override_auth():

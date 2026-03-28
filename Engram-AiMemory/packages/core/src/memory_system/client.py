@@ -14,7 +14,6 @@ from rich.console import Console
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from memory_system.compat import UTC
-
 from memory_system.config import (
     ENTITY_COLLECTION,
     RELATION_COLLECTION,

@@ -75,7 +75,7 @@ disable_error_code = ["no-any-return", "type-arg", "assignment", "var-annotated"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["packages/core/tests"]
-addopts = "--cov=memory_system --cov-report=term-missing --cov-report=html --cov-fail-under=79.8"
+addopts = "--cov=memory_system --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=79.8"
 
 [tool.coverage.run]
 omit = [

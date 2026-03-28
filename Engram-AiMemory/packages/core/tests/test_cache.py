@@ -185,8 +185,15 @@ class TestSearchCache:
         cache, mock_client = _make_cache_with_client()
         mock_client.setex = AsyncMock()
         data = [{"memory": "result"}]
+        query_without_project = MemoryQuery(
+            query="test query",
+            tier=MemoryTier.PROJECT,
+            project_id=None,  # No project_id to avoid double setex call
+            user_id="user-1",
+            limit=10,
+        )
 
-        await cache.set_search_results(self._make_query(), data)
+        await cache.set_search_results(query_without_project, data)
         mock_client.setex.assert_awaited_once()
 
     @pytest.mark.asyncio

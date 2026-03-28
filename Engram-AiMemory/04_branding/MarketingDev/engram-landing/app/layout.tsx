@@ -26,8 +26,8 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ENGRAM — Multi-layer AI Memory System",
-  description: "A revolutionary vector database that mimics the human brain's multi-layered memory architecture, enabling AI systems with persistent, contextual, and evolving intelligence.",
+  title: "ENGRAM — Unified AI Intelligence Platform",
+  description: "A comprehensive AI intelligence platform combining persistent memory, intelligent crawling, unified protocol servers, and visual analytics. Memory + Crawler + MCP + Dashboard.",
 };
 
 export default function RootLayout({

@@ -2,14 +2,12 @@
 Weaviate Client - Handles connection and operations to remote Weaviate instance
 """
 import os
-import asyncio
 from typing import Optional
 from dataclasses import dataclass
 from datetime import datetime
 import weaviate
 from weaviate.classes.init import Auth
 from weaviate.classes.config import Configure, Property, DataType
-from weaviate.classes.data import DataObject
 from dotenv import load_dotenv
 from rich.console import Console
 

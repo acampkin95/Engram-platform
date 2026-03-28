@@ -9,18 +9,15 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import UUID, uuid4
+from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 import pytest
 
 from memory_system.client import WeaviateMemoryClient
 from memory_system.config import (
     ENTITY_COLLECTION,
-    RELATION_COLLECTION,
     TIER1_COLLECTION,
-    TIER2_COLLECTION,
-    TIER3_COLLECTION,
     Settings,
 )
 from memory_system.memory import (

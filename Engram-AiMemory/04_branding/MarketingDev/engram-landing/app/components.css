@@ -69,7 +69,7 @@
 }
 
 .memory-layer {
-  width: 280px;
+  width: 320px;
   height: 52px;
   border-radius: 8px;
   display: flex;
@@ -135,3 +135,46 @@
 .memory-layer-2 { margin-left: 16px; }
 .memory-layer-3 { margin-left: 24px; }
 .memory-layer-4 { margin-left: 32px; }
+
+/* Service Card Styles */
+.service-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  transition: width 0.3s ease;
+}
+
+.service-card:hover::before {
+  width: 6px;
+}
+
+.service-card.amber::before { background: var(--engram-amber); }
+.service-card.violet::before { background: var(--engram-violet); }
+.service-card.teal::before { background: var(--engram-teal); }
+.service-card.rose::before { background: var(--engram-rose); }
+
+/* Code Block Styles */
+.code-block {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--engram-teal);
+  overflow-x: auto;
+  margin: 24px 0;
+}

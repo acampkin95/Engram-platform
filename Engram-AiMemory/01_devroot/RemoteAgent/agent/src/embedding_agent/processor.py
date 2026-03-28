@@ -12,7 +12,7 @@ from .chunker import TextChunker
 from .config import Settings, get_settings
 from .embedder import EmbeddingService, create_embedder
 from .parsers import get_parser_registry
-from .state import StateDB, FileState, compute_file_hash, file_needs_processing
+from .state import StateDB, FileState, file_needs_processing
 from .watcher import FileWatcher
 from .weaviate_client import DocumentChunk, WeaviateClient
 

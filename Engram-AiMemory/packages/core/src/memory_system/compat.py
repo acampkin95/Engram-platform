@@ -12,21 +12,13 @@ These files can be synced to/from the Weaviate memory system.
 
 import json
 import re
-import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime  # noqa: F401 — UTC re-exported for 15+ consumers
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 from rich.console import Console
-
-# Python 3.11+ compatibility: datetime.UTC
-if sys.version_info >= (3, 11):
-    from datetime import UTC
-else:
-    from datetime import timezone
-    UTC = timezone.utc
 
 console = Console()
 

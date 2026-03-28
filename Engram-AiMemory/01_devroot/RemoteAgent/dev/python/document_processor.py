@@ -2,7 +2,6 @@
 Document Processor - Handles file reading, parsing, and chunking
 """
 import os
-import re
 from pathlib import Path
 from typing import Optional, Generator
 from dataclasses import dataclass, field

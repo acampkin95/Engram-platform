@@ -8,18 +8,16 @@ No live services required.
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 
 from memory_system.memory import (
     GraphQueryResult,
     KnowledgeEntity,
-    KnowledgeRelation,
     Memory,
-    MemoryQuery,
     MemorySearchResult,
     MemorySource,
     MemoryStats,

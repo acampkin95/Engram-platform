@@ -2,7 +2,6 @@
 API Server - FastAPI server exposing the embedding agent to TypeScript orchestrator
 """
 import os
-import asyncio
 from typing import Optional
 from pathlib import Path
 from contextlib import asynccontextmanager

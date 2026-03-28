@@ -5,15 +5,14 @@ Tests WeaviateMemoryClient logic without requiring a live Weaviate instance.
 
 import os
 import pytest
-from datetime import datetime, UTC
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
-from uuid import UUID, uuid4
+from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 os.environ["JWT_SECRET"] = "test-secret-key-for-testing-only"
 
 from memory_system.client import WeaviateMemoryClient
 from memory_system.config import Settings, TIER1_COLLECTION, TIER2_COLLECTION, TIER3_COLLECTION
-from memory_system.memory import Memory, MemoryTier, MemoryType, MemorySource
+from memory_system.memory import Memory, MemoryTier, MemoryType
 
 
 class TestWeaviateMemoryClientInitialization:

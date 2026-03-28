@@ -3,7 +3,6 @@
 import os
 import pytest
 from datetime import datetime, UTC, timedelta
-from unittest.mock import AsyncMock, MagicMock
 
 os.environ["JWT_SECRET"] = "test-secret-key-for-testing-only"
 

@@ -7,12 +7,10 @@ Tests real scheduling logic, stats tracking, and job routing.
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
-import pytest
 
 from memory_system.memory import (
     Memory,

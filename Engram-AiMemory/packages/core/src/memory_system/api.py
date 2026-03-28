@@ -14,8 +14,6 @@ from contextlib import asynccontextmanager, suppress
 from datetime import datetime, timedelta
 from typing import Any
 
-from memory_system.compat import UTC
-
 from fastapi import (
     Depends,
     FastAPI,
@@ -48,6 +46,7 @@ from memory_system.auth import (
     require_auth,
     verify_password,
 )
+from memory_system.compat import UTC
 from memory_system.config import get_settings
 
 console = Console()

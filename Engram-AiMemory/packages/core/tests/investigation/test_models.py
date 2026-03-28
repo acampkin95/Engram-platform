@@ -2,12 +2,10 @@
 from __future__ import annotations
 
 import pytest
-from datetime import datetime
 from pydantic import ValidationError
 
 from memory_system.investigation.models import (
     MatterCreate,
-    MatterResponse,
     MatterStatus,
     EvidenceIngest,
     SearchRequest,

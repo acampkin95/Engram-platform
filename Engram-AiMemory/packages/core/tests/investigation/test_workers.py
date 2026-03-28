@@ -1,7 +1,6 @@
 """Unit tests for investigation workers (no Weaviate required)."""
 from __future__ import annotations
 
-import pytest
 
 from memory_system.investigation.workers import (
     ContradictionFlaggingWorker,

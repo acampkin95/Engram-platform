@@ -4,6 +4,26 @@ All notable changes to the AI Memory System project are documented here.
 
 ---
 
+## [Unreleased] — AGENTS.md Generation for AI Agent Navigation
+
+**Date:** 2026-03-22
+
+### Added
+
+- **`AGENTS.md`** — Root directory guide (Purpose, Key Files, Subdirectories, Working patterns, Testing, Common patterns, Dependencies)
+- **`packages/AGENTS.md`** — npm workspaces root guide (Minimal, links to core and cli)
+- **`packages/core/AGENTS.md`** — Python backend package guide (Setup, Testing, patterns, Dependencies)
+- **`packages/core/src/memory_system/AGENTS.md`** — Core package API guide (24 key files, 3 subdirectories, Async patterns, Redis caching, JWT auth)
+- **`packages/core/src/memory_system/investigation/AGENTS.md`** — Investigation module guide (Crawling, Parsing, Deduplication, Evidence API)
+- **`packages/core/tests/AGENTS.md`** — Test suite guide (26 test modules, 79.8% coverage, Fixtures, Async testing patterns)
+- **`packages/cli/AGENTS.md`** — CLI package guide (Minimal TypeScript, HTTP client, no tests)
+- **`docker/AGENTS.md`** — Container guide (Dockerfiles, Compose files, Nginx, Health checks)
+- **`scripts/AGENTS.md`** — Deployment and testing guide (Deploy, health checks, e2e tests, Tailscale SSH)
+
+All files use hierarchical parent references and accurate directory scanning. Verified working tree.
+
+---
+
 ## [Unreleased] — Engram Design System Polish: Dashboard Pages & Navigation
 
 **Date:** 2026-02-28

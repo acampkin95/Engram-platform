@@ -15,7 +15,7 @@ from uuid import uuid4
 
 os.environ["JWT_SECRET"] = "test-secret-key-for-testing-only"
 
-from memory_system.memory import Memory, MemoryTier, MemoryType, MemorySource
+from memory_system.memory import Memory, MemoryTier, MemoryType
 
 
 class TestDataIntegrity:

@@ -29,6 +29,9 @@
   --engram-teal-glow: rgba(46, 196, 196, 0.12);
 
   --engram-rose: #E05C7F;
+  --engram-rose-glow: rgba(224, 92, 127, 0.12);
+  --border-rose: rgba(224, 92, 127, 0.25);
+  --border-teal: rgba(46, 196, 196, 0.25);
 
   /* Text */
   --text-primary: #F0EEF8;
@@ -146,4 +149,9 @@ a {
   15% { opacity: 0.2; }
   20% { opacity: 1; }
   100% { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
 }

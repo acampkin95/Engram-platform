@@ -68,7 +68,6 @@ class TestNomicEmbedder:
         """Verify embed() prepends task prefix to each text."""
         mock_model = MagicMock()
         # Return a tensor-like object
-        import types
 
         mock_tensor = MagicMock()
         mock_tensor.shape = (2, 768)

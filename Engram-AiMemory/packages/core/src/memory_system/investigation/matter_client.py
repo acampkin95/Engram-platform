@@ -5,10 +5,9 @@ from datetime import datetime
 from uuid import uuid4
 
 from rich.console import Console
-
-from memory_system.compat import UTC
 from weaviate.classes.tenants import Tenant, TenantActivityStatus
 
+from memory_system.compat import UTC
 from memory_system.config import (
     INVESTIGATION_MATTER,
     INVESTIGATION_TENANT_COLLECTIONS,

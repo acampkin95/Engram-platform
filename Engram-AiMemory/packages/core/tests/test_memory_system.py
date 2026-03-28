@@ -4,12 +4,11 @@ Integration tests for the AI Memory System.
 Run with: pytest packages/core/tests/ -v
 """
 
-import asyncio
 from uuid import uuid4
 
 import pytest
 
-from memory_system import MemorySystem, MemoryTier, MemoryType, MemorySource
+from memory_system import MemorySystem, MemoryTier, MemoryType
 
 
 @pytest.fixture

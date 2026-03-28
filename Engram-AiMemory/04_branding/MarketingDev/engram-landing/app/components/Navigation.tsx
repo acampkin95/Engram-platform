@@ -4,23 +4,146 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from './ui/Button';
+import {
+  Home,
+  Layers,
+  Brain,
+  Globe,
+  Server,
+  LayoutDashboard,
+  BookOpen,
+  Rocket,
+  Code,
+  GitBranch,
+  ChevronRight,
+  GitCommit,
+} from 'lucide-react';
+
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
 
 interface NavItem {
   label: string;
   href: string;
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
+  external?: boolean;
+  dotColor?: string;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Home', href: '/' },
-  { label: 'Features', href: '#features' },
-  { label: 'Architecture', href: '#architecture' },
-  { label: 'Use Cases', href: '#use-cases' },
-  { label: 'Documentation', href: '/docs' },
-  { label: 'API Reference', href: '/api' },
-  { label: 'Examples', href: '/examples' },
-  { label: 'GitHub', href: 'https://github.com/engram/engram' },
+const navSections: NavSection[] = [
+  {
+    label: 'OVERVIEW',
+    items: [
+      { label: 'Home', href: '/', icon: <Home size={16} /> },
+      { label: 'Platform', href: '/platform', icon: <Layers size={16} /> },
+    ],
+  },
+  {
+    label: 'PRODUCTS',
+    items: [
+      {
+        label: 'AiMemory',
+        href: '/platform/memory',
+        icon: <Brain size={16} />,
+        dotColor: 'var(--engram-amber)',
+      },
+      {
+        label: 'AiCrawler',
+        href: '/platform/crawler',
+        icon: <Globe size={16} />,
+        dotColor: 'var(--engram-violet)',
+      },
+      {
+        label: 'MCP Server',
+        href: '/platform/mcp',
+        icon: <Server size={16} />,
+        dotColor: 'var(--engram-teal)',
+      },
+      {
+        label: 'Dashboard',
+        href: '/platform/dashboard',
+        icon: <LayoutDashboard size={16} />,
+        dotColor: 'var(--engram-rose)',
+      },
+    ],
+  },
+  {
+    label: 'RESOURCES',
+    items: [
+      {
+        label: 'Knowledge Base',
+        href: '/knowledge-base',
+        icon: <BookOpen size={16} />,
+      },
+      {
+        label: 'Getting Started',
+        href: '/getting-started',
+        icon: <Rocket size={16} />,
+      },
+      { label: 'API Reference', href: '#api', icon: <Code size={16} /> },
+      {
+        label: 'GitHub',
+        href: 'https://github.com/engram',
+        icon: <GitCommit size={16} />,
+        external: true,
+      },
+    ],
+  },
 ];
+
+interface NavItemProps {
+  item: NavItem;
+  isActive: boolean;
+}
+
+function NavItemComponent({ item, isActive }: NavItemProps) {
+  const content = (
+    <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-[var(--font-mono)] text-sm relative">
+      {item.dotColor && (
+        <div
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full opacity-0 transition-opacity duration-200"
+          style={{
+            backgroundColor: item.dotColor,
+            opacity: isActive ? 1 : 0.4,
+          }}
+        />
+      )}
+
+      <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>
+      <span className="flex-1">{item.label}</span>
+
+      {isActive && (
+        <ChevronRight size={14} className="opacity-60 flex-shrink-0" />
+      )}
+    </div>
+  );
+
+  const baseClasses = `
+    flex w-full text-left transition-all duration-200
+    font-[var(--font-mono)] text-sm
+    ${
+      isActive
+        ? 'text-[var(--engram-amber)] bg-[var(--engram-amber-glow)] border-l-2 border-[var(--engram-amber)] rounded-lg'
+        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-1)]'
+    }
+  `;
+
+  if (item.external) {
+    return (
+      <a href={item.href} target="_blank" rel="noopener noreferrer" className={baseClasses}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={item.href} className={baseClasses}>
+      {content}
+    </Link>
+  );
+}
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,26 +152,39 @@ export function Navigation() {
   return (
     <>
       {/* Mobile Menu Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="fixed top-4 left-4 z-50 md:hidden"
+      <button
         onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-50 md:hidden p-2 hover:bg-[var(--surface-1)] rounded-lg transition-colors"
+        aria-label="Toggle navigation"
       >
         <div className="w-5 h-5 flex flex-col justify-center gap-1">
-          <div className={`h-0.5 w-full bg-[var(--text-primary)] transition-transform ${isOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-          <div className={`h-0.5 w-full bg-[var(--text-primary)] transition-opacity ${isOpen ? 'opacity-0' : ''}`} />
-          <div className={`h-0.5 w-full bg-[var(--text-primary)] transition-transform ${isOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+          <div
+            className={`h-0.5 w-full bg-[var(--text-primary)] transition-transform ${
+              isOpen ? 'rotate-45 translate-y-1.5' : ''
+            }`}
+          />
+          <div
+            className={`h-0.5 w-full bg-[var(--text-primary)] transition-opacity ${
+              isOpen ? 'opacity-0' : ''
+            }`}
+          />
+          <div
+            className={`h-0.5 w-full bg-[var(--text-primary)] transition-transform ${
+              isOpen ? '-rotate-45 -translate-y-1.5' : ''
+            }`}
+          />
         </div>
-      </Button>
+      </button>
 
       {/* Navigation Sidebar */}
-      <nav className={`
-        fixed left-0 top-0 h-screen bg-[var(--deep)] border-r border-[var(--border)] z-40
-        transition-transform duration-300 ease-in-out
-        w-[260px] -translate-x-full md:translate-x-0
-        ${isOpen ? 'translate-x-0' : ''}
-      `}>
+      <nav
+        className={`
+          fixed left-0 top-0 h-screen bg-[var(--deep)] border-r border-[var(--border)] z-40
+          transition-transform duration-300 ease-in-out
+          w-[280px] -translate-x-full md:translate-x-0
+          ${isOpen ? 'translate-x-0' : ''}
+        `}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-8 border-b border-[var(--border)]">
@@ -61,38 +197,31 @@ export function Navigation() {
               </span>
             </Link>
             <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.12em] mt-2">
-              Multi-layer AI Memory System
+              Unified AI Intelligence Platform
             </p>
           </div>
 
-          {/* Navigation Items */}
-          <div className="flex-1 p-4 overflow-y-auto">
-            <div className="space-y-1">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href || 
-                               (item.href.startsWith('#') && typeof window !== 'undefined' && 
-                                window.location.hash === item.href);
-                
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`
-                      flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-                      font-[var(--font-mono)] text-sm
-                      ${isActive 
-                        ? 'bg-[var(--engram-amber-glow)] text-[var(--engram-amber)] border border-[var(--border-amber)]' 
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-1)]'
-                      }
-                    `}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.icon && <span className="w-4 h-4">{item.icon}</span>}
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
+          {/* Navigation Sections */}
+          <div className="flex-1 p-4 overflow-y-auto space-y-6">
+            {navSections.map((section) => (
+              <div key={section.label}>
+                <h3 className="font-[var(--font-mono)] text-xs font-bold uppercase tracking-wider text-[var(--engram-amber)] px-4 mb-3">
+                  {section.label}
+                </h3>
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <NavItemComponent
+                        key={item.href}
+                        item={item}
+                        isActive={isActive}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Footer */}
@@ -106,7 +235,7 @@ export function Navigation() {
 
       {/* Overlay for mobile */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-[var(--void)]/80 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setIsOpen(false)}
         />
