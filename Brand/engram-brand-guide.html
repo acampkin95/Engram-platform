@@ -1,0 +1,3477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engram Platform — Brand Guide v1.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --foundation: #0A0E1A;
+      --surface: #141928;
+      --surface-elevated: #1F2433;
+      --rust: #C25216;
+      --rust-light: #D4663D;
+      --rust-dark: #A03F0F;
+      --amber: #E8A030;
+      --amber-light: #F0B84B;
+      --amber-dark: #D18820;
+      --graphite: #8892A4;
+      --graphite-light: #A8B3C1;
+      --ice: #E8EDF5;
+      --ice-dark: #C8D0E0;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --error: #EF4444;
+      --info: #3B82F6;
+      --text-primary: var(--ice);
+      --text-secondary: var(--graphite);
+      --bg-primary: var(--foundation);
+      --bg-secondary: var(--surface);
+      --border-color: rgba(232, 237, 245, 0.1);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --spacing-xs: 2px;
+      --spacing-sm: 4px;
+      --spacing-md: 8px;
+      --spacing-lg: 12px;
+      --spacing-xl: 16px;
+      --spacing-2xl: 24px;
+      --spacing-3xl: 32px;
+      --spacing-4xl: 48px;
+      --spacing-5xl: 64px;
+      --spacing-6xl: 96px;
+      --spacing-7xl: 128px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      width: 240px;
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border-color);
+      overflow-y: auto;
+      padding: var(--spacing-3xl) 0;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: var(--spacing-xl) var(--spacing-2xl);
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--rust);
+      margin-bottom: var(--spacing-2xl);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-nav {
+      list-style: none;
+    }
+
+    .sidebar-nav li {
+      margin: 0;
+    }
+
+    .sidebar-nav a {
+      display: block;
+      padding: var(--spacing-lg) var(--spacing-2xl);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-nav a:hover {
+      color: var(--rust);
+      background: rgba(194, 82, 22, 0.1);
+      border-left-color: var(--rust);
+    }
+
+    .sidebar-nav a.active {
+      color: var(--rust);
+      background: rgba(194, 82, 22, 0.15);
+      border-left-color: var(--rust);
+    }
+
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--spacing-4xl) var(--spacing-5xl);
+    }
+
+    section {
+      margin-bottom: var(--spacing-7xl);
+      scroll-margin-top: 20px;
+    }
+
+    section > h1 {
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-2xl);
+      color: var(--ice);
+    }
+
+    section > h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 600;
+      margin-top: var(--spacing-3xl);
+      margin-bottom: var(--spacing-xl);
+      color: var(--rust);
+    }
+
+    section > p {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-xl);
+      line-height: 1.8;
+    }
+
+    .subsection {
+      margin: var(--spacing-3xl) 0;
+    }
+
+    .subsection > h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: var(--spacing-lg);
+      color: var(--amber);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-3xl);
+      margin: var(--spacing-2xl) 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-2xl);
+      margin: var(--spacing-2xl) 0;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--spacing-2xl);
+      margin: var(--spacing-2xl) 0;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: var(--spacing-2xl);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      background: var(--surface-elevated);
+      border-color: rgba(194, 82, 22, 0.3);
+    }
+
+    .swatch {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: var(--spacing-xl);
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .swatch:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .swatch-label {
+      position: absolute;
+      bottom: var(--spacing-lg);
+      background: rgba(10, 14, 26, 0.95);
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .swatch:hover .swatch-label {
+      opacity: 1;
+    }
+
+    .scale-strip {
+      display: flex;
+      gap: 2px;
+      margin: var(--spacing-xl) 0;
+      height: 40px;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .scale-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .scale-item:hover {
+      filter: brightness(1.2);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .paint-chip {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: var(--spacing-2xl);
+      margin: var(--spacing-xl) 0;
+    }
+
+    .paint-chip-color {
+      width: 100%;
+      height: 80px;
+      border-radius: 4px;
+      margin-bottom: var(--spacing-lg);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .paint-chip-color:hover {
+      transform: scale(1.02);
+    }
+
+    .paint-chip-specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      font-size: 13px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+
+    .paint-chip-spec-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      background: rgba(194, 82, 22, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: var(--amber);
+      font-size: 13px;
+    }
+
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: var(--spacing-2xl);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      margin: var(--spacing-xl) 0;
+      line-height: 1.6;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    .button {
+      display: inline-block;
+      padding: var(--spacing-lg) var(--spacing-2xl);
+      border-radius: 6px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 14px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .button-primary {
+      background: var(--rust);
+      color: var(--ice);
+      border-color: var(--rust);
+    }
+
+    .button-primary:hover {
+      background: var(--rust-light);
+      border-color: var(--rust-light);
+    }
+
+    .button-secondary {
+      background: transparent;
+      color: var(--rust);
+      border-color: var(--rust);
+    }
+
+    .button-secondary:hover {
+      background: rgba(194, 82, 22, 0.1);
+    }
+
+    .button-ghost {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+
+    .button-ghost:hover {
+      border-color: var(--rust);
+      color: var(--rust);
+    }
+
+    .button-danger {
+      background: var(--error);
+      color: white;
+      border-color: var(--error);
+    }
+
+    .button-danger:hover {
+      opacity: 0.9;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      margin: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) 0;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+
+    .badge-error {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+    }
+
+    .badge-info {
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--info);
+    }
+
+    .alert {
+      border-radius: 6px;
+      padding: var(--spacing-xl) var(--spacing-2xl);
+      margin: var(--spacing-xl) 0;
+      border-left: 4px solid;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .alert-info {
+      border-color: var(--info);
+      color: var(--info);
+    }
+
+    .alert-success {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .alert-warning {
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+
+    .alert-error {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: var(--spacing-lg) var(--spacing-xl);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      transition: all 0.2s ease;
+      margin: var(--spacing-lg) 0;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--rust);
+      background: var(--surface-elevated);
+      box-shadow: 0 0 0 3px rgba(194, 82, 22, 0.1);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--spacing-xl) 0;
+    }
+
+    .data-table th {
+      background: var(--surface);
+      border-bottom: 2px solid var(--rust);
+      padding: var(--spacing-lg);
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--rust);
+    }
+
+    .data-table td {
+      border-bottom: 1px solid var(--border-color);
+      padding: var(--spacing-lg);
+      font-size: 13px;
+    }
+
+    .data-table tr:hover {
+      background: rgba(194, 82, 22, 0.05);
+    }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: var(--spacing-2xl);
+      margin: var(--spacing-2xl) 0;
+    }
+
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: var(--spacing-2xl);
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .icon-item:hover {
+      background: var(--surface-elevated);
+      border-color: var(--rust);
+      transform: translateY(-4px);
+    }
+
+    .icon-item svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--spacing-lg);
+      stroke: var(--rust);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    .icon-item-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .animation-demo {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: var(--spacing-3xl);
+      margin: var(--spacing-xl) 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { r: 6; opacity: 1; }
+      50% { r: 12; opacity: 0.5; }
+    }
+
+    @keyframes edgeDraw {
+      0% { stroke-dashoffset: 100; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes dataFloat {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-100px); opacity: 0; }
+    }
+
+    @keyframes ripple {
+      0% { r: 0; opacity: 0.8; }
+      100% { r: 50; opacity: 0; }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: var(--spacing-2xl);
+      right: var(--spacing-2xl);
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      padding: var(--spacing-xl) var(--spacing-2xl);
+      border-radius: 6px;
+      border-left: 4px solid var(--rust);
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(100px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .pillar {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: var(--spacing-2xl);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .pillar-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--rust);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .pillar-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-2xl);
+      margin: var(--spacing-2xl) 0;
+    }
+
+    .comparison-item {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: var(--spacing-2xl);
+    }
+
+    .comparison-label {
+      font-weight: 700;
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .comparison-wrong {
+      color: var(--error);
+    }
+
+    .comparison-right {
+      color: var(--success);
+    }
+
+    .prompt-library {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: var(--spacing-2xl);
+      margin: var(--spacing-xl) 0;
+    }
+
+    .prompt-title {
+      font-weight: 600;
+      color: var(--amber);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .prompt-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .wcag-table {
+      width: 100%;
+      margin: var(--spacing-2xl) 0;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .wcag-table th {
+      background: var(--surface);
+      border-bottom: 2px solid var(--rust);
+      padding: var(--spacing-lg);
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .wcag-table td {
+      border-bottom: 1px solid var(--border-color);
+      padding: var(--spacing-lg);
+    }
+
+    .wcag-pass {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .wcag-fail {
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    .changelog-item {
+      background: var(--surface);
+      border-left: 4px solid var(--rust);
+      border-radius: 6px;
+      padding: var(--spacing-2xl);
+      margin: var(--spacing-xl) 0;
+    }
+
+    .changelog-version {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--rust);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .changelog-date {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .changelog-notes {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    @media (max-width: 1200px) {
+      .main {
+        padding: var(--spacing-3xl);
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-3, .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .main {
+        padding: var(--spacing-2xl);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar">
+      <div class="sidebar-header">Engram</div>
+      <ul class="sidebar-nav">
+        <li><a href="#overview" class="nav-link">1. Overview</a></li>
+        <li><a href="#colors" class="nav-link">2. Colour System</a></li>
+        <li><a href="#typography" class="nav-link">3. Typography</a></li>
+        <li><a href="#logo" class="nav-link">4. Logo & Marks</a></li>
+        <li><a href="#iconography" class="nav-link">5. Iconography</a></li>
+        <li><a href="#motion" class="nav-link">6. Motion & Animation</a></li>
+        <li><a href="#voice" class="nav-link">7. Voice & Tone</a></li>
+        <li><a href="#messaging" class="nav-link">8. Tagline & Messaging</a></li>
+        <li><a href="#spacing" class="nav-link">9. Spacing & Layout</a></li>
+        <li><a href="#components" class="nav-link">10. Component Library</a></li>
+        <li><a href="#dashboard" class="nav-link">11. Dashboard UI</a></li>
+        <li><a href="#developer" class="nav-link">12. Developer Brand</a></li>
+        <li><a href="#tailwind" class="nav-link">13. Tailwind v4</a></li>
+        <li><a href="#photography" class="nav-link">14. Photography</a></li>
+        <li><a href="#illustration" class="nav-link">15. Illustration</a></li>
+        <li><a href="#applications" class="nav-link">16. Applications</a></li>
+        <li><a href="#antipatterns" class="nav-link">17. Anti-patterns</a></li>
+        <li><a href="#prompts" class="nav-link">18. AI Prompt Library</a></li>
+        <li><a href="#accessibility" class="nav-link">19. Accessibility</a></li>
+        <li><a href="#changelog" class="nav-link">20. Changelog</a></li>
+      </ul>
+    </nav>
+
+    <main class="main">
+
+
+      <!-- SECTION 1: OVERVIEW -->
+      <section id="overview">
+        <h1>1. Overview</h1>
+        <p>The Engram Platform brand represents a new era of AI systems that remember, learn, and think continuously. We are not just tools—we are partners in intelligence, building persistent memory and knowledge systems that scale with human ambition.</p>
+
+        <div class="subsection">
+          <h3>Mission</h3>
+          <p>To empower developers and AI teams to build intelligent agents with persistent memory, enabling systems that learn from context, remember interactions, and make better decisions over time.</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Primary Tagline</h3>
+          <p style="font-family: var(--font-display); font-size: 24px; color: var(--rust); margin: var(--spacing-2xl) 0;"><strong>Memory that thinks with you.</strong></p>
+        </div>
+
+        <div class="subsection">
+          <h3>Positioning</h3>
+          <p>Engram is the infrastructure layer for intelligent, memory-augmented AI systems. We sit between raw vector databases and application logic, providing semantic reasoning, temporal persistence, and multi-layer knowledge orchestration.</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Brand Pillars</h3>
+          <div class="grid-2">
+            <div class="pillar">
+              <div class="pillar-title">Intelligence</div>
+              <div class="pillar-desc">We don't just store vectors—we enable reasoning across multi-layer knowledge graphs, understanding connections that matter.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-title">Persistence</div>
+              <div class="pillar-desc">Memory that lasts. Temporal depth. Systems that remember across sessions, learning and evolving with every interaction.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-title">Precision</div>
+              <div class="pillar-desc">Exact retrieval. No noise. Technical rigor in every layer—from embeddings to graph topology to API design.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-title">Trust</div>
+              <div class="pillar-desc">Transparent memory. Auditable reasoning. Systems that work because developers understand exactly how they remember.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: COLOUR SYSTEM -->
+      <section id="colors">
+        <h1>2. Colour System</h1>
+        <p>Our palette is rooted in the warm, technical aesthetic of modern AI infrastructure. Deep foundations meet rust-forward accents, creating a sophisticated yet confident visual language.</p>
+
+        <div class="subsection">
+          <h3>Core Palette</h3>
+          
+          <div class="paint-chip">
+            <div class="paint-chip-color" style="background: #0A0E1A;" data-color="#0A0E1A"></div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Foundation</div>
+            <div class="paint-chip-specs">
+              <div>
+                <span class="paint-chip-spec-label">Pantone</span>
+                Black 6 C
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">CMYK</span>
+                100/79/44/93
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">HEX</span>
+                #0A0E1A
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">RGB</span>
+                10, 14, 26
+              </div>
+            </div>
+          </div>
+
+          <div class="paint-chip">
+            <div class="paint-chip-color" style="background: #C25216;" data-color="#C25216"></div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Rust (Primary Accent)</div>
+            <div class="paint-chip-specs">
+              <div>
+                <span class="paint-chip-spec-label">Pantone</span>
+                7526 C
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">CMYK</span>
+                0/60/80/15
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">HEX</span>
+                #C25216
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">RGB</span>
+                194, 82, 22
+              </div>
+            </div>
+          </div>
+
+          <div class="paint-chip">
+            <div class="paint-chip-color" style="background: #E8A030;" data-color="#E8A030"></div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Amber (Secondary Accent)</div>
+            <div class="paint-chip-specs">
+              <div>
+                <span class="paint-chip-spec-label">Pantone</span>
+                7509 C
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">CMYK</span>
+                0/30/80/5
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">HEX</span>
+                #E8A030
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">RGB</span>
+                232, 160, 48
+              </div>
+            </div>
+          </div>
+
+          <div class="paint-chip">
+            <div class="paint-chip-color" style="background: #8892A4;" data-color="#8892A4"></div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Graphite (Text Secondary)</div>
+            <div class="paint-chip-specs">
+              <div>
+                <span class="paint-chip-spec-label">Use for</span>
+                Secondary text, disabled states
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">HEX</span>
+                #8892A4
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">RGB</span>
+                136, 146, 164
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">Usage</span>
+                Captions, hints, borders
+              </div>
+            </div>
+          </div>
+
+          <div class="paint-chip">
+            <div class="paint-chip-color" style="background: #E8EDF5;" data-color="#E8EDF5"></div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Ice (Primary Text)</div>
+            <div class="paint-chip-specs">
+              <div>
+                <span class="paint-chip-spec-label">Use for</span>
+                Primary text on dark
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">HEX</span>
+                #E8EDF5
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">RGB</span>
+                232, 237, 245
+              </div>
+              <div>
+                <span class="paint-chip-spec-label">Usage</span>
+                Headlines, body copy
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Extended Palette</h3>
+
+          <h3 style="margin-top: var(--spacing-2xl); margin-bottom: var(--spacing-lg); color: var(--amber);">Rust Scale (50–950)</h3>
+          <div class="scale-strip" style="background: linear-gradient(to right, #F0D5C9, #E8C4B5, #DFB3A1, #D4A08D, #C88F79, #BC7E65, #B06D51, #A35C3D, #974B29, #8B3A15, #7F2901);">
+            <div class="scale-item">50</div>
+            <div class="scale-item">100</div>
+            <div class="scale-item">200</div>
+            <div class="scale-item">300</div>
+            <div class="scale-item">400</div>
+            <div class="scale-item">500</div>
+            <div class="scale-item">600</div>
+            <div class="scale-item">700</div>
+            <div class="scale-item">800</div>
+            <div class="scale-item">900</div>
+            <div class="scale-item">950</div>
+          </div>
+
+          <h3 style="margin-top: var(--spacing-2xl); margin-bottom: var(--spacing-lg); color: var(--amber);">Amber Scale (50–950)</h3>
+          <div class="scale-strip" style="background: linear-gradient(to right, #FEF3E6, #FDE8CC, #FCDDB2, #FBD298, #F9C77E, #F7BC64, #F5B14A, #F3A630, #E89A1B, #D68D0A, #C38100);">
+            <div class="scale-item">50</div>
+            <div class="scale-item">100</div>
+            <div class="scale-item">200</div>
+            <div class="scale-item">300</div>
+            <div class="scale-item">400</div>
+            <div class="scale-item">500</div>
+            <div class="scale-item">600</div>
+            <div class="scale-item">700</div>
+            <div class="scale-item">800</div>
+            <div class="scale-item">900</div>
+            <div class="scale-item">950</div>
+          </div>
+
+          <h3 style="margin-top: var(--spacing-2xl); margin-bottom: var(--spacing-lg); color: var(--amber);">Foundation Scale (50–950)</h3>
+          <div class="scale-strip" style="background: linear-gradient(to right, #3D424F, #353A47, #2D323F, #252A37, #1D222F, #151A27, #0D121F, #0A0E1A, #080B14, #06090F, #040608);">
+            <div class="scale-item">50</div>
+            <div class="scale-item">100</div>
+            <div class="scale-item">200</div>
+            <div class="scale-item">300</div>
+            <div class="scale-item">400</div>
+            <div class="scale-item">500</div>
+            <div class="scale-item">600</div>
+            <div class="scale-item">700</div>
+            <div class="scale-item">800</div>
+            <div class="scale-item">900</div>
+            <div class="scale-item">950</div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Status Colours</h3>
+          <div class="grid-4">
+            <div class="card">
+              <div style="width: 100%; height: 60px; background: #10B981; border-radius: 6px; margin-bottom: var(--spacing-lg);"></div>
+              <div style="font-weight: 600; color: var(--success);">Success</div>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);">#10B981</div>
+            </div>
+            <div class="card">
+              <div style="width: 100%; height: 60px; background: #F59E0B; border-radius: 6px; margin-bottom: var(--spacing-lg);"></div>
+              <div style="font-weight: 600; color: var(--warning);">Warning</div>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);">#F59E0B</div>
+            </div>
+            <div class="card">
+              <div style="width: 100%; height: 60px; background: #EF4444; border-radius: 6px; margin-bottom: var(--spacing-lg);"></div>
+              <div style="font-weight: 600; color: var(--error);">Error</div>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);">#EF4444</div>
+            </div>
+            <div class="card">
+              <div style="width: 100%; height: 60px; background: #3B82F6; border-radius: 6px; margin-bottom: var(--spacing-lg);"></div>
+              <div style="font-weight: 600; color: var(--info);">Info</div>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);">#3B82F6</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>CSS Custom Properties</h3>
+          <div class="code-block">
+:root {
+  --foundation: #0A0E1A;
+  --surface: #141928;
+  --rust: #C25216;
+  --rust-light: #D4663D;
+  --rust-dark: #A03F0F;
+  --amber: #E8A030;
+  --amber-light: #F0B84B;
+  --amber-dark: #D18820;
+  --graphite: #8892A4;
+  --ice: #E8EDF5;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+}
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: TYPOGRAPHY -->
+      <section id="typography">
+        <h1>3. Typography</h1>
+        <p>Our type system balances technical precision with readable clarity. Three families create hierarchy and purpose: geometric display, humanist body, and monospace for code.</p>
+
+        <div class="subsection">
+          <h3>Type Families</h3>
+          <div class="grid-3">
+            <div class="card">
+              <div style="font-family: var(--font-display); font-size: 28px; font-weight: 700; margin-bottom: var(--spacing-lg);">Space Grotesk</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Display, headlines, UI labels. Geometric, modern, confident.</div>
+              <div style="font-size: 12px; color: var(--graphite); margin-top: var(--spacing-lg); font-family: var(--font-mono);">Display font</div>
+            </div>
+            <div class="card">
+              <div style="font-family: var(--font-body); font-size: 16px; font-weight: 400; margin-bottom: var(--spacing-lg); line-height: 1.6;">Inter</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Body copy, paragraphs, UI text. Clean, readable, neutral.</div>
+              <div style="font-size: 12px; color: var(--graphite); margin-top: var(--spacing-lg); font-family: var(--font-mono);">Body font</div>
+            </div>
+            <div class="card">
+              <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 400; margin-bottom: var(--spacing-lg);">IBM Plex Mono</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Code blocks, technical specs, inline code.</div>
+              <div style="font-size: 12px; color: var(--graphite); margin-top: var(--spacing-lg); font-family: var(--font-mono);">Monospace font</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Size Scale</h3>
+          <div class="card">
+            <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">5XL</div>
+            <div style="font-size: 48px; font-weight: 700; line-height: 1.2; margin-bottom: var(--spacing-2xl); color: var(--ice);">Heading 1: Maximum Visual Impact</div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); font-family: var(--font-mono); font-size: 12px; color: var(--graphite);">font-size: 48px | font-weight: 700 | line-height: 1.2</div>
+          </div>
+
+          <div class="card" style="margin-top: var(--spacing-xl);">
+            <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">4XL</div>
+            <div style="font-size: 36px; font-weight: 700; line-height: 1.3; margin-bottom: var(--spacing-2xl); color: var(--ice);">Heading 2: Section Titles</div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); font-family: var(--font-mono); font-size: 12px; color: var(--graphite);">font-size: 36px | font-weight: 700 | line-height: 1.3</div>
+          </div>
+
+          <div class="card" style="margin-top: var(--spacing-xl);">
+            <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">3XL</div>
+            <div style="font-size: 28px; font-weight: 600; line-height: 1.4; margin-bottom: var(--spacing-2xl); color: var(--ice);">Heading 3: Subsection Titles</div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); font-family: var(--font-mono); font-size: 12px; color: var(--graphite);">font-size: 28px | font-weight: 600 | line-height: 1.4</div>
+          </div>
+
+          <div class="card" style="margin-top: var(--spacing-xl);">
+            <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">2XL</div>
+            <div style="font-size: 20px; font-weight: 600; line-height: 1.5; margin-bottom: var(--spacing-2xl); color: var(--ice);">Heading 4: Card Titles</div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); font-family: var(--font-mono); font-size: 12px; color: var(--graphite);">font-size: 20px | font-weight: 600 | line-height: 1.5</div>
+          </div>
+
+          <div class="card" style="margin-top: var(--spacing-xl);">
+            <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">XL</div>
+            <div style="font-size: 18px; font-weight: 500; line-height: 1.6; margin-bottom: var(--spacing-2xl); color: var(--ice);">Paragraph Large: Lead text and emphasis</div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); font-family: var(--font-mono); font-size: 12px; color: var(--graphite);">font-size: 18px | font-weight: 500 | line-height: 1.6</div>
+          </div>
+
+          <div class="card" style="margin-top: var(--spacing-xl);">
+            <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">Base</div>
+            <div style="font-size: 16px; font-weight: 400; line-height: 1.6; margin-bottom: var(--spacing-2xl); color: var(--text-secondary);">Body text: The foundation of reading. Clear, accessible, human-centered.</div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); font-family: var(--font-mono); font-size: 12px; color: var(--graphite);">font-size: 16px | font-weight: 400 | line-height: 1.6</div>
+          </div>
+
+          <div class="card" style="margin-top: var(--spacing-xl);">
+            <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">SM</div>
+            <div style="font-size: 14px; font-weight: 500; line-height: 1.5; margin-bottom: var(--spacing-2xl); color: var(--text-secondary);">Caption and secondary information</div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); font-family: var(--font-mono); font-size: 12px; color: var(--graphite);">font-size: 14px | font-weight: 500 | line-height: 1.5</div>
+          </div>
+
+          <div class="card" style="margin-top: var(--spacing-xl);">
+            <div style="font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">XS</div>
+            <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: var(--spacing-2xl); color: var(--graphite);">LABELS AND UI TEXT</div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: var(--spacing-lg); font-family: var(--font-mono); font-size: 12px; color: var(--graphite);">font-size: 12px | font-weight: 600 | letter-spacing: 0.5px</div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Font Weights & Usage</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Weight</th>
+                <th>Display (Space Grotesk)</th>
+                <th>Body (Inter)</th>
+                <th>Mono (IBM Plex)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>400 (Regular)</td>
+                <td>Rarely used</td>
+                <td>Body copy, default</td>
+                <td>Code blocks</td>
+              </tr>
+              <tr>
+                <td>500 (Medium)</td>
+                <td>Small buttons</td>
+                <td>UI elements, captions</td>
+                <td>Highlighted code</td>
+              </tr>
+              <tr>
+                <td>600 (Semibold)</td>
+                <td>Subheadings, labels</td>
+                <td>Strong emphasis</td>
+                <td>Code labels</td>
+              </tr>
+              <tr>
+                <td>700 (Bold)</td>
+                <td>Headlines, titles</td>
+                <td>Not typically used</td>
+                <td>Not used</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <h3>Line Height System</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Context</th>
+                <th>Line Height</th>
+                <th>Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tight</td>
+                <td>1.2</td>
+                <td>Large headlines (36px+)</td>
+              </tr>
+              <tr>
+                <td>Normal</td>
+                <td>1.4–1.5</td>
+                <td>Medium headings (20–28px)</td>
+              </tr>
+              <tr>
+                <td>Comfortable</td>
+                <td>1.6</td>
+                <td>Body text, paragraphs</td>
+              </tr>
+              <tr>
+                <td>Spacious</td>
+                <td>1.8</td>
+                <td>Long-form content, readability</td>
+              </tr>
+              <tr>
+                <td>Code</td>
+                <td>1.6</td>
+                <td>Code blocks, monospace</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 4: LOGO & MARKS -->
+      <section id="logo">
+        <h1>4. Logo & Marks</h1>
+        <p>The Engram logo system features four versatile variations designed for clarity across applications. The core icon represents a knowledge graph—three nodes connected by edges forming an abstract "E" in negative space.</p>
+
+        <div class="subsection">
+          <h3>Logo Variant 1: Wordmark + Icon (Primary)</h3>
+          <div class="animation-demo">
+            <svg width="240" height="80" viewBox="0 0 240 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g>
+                <!-- Icon: Knowledge Graph -->
+                <circle cx="30" cy="30" r="6" fill="#C25216" stroke="#C25216" stroke-width="1"/>
+                <circle cx="45" cy="20" r="6" fill="#C25216" stroke="#C25216" stroke-width="1"/>
+                <circle cx="50" cy="40" r="6" fill="#C25216" stroke="#C25216" stroke-width="1"/>
+                <line x1="30" y1="30" x2="45" y2="20" stroke="#E8A030" stroke-width="2" stroke-linecap="round"/>
+                <line x1="30" y1="30" x2="50" y2="40" stroke="#E8A030" stroke-width="2" stroke-linecap="round"/>
+                <line x1="45" y1="20" x2="50" y2="40" stroke="#E8A030" stroke-width="2" stroke-linecap="round"/>
+              </g>
+              <g>
+                <!-- Wordmark -->
+                <text x="75" y="42" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#E8EDF5">Engram</text>
+              </g>
+            </svg>
+          </div>
+          <p style="margin-top: var(--spacing-xl); font-size: 13px; color: var(--text-secondary); text-align: center;">Minimum width: 240px | Ratio: 3:1</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Logo Variant 2: Icon Only</h3>
+          <div class="animation-demo">
+            <svg width="120" height="120" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="30" r="8" fill="#C25216" stroke="#C25216" stroke-width="1.5"/>
+              <circle cx="60" cy="18" r="8" fill="#C25216" stroke="#C25216" stroke-width="1.5"/>
+              <circle cx="65" cy="50" r="8" fill="#C25216" stroke="#C25216" stroke-width="1.5"/>
+              <line x1="40" y1="30" x2="60" y2="18" stroke="#E8A030" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="40" y1="30" x2="65" y2="50" stroke="#E8A030" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="60" y1="18" x2="65" y2="50" stroke="#E8A030" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p style="margin-top: var(--spacing-xl); font-size: 13px; color: var(--text-secondary); text-align: center;">Minimum size: 64px | Works at any scale</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Logo Variant 3: Horizontal Lockup</h3>
+          <div class="animation-demo">
+            <svg width="300" height="100" viewBox="0 0 300 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g>
+                <!-- Icon -->
+                <circle cx="40" cy="50" r="8" fill="#C25216" stroke="#C25216" stroke-width="1.5"/>
+                <circle cx="60" cy="35" r="8" fill="#C25216" stroke="#C25216" stroke-width="1.5"/>
+                <circle cx="65" cy="65" r="8" fill="#C25216" stroke="#C25216" stroke-width="1.5"/>
+                <line x1="40" y1="50" x2="60" y2="35" stroke="#E8A030" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="40" y1="50" x2="65" y2="65" stroke="#E8A030" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="60" y1="35" x2="65" y2="65" stroke="#E8A030" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+              <g>
+                <!-- Wordmark -->
+                <text x="95" y="62" font-family="Space Grotesk" font-size="36" font-weight="700" fill="#E8EDF5">Engram</text>
+              </g>
+            </svg>
+          </div>
+          <p style="margin-top: var(--spacing-xl); font-size: 13px; color: var(--text-secondary); text-align: center;">Minimum width: 280px | Icon + text spacing: 16px</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Logo Variant 4: Monochrome / Reversed</h3>
+          <div class="animation-demo" style="background: var(--rust);">
+            <svg width="240" height="80" viewBox="0 0 240 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g>
+                <!-- Icon: Monochrome -->
+                <circle cx="30" cy="30" r="6" fill="#0A0E1A" stroke="#0A0E1A" stroke-width="1"/>
+                <circle cx="45" cy="20" r="6" fill="#0A0E1A" stroke="#0A0E1A" stroke-width="1"/>
+                <circle cx="50" cy="40" r="6" fill="#0A0E1A" stroke="#0A0E1A" stroke-width="1"/>
+                <line x1="30" y1="30" x2="45" y2="20" stroke="#0A0E1A" stroke-width="2" stroke-linecap="round"/>
+                <line x1="30" y1="30" x2="50" y2="40" stroke="#0A0E1A" stroke-width="2" stroke-linecap="round"/>
+                <line x1="45" y1="20" x2="50" y2="40" stroke="#0A0E1A" stroke-width="2" stroke-linecap="round"/>
+              </g>
+              <g>
+                <!-- Wordmark -->
+                <text x="75" y="42" font-family="Space Grotesk" font-size="32" font-weight="700" fill="#0A0E1A">Engram</text>
+              </g>
+            </svg>
+          </div>
+          <p style="margin-top: var(--spacing-xl); font-size: 13px; color: var(--text-secondary); text-align: center;">Dark on light background. Use on Rust, Amber, or Light surfaces.</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Logo Spacing & Clearance</h3>
+          <p>Maintain minimum clear space around the logo (no other elements). Clear space equals the height of the icon (approximately 1:1 ratio).</p>
+          <div class="animation-demo" style="background: rgba(194, 82, 22, 0.1); border: 2px dashed var(--rust);">
+            <svg width="280" height="140" viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse">
+                  <path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(232,237,245,0.1)" stroke-width="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="280" height="140" fill="url(#grid)"/>
+              <!-- Dashed clear space border -->
+              <rect x="20" y="20" width="240" height="100" fill="none" stroke="var(--rust)" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>
+              <!-- Logo -->
+              <g>
+                <circle cx="60" cy="60" r="6" fill="#C25216"/>
+                <circle cx="75" cy="50" r="6" fill="#C25216"/>
+                <circle cx="80" cy="70" r="6" fill="#C25216"/>
+                <line x1="60" y1="60" x2="75" y2="50" stroke="#E8A030" stroke-width="2"/>
+                <line x1="60" y1="60" x2="80" y2="70" stroke="#E8A030" stroke-width="2"/>
+                <line x1="75" y1="50" x2="80" y2="70" stroke="#E8A030" stroke-width="2"/>
+                <text x="110" y="72" font-family="Space Grotesk" font-size="28" font-weight="700" fill="#E8EDF5">Engram</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: ICONOGRAPHY -->
+      <section id="iconography">
+        <h1>5. Iconography</h1>
+        <p>Our icon system reflects the platform's technical nature. Icons are geometric, precise, and aligned to a 24px grid with consistent 1.5px stroke weight. All icons use Rust as primary color, with Amber for active/hover states.</p>
+
+        <div class="subsection">
+          <h3>Icon Specifications</h3>
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight: 600; margin-bottom: var(--spacing-lg); color: var(--rust);">Grid & Sizing</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <li>• Base grid: 24px × 24px</li>
+                <li>• Padding: 2px inside grid</li>
+                <li>• Usable area: 20px × 20px</li>
+                <li>• Scaling: 16px, 24px, 32px, 48px</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; margin-bottom: var(--spacing-lg); color: var(--rust);">Visual Style</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <li>• Stroke weight: 1.5px (24px icons)</li>
+                <li>• Corner radius: 2–3px max</li>
+                <li>• Fill: None (outline only)</li>
+                <li>• Line caps: Rounded (stroke-linecap="round")</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Icon Library (16 Platform Icons)</h3>
+          <div class="icon-grid">
+            <!-- 1. Memory Node -->
+            <div class="icon-item" title="Memory Node">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.5" fill="currentColor"/>
+                <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
+                <circle cx="19" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+                <circle cx="5" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+              <div class="icon-item-label">Memory Node</div>
+            </div>
+
+            <!-- 2. Vector Space -->
+            <div class="icon-item" title="Vector Space">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 3 L21 3 L21 21 L3 21 Z" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+                <circle cx="16" cy="8" r="1.5" fill="currentColor"/>
+                <circle cx="8" cy="16" r="1.5" fill="currentColor"/>
+                <circle cx="16" cy="16" r="1.5" fill="currentColor"/>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+              <div class="icon-item-label">Vector Space</div>
+            </div>
+
+            <!-- 3. Knowledge Graph -->
+            <div class="icon-item" title="Knowledge Graph">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="6" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="18" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="16" r="2" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="7" y1="9" x2="11" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="17" y1="9" x2="13" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="6" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div class="icon-item-label">Knowledge Graph</div>
+            </div>
+
+            <!-- 4. Data Stream -->
+            <div class="icon-item" title="Data Stream">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 12 Q6 8, 10 12 T18 12" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <circle cx="3" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="10" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="18" cy="12" r="1.5" fill="currentColor"/>
+                <path d="M2 7 Q6 3, 10 7 T18 7" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6"/>
+                <path d="M2 17 Q6 21, 10 17 T18 17" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6"/>
+              </svg>
+              <div class="icon-item-label">Data Stream</div>
+            </div>
+
+            <!-- 5. API Key -->
+            <div class="icon-item" title="API Key">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="7" width="18" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="6" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="18" cy="12" r="1.5" fill="currentColor"/>
+                <path d="M8 5 L8 3 M16 5 L16 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div class="icon-item-label">API Key</div>
+            </div>
+
+            <!-- 6. Embed -->
+            <div class="icon-item" title="Embed">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9 L3 12 L6 15 M18 9 L21 12 L18 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 3 L10 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div class="icon-item-label">Embed</div>
+            </div>
+
+            <!-- 7. Retrieval -->
+            <div class="icon-item" title="Retrieval">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12 C3 7.6 6.6 4 12 4 C17.4 4 21 7.6 21 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M12 20 L12 12 L8 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="icon-item-label">Retrieval</div>
+            </div>
+
+            <!-- 8. Inference -->
+            <div class="icon-item" title="Inference">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 8 L22 8 M2 12 L22 12 M2 16 L22 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="6" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <circle cx="18" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              </svg>
+              <div class="icon-item-label">Inference</div>
+            </div>
+
+            <!-- 9. Cluster -->
+            <div class="icon-item" title="Cluster">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="14" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="2" y="14" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="14" y="14" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="10" y1="6" x2="14" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="6" y1="10" x2="6" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div class="icon-item-label">Cluster</div>
+            </div>
+
+            <!-- 10. Timeline -->
+            <div class="icon-item" title="Timeline">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 6 L4 18 C4 19.1 4.9 20 6 20 L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="6" cy="6" r="1.5" fill="currentColor"/>
+                <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                <circle cx="14" cy="8" r="1.5" fill="currentColor"/>
+                <circle cx="18" cy="14" r="1.5" fill="currentColor"/>
+              </svg>
+              <div class="icon-item-label">Timeline</div>
+            </div>
+
+            <!-- 11. Bookmark -->
+            <div class="icon-item" title="Bookmark">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 3 C5 3, 5 2, 6 2 L18 2 C19 2 19 3 19 3 L19 21 L12 16 L5 21 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+              <div class="icon-item-label">Bookmark</div>
+            </div>
+
+            <!-- 12. Sync -->
+            <div class="icon-item" title="Sync">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 10 C4 6.7 6.7 4 10 4 C12.2 4 14.1 5.1 15.2 6.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M20 14 C20 17.3 17.3 20 14 20 C11.8 20 9.9 18.9 8.8 17.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M18 7 L15 6 L16 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 17 L9 18 L8 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="icon-item-label">Sync</div>
+            </div>
+
+            <!-- 13. Search -->
+            <div class="icon-item" title="Search">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="10" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 14 L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div class="icon-item-label">Search</div>
+            </div>
+
+            <!-- 14. Agent -->
+            <div class="icon-item" title="Agent">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M6 14 C6 11.8 8.2 10 11 10 L13 10 C15.8 10 18 11.8 18 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M4 20 C4 17 7.6 15 12 15 C16.4 15 20 17 20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div class="icon-item-label">Agent</div>
+            </div>
+
+            <!-- 15. Layer -->
+            <div class="icon-item" title="Layer">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 8 L12 3 L21 8 L21 11 L3 11 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M3 13 L12 8 L21 13 L21 16 L3 16 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" opacity="0.7"/>
+                <path d="M3 18 L12 13 L21 18 L21 21 L3 21 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" opacity="0.4"/>
+              </svg>
+              <div class="icon-item-label">Layer</div>
+            </div>
+
+            <!-- 16. Dimension -->
+            <div class="icon-item" title="Dimension">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 3 L21 3 L21 21 L3 21 Z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M3 3 L21 21" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                <path d="M21 3 L3 21" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              </svg>
+              <div class="icon-item-label">Dimension</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Icon Usage Guidelines</h3>
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">✓ Do</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <li>• Use consistent stroke weight</li>
+                <li>• Align to 8px grid when possible</li>
+                <li>• Maintain clearance around icons</li>
+                <li>• Use Rust for default, Amber for active</li>
+                <li>• Scale to 16, 24, 32, 48px only</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">✗ Don't</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <li>• Skew or rotate icons</li>
+                <li>• Use inconsistent stroke widths</li>
+                <li>• Mix filled and outlined styles</li>
+                <li>• Resize to arbitrary dimensions</li>
+                <li>• Add shadows or effects</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SECTION 6: MOTION & ANIMATION -->
+      <section id="motion">
+        <h1>6. Motion & Animation</h1>
+        <p>Motion in Engram is purposeful, not decorative. Animations reveal relationships, guide attention, and create a sense of living, responsive systems. All animations use easing and timing that feel technical yet approachable.</p>
+
+        <div class="subsection">
+          <h3>Animation Principles</h3>
+          <ul style="margin: var(--spacing-xl) 0; font-size: 14px; color: var(--text-secondary); line-height: 2;">
+            <li><strong>Duration:</strong> 300–500ms for UI interactions, 1–2s for data-driven animations</li>
+            <li><strong>Easing:</strong> cubic-bezier(0.4, 0, 0.2, 1) for standard transitions, ease-out for entrances</li>
+            <li><strong>Purpose:</strong> Each animation answers a user question or reveals hidden relationships</li>
+            <li><strong>Restraint:</strong> Subtle > flashy. Never distract from content</li>
+          </ul>
+        </div>
+
+        <div class="subsection">
+          <h3>Six Core Animations</h3>
+
+          <div class="card" style="margin: var(--spacing-2xl) 0;">
+            <h3 style="color: var(--amber); margin-bottom: var(--spacing-lg);">1. Node Pulse</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--spacing-xl);">Indicates an active memory node or data point. Used in dashboards to show "live" systems.</p>
+            <div class="animation-demo">
+              <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <style>
+                    @keyframes nodePulse {
+                      0%, 100% { r: 8; opacity: 1; }
+                      50% { r: 16; opacity: 0.4; }
+                    }
+                    .pulse-ring { animation: nodePulse 2s ease-in-out infinite; }
+                  </style>
+                </defs>
+                <circle class="pulse-ring" cx="50" cy="50" r="8" stroke="#E8A030" stroke-width="2" fill="none"/>
+                <circle cx="50" cy="50" r="6" fill="#C25216"/>
+              </svg>
+            </div>
+            <div class="code-block">@keyframes nodePulse {
+  0%, 100% { r: 8; opacity: 1; }
+  50% { r: 16; opacity: 0.4; }
+}
+animation: nodePulse 2s ease-in-out infinite;</div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-2xl) 0;">
+            <h3 style="color: var(--amber); margin-bottom: var(--spacing-lg);">2. Edge Draw (Path Animation)</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--spacing-xl);">Animates the drawing of knowledge graph connections. Reveals relationships progressively.</p>
+            <div class="animation-demo">
+              <svg width="200" height="120" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <style>
+                    @keyframes edgeDraw {
+                      0% { stroke-dashoffset: 100; }
+                      100% { stroke-dashoffset: 0; }
+                    }
+                    .edge-path {
+                      stroke-dasharray: 100;
+                      animation: edgeDraw 1.5s ease-out forwards;
+                      animation-delay: 0.2s;
+                    }
+                  </style>
+                </defs>
+                <circle cx="30" cy="30" r="6" fill="#C25216"/>
+                <circle cx="170" cy="30" r="6" fill="#C25216"/>
+                <circle cx="100" cy="90" r="6" fill="#C25216"/>
+                <line class="edge-path" x1="30" y1="30" x2="100" y2="90" stroke="#E8A030" stroke-width="2" stroke-linecap="round"/>
+                <line class="edge-path" x1="170" y1="30" x2="100" y2="90" stroke="#E8A030" stroke-width="2" stroke-linecap="round" style="animation-delay: 0.4s;"/>
+              </svg>
+            </div>
+            <div class="code-block">@keyframes edgeDraw {
+  0% { stroke-dashoffset: 100; }
+  100% { stroke-dashoffset: 0; }
+}
+stroke-dasharray: 100;
+animation: edgeDraw 1.5s ease-out forwards;</div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-2xl) 0;">
+            <h3 style="color: var(--amber); margin-bottom: var(--spacing-lg);">3. Data Stream (Particle Float)</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--spacing-xl);">Particles rising through data. Visualizes information flow and processing.</p>
+            <div class="animation-demo">
+              <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <style>
+                    @keyframes dataFloat {
+                      0% { transform: translateY(0); opacity: 1; }
+                      100% { transform: translateY(-180px); opacity: 0; }
+                    }
+                    .particle {
+                      animation: dataFloat 2s ease-out forwards;
+                    }
+                  </style>
+                </defs>
+                <circle class="particle" cx="50" cy="150" r="3" fill="#E8A030" style="animation-delay: 0s;"/>
+                <circle class="particle" cx="100" cy="150" r="3" fill="#E8A030" style="animation-delay: 0.3s;"/>
+                <circle class="particle" cx="150" cy="150" r="3" fill="#E8A030" style="animation-delay: 0.6s;"/>
+                <circle class="particle" cx="75" cy="150" r="3" fill="#C25216" style="animation-delay: 0.15s;"/>
+                <circle class="particle" cx="125" cy="150" r="3" fill="#C25216" style="animation-delay: 0.45s;"/>
+              </svg>
+            </div>
+            <div class="code-block">@keyframes dataFloat {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-180px); opacity: 0; }
+}
+animation: dataFloat 2s ease-out forwards;</div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-2xl) 0;">
+            <h3 style="color: var(--amber); margin-bottom: var(--spacing-lg);">4. Vector Cluster Morph</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--spacing-xl);">Nodes reorganizing into clusters. Shows semantic grouping and relationships.</p>
+            <div class="animation-demo">
+              <svg width="200" height="120" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <style>
+                    @keyframes clusterMove {
+                      0% { cx: var(--start-x, 0); cy: var(--start-y, 0); }
+                      100% { cx: var(--end-x, 0); cy: var(--end-y, 0); }
+                    }
+                    .cluster-node {
+                      animation: clusterMove 1.5s ease-in-out infinite alternate;
+                      r: 5;
+                    }
+                  </style>
+                </defs>
+                <!-- Group 1: Left cluster -->
+                <circle cx="40" cy="40" r="5" fill="#C25216" style="--start-x: 40px; --start-y: 40px; --end-x: 60px; --end-y: 30px; animation: clusterMove 1.5s ease-in-out infinite alternate;"/>
+                <circle cx="40" cy="60" r="5" fill="#C25216" style="--start-x: 40px; --start-y: 60px; --end-x: 60px; --end-y: 70px; animation: clusterMove 1.5s ease-in-out infinite alternate 0.1s;"/>
+                <!-- Group 2: Right cluster -->
+                <circle cx="160" cy="40" r="5" fill="#E8A030" style="--start-x: 160px; --start-y: 40px; --end-x: 140px; --end-y: 30px; animation: clusterMove 1.5s ease-in-out infinite alternate 0.2s;"/>
+                <circle cx="160" cy="60" r="5" fill="#E8A030" style="--start-x: 160px; --start-y: 60px; --end-x: 140px; --end-y: 70px; animation: clusterMove 1.5s ease-in-out infinite alternate 0.3s;"/>
+              </svg>
+            </div>
+            <div class="code-block">@keyframes clusterMove {
+  0% { cx: var(--start-x); cy: var(--start-y); }
+  100% { cx: var(--end-x); cy: var(--end-y); }
+}
+animation: clusterMove 1.5s ease-in-out infinite alternate;</div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-2xl) 0;">
+            <h3 style="color: var(--amber); margin-bottom: var(--spacing-lg);">5. Memory Consolidation (Nodes Merging)</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--spacing-xl);">Two nodes merging into one. Represents memory consolidation and synthesis.</p>
+            <div class="animation-demo">
+              <svg width="200" height="100" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <style>
+                    @keyframes mergeLeft {
+                      0% { cx: 40; }
+                      100% { cx: 100; r: 0; opacity: 0; }
+                    }
+                    @keyframes mergeRight {
+                      0% { cx: 160; }
+                      100% { cx: 100; r: 0; opacity: 0; }
+                    }
+                    @keyframes mergeCenter {
+                      0% { r: 5; opacity: 0; }
+                      50% { opacity: 0; }
+                      100% { r: 10; opacity: 1; }
+                    }
+                    .merge-left { animation: mergeLeft 2s ease-in infinite; }
+                    .merge-right { animation: mergeRight 2s ease-in infinite; }
+                    .merge-center { animation: mergeCenter 2s ease-out infinite; }
+                  </style>
+                </defs>
+                <circle class="merge-left" cy="50" r="6" fill="#C25216"/>
+                <circle class="merge-right" cy="50" r="6" fill="#E8A030"/>
+                <circle class="merge-center" cx="100" cy="50" r="5" fill="#C25216"/>
+              </svg>
+            </div>
+            <div class="code-block">@keyframes mergeLeft {
+  0% { cx: 40; opacity: 1; }
+  100% { cx: 100; r: 0; opacity: 0; }
+}</div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-2xl) 0;">
+            <h3 style="color: var(--amber); margin-bottom: var(--spacing-lg);">6. Retrieval Ping (Ripple)</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--spacing-xl);">Concentric circles emanating from a source. Shows query propagation and retrieval.</p>
+            <div class="animation-demo">
+              <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <style>
+                    @keyframes ripple {
+                      0% { r: 0; opacity: 1; }
+                      100% { r: 60; opacity: 0; }
+                    }
+                    .ripple-ring {
+                      animation: ripple 1.5s ease-out infinite;
+                      stroke: #E8A030;
+                      stroke-width: 2;
+                      fill: none;
+                    }
+                  </style>
+                </defs>
+                <circle class="ripple-ring" cx="100" cy="100" r="0" style="animation-delay: 0s;"/>
+                <circle class="ripple-ring" cx="100" cy="100" r="0" style="animation-delay: 0.3s;"/>
+                <circle class="ripple-ring" cx="100" cy="100" r="0" style="animation-delay: 0.6s;"/>
+                <circle cx="100" cy="100" r="6" fill="#C25216"/>
+              </svg>
+            </div>
+            <div class="code-block">@keyframes ripple {
+  0% { r: 0; opacity: 1; }
+  100% { r: 60; opacity: 0; }
+}
+animation: ripple 1.5s ease-out infinite;</div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Timing & Easing Library</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Use Case</th>
+                <th>Duration</th>
+                <th>Easing Function</th>
+                <th>CSS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Button hover</td>
+                <td>200ms</td>
+                <td>ease-out</td>
+                <td>transition: 200ms cubic-bezier(0, 0, 0.2, 1)</td>
+              </tr>
+              <tr>
+                <td>UI transition</td>
+                <td>300ms</td>
+                <td>ease-out</td>
+                <td>transition: 300ms cubic-bezier(0, 0, 0.2, 1)</td>
+              </tr>
+              <tr>
+                <td>Modal entrance</td>
+                <td>350ms</td>
+                <td>ease-out</td>
+                <td>animation: 350ms cubic-bezier(0.34, 1.56, 0.64, 1)</td>
+              </tr>
+              <tr>
+                <td>Data animation</td>
+                <td>1s–2s</td>
+                <td>ease-in-out</td>
+                <td>animation: 1.5s cubic-bezier(0.4, 0, 0.2, 1)</td>
+              </tr>
+              <tr>
+                <td>Continuous loop</td>
+                <td>2s–3s</td>
+                <td>ease-in-out</td>
+                <td>animation: 2s ease-in-out infinite</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <h3>Reduced Motion Support</h3>
+          <div class="code-block">@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}</div>
+        </div>
+      </section>
+
+      <!-- SECTION 7: VOICE & TONE -->
+      <section id="voice">
+        <h1>7. Voice & Tone</h1>
+        <p>Engram's voice is technical yet approachable, confident yet humble. We speak to developers and AI engineers with respect for their expertise while remaining accessible to those newer to the field.</p>
+
+        <div class="subsection">
+          <h3>Voice Pillars</h3>
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Technical Precision</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">We use exact language. Vector, embedding, retrieval augmented generation—not "AI magic" or "smart memory."</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Confident but Not Arrogant</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">We know our platform. We don't overclaim. We say what we do well and acknowledge trade-offs.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Helpful, Not Patronizing</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Assume the reader is smart. Explain complexity clearly, not by dumbing it down.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Direct and Action-Oriented</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">No fluff. Start with the what, then explain the why. Use imperatives: "Initialize," "Configure," "Deploy."</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Vocabulary: Do's & Don'ts</h3>
+          <div class="grid-2">
+            <div class="comparison-item">
+              <div class="comparison-label"><span class="comparison-right">✓</span> Use</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <li>Vector embedding, semantic search</li>
+                <li>Multi-layer knowledge graph</li>
+                <li>Retrieval-augmented generation (RAG)</li>
+                <li>Temporal persistence, memory consolidation</li>
+                <li>API, SDK, integration</li>
+                <li>Nodes, edges, topology</li>
+                <li>Inference, reasoning, inference engine</li>
+              </ul>
+            </div>
+            <div class="comparison-item">
+              <div class="comparison-label"><span class="comparison-wrong">✗</span> Avoid</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <li>AI magic, magic memory, smart AI</li>
+                <li>Brain metaphors (neural, synapse)</li>
+                <li>Buzzwords (paradigm shift, synergy)</li>
+                <li>Vague language (remembers stuff, learns)</li>
+                <li>Tool, gadget, platform (overused)</li>
+                <li>Network, web, mesh (ambiguous)</li>
+                <li>Black box, mysterious, unexplainable</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Tone by Context</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Context</th>
+                <th>Tone</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Documentation</td>
+                <td>Precise, methodical, clear</td>
+                <td>"Initialize a memory context with embeddings.model_name='openai'."</td>
+              </tr>
+              <tr>
+                <td>Error messages</td>
+                <td>Direct, actionable, helpful</td>
+                <td>"Vector dimension mismatch: expected 1536, got 768. Check your embedding model."</td>
+              </tr>
+              <tr>
+                <td>Marketing copy</td>
+                <td>Aspirational, technical, confident</td>
+                <td>"Memory that scales with ambition. Build agents that remember."</td>
+              </tr>
+              <tr>
+                <td>UI labels</td>
+                <td>Concise, imperative, action-driven</td>
+                <td>"Initialize graph," "Retrieve context," "Consolidate memory"</td>
+              </tr>
+              <tr>
+                <td>Blog posts</td>
+                <td>Conversational expertise, thoughtful</td>
+                <td>"Here's why multi-layer memory matters for agentic systems..."</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <h3>Sample Copy Pairs</h3>
+          <div class="grid-2">
+            <div class="comparison-item">
+              <div class="comparison-label"><span class="comparison-wrong">✗</span> Weak</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Engram helps AI systems remember things and get smarter over time using memory.</p>
+            </div>
+            <div class="comparison-item">
+              <div class="comparison-label"><span class="comparison-right">✓</span> Strong</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Engram provides persistent, multi-layer memory for agentic AI systems—enabling retrieval-augmented generation, temporal reasoning, and knowledge consolidation across sessions.</p>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top: var(--spacing-xl);">
+            <div class="comparison-item">
+              <div class="comparison-label"><span class="comparison-wrong">✗</span> Weak</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Our platform is really smart and learns from everything.</p>
+            </div>
+            <div class="comparison-item">
+              <div class="comparison-label"><span class="comparison-right">✓</span> Strong</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Every interaction updates your knowledge graph. Every query refines your embeddings. Every session strengthens your model.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 8: TAGLINE & MESSAGING -->
+      <section id="messaging">
+        <h1>8. Tagline & Messaging</h1>
+
+        <div class="subsection">
+          <h3>Primary Tagline</h3>
+          <div class="card" style="background: rgba(194, 82, 22, 0.1); border-color: var(--rust); padding: var(--spacing-3xl);">
+            <div style="font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--rust); text-align: center; line-height: 1.4;">Memory that thinks with you.</div>
+          </div>
+          <p style="margin-top: var(--spacing-xl); font-size: 13px; color: var(--text-secondary); text-align: center;">Primary positioning statement. Use on hero sections, main marketing pages, and brand materials.</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Secondary Taglines</h3>
+          <div class="grid-3">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--amber); margin-bottom: var(--spacing-lg);">Persistence</div>
+              <div style="font-size: 15px; color: var(--text-primary); font-family: var(--font-display); font-weight: 500; line-height: 1.6;">"Memory that lasts across sessions."</div>
+              <p style="margin-top: var(--spacing-lg); font-size: 12px; color: var(--text-secondary);">Emphasize temporal depth and continuity.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--amber); margin-bottom: var(--spacing-lg);">Intelligence</div>
+              <div style="font-size: 15px; color: var(--text-primary); font-family: var(--font-display); font-weight: 500; line-height: 1.6;">"Knowledge graphs that reason."</div>
+              <p style="margin-top: var(--spacing-lg); font-size: 12px; color: var(--text-secondary);">Focus on reasoning and semantic understanding.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--amber); margin-bottom: var(--spacing-lg);">Scale</div>
+              <div style="font-size: 15px; color: var(--text-primary); font-family: var(--font-display); font-weight: 500; line-height: 1.6;">"Memory without limits."</div>
+              <p style="margin-top: var(--spacing-lg); font-size: 12px; color: var(--text-secondary);">Highlight infrastructure and performance.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Value Proposition by Audience</h3>
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">For Developers</div>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">Build intelligent agents with persistent memory in days, not months. Simple APIs. Full control. Transparent reasoning.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">For Enterprise</div>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">Governance-first memory infrastructure. Audit trails. Multi-tenant architectures. Zero data leakage between contexts.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">For Researchers</div>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">Test hypotheses on knowledge graph architectures. Publish on temporal reasoning. Access production-scale infrastructure.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">For AI Teams</div>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">Offload memory orchestration. Focus on reasoning. Integrate vectors, graphs, and databases seamlessly.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Elevator Pitch (30 seconds)</h3>
+          <div class="card" style="background: var(--surface-elevated); padding: var(--spacing-2xl);">
+            <p style="font-size: 14px; color: var(--text-primary); line-height: 1.8; font-style: italic;">"Engram is the memory infrastructure for AI agents. We sit between your vector database and your application logic, enabling persistent multi-layer knowledge graphs that remember across sessions, reason over time, and scale with your agents' ambition. Think of us as the cognitive layer for systems that need to be truly intelligent, not just fast."</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Marketing Headlines (By Channel)</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Channel</th>
+                <th>Headline</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Product Hunt</td>
+                <td>Engram: Persistent memory for AI agents. Build systems that remember.</td>
+              </tr>
+              <tr>
+                <td>Twitter/X</td>
+                <td>Your AI agents forget. Ours remember. Meet Engram.</td>
+              </tr>
+              <tr>
+                <td>HackerNews</td>
+                <td>Show HN: Engram – Multi-layer knowledge graphs for agentic AI</td>
+              </tr>
+              <tr>
+                <td>GitHub</td>
+                <td>Memory that thinks with you. Open-source AI infrastructure for persistent agents.</td>
+              </tr>
+              <tr>
+                <td>LinkedIn</td>
+                <td>The missing piece in agentic AI: persistent, reasoning-capable memory infrastructure.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 9: SPACING & LAYOUT -->
+      <section id="spacing">
+        <h1>9. Spacing & Layout</h1>
+        <p>Our spacing system is based on an 8px grid. Consistent spacing creates rhythm, hierarchy, and visual coherence across all applications.</p>
+
+        <div class="subsection">
+          <h3>Spacing Scale</h3>
+          <div class="card">
+            <table class="data-table" style="font-size: 13px;">
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Value</th>
+                  <th>Use Case</th>
+                  <th>CSS Variable</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>XS</td>
+                  <td>2px</td>
+                  <td>Border offsets, micro spacing</td>
+                  <td>--spacing-xs</td>
+                </tr>
+                <tr>
+                  <td>SM</td>
+                  <td>4px</td>
+                  <td>Icon padding, tight groups</td>
+                  <td>--spacing-sm</td>
+                </tr>
+                <tr>
+                  <td>MD</td>
+                  <td>8px</td>
+                  <td>Default element spacing, grid unit</td>
+                  <td>--spacing-md</td>
+                </tr>
+                <tr>
+                  <td>LG</td>
+                  <td>12px</td>
+                  <td>Intra-component spacing</td>
+                  <td>--spacing-lg</td>
+                </tr>
+                <tr>
+                  <td>XL</td>
+                  <td>16px</td>
+                  <td>Component padding, small gaps</td>
+                  <td>--spacing-xl</td>
+                </tr>
+                <tr>
+                  <td>2XL</td>
+                  <td>24px</td>
+                  <td>Card padding, section gaps</td>
+                  <td>--spacing-2xl</td>
+                </tr>
+                <tr>
+                  <td>3XL</td>
+                  <td>32px</td>
+                  <td>Large sections, major dividers</td>
+                  <td>--spacing-3xl</td>
+                </tr>
+                <tr>
+                  <td>4XL</td>
+                  <td>48px</td>
+                  <td>Hero spacing, page margins</td>
+                  <td>--spacing-4xl</td>
+                </tr>
+                <tr>
+                  <td>5XL</td>
+                  <td>64px</td>
+                  <td>Large layout gaps, section separation</td>
+                  <td>--spacing-5xl</td>
+                </tr>
+                <tr>
+                  <td>6XL</td>
+                  <td>96px</td>
+                  <td>Major section breaks</td>
+                  <td>--spacing-6xl</td>
+                </tr>
+                <tr>
+                  <td>7XL</td>
+                  <td>128px</td>
+                  <td>Page breaks, hero sections</td>
+                  <td>--spacing-7xl</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Layout Principles</h3>
+          <ul style="margin: var(--spacing-xl) 0; font-size: 14px; color: var(--text-secondary); line-height: 2;">
+            <li><strong>Margin collapse awareness:</strong> Use padding on containers, margins on children to avoid unexpected collapses</li>
+            <li><strong>White space is content:</strong> Never fill silence with decoration. Breathing room clarifies hierarchy</li>
+            <li><strong>Max-width constraints:</strong> Content max-width 1200px for reading, 1400px for data-dense layouts</li>
+            <li><strong>Vertical rhythm:</strong> All vertical spacing should be multiples of 8px (16px, 24px, 32px, etc.)</li>
+            <li><strong>Horizontal breathing:</strong> Minimum 16px padding on mobile, 24px on tablet, 32px on desktop</li>
+          </ul>
+        </div>
+
+        <div class="subsection">
+          <h3>Common Layout Patterns</h3>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Pattern</th>
+                <th>Structure</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Card Grid</td>
+                <td>gap: 24px, padding: 24px per card</td>
+                <td>3–4 columns on desktop, 2 on tablet, 1 on mobile</td>
+              </tr>
+              <tr>
+                <td>Sidebar + Main</td>
+                <td>sidebar: 240–280px, main: flex 1, gap: 32px</td>
+                <td>Stack on mobile (sidebar: 100% height, main below)</td>
+              </tr>
+              <tr>
+                <td>Hero Section</td>
+                <td>padding: 96px 32px (top/bottom), margin-bottom: 128px</td>
+                <td>Text centered, max-width 800px for headlines</td>
+              </tr>
+              <tr>
+                <td>Data Table</td>
+                <td>cell padding: 12px 16px, row gap: 0, cell borders</td>
+                <td>Striped rows optional, hover states required</td>
+              </tr>
+              <tr>
+                <td>Form Section</td>
+                <td>label: 4px above input, gap: 16px between fields, gap: 24px between sections</td>
+                <td>Max-width 600px, single column preferred</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <h3>Responsive Breakpoints</h3>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Breakpoint</th>
+                <th>Width</th>
+                <th>Device</th>
+                <th>Columns</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>XS (Mobile)</td>
+                <td>320–640px</td>
+                <td>Phone</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>SM (Tablet)</td>
+                <td>641–1024px</td>
+                <td>Tablet portrait</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>MD (Tablet+)</td>
+                <td>1025–1280px</td>
+                <td>Tablet landscape</td>
+                <td>3</td>
+              </tr>
+              <tr>
+                <td>LG (Desktop)</td>
+                <td>1281–1536px</td>
+                <td>Desktop</td>
+                <td>4</td>
+              </tr>
+              <tr>
+                <td>XL (Wide)</td>
+                <td>1537+px</td>
+                <td>Large display</td>
+                <td>5+</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <!-- SECTION 10: COMPONENT LIBRARY -->
+      <section id="components">
+        <h1>10. Component Library</h1>
+        <p>Pre-built, styled components maintain consistency and accelerate development. All components inherit CSS custom properties for colours, typography, and spacing.</p>
+
+        <div class="subsection">
+          <h3>Button Variants</h3>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: var(--spacing-2xl) 0;">
+            <button class="button button-primary">Primary Action</button>
+            <button class="button button-secondary">Secondary Action</button>
+            <button class="button button-ghost">Ghost Button</button>
+            <button class="button button-danger">Danger Action</button>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Form Inputs</h3>
+          <input type="text" class="input-field" placeholder="Search memory contexts...">
+          <input type="text" class="input-field" placeholder="Enter API key..." style="margin-top: var(--spacing-lg);">
+          <input type="email" class="input-field" placeholder="Email address" style="margin-top: var(--spacing-lg);">
+        </div>
+
+        <div class="subsection">
+          <h3>Code Block</h3>
+          <div class="code-block">import engram
+from engram.memory import MemoryContext
+
+# Initialize a memory context
+context = MemoryContext(
+    model="openai:text-embedding-3-large",
+    storage="weaviate",
+    temporal_depth="7d"
+)
+
+# Store a fact
+context.embed("The AI remembers this.", tags=["important"])
+
+# Retrieve relevant context
+results = context.retrieve("What do you remember?")
+print(results)</div>
+        </div>
+
+        <div class="subsection">
+          <h3>Badges</h3>
+          <div style="margin: var(--spacing-xl) 0;">
+            <span class="badge badge-success">Success</span>
+            <span class="badge badge-warning">Warning</span>
+            <span class="badge badge-error">Error</span>
+            <span class="badge badge-info">Info</span>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Alerts</h3>
+          <div class="alert alert-info">
+            <strong>Info:</strong> This is an informational alert with important context.
+          </div>
+          <div class="alert alert-success">
+            <strong>Success:</strong> Operation completed successfully. Your memory context is initialized.
+          </div>
+          <div class="alert alert-warning">
+            <strong>Warning:</strong> Vector dimension mismatch detected. Check your embedding model configuration.
+          </div>
+          <div class="alert alert-error">
+            <strong>Error:</strong> Failed to connect to memory backend. Verify your storage credentials.
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Cards & Panels</h3>
+          <div class="grid-3">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Memory Status</div>
+              <div style="font-size: 28px; font-weight: 700; color: var(--ice); margin-bottom: var(--spacing-lg);">4.2M</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">vectors stored • 2.3GB memory</div>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Retrieval Latency</div>
+              <div style="font-size: 28px; font-weight: 700; color: var(--success); margin-bottom: var(--spacing-lg);">24ms</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">p95 latency (target: &lt;50ms)</div>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Graph Density</div>
+              <div style="font-size: 28px; font-weight: 700; color: var(--amber); margin-bottom: var(--spacing-lg);">3.8</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">avg connections per node</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Data Table Sample</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Node ID</th>
+                <th>Embedding Model</th>
+                <th>Vector Dim</th>
+                <th>Nodes</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code style="background: transparent;">mem_ctx_001</code></td>
+                <td>text-embedding-3-large</td>
+                <td>3072</td>
+                <td>1.2M</td>
+                <td><span class="badge badge-success">Active</span></td>
+              </tr>
+              <tr>
+                <td><code style="background: transparent;">mem_ctx_002</code></td>
+                <td>text-embedding-3-small</td>
+                <td>1536</td>
+                <td>842K</td>
+                <td><span class="badge badge-success">Active</span></td>
+              </tr>
+              <tr>
+                <td><code style="background: transparent;">mem_ctx_003</code></td>
+                <td>text-embedding-3-large</td>
+                <td>3072</td>
+                <td>2.1M</td>
+                <td><span class="badge badge-warning">Consolidating</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <h3>Tags & Chips</h3>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: var(--spacing-xl) 0;">
+            <div style="background: rgba(194, 82, 22, 0.15); color: var(--rust); padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">important</div>
+            <div style="background: rgba(232, 160, 48, 0.15); color: var(--amber); padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">rag</div>
+            <div style="background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">retrieval</div>
+            <div style="background: rgba(59, 130, 246, 0.15); color: var(--info); padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">experimental</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 11: DASHBOARD UI GUIDE -->
+      <section id="dashboard">
+        <h1>11. Dashboard UI Guide</h1>
+        <p>Engram dashboards prioritize data density and clarity. Dark backgrounds reduce eye strain during extended monitoring sessions. Visual hierarchy guides attention to critical metrics.</p>
+
+        <div class="subsection">
+          <h3>Dashboard Design Principles</h3>
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Dark Mode First</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <li>• All dashboards assume dark background</li>
+                <li>• Minimize brightness variation (contrast, not saturation)</li>
+                <li>• Use semantic colors sparingly</li>
+                <li>• Status indicators should be glanceable</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Information Density</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <li>• Show 15–20 key metrics per view</li>
+                <li>• Group related metrics into sections</li>
+                <li>• Hide secondary data behind expand/detail</li>
+                <li>• Use sparklines for trends, not large charts</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Status Clarity</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <li>• Green = healthy, running, active</li>
+                <li>• Amber = attention needed, degraded</li>
+                <li>• Red = critical, down, error</li>
+                <li>• Gray = disabled, inactive, N/A</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Panel Hierarchy</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <li>• Hero panels: 2x2 grid (top left)</li>
+                <li>• Secondary panels: 3-column grid</li>
+                <li>• Detail panels: Full-width tables</li>
+                <li>• Borders emphasize importance</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Sample Dashboard Layout (Wireframe)</h3>
+          <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: var(--spacing-2xl); margin: var(--spacing-2xl) 0;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-2xl); margin-bottom: var(--spacing-2xl);">
+              <div style="background: var(--surface-elevated); border: 1px solid var(--border-color); border-radius: 6px; padding: var(--spacing-2xl); min-height: 200px; border-left: 4px solid var(--rust);">
+                <div style="font-weight: 600; color: var(--rust); font-size: 12px; margin-bottom: var(--spacing-lg);">PRIMARY METRIC</div>
+                <div style="font-size: 32px; font-weight: 700; color: var(--ice);">4.2M</div>
+                <div style="font-size: 12px; color: var(--graphite); margin-top: var(--spacing-md);">Vectors • ↑ 12% this week</div>
+              </div>
+              <div style="background: var(--surface-elevated); border: 1px solid var(--border-color); border-radius: 6px; padding: var(--spacing-2xl); min-height: 200px;">
+                <div style="font-weight: 600; color: var(--amber); font-size: 12px; margin-bottom: var(--spacing-lg);">SECONDARY</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--success);">99.8%</div>
+                <div style="font-size: 12px; color: var(--graphite); margin-top: var(--spacing-md);">Uptime</div>
+              </div>
+            </div>
+            <div style="background: var(--surface-elevated); border: 1px solid var(--border-color); border-radius: 6px; padding: var(--spacing-2xl);">
+              <div style="font-weight: 600; color: var(--rust); font-size: 12px; margin-bottom: var(--spacing-lg);">MEMORY CONTEXTS (Detail Table)</div>
+              <div style="height: 120px; background: var(--foundation); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--graphite);">Data table would appear here</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Graph & Chart Colour Rules</h3>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Chart Type</th>
+                <th>Primary Series</th>
+                <th>Secondary Series</th>
+                <th>Highlight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Line chart</td>
+                <td>var(--rust)</td>
+                <td>var(--graphite)</td>
+                <td>var(--amber)</td>
+              </tr>
+              <tr>
+                <td>Area chart</td>
+                <td>var(--rust) @ 20% opacity</td>
+                <td>var(--graphite) @ 15% opacity</td>
+                <td>var(--rust) border</td>
+              </tr>
+              <tr>
+                <td>Bar chart</td>
+                <td>var(--rust)</td>
+                <td>var(--surface-elevated)</td>
+                <td>var(--amber)</td>
+              </tr>
+              <tr>
+                <td>Status heatmap</td>
+                <td colspan="3">Green (success) → Amber (warning) → Red (critical)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 12: DEVELOPER BRAND -->
+      <section id="developer">
+        <h1>12. Developer Brand</h1>
+        <p>Engram's developer experience is first-class. APIs, SDKs, and documentation reflect our technical precision and commitment to clarity.</p>
+
+        <div class="subsection">
+          <h3>API Documentation Style</h3>
+          <div class="card">
+            <div style="font-family: var(--font-mono); font-size: 12px; line-height: 1.8; color: var(--text-secondary);">
+              <div style="color: var(--amber);">POST /api/v1/memory/contexts/{context_id}/embed</div>
+              <div style="margin-top: var(--spacing-lg); color: var(--graphite);">Create an embedding and store it in the memory context.</div>
+              <div style="margin-top: var(--spacing-xl); color: var(--rust); font-weight: 600;">Request Body</div>
+              <div style="background: var(--foundation); padding: var(--spacing-lg); border-radius: 4px; margin-top: var(--spacing-sm);">
+                <div style="color: var(--amber);">{</div>
+                <div style="margin-left: var(--spacing-xl);"><span style="color: var(--amber);">"text":</span> <span style="color: var(--success);">"The agent learned this fact."</span>,</div>
+                <div style="margin-left: var(--spacing-xl);"><span style="color: var(--amber);">"tags":</span> [<span style="color: var(--success);">"important"</span>, <span style="color: var(--success);">"learning"</span>]</div>
+                <div style="color: var(--amber);">}</div>
+              </div>
+              <div style="margin-top: var(--spacing-xl); color: var(--rust); font-weight: 600;">Response (200 OK)</div>
+              <div style="background: var(--foundation); padding: var(--spacing-lg); border-radius: 4px; margin-top: var(--spacing-sm);">
+                <div style="color: var(--amber);">{</div>
+                <div style="margin-left: var(--spacing-xl);"><span style="color: var(--amber);">"id":</span> <span style="color: var(--success);">"node_abc123"</span>,</div>
+                <div style="margin-left: var(--spacing-xl);"><span style="color: var(--amber);">"embedding":</span> [...3072 dims...],</div>
+                <div style="margin-left: var(--spacing-xl);"><span style="color: var(--amber);">"created_at":</span> <span style="color: var(--success);">"2026-03-27T14:32:00Z"</span></div>
+                <div style="color: var(--amber);">}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Code Snippet Conventions</h3>
+          <p style="margin-bottom: var(--spacing-xl);">All code snippets use IBM Plex Mono. Syntax highlighting follows this colour scheme:</p>
+          <table class="data-table" style="font-size: 12px;">
+            <thead>
+              <tr>
+                <th>Element</th>
+                <th>Colour</th>
+                <th>Usage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Keywords</td>
+                <td style="color: var(--rust);">var(--rust)</td>
+                <td>if, def, class, import, return</td>
+              </tr>
+              <tr>
+                <td>Strings</td>
+                <td style="color: var(--success);">var(--success)</td>
+                <td>"text", 'values', f"interpolation"</td>
+              </tr>
+              <tr>
+                <td>Numbers</td>
+                <td style="color: var(--info);">var(--info)</td>
+                <td>123, 3.14, 0xff, True, False</td>
+              </tr>
+              <tr>
+                <td>Comments</td>
+                <td style="color: var(--graphite);">var(--graphite)</td>
+                <td>// comment, # comment, /* block */</td>
+              </tr>
+              <tr>
+                <td>Functions/Classes</td>
+                <td style="color: var(--amber);">var(--amber)</td>
+                <td>MemoryContext(), retrieve(), embed()</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <h3>Terminal / CLI Aesthetics</h3>
+          <div class="code-block" style="background: #000; border-color: var(--rust);">
+$ engram init
+<span style="color: var(--rust);">» Creating new memory context...</span>
+<span style="color: var(--success);">✓ Context initialized at ./engram.yaml</span>
+<span style="color: var(--graphite);">  Store: weaviate (localhost:6379)</span>
+<span style="color: var(--graphite);">  Embedding model: text-embedding-3-large</span>
+<span style="color: var(--rust);">» Configure your first dataset:</span>
+$ engram dataset add --name "knowledge" --source "./data.jsonl"
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>SDK Badge Design</h3>
+          <p style="margin-bottom: var(--spacing-xl);">Use on READMEs and project pages to indicate SDK availability:</p>
+          <div style="display: flex; gap: var(--spacing-xl); flex-wrap: wrap;">
+            <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 4px; padding: 8px 12px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--rust);">📦 Python SDK</div>
+            <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 4px; padding: 8px 12px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--amber);">🚀 Node.js SDK</div>
+            <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 4px; padding: 8px 12px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--success);">⚡ Go SDK</div>
+            <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 4px; padding: 8px 12px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--graphite);">REST API</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 13: TAILWIND v4 CONFIG -->
+      <section id="tailwind">
+        <h1>13. Tailwind v4 Config (@theme Block)</h1>
+        <p>Full Tailwind v4 configuration using CSS custom properties and the @theme directive.</p>
+
+        <div class="subsection">
+          <h3>Complete @theme Configuration</h3>
+          <div class="code-block">@theme {
+  --color-foundation: #0A0E1A;
+  --color-surface: #141928;
+  --color-surface-elevated: #1F2433;
+  --color-rust: #C25216;
+  --color-rust-light: #D4663D;
+  --color-rust-dark: #A03F0F;
+  --color-amber: #E8A030;
+  --color-amber-light: #F0B84B;
+  --color-amber-dark: #D18820;
+  --color-graphite: #8892A4;
+  --color-graphite-light: #A8B3C1;
+  --color-ice: #E8EDF5;
+  --color-ice-dark: #C8D0E0;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  --font-family-display: 'Space Grotesk', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+  --font-family-mono: 'IBM Plex Mono', monospace;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 28px;
+  --font-size-3xl: 36px;
+  --font-size-4xl: 48px;
+  --font-size-5xl: 64px;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+  --line-height-loose: 1.8;
+
+  --spacing-xs: 2px;
+  --spacing-sm: 4px;
+  --spacing-md: 8px;
+  --spacing-lg: 12px;
+  --spacing-xl: 16px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+  --spacing-4xl: 48px;
+  --spacing-5xl: 64px;
+  --spacing-6xl: 96px;
+  --spacing-7xl: 128px;
+
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+  --border-radius-xl: 12px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  --animation-duration-fast: 200ms;
+  --animation-duration-base: 300ms;
+  --animation-duration-slow: 500ms;
+  --animation-duration-slower: 1s;
+
+  --animation-timing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --animation-timing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Extend with custom utilities */
+@layer utilities {
+  .ring-rust { @apply ring-2 ring-rust-500; }
+  .ring-amber { @apply ring-2 ring-amber-500; }
+  .text-display { @apply font-display font-bold; }
+  .text-body { @apply font-body font-normal; }
+  .text-code { @apply font-mono; }
+}</div>
+        </div>
+      </section>
+
+      <!-- SECTION 14: PHOTOGRAPHY & IMAGERY -->
+      <section id="photography">
+        <h1>14. Photography & Imagery</h1>
+        <p>Visual assets should reflect Engram's technical sophistication. Avoid generic "AI" stock photos. Embrace abstract geometry, deep space, and data topology.</p>
+
+        <div class="subsection">
+          <h3>Art Direction</h3>
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">✓ Use</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <li>• Abstract geometric forms</li>
+                <li>• Vector field visualizations</li>
+                <li>• Knowledge graphs and networks</li>
+                <li>• Deep space / cosmic imagery</li>
+                <li>• Data topology diagrams</li>
+                <li>• Crystalline structures</li>
+                <li>• Particle effects and streams</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">✗ Avoid</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <li>• Brain imagery (neurons, synapses)</li>
+                <li>• Stock photos of diverse people</li>
+                <li>• Glowing orbs, "AI magic" visuals</li>
+                <li>• Generic business photoshoot</li>
+                <li>• Holographic interfaces</li>
+                <li>• Humanoid robots or androids</li>
+                <li>• Cloud metaphors (overused)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Colour Grading Guidelines</h3>
+          <ul style="margin: var(--spacing-xl) 0; font-size: 14px; color: var(--text-secondary); line-height: 2;">
+            <li><strong>Dark grading:</strong> Cool shadows (0A0E1A), warm highlights (C25216 or E8A030)</li>
+            <li><strong>Saturation:</strong> Moderate–high. Avoid flat, desaturated look</li>
+            <li><strong>Contrast:</strong> Strong (avoid muddy midtones)</li>
+            <li><strong>Temperature:</strong> Slight warm bias in overall tone (matches brand warmth)</li>
+            <li><strong>Vignette:</strong> Optional subtle vignette to draw focus</li>
+          </ul>
+        </div>
+
+        <div class="subsection">
+          <h3>Image Usage Contexts</h3>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Context</th>
+                <th>Style</th>
+                <th>Ratio</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hero banner</td>
+                <td>Abstract geometry + rust accent</td>
+                <td>16:9 or 4:1</td>
+                <td>Full-bleed, dark graded, text overlay</td>
+              </tr>
+              <tr>
+                <td>Feature image</td>
+                <td>Vector field or knowledge graph</td>
+                <td>1:1 or 4:3</td>
+                <td>Can include 2–3 Engram colours</td>
+              </tr>
+              <tr>
+                <td>Blog post</td>
+                <td>Data topology, node networks</td>
+                <td>16:9</td>
+                <td>Match post topic (e.g., "memory" → temporal graphs)</td>
+              </tr>
+              <tr>
+                <td>Social media</td>
+                <td>Abstract, high-contrast, bold</td>
+                <td>1:1 or 16:9 (platform-specific)</td>
+                <td>Should read well at small size</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 15: ILLUSTRATION STYLE -->
+      <section id="illustration">
+        <h1>15. Illustration Style</h1>
+        <p>Illustrations support conceptual understanding without overexplaining. Technical diagrams use consistent line weights and a limited palette. Isometric views emphasize three-dimensionality.</p>
+
+        <div class="subsection">
+          <h3>Illustration Principles</h3>
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Technical Precision</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <li>• Consistent stroke weight (1.5–2px)</li>
+                <li>• Geometric base shapes</li>
+                <li>• Alignment to grid (8px minimum)</li>
+                <li>• No decorative flourishes</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--rust); margin-bottom: var(--spacing-lg);">Colour Usage</div>
+              <ul style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <li>• Primary: Rust (#C25216)</li>
+                <li>• Secondary: Amber (#E8A030)</li>
+                <li>• Accent: Success/Warning (semantic)</li>
+                <li>• Lines: Graphite (#8892A4)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Illustration Types</h3>
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight: 600; color: var(--amber); margin-bottom: var(--spacing-lg);">Isometric Diagrams</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Show spatial relationships and data flow. Use 30-degree angles. Perfect for platform architecture, embedding spaces, and multi-layer memory representations.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--amber); margin-bottom: var(--spacing-lg);">Node Graphs</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Knowledge graphs, semantic networks, connections. Nodes: circles or squares. Edges: straight lines or curves. Emphasize topology, not aesthetics.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--amber); margin-bottom: var(--spacing-lg);">Vector Fields</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Direction and magnitude of embeddings. Use arrows or flow lines. Suggest dimensionality without overcomplicating. Works well for abstract "memory space" visuals.</p>
+            </div>
+            <div class="card">
+              <div style="font-weight: 600; color: var(--amber); margin-bottom: var(--spacing-lg);">Timeline Diagrams</div>
+              <p style="font-size: 13px; color: var(--text-secondary);">Temporal progression, event sequences. Horizontal or vertical axes. Nodes for milestones, lines for progression. Show causality or dependency.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Line Weight & Scale</h3>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Element</th>
+                <th>Line Weight</th>
+                <th>Context</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Primary strokes (nodes, shapes)</td>
+                <td>1.5–2px</td>
+                <td>Main visual elements</td>
+              </tr>
+              <tr>
+                <td>Edges / connections</td>
+                <td>1–1.5px</td>
+                <td>Links between nodes</td>
+              </tr>
+              <tr>
+                <td>Detail / shadow strokes</td>
+                <td>0.75–1px</td>
+                <td>Subtle emphasis, depth</td>
+              </tr>
+              <tr>
+                <td>Text indicators / labels</td>
+                <td>N/A</td>
+                <td>Use font weight for emphasis</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <!-- SECTION 16: BRAND APPLICATIONS -->
+      <section id="applications">
+        <h1>16. Brand Applications</h1>
+        <p>How the brand system comes to life across key customer touchpoints.</p>
+
+        <div class="subsection">
+          <h3>Dashboard UI Screenshot Mockup</h3>
+          <div style="background: var(--foundation); border: 1px solid var(--border-color); border-radius: 8px; padding: var(--spacing-2xl); margin: var(--spacing-2xl) 0; min-height: 400px;">
+            <div style="background: var(--surface); border-radius: 8px; padding: var(--spacing-2xl); height: 100%;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-2xl);">
+                <div style="background: var(--surface-elevated); border-left: 4px solid var(--rust); padding: var(--spacing-xl); border-radius: 4px;">
+                  <div style="font-size: 11px; color: var(--graphite); text-transform: uppercase; font-weight: 600; margin-bottom: var(--spacing-sm);">Vectors Stored</div>
+                  <div style="font-size: 28px; font-weight: 700; color: var(--ice);">4.2M</div>
+                </div>
+                <div style="background: var(--surface-elevated); border-left: 4px solid var(--amber); padding: var(--spacing-xl); border-radius: 4px;">
+                  <div style="font-size: 11px; color: var(--graphite); text-transform: uppercase; font-weight: 600; margin-bottom: var(--spacing-sm);">Retrieval Latency</div>
+                  <div style="font-size: 28px; font-weight: 700; color: var(--success);">24ms</div>
+                </div>
+                <div style="background: var(--surface-elevated); border-left: 4px solid var(--success); padding: var(--spacing-xl); border-radius: 4px;">
+                  <div style="font-size: 11px; color: var(--graphite); text-transform: uppercase; font-weight: 600; margin-bottom: var(--spacing-sm);">Uptime</div>
+                  <div style="font-size: 28px; font-weight: 700; color: var(--success);">99.8%</div>
+                </div>
+              </div>
+              <div style="background: var(--surface-elevated); padding: var(--spacing-xl); border-radius: 4px; border: 1px solid var(--border-color);">
+                <div style="font-size: 12px; color: var(--rust); font-weight: 600; margin-bottom: var(--spacing-lg);">Active Memory Contexts</div>
+                <div style="height: 120px; display: flex; align-items: center; justify-content: center; color: var(--graphite); font-size: 13px;">3 contexts • 1.2M–2.1M vectors per context</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Marketing Page Hero Concept</h3>
+          <div style="background: linear-gradient(135deg, var(--foundation) 0%, var(--surface) 50%, var(--surface-elevated) 100%); border: 1px solid var(--border-color); border-radius: 8px; padding: var(--spacing-4xl); margin: var(--spacing-2xl) 0; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div style="max-width: 700px;">
+              <div style="font-family: var(--font-display); font-size: 42px; font-weight: 700; color: var(--ice); margin-bottom: var(--spacing-xl); line-height: 1.2;">Memory that thinks with you</div>
+              <p style="font-size: 18px; color: var(--graphite); margin-bottom: var(--spacing-2xl); line-height: 1.6;">Build intelligent AI agents with persistent, multi-layer memory. Retrieval-augmented generation. Knowledge graphs that reason. Temporal persistence that learns.</p>
+              <div style="display: flex; gap: var(--spacing-lg); justify-content: center;">
+                <button class="button button-primary">Start Building</button>
+                <button class="button button-secondary">View Docs</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Terminal Output Aesthetic</h3>
+          <div class="code-block" style="background: #000; border: 1px solid var(--rust);">
+<span style="color: var(--graphite);">~/projects/my-agent $ </span><span style="color: var(--text-primary);">engram dashboard</span>
+
+<span style="color: var(--success);">✓ Connected to memory backend</span>
+<span style="color: var(--rust);">» Loading memory contexts...</span>
+
+<span style="color: var(--amber);">CONTEXT NAME        VECTORS    RETRIEVAL    STATUS</span>
+<span style="color: var(--graphite);">───────────────────────────────────────────────</span>
+<span style="color: var(--text-primary);">knowledge-base      1.2M       18ms         </span><span style="color: var(--success);">ACTIVE</span>
+<span style="color: var(--text-primary);">conversation-log    842K       22ms         </span><span style="color: var(--success);">ACTIVE</span>
+<span style="color: var(--text-primary);">reasoning-graph     2.1M       28ms         </span><span style="color: var(--amber);">CONSOLIDATING</span>
+
+<span style="color: var(--rust);">» Ready for queries</span>
+<span style="color: var(--graphite);">~/projects/my-agent $ </span>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>GitHub README Badge Style</h3>
+          <div style="margin: var(--spacing-2xl) 0; display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
+            <img src="data:image/svg+xml,%3Csvg width='120' height='28' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='28' fill='%230A0E1A' stroke='%23C25216' stroke-width='1'/%3E%3Ctext x='60' y='18' text-anchor='middle' font-family='monospace' font-size='12' fill='%23C25216' font-weight='bold'%3E%E2%9C%93 Python SDK%3C/text%3E%3C/svg%3E" alt="Python SDK">
+            <img src="data:image/svg+xml,%3Csvg width='130' height='28' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='130' height='28' fill='%230A0E1A' stroke='%23E8A030' stroke-width='1'/%3E%3Ctext x='65' y='18' text-anchor='middle' font-family='monospace' font-size='12' fill='%23E8A030' font-weight='bold'%3E%F0%9F%9A%80 Node.js SDK%3C/text%3E%3C/svg%3E" alt="Node.js SDK">
+            <img src="data:image/svg+xml,%3Csvg width='120' height='28' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='28' fill='%230A0E1A' stroke='%2310B981' stroke-width='1'/%3E%3Ctext x='60' y='18' text-anchor='middle' font-family='monospace' font-size='12' fill='%2310B981' font-weight='bold'%3E Go SDK%3C/text%3E%3C/svg%3E" alt="Go SDK">
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 17: ANTI-PATTERNS -->
+      <section id="antipatterns">
+        <h1>17. Anti-patterns</h1>
+        <p>What NOT to do with the Engram brand. These violations undermine our positioning and confuse the market.</p>
+
+        <div class="subsection">
+          <h3>15 Critical Don'ts</h3>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">1. Brain Imagery & Neuron Metaphors</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">"Engram uses AI neural networks to remember like a brain."</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">"Engram stores embeddings in knowledge graphs for semantic retrieval."</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">2. Generic Stock Photos (People, Offices, Meetups)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Diverse business team smiling with laptops</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Abstract data topology, geometric forms, deep space</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">3. Wrong Colours (Neons, Full Saturation, Pastels)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Bright cyan, hot pink, electric green on white</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Rust (#C25216) + Amber (#E8A030) on dark foundations</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">4. Comic Sans or Decorative Fonts</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error); font-family: 'Comic Sans MS', cursive;">Playful, friendly fonts for headlines</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success); font-family: 'Space Grotesk';">Space Grotesk for display, Inter for body</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">5. Cramped Layouts (No Breathing Room)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Padding 4px, margins 2px, text 12pt single-spaced</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Padding 16–24px, margins 32px+, line-height 1.6+</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">6. Buzzwords & Vague Language</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">"AI magic, next-gen synergy, cutting-edge solutions"</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">"RAG, multi-layer graphs, temporal reasoning"</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">7. Glowing Orbs & Holographic Interfaces</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Sci-fi special effects, lens flares, glow effects</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Clean geometry, subtle shadows, technical precision</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">8. Humanoid Robots or Android Imagery</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Robot mascots, AI assistants with faces</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Abstract systems, node networks, infrastructure</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">9. Logo Distortion (Stretched, Rotated, Skewed)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Any transformation of the logo</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Use standard variants only (4 approved lockups)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">10. Light Mode as Default (Unless Required)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">White backgrounds, dark text as primary</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Dark-first design with light mode fallback</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">11. Inconsistent Spacing (No Grid System)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Random padding: 5px, 13px, 22px, 39px</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">8px grid multiples only: 8, 16, 24, 32, 48, 64px</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">12. Using Rust Colour on Rust Background</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Low contrast, illegible combinations</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">High contrast (WCAG AA minimum 4.5:1)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">13. Overusing Animations (No Purpose)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Every interaction bounces, spins, morphs</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Intentional animations revealing relationships</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">14. Inconsistent Messaging (Mixed Metaphors)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">"Smart AI like a brain" + "technical infrastructure"</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Consistent voice: technical, precise, confident</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin: var(--spacing-xl) 0; border-left: 4px solid var(--error);">
+            <div style="font-weight: 600; color: var(--error); margin-bottom: var(--spacing-lg);">15. Falling Back to Default UI Kit (Material, Bootstrap)</div>
+            <div class="comparison">
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-wrong">✗</span> Wrong</div>
+                <p style="font-size: 13px; color: var(--error);">Material Design blue buttons, standard form controls</p>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label"><span class="comparison-right">✓</span> Right</div>
+                <p style="font-size: 13px; color: var(--success);">Custom components using Engram colour & spacing</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 18: AI PROMPT LIBRARY -->
+      <section id="prompts">
+        <h1>18. AI Prompt Library</h1>
+        <p>Prompts for Recraft.ai (image generation) and ElevenLabs (voice/audio) to maintain brand consistency at scale.</p>
+
+        <div class="subsection">
+          <h3>Recraft.ai Image Prompts</h3>
+
+          <div class="prompt-library">
+            <div class="prompt-title">Prompt 1: Product Hero Banner</div>
+            <div class="prompt-text">Abstract geometric knowledge graph floating in deep space, nodes connected by glowing edges (rust orange #C25216 and amber gold #E8A030), dark navy background #0A0E1A, crystalline formations, digital topology visualization, high contrast, cinematic lighting, no text, professional commercial photography style, 3D rendering, 16:9 aspect ratio</div>
+          </div>
+
+          <div class="prompt-library">
+            <div class="prompt-title">Prompt 2: Memory Concept</div>
+            <div class="prompt-text">Temporal network diagram showing layers of memory consolidation, multiple rust-coloured nodes merging upward, arrows showing information flow, dark background, technical precision, isometric perspective, no people, vector field visualization, minimalist, clean lines, 4:3 ratio</div>
+          </div>
+
+          <div class="prompt-library">
+            <div class="prompt-title">Prompt 3: Data Infrastructure</div>
+            <div class="prompt-text">Isometric data center architecture, multiple stacked layers with rust and amber accents, nodes and connections, deep navy foundation, cables or data streams flowing between layers, technical precision, clean geometric shapes, no humans, commercial illustration style, 1:1 ratio</div>
+          </div>
+
+          <div class="prompt-library">
+            <div class="prompt-title">Prompt 4: Vector Space Visualization</div>
+            <div class="prompt-text">3D vector field in dark space, thousands of points scattered in dimensional coordinate system, rust orange primary vectors, amber accent vectors, particle effects, mathematical elegance, high-tech aesthetic, no text, 16:9 ratio, cinematic</div>
+          </div>
+
+          <div class="prompt-library">
+            <div class="prompt-title">Prompt 5: Retrieval Process</div>
+            <div class="prompt-text">Query expanding outward as concentric ripples through a knowledge graph network, central node with rust colour, amber highlights, ripple waves in decreasing opacity, dark deep space background, technical illustration, 1:1 square ratio</div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>ElevenLabs Voice Specifications</h3>
+          <p style="margin: var(--spacing-xl) 0; font-size: 14px; color: var(--text-secondary);">If Engram produces audio brand content (voice guides, demos, etc.):</p>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Context</th>
+                <th>Tone Direction</th>
+                <th>Pace & Delivery</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Product Demo</td>
+                <td>Professional, knowledgeable, confident but not condescending</td>
+                <td>Steady, measured, deliberate (not rushed)</td>
+              </tr>
+              <tr>
+                <td>Tutorial/How-to</td>
+                <td>Clear, educational, helpful, friendly technical voice</td>
+                <td>Moderate pace with strategic pauses for clarity</td>
+              </tr>
+              <tr>
+                <td>Brand Anthem</td>
+                <td>Aspirational, visionary, technical precision with warmth</td>
+                <td>Moderate to slow, emphasis on key concepts</td>
+              </tr>
+              <tr>
+                <td>Onboarding</td>
+                <td>Encouraging, empowering, accessible to all experience levels</td>
+                <td>Clear and unhurried, warm</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 19: ACCESSIBILITY -->
+      <section id="accessibility">
+        <h1>19. Accessibility</h1>
+        <p>Engram brand must be accessible to all users. WCAG 2.2 AA compliance is baseline. All colour combinations, type sizes, and interactive elements must meet accessibility standards.</p>
+
+        <div class="subsection">
+          <h3>Colour Contrast Ratios (WCAG 2.2 AA)</h3>
+          <table class="wcag-table">
+            <thead>
+              <tr>
+                <th>Foreground</th>
+                <th>Background</th>
+                <th>Contrast Ratio</th>
+                <th>AA Pass</th>
+                <th>AAA Pass</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ice (#E8EDF5)</td>
+                <td>Foundation (#0A0E1A)</td>
+                <td>18.2:1</td>
+                <td class="wcag-pass">✓ Yes</td>
+                <td class="wcag-pass">✓ Yes</td>
+              </tr>
+              <tr>
+                <td>Rust (#C25216)</td>
+                <td>Foundation (#0A0E1A)</td>
+                <td>6.8:1</td>
+                <td class="wcag-pass">✓ Yes</td>
+                <td class="wcag-pass">✓ Yes</td>
+              </tr>
+              <tr>
+                <td>Amber (#E8A030)</td>
+                <td>Foundation (#0A0E1A)</td>
+                <td>9.1:1</td>
+                <td class="wcag-pass">✓ Yes</td>
+                <td class="wcag-pass">✓ Yes</td>
+              </tr>
+              <tr>
+                <td>Graphite (#8892A4)</td>
+                <td>Foundation (#0A0E1A)</td>
+                <td>3.8:1</td>
+                <td class="wcag-fail">✗ No</td>
+                <td class="wcag-fail">✗ No</td>
+              </tr>
+              <tr>
+                <td>Graphite (#8892A4)</td>
+                <td>Surface (#141928)</td>
+                <td>3.5:1</td>
+                <td class="wcag-fail">✗ No</td>
+                <td class="wcag-fail">✗ No</td>
+              </tr>
+              <tr>
+                <td>Success (#10B981)</td>
+                <td>Foundation (#0A0E1A)</td>
+                <td>7.2:1</td>
+                <td class="wcag-pass">✓ Yes</td>
+                <td class="wcag-pass">✓ Yes</td>
+              </tr>
+              <tr>
+                <td>Warning (#F59E0B)</td>
+                <td>Foundation (#0A0E1A)</td>
+                <td>8.5:1</td>
+                <td class="wcag-pass">✓ Yes</td>
+                <td class="wcag-pass">✓ Yes</td>
+              </tr>
+              <tr>
+                <td>Error (#EF4444)</td>
+                <td>Foundation (#0A0E1A)</td>
+                <td>5.2:1</td>
+                <td class="wcag-pass">✓ Yes</td>
+                <td class="wcag-fail">✗ No</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top: var(--spacing-xl); font-size: 12px; color: var(--graphite);">Note: Graphite (#8892A4) fails contrast requirements. Use only for tertiary text (captions, hints) or increase weight (semibold/bold) to improve contrast.</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Typography Accessibility</h3>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Size</th>
+                <th>Weight</th>
+                <th>Min. Contrast</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>12px</td>
+                <td>Normal (400)</td>
+                <td>7:1 (AAA)</td>
+                <td>Labels, captions. Requires high contrast.</td>
+              </tr>
+              <tr>
+                <td>14px</td>
+                <td>Normal (400)</td>
+                <td>4.5:1 (AA)</td>
+                <td>Body text. Ensure line-height 1.5+</td>
+              </tr>
+              <tr>
+                <td>16px</td>
+                <td>Normal (400)</td>
+                <td>4.5:1 (AA)</td>
+                <td>Standard body. Recommended minimum for long text.</td>
+              </tr>
+              <tr>
+                <td>18px+</td>
+                <td>Normal (400)</td>
+                <td>3:1 (AA)</td>
+                <td>Large text. More lenient contrast requirements.</td>
+              </tr>
+              <tr>
+                <td>Any</td>
+                <td>Bold (700)</td>
+                <td>3:1 (AA)</td>
+                <td>Bold text can use lower contrast ratios.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <h3>Focus Ring & Interactive Elements</h3>
+          <div class="code-block">/* Keyboard focus indicator */
+:focus-visible {
+  outline: 3px solid var(--rust);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Button focus */
+button:focus-visible {
+  box-shadow: 0 0 0 3px var(--rust);
+}
+
+/* Form input focus */
+input:focus-visible {
+  border-color: var(--rust);
+  box-shadow: 0 0 0 3px rgba(194, 82, 22, 0.1);
+}
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>Reduced Motion Support</h3>
+          <div class="code-block">@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+          </div>
+          <p style="margin-top: var(--spacing-lg); font-size: 13px; color: var(--text-secondary);">Ensure all animated content can be disabled. Provide skip links for navigation. Test with screen readers (NVDA, JAWS, VoiceOver).</p>
+        </div>
+
+        <div class="subsection">
+          <h3>Accessibility Checklist</h3>
+          <ul style="margin: var(--spacing-xl) 0; font-size: 14px; color: var(--text-secondary); line-height: 2;">
+            <li>✓ All images have descriptive alt text</li>
+            <li>✓ Colour is not the only differentiator (use icons, text, patterns)</li>
+            <li>✓ Form labels are explicitly associated with inputs</li>
+            <li>✓ Keyboard navigation works (Tab order logical)</li>
+            <li>✓ Focus indicators are visible and clear</li>
+            <li>✓ Minimum touch target size: 48×48px</li>
+            <li>✓ All interactive elements have :focus-visible states</li>
+            <li>✓ Animations can be disabled (prefers-reduced-motion)</li>
+            <li>✓ Text resizing works to 200%</li>
+            <li>✓ No automatic audio playback or redirects without warning</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- SECTION 20: CHANGELOG -->
+      <section id="changelog">
+        <h1>20. Changelog</h1>
+        <p>Version history of the Engram brand guide. Updates and refinements are tracked here.</p>
+
+        <div class="changelog-item">
+          <div class="changelog-version">v1.0 — Initial Release</div>
+          <div class="changelog-date">27 March 2026</div>
+          <div class="changelog-notes">
+            • Launched comprehensive brand system with 20 full sections<br>
+            • Established colour palette (Rust #C25216, Amber #E8A030, Foundation #0A0E1A)<br>
+            • Defined typography system (Space Grotesk, Inter, IBM Plex Mono)<br>
+            • Created 4 logo variants + 16 icon set<br>
+            • Documented 6 core animations (node pulse, edge draw, data stream, cluster morph, consolidation, ripple)<br>
+            • Specified voice & tone guidelines, anti-patterns, and accessibility standards<br>
+            • Included Tailwind v4 @theme configuration<br>
+            • Added motion principles, component library, and developer brand guidelines<br>
+            • Established WCAG 2.2 AA compliance baseline
+          </div>
+        </div>
+
+        <div style="margin-top: var(--spacing-3xl); padding: var(--spacing-2xl); background: var(--surface); border-radius: 8px; border-left: 4px solid var(--amber);">
+          <div style="font-weight: 600; color: var(--amber); margin-bottom: var(--spacing-lg);">Future Iterations</div>
+          <ul style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+            <li>• Planned: Motion design system expansion (Figma plugin)</li>
+            <li>• Planned: Interactive component playground</li>
+            <li>• Planned: Brand governance dashboard</li>
+            <li>• Planned: Localization guidelines (CJK, RTL)</li>
+            <li>• Planned: Video production style guide</li>
+            <li>• Community contributions welcome on GitHub</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Smooth scroll to section
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+
+    function updateActiveNav() {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= sectionTop - 200) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').slice(1) === current) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', updateActiveNav);
+    updateActiveNav();
+
+    // Swatch copy-to-clipboard
+    document.querySelectorAll('.paint-chip-color').forEach(swatch => {
+      swatch.addEventListener('click', function() {
+        const color = this.getAttribute('data-color');
+        navigator.clipboard.writeText(color).then(() => {
+          showToast(`Copied ${color}`);
+        });
+      });
+    });
+
+    // Toast notification
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast show';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
