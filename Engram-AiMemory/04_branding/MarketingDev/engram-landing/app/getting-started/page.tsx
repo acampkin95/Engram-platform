@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/app/components/ui/Button';
 import * as Icons from 'lucide-react';
 
@@ -18,11 +18,11 @@ const steps: Step[] = [
     description: 'Ensure you have all required tools installed',
     content: (
       <div className="space-y-6">
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-[var(--text-secondary)] leading-relaxed">
           Before setting up Engram, make sure you have the following installed:
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[
             { tool: 'Docker Desktop', version: '24+', description: 'Container runtime' },
             { tool: 'Node.js', version: '20+', description: 'JavaScript runtime (for MCP)' },
@@ -31,27 +31,35 @@ const steps: Step[] = [
           ].map((item) => (
             <div
               key={item.tool}
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-4 flex items-start justify-between"
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-4 flex items-start justify-between hover:border-[var(--engram-amber)] transition-colors duration-200"
             >
-              <div>
-                <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)]">
-                  {item.tool}
-                </h4>
-                <p className="text-sm text-[var(--text-secondary)]">{item.description}</p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)]" />
+                  <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)]">
+                    {item.tool}
+                  </h4>
+                </div>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">{item.description}</p>
               </div>
-              <span className="px-3 py-1 rounded text-xs font-[var(--font-mono)] bg-[var(--layer-1)] text-[var(--engram-teal)]">
+              <span className="px-3 py-1.5 rounded-lg text-xs font-[var(--font-mono)] bg-[var(--layer-1)] text-[var(--engram-teal)] whitespace-nowrap ml-4">
                 {item.version}
               </span>
             </div>
           ))}
         </div>
 
-        <div className="rounded-lg border border-[var(--engram-amber)] bg-[var(--engram-amber-glow)] p-4">
-          <p className="text-sm text-[var(--text-primary)]">
-            <strong>Tip:</strong> Use{' '}
-            <code className="font-[var(--font-mono)]">brew --version</code> or{' '}
-            <code className="font-[var(--font-mono)]">docker --version</code> to check installed
-            versions.
+        <div className="rounded-xl border border-[var(--engram-amber)] border-opacity-30 bg-gradient-to-r from-[var(--engram-amber)] to-[var(--engram-amber)] bg-opacity-5 p-4">
+          <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+            <strong className="text-[var(--engram-amber)]">Tip:</strong> Use{' '}
+            <code className="font-[var(--font-mono)] bg-[var(--layer-1)] px-2 py-1 rounded">
+              brew --version
+            </code>{' '}
+            or{' '}
+            <code className="font-[var(--font-mono)] bg-[var(--layer-1)] px-2 py-1 rounded">
+              docker --version
+            </code>{' '}
+            to check installed versions.
           </p>
         </div>
       </div>
@@ -63,42 +71,41 @@ const steps: Step[] = [
     description: 'Get the source code and set up environment variables',
     content: (
       <div className="space-y-6">
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-[var(--text-secondary)] leading-relaxed">
           Clone the Engram repository and prepare your environment:
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
-            <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3">
+            <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--engram-amber)]" />
               Clone the repository
             </h4>
 
-            <div className="rounded-lg p-6 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-2 border-[var(--engram-amber)] overflow-x-auto">
-              <div className="text-[var(--engram-amber)]">$</div>
-              <div className="text-[var(--text-primary)]">
-                git clone https://github.com/engram/engram-platform.git
-              </div>
-              <div className="text-[var(--engram-amber)] mt-2">$</div>
-              <div className="text-[var(--text-primary)]">cd engram-platform</div>
-            </div>
+            <CodeBlock
+              language="bash"
+              lines={[
+                '$ git clone https://github.com/engram/engram-platform.git',
+                '$ cd engram-platform',
+              ]}
+              color="amber"
+            />
           </div>
 
           <div>
-            <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3">
+            <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--engram-violet)]" />
               Copy and configure .env
             </h4>
 
-            <div className="rounded-lg p-6 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-2 border-[var(--engram-violet)] overflow-x-auto mb-4">
-              <div className="text-[var(--engram-violet)]">$</div>
-              <div className="text-[var(--text-primary)]">cp .env.example .env</div>
-            </div>
+            <CodeBlock language="bash" lines={['$ cp .env.example .env']} color="violet" />
 
-            <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-4 space-y-3">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-5 space-y-3 mt-4">
               <p className="text-sm font-[var(--font-display)] font-semibold text-[var(--text-primary)]">
                 Key environment variables to set:
               </p>
 
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-sm font-[var(--font-mono)]">
                 {[
                   {
                     key: 'EMBEDDING_PROVIDER',
@@ -118,9 +125,10 @@ const steps: Step[] = [
                     values: 'From clerk.com dashboard',
                   },
                 ].map((env) => (
-                  <div key={env.key} className="font-[var(--font-mono)]">
-                    <span className="text-[var(--engram-amber)]">{env.key}</span>
-                    <span className="text-[var(--text-muted)]"> = {env.values}</span>
+                  <div key={env.key} className="flex items-start gap-2">
+                    <span className="text-[var(--engram-amber)] font-semibold">{env.key}</span>
+                    <span className="text-[var(--text-muted)]">=</span>
+                    <span className="text-[var(--text-secondary)]">{env.values}</span>
                   </div>
                 ))}
               </div>
@@ -136,21 +144,23 @@ const steps: Step[] = [
     description: 'Start all Engram services with Docker Compose',
     content: (
       <div className="space-y-6">
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-[var(--text-secondary)] leading-relaxed">
           Deploy the entire platform with a single command:
         </p>
 
-        <div className="rounded-lg p-6 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-2 border-[var(--engram-teal)] overflow-x-auto">
-          <div className="text-[var(--engram-teal)]">$</div>
-          <div className="text-[var(--text-primary)]">docker compose up -d</div>
-        </div>
+        <CodeBlock
+          language="bash"
+          lines={['$ docker compose up -d']}
+          color="teal"
+          filename="Terminal"
+        />
 
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-4">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-5">
           <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-4">
             Service startup order (automatic):
           </h4>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {[
               { service: 'Weaviate', port: '8080', desc: 'Vector database' },
               { service: 'Redis (Crawler)', port: '6379', desc: 'Cache layer' },
@@ -160,12 +170,11 @@ const steps: Step[] = [
               { service: 'Platform Frontend', port: '3002', desc: 'Dashboard UI' },
               { service: 'MCP Server', port: '3000', desc: 'Protocol bridge' },
             ].map((s) => (
-              <div key={s.service} className="flex items-start gap-3 text-sm">
-                <Icons.CheckCircle2
-                  size={16}
-                  className="text-[var(--engram-teal)] flex-shrink-0 mt-1"
-                />
-                <div>
+              <div key={s.service} className="flex items-start gap-3 text-sm group">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--engram-teal)] bg-opacity-10 flex items-center justify-center mt-0.5 group-hover:bg-opacity-20 transition-colors">
+                  <Icons.Check size={12} className="text-[var(--engram-teal)]" strokeWidth={3} />
+                </div>
+                <div className="flex-1">
                   <span className="font-[var(--font-mono)] text-[var(--text-primary)]">
                     {s.service}
                   </span>
@@ -176,12 +185,12 @@ const steps: Step[] = [
           </div>
         </div>
 
-        <p className="text-sm text-[var(--text-secondary)]">
-          Monitor logs with:{' '}
-          <code className="font-[var(--font-mono)] text-[var(--text-primary)]">
-            docker compose logs -f
-          </code>
-        </p>
+        <div className="rounded-lg bg-[var(--layer-1)] p-3 border border-[var(--border)]">
+          <p className="text-sm text-[var(--text-secondary)] font-[var(--font-mono)]">
+            Monitor logs with:{' '}
+            <code className="text-[var(--engram-teal)] font-semibold">docker compose logs -f</code>
+          </p>
+        </div>
       </div>
     ),
   },
@@ -191,11 +200,11 @@ const steps: Step[] = [
     description: 'Check that all services are running correctly',
     content: (
       <div className="space-y-6">
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-[var(--text-secondary)] leading-relaxed">
           Test each service with health check endpoints:
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           {[
             {
               service: 'Memory API',
@@ -214,26 +223,26 @@ const steps: Step[] = [
             },
           ].map((check) => (
             <div key={check.service}>
-              <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-2">
+              <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-2 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: `var(--engram-${check.color})` }} />
                 {check.service}
               </h4>
 
-              <div
-                className="rounded-lg p-6 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] overflow-x-auto"
-                style={{
-                  borderLeft: `2px solid var(--engram-${check.color})`,
-                }}
-              >
-                <div style={{ color: `var(--engram-${check.color})` }}>$</div>
-                <div className="text-[var(--text-primary)]">{check.curl}</div>
-              </div>
+              <CodeBlock
+                language="bash"
+                lines={[`$ ${check.curl}`]}
+                color={check.color as any}
+              />
             </div>
           ))}
         </div>
 
-        <div className="rounded-lg border border-[var(--engram-teal)] bg-[var(--engram-teal-glow)] p-4">
-          <p className="text-sm text-[var(--text-primary)]">
-            <strong>Success:</strong> All services return HTTP 200 with status {"{ healthy: true }"}
+        <div className="rounded-xl border border-[var(--engram-teal)] border-opacity-30 bg-gradient-to-r from-[var(--engram-teal)] to-[var(--engram-teal)] bg-opacity-5 p-4">
+          <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+            <strong className="text-[var(--engram-teal)]">Success:</strong> All services return HTTP
+            200 with status <code className="font-[var(--font-mono)] bg-[var(--layer-1)] px-2 py-1 rounded">
+              {"{ healthy: true }"}
+            </code>
           </p>
         </div>
       </div>
@@ -245,58 +254,72 @@ const steps: Step[] = [
     description: 'Configure AI clients to use the MCP server',
     content: (
       <div className="space-y-6">
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-[var(--text-secondary)] leading-relaxed">
           Install and configure the MCP server for Claude Desktop and Claude Code:
         </p>
 
-        <div>
-          <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3">
-            Install globally
-          </h4>
+        <div className="space-y-6">
+          <div>
+            <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--engram-teal)]" />
+              Install globally
+            </h4>
 
-          <div className="rounded-lg p-6 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-2 border-[var(--engram-teal)] overflow-x-auto">
-            <div className="text-[var(--engram-teal)]">$</div>
-            <div className="text-[var(--text-primary)]">npx @engram/mcp init</div>
+            <CodeBlock
+              language="bash"
+              lines={['$ npx @engram/mcp init']}
+              color="teal"
+            />
           </div>
-        </div>
 
-        <div>
-          <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3">
-            Claude Desktop config
-          </h4>
+          <div>
+            <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--engram-amber)]" />
+              Claude Desktop config
+            </h4>
 
-          <p className="text-sm text-[var(--text-secondary)] mb-3">
-            Edit <code className="font-[var(--font-mono)]">~/.claude/config.json</code>:
-          </p>
+            <p className="text-sm text-[var(--text-secondary)] mb-3">
+              Edit{' '}
+              <code className="font-[var(--font-mono)] bg-[var(--layer-1)] px-2 py-1 rounded">
+                ~/.claude/config.json
+              </code>
+              :
+            </p>
 
-          <div className="rounded-lg p-4 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-2 border-[var(--engram-amber)] overflow-x-auto">
-            <pre className="text-[var(--text-primary)]">{`{
-  "mcpServers": {
-    "engram": {
-      "command": "node",
-      "args": [
-        ".../engram-mcp/dist/server.js"
-      ]
-    }
-  }
-}`}</pre>
+            <CodeBlock
+              language="json"
+              filename="~/.claude/config.json"
+              lines={[
+                '{',
+                '  "mcpServers": {',
+                '    "engram": {',
+                '      "command": "node",',
+                '      "args": [',
+                '        ".../engram-mcp/dist/server.js"',
+                '      ]',
+                '    }',
+                '  }',
+                '}',
+              ]}
+              color="amber"
+            />
           </div>
-        </div>
 
-        <div>
-          <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3">
-            Claude Code config
-          </h4>
+          <div>
+            <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--engram-violet)]" />
+              Claude Code config
+            </h4>
 
-          <p className="text-sm text-[var(--text-secondary)] mb-3">
-            Add MCP server URL to your development environment:
-          </p>
+            <p className="text-sm text-[var(--text-secondary)] mb-3">
+              Add MCP server URL to your development environment:
+            </p>
 
-          <div className="rounded-lg p-4 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-2 border-[var(--engram-violet)] overflow-x-auto">
-            <div className="text-[var(--engram-violet)]">$</div>
-            <div className="text-[var(--text-primary)]">
-              export MCP_URL="http://localhost:3000"
-            </div>
+            <CodeBlock
+              language="bash"
+              lines={['$ export MCP_URL="http://localhost:3000"']}
+              color="violet"
+            />
           </div>
         </div>
       </div>
@@ -308,64 +331,71 @@ const steps: Step[] = [
     description: 'Store your first memory and test the system',
     content: (
       <div className="space-y-6">
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-[var(--text-secondary)] leading-relaxed">
           Create and retrieve a memory to verify the platform is working:
         </p>
 
-        <div className="rounded-lg p-6 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-2 border-[var(--engram-rose)] overflow-x-auto">
-          <pre className="text-[var(--text-primary)]">{`import httpx
+        <CodeBlock
+          language="python"
+          filename="test_memory.py"
+          lines={[
+            'import httpx',
+            '',
+            '# Create HTTP client',
+            'client = httpx.AsyncClient(base_url="http://localhost:8000")',
+            '',
+            '# Store a memory',
+            'memory = await client.post(',
+            '  "/memories",',
+            '  json={',
+            '    "content": "Engram is running!",',
+            '    "tier": "project",',
+            '    "metadata": {',
+            '      "source": "getting-started",',
+            '      "importance": "high"',
+            '    }',
+            '  }',
+            ')',
+            '',
+            'memory_data = memory.json()',
+            'print(f"✓ Stored: {memory_data[\'id\']}")',
+            '',
+            '# Search memories',
+            'results = await client.post(',
+            '  "/rag/query",',
+            '  json={',
+            '    "query": "What is Engram?",',
+            '    "top_k": 3',
+            '  }',
+            ')',
+            '',
+            'for result in results.json()["results"]:',
+            '  print(f"- {result[\'content\']}")',
+            '  print(f"  (Score: {result[\'score\']})")',
+          ]}
+          color="rose"
+        />
 
-# Create HTTP client
-client = httpx.AsyncClient(base_url="http://localhost:8000")
-
-# Store a memory
-memory = await client.post(
-  "/memories",
-  json={
-    "content": "Engram is running!",
-    "tier": "project",
-    "metadata": {
-      "source": "getting-started",
-      "importance": "high"
-    }
-  }
-)
-
-memory_data = memory.json()
-print(f"✓ Stored: {memory_data['id']}")
-
-# Search memories
-results = await client.post(
-  "/rag/query",
-  json={
-    "query": "What is Engram?",
-    "top_k": 3
-  }
-)
-
-for result in results.json()["results"]:
-  print(f"- {result['content']}")
-  print(f"  (Score: {result['score']})")`}</pre>
-        </div>
-
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-4">
-          <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-5">
+          <h4 className="font-[var(--font-display)] font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--engram-teal)]" />
             Next steps:
           </h4>
 
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-2.5 text-sm">
             {[
               'Browse stored memories in the Dashboard',
               'Run your first OSINT scan via Crawler API',
               'Explore knowledge graph in Platform UI',
               'Read the full documentation',
             ].map((step) => (
-              <li key={step} className="flex items-start gap-2">
-                <Icons.ArrowRight
-                  size={16}
-                  className="text-[var(--engram-teal)] flex-shrink-0 mt-0.5"
-                />
-                <span className="text-[var(--text-secondary)]">{step}</span>
+              <li key={step} className="flex items-start gap-2 group">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--engram-teal)] bg-opacity-10 flex items-center justify-center mt-0.5 group-hover:bg-opacity-20 transition-colors">
+                  <Icons.ArrowRight size={12} className="text-[var(--engram-teal)]" strokeWidth={3} />
+                </div>
+                <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                  {step}
+                </span>
               </li>
             ))}
           </ul>
@@ -375,106 +405,235 @@ for result in results.json()["results"]:
   },
 ];
 
+interface CodeBlockProps {
+  language: string;
+  lines: string[];
+  color: 'amber' | 'violet' | 'teal' | 'rose';
+  filename?: string;
+}
+
+function CodeBlock({ language, lines, color, filename }: CodeBlockProps) {
+  const [copied, setCopied] = useState(false);
+
+  const codeContent = lines.join('\n');
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeContent);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative">
+      {filename && (
+        <div
+          className="text-xs font-[var(--font-mono)] text-[var(--text-muted)] px-5 py-2 bg-[var(--layer-1)] rounded-t-xl border-b border-[var(--border)]"
+          style={{ borderBottomColor: `var(--engram-${color})` }}
+        >
+          {filename}
+        </div>
+      )}
+
+      <div
+        className={`rounded-${filename ? 'b' : ''}-xl p-5 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] overflow-x-auto group`}
+        style={{
+          borderLeft: `3px solid var(--engram-${color})`,
+        }}
+      >
+        <div className="space-y-1">
+          {lines.map((line, idx) => (
+            <div key={idx} className="flex items-start gap-3">
+              <span className="text-[var(--text-muted)] select-none w-6 text-right flex-shrink-0 opacity-50">
+                {idx + 1}
+              </span>
+              <span
+                className="text-[var(--text-primary)]"
+                style={{
+                  color: line.startsWith('$')
+                    ? `var(--engram-${color})`
+                    : 'var(--text-primary)',
+                }}
+              >
+                {line}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button
+        onClick={handleCopy}
+        className="absolute top-3 right-3 px-2.5 py-1.5 rounded-lg text-xs font-[var(--font-mono)] bg-[var(--layer-1)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-1)] border border-[var(--border)] hover:border-[var(--engram-amber)] transition-all duration-200 opacity-0 group-hover:opacity-100"
+        title="Copy code"
+      >
+        {copied ? (
+          <span className="text-[var(--engram-teal)]">✓ Copied</span>
+        ) : (
+          <Icons.Copy size={12} className="inline mr-1" />
+        )}
+        {!copied && 'Copy'}
+      </button>
+    </div>
+  );
+}
+
 export default function GettingStartedPage() {
   const [activeStep, setActiveStep] = useState(1);
+  const [mounted, setMounted] = useState(false);
   const currentStep = steps.find((s) => s.number === activeStep);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeStep]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && activeStep > 1) {
+        setActiveStep(activeStep - 1);
+      } else if (e.key === 'ArrowRight' && activeStep < steps.length) {
+        setActiveStep(activeStep + 1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeStep]);
+
+  if (!mounted) return null;
+
+  const progressPercent = (activeStep / steps.length) * 100;
 
   return (
     <div className="min-h-screen bg-[var(--void)]">
       {/* Progress Bar */}
-      <div className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--void)]/95 backdrop-blur-sm">
+      <div className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--void)]/95 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-[var(--font-display)] font-bold text-2xl">Getting Started</h1>
-            <span className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)]">
-              Step {activeStep} of {steps.length}
-            </span>
+            <h1 className="font-[var(--font-display)] font-bold text-2xl text-[var(--text-primary)]">
+              Getting Started
+            </h1>
+            <div className="flex items-center gap-4">
+              <span className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)]">
+                {Math.round(progressPercent)}%
+              </span>
+              <span className="font-[var(--font-mono)] text-sm text-[var(--text-muted)]">
+                Step {activeStep} of {steps.length}
+              </span>
+            </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="w-full h-1 rounded-full bg-[var(--layer-1)]">
+          {/* Progress bar with glow */}
+          <div className="relative w-full h-2 rounded-full bg-[var(--layer-1)] overflow-hidden">
             <div
-              className="h-full rounded-full bg-[var(--engram-amber)] transition-all duration-300"
-              style={{ width: `${(activeStep / steps.length) * 100}%` }}
+              className="h-full rounded-full bg-gradient-to-r from-[var(--engram-amber)] to-[var(--engram-amber)] transition-all duration-500 ease-out shadow-lg shadow-[var(--engram-amber)]/20"
+              style={{ width: `${progressPercent}%` }}
             />
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-          {/* Stepper (left) */}
-          <div className="lg:col-span-1">
-            <div className="space-y-4 sticky top-32">
+      <div className="max-w-7xl mx-auto px-6 py-12 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12">
+          {/* Stepper (left) - hidden on mobile */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="space-y-2 sticky top-32">
               {steps.map((step, idx) => {
                 const isActive = step.number === activeStep;
                 const isCompleted = step.number < activeStep;
+                const isFuture = step.number > activeStep;
 
                 return (
-                  <button
-                    key={step.number}
-                    onClick={() => setActiveStep(step.number)}
-                    className="w-full text-left group"
-                  >
-                    <div className="flex items-start gap-4">
-                      {/* Circle */}
-                      <div
-                        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 border"
-                        style={{
-                          background: isActive
-                            ? 'var(--engram-amber)'
-                            : isCompleted
-                              ? 'var(--engram-teal)'
-                              : 'var(--layer-1)',
-                          borderColor: isActive ? 'var(--engram-amber)' : 'var(--border)',
-                          color: isActive || isCompleted ? 'var(--void)' : 'var(--text-secondary)',
-                        }}
-                      >
-                        {isCompleted ? (
-                          <Icons.Check size={16} strokeWidth={3} />
-                        ) : (
-                          <span className="font-[var(--font-mono)] font-semibold text-sm">
-                            {step.number}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1">
-                        <h3
-                          className="font-[var(--font-display)] font-semibold text-sm transition-colors"
+                  <div key={step.number} className="relative">
+                    <button
+                      onClick={() => setActiveStep(step.number)}
+                      className="w-full text-left group"
+                      aria-current={isActive ? 'step' : undefined}
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Circle with state */}
+                        <div
+                          className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border-2 font-[var(--font-mono)] font-bold text-sm"
                           style={{
-                            color: isActive
+                            background: isActive
                               ? 'var(--engram-amber)'
                               : isCompleted
                                 ? 'var(--engram-teal)'
-                                : 'var(--text-secondary)',
+                                : isFuture
+                                  ? 'var(--surface-2)'
+                                  : 'var(--layer-1)',
+                            borderColor: isActive
+                              ? 'var(--engram-amber)'
+                              : isCompleted
+                                ? 'var(--engram-teal)'
+                                : 'var(--border)',
+                            color: isActive || isCompleted ? 'var(--void)' : 'var(--text-muted)',
+                            boxShadow: isActive
+                              ? '0 0 20px rgba(242, 169, 59, 0.3)'
+                              : 'none',
                           }}
                         >
-                          {step.title}
-                        </h3>
+                          {isCompleted ? (
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 18 18"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="16 5 7 14 2 9" />
+                            </svg>
+                          ) : (
+                            step.number
+                          )}
+                        </div>
 
-                        <p className="text-xs text-[var(--text-muted)] mt-1">
-                          {step.description}
-                        </p>
+                        {/* Content */}
+                        <div className="flex-1 pt-1">
+                          <h3
+                            className="font-[var(--font-display)] font-semibold text-sm transition-all duration-300"
+                            style={{
+                              color: isActive
+                                ? 'var(--engram-amber)'
+                                : isCompleted
+                                  ? 'var(--engram-teal)'
+                                  : 'var(--text-secondary)',
+                            }}
+                          >
+                            {step.title}
+                          </h3>
+
+                          <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">
+                            {step.description}
+                          </p>
+                        </div>
+
+                        {/* Connector Line */}
+                        {idx < steps.length - 1 && (
+                          <div
+                            className="absolute left-4 w-0.5"
+                            style={{
+                              top: '100%',
+                              height: '48px',
+                              background:
+                                isCompleted || isActive
+                                  ? `linear-gradient(to bottom, ${isCompleted ? 'var(--engram-teal)' : 'var(--engram-amber)'}, ${steps[idx + 1].number < activeStep ? 'var(--engram-teal)' : 'var(--border)'})`
+                                  : 'var(--border)',
+                              marginTop: '8px',
+                            }}
+                          />
+                        )}
                       </div>
-
-                      {/* Connector Line */}
-                      {idx < steps.length - 1 && (
-                        <div
-                          className="absolute left-3.5 w-0.5 h-12 ml-0.5"
-                          style={{
-                            background: isCompleted
-                              ? 'var(--engram-teal)'
-                              : 'var(--border)',
-                            top: '100%',
-                            marginTop: '16px',
-                          }}
-                        />
-                      )}
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -483,24 +642,26 @@ export default function GettingStartedPage() {
           {/* Content (right) */}
           <div className="lg:col-span-3">
             {currentStep && (
-              <div className="space-y-8">
-                <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <span
-                      className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center font-[var(--font-mono)] font-bold text-lg"
+              <div className="space-y-8 animate-in fade-in duration-300">
+                {/* Header */}
+                <div className="space-y-3">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center font-[var(--font-display)] font-bold text-lg"
                       style={{
                         background: 'var(--engram-amber)',
                         color: 'var(--void)',
+                        boxShadow: '0 0 24px rgba(242, 169, 59, 0.25)',
                       }}
                     >
                       {currentStep.number}
-                    </span>
+                    </div>
 
-                    <div>
-                      <h2 className="font-[var(--font-display)] font-bold text-3xl">
+                    <div className="flex-1">
+                      <h2 className="font-[var(--font-display)] font-bold text-2xl lg:text-3xl text-[var(--text-primary)]">
                         {currentStep.title}
                       </h2>
-                      <p className="text-[var(--text-secondary)]">
+                      <p className="text-[var(--text-secondary)] text-sm lg:text-base mt-1">
                         {currentStep.description}
                       </p>
                     </div>
@@ -511,29 +672,40 @@ export default function GettingStartedPage() {
                 <div className="space-y-6">{currentStep.content}</div>
 
                 {/* Navigation */}
-                <div className="flex items-center justify-between pt-8 border-t border-[var(--border)]">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-8 border-t border-[var(--border)]">
                   <Button
                     variant="secondary"
                     disabled={activeStep === 1}
                     onClick={() => setActiveStep(Math.max(1, activeStep - 1))}
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto"
                   >
-                    {activeStep > 1 && '← '}Previous
+                    {activeStep > 1 && <Icons.ArrowLeft size={16} />}
+                    Previous
                   </Button>
 
                   {activeStep < steps.length ? (
-                    <Button onClick={() => setActiveStep(activeStep + 1)}>
-                      Next →
+                    <Button
+                      onClick={() => setActiveStep(activeStep + 1)}
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto bg-[var(--engram-amber)] hover:bg-[var(--engram-amber)]/90"
+                    >
+                      Next
+                      <Icons.ArrowRight size={16} />
                     </Button>
                   ) : (
-                    <div className="text-center">
-                      <p className="text-[var(--text-secondary)] text-sm mb-2">
-                        You&apos;re all set!
+                    <div className="text-center sm:text-right w-full sm:w-auto">
+                      <p className="text-[var(--text-secondary)] text-sm mb-1.5">
+                        You're all set!
                       </p>
-                      <p className="font-[var(--font-mono)] text-sm text-[var(--engram-teal)]">
-                        → Visit the Dashboard at localhost:3002
+                      <p className="font-[var(--font-mono)] text-sm text-[var(--engram-teal)] font-semibold">
+                        → Visit localhost:3002
                       </p>
                     </div>
                   )}
+                </div>
+
+                {/* Keyboard hint */}
+                <div className="text-xs text-[var(--text-muted)] text-center mt-4">
+                  Use arrow keys to navigate
                 </div>
               </div>
             )}

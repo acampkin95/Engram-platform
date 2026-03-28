@@ -27,6 +27,7 @@ export default function KBLayout({
     deployment: false,
     security: false,
   });
+  const [activePath, setActivePath] = useState<string | null>(null);
 
   const categories: Category[] = [
     {
@@ -73,7 +74,8 @@ export default function KBLayout({
       {/* Mobile menu button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed left-4 top-4 z-40 lg:hidden p-2 rounded-lg bg-[var(--surface-1)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
+        className="fixed left-4 top-4 z-40 lg:hidden p-2 rounded-lg bg-[var(--surface-1)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors duration-200"
+        aria-label={sidebarOpen ? "Close menu" : "Open menu"}
       >
         {sidebarOpen ? (
           <X size={20} />
@@ -82,66 +84,103 @@ export default function KBLayout({
         )}
       </button>
 
+      {/* Sidebar - Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 h-full w-60 bg-[var(--layer-0)] border-r border-[var(--border)] overflow-y-auto transition-transform duration-300 lg:relative lg:translate-x-0 z-30 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-6">
-          <h2 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-8">
+        <div className="p-6 sticky top-0 bg-[var(--layer-0)] border-b border-[var(--border)]">
+          <h2 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
             Knowledge Base
           </h2>
+        </div>
 
-          <nav className="space-y-1">
-            {categories.map((category) => (
-              <div key={category.id}>
-                <button
-                  onClick={() => toggleCategory(category.id)}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-1)] transition-colors"
-                >
-                  <span>{category.label}</span>
-                  <span className="text-xs text-[var(--text-muted)] bg-[var(--surface-1)] px-2 py-1 rounded">
+        <nav className="p-6 space-y-1">
+          {categories.map((category) => (
+            <div key={category.id}>
+              <button
+                onClick={() => toggleCategory(category.id)}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-1)] transition-all duration-200 group"
+              >
+                <span className="flex-1 text-left">{category.label}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-[var(--text-muted)] bg-[var(--surface-1)] px-2 py-1 rounded-full group-hover:bg-[var(--surface-2)] transition-colors duration-200">
                     {category.articles.length}
                   </span>
-                </button>
+                  <ChevronDown
+                    size={16}
+                    className={`text-[var(--text-muted)] transition-transform duration-300 ${
+                      expandedCategories[category.id] ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+              </button>
 
-                {expandedCategories[category.id] && (
-                  <div className="ml-2 mt-1 space-y-1 border-l border-[var(--border)] pl-4">
-                    {category.articles.map((article) => (
-                      <Link
-                        key={article.slug}
-                        href={`/knowledge-base/${article.slug}`}
-                        className="block px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-lg hover:bg-[var(--surface-1)]"
-                      >
+              {/* Expandable category articles - Smooth animation */}
+              <div
+                className="overflow-hidden transition-all duration-300 ease-out"
+                style={{
+                  maxHeight: expandedCategories[category.id]
+                    ? `${category.articles.length * 40 + 8}px`
+                    : "0px",
+                }}
+              >
+                <div className="ml-2 mt-2 space-y-1 border-l border-[var(--border)] pl-4">
+                  {category.articles.map((article) => (
+                    <Link
+                      key={article.slug}
+                      href={`/knowledge-base/${article.slug}`}
+                      className="block px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-200 rounded-lg hover:bg-[var(--surface-1)] relative group"
+                      onClick={() => setActivePath(article.slug)}
+                    >
+                      {/* Active indicator - amber left border */}
+                      {activePath === article.slug && (
+                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--engram-amber)] rounded-r transition-all duration-300" />
+                      )}
+                      <span className={activePath === article.slug ? "text-[var(--engram-amber)]" : ""}>
                         {article.title}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
               </div>
-            ))}
-          </nav>
-        </div>
+            </div>
+          ))}
+        </nav>
       </aside>
 
       {/* Main content */}
       <main className="flex-1 w-full">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-[var(--text-secondary)] mb-8">
-            <Link href="/" className="hover:text-[var(--text-primary)]">
+          {/* Breadcrumb - Enhanced styling */}
+          <nav
+            className="flex items-center gap-2 text-sm mb-8 pb-6 border-b border-[var(--border)]"
+            aria-label="Breadcrumb"
+          >
+            <Link
+              href="/"
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors duration-200 font-mono"
+            >
               Home
             </Link>
-            <span>/</span>
+            <span className="text-[var(--text-muted)]">/</span>
             <Link
               href="/knowledge-base"
-              className="hover:text-[var(--text-primary)]"
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors duration-200 font-mono"
             >
               Knowledge Base
             </Link>
-            <span>/</span>
-            <span className="text-[var(--text-primary)]">
+            <span className="text-[var(--text-muted)]">/</span>
+            <span className="text-[var(--text-primary)] font-mono font-semibold">
               Article
             </span>
           </nav>

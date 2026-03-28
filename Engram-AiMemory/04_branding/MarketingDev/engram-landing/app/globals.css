@@ -155,3 +155,394 @@ a {
   from { opacity: 0; transform: translateX(24px); }
   to { opacity: 1; transform: translateX(0); }
 }
+
+/* ═══════════════════════════════════════
+   NEW PREMIUM ANIMATIONS
+══════════════════════════════════════ */
+
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--engram-amber-glow); }
+  50% { box-shadow: 0 0 20px 4px var(--engram-amber-glow); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-4deg) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px var(--engram-amber-glow));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px var(--engram-amber-glow)) drop-shadow(0 0 16px rgba(242,169,59,0.1));
+  }
+}
+
+@keyframes shimmer-line {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* ═══════════════════════════════════════
+   ANIMATION UTILITIES
+══════════════════════════════════════ */
+
+.animate-reveal {
+  animation: revealUp 0.6s ease-out both;
+}
+
+.animate-reveal-delay-1 {
+  animation: revealUp 0.6s ease-out 0.1s both;
+}
+
+.animate-reveal-delay-2 {
+  animation: revealUp 0.6s ease-out 0.2s both;
+}
+
+.animate-reveal-delay-3 {
+  animation: revealUp 0.6s ease-out 0.3s both;
+}
+
+.animate-reveal-delay-4 {
+  animation: revealUp 0.6s ease-out 0.4s both;
+}
+
+.animate-float {
+  animation: gentleFloat 4s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: gentleFloat 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-out both;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.4s ease-out both;
+}
+
+.animate-rotate-in {
+  animation: rotateIn 0.5s ease-out both;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════
+   TRANSITION UTILITIES
+══════════════════════════════════════ */
+
+.transition-lift {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s ease;
+}
+
+.transition-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.transition-lift:active {
+  transform: translateY(0);
+}
+
+.transition-glow {
+  transition: border-color 0.3s ease,
+              box-shadow 0.3s ease,
+              background-color 0.3s ease;
+}
+
+.transition-glow:hover {
+  box-shadow: 0 0 20px var(--engram-amber-glow);
+}
+
+.transition-all-ease {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.transition-color {
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ═══════════════════════════════════════
+   GLASSMORPHISM EFFECTS
+══════════════════════════════════════ */
+
+.glass {
+  background: var(--surface-2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+.glass-amber {
+  background: rgba(242, 169, 59, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(242, 169, 59, 0.15);
+  transition: all 0.3s ease;
+}
+
+.glass-amber:hover {
+  background: rgba(242, 169, 59, 0.08);
+  border-color: rgba(242, 169, 59, 0.25);
+  box-shadow: 0 0 20px var(--engram-amber-glow);
+}
+
+.glass-violet {
+  background: rgba(124, 92, 191, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(124, 92, 191, 0.15);
+  transition: all 0.3s ease;
+}
+
+.glass-violet:hover {
+  background: rgba(124, 92, 191, 0.08);
+  border-color: rgba(124, 92, 191, 0.25);
+  box-shadow: 0 0 20px var(--engram-violet-glow);
+}
+
+.glass-teal {
+  background: rgba(46, 196, 196, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(46, 196, 196, 0.15);
+}
+
+.glass-teal:hover {
+  background: rgba(46, 196, 196, 0.08);
+  border-color: rgba(46, 196, 196, 0.25);
+  box-shadow: 0 0 20px var(--engram-teal-glow);
+}
+
+/* ═══════════════════════════════════════
+   GRADIENT TEXT UTILITIES
+══════════════════════════════════════ */
+
+.text-gradient-amber {
+  background: linear-gradient(135deg, #FFC15E 0%, #F2A93B 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-violet {
+  background: linear-gradient(135deg, #9B7DE0 0%, #7C5CBF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-teal {
+  background: linear-gradient(135deg, #45E3E3 0%, #2EC4C4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-multi {
+  background: linear-gradient(135deg, #FFC15E 0%, #F2A93B 25%, #9B7DE0 50%, #2EC4C4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ═══════════════════════════════════════
+   CODE BLOCK ENHANCEMENTS
+══════════════════════════════════════ */
+
+.code-block {
+  background: var(--layer-2);
+  border-left: 3px solid var(--engram-amber);
+  border-radius: 12px;
+  padding: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.code-block:hover {
+  border-left-color: var(--engram-amber-bright);
+  box-shadow: 0 0 20px var(--engram-amber-glow);
+}
+
+.code-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--engram-amber), transparent);
+  opacity: 0.3;
+}
+
+.code-block::after {
+  content: '⟨⟩';
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  color: var(--engram-amber-dim);
+  font-size: 0.75rem;
+  opacity: 0.4;
+}
+
+/* Scrollbar for code blocks */
+.code-block::-webkit-scrollbar {
+  height: 6px;
+}
+
+.code-block::-webkit-scrollbar-track {
+  background: var(--layer-1);
+  border-radius: 3px;
+}
+
+.code-block::-webkit-scrollbar-thumb {
+  background: var(--layer-4);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.code-block::-webkit-scrollbar-thumb:hover {
+  background: rgba(242, 169, 59, 0.2);
+}
+
+/* ═══════════════════════════════════════
+   LINK & FOCUS STATES
+══════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid var(--engram-amber);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible {
+  outline-offset: 4px;
+}
+
+a:focus-visible {
+  outline-offset: 4px;
+}
+
+/* ═══════════════════════════════════════
+   ACCESSIBILITY — REDUCED MOTION
+══════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE UTILITIES
+══════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .animate-reveal {
+    animation-duration: 0.5s;
+  }
+
+  .transition-lift:hover {
+    transform: translateY(-1px);
+  }
+}

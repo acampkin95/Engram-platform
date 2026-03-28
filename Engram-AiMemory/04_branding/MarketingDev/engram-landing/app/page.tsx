@@ -76,12 +76,12 @@ const useCases = [
   {
     title: 'Research Automation',
     description: 'Web crawling with AI-powered analysis, extraction, and knowledge synthesis.',
-    color: 'violet' as const,
+    color: 'amber' as const,
   },
   {
     title: 'MCP Tool Server',
     description: 'Expose any capability as tools for Claude Desktop, Claude Code, and AI assistants.',
-    color: 'teal' as const,
+    color: 'violet' as const,
   },
 ];
 
@@ -110,23 +110,29 @@ export default function Home() {
         <Hero />
 
         {/* Platform Overview - 4 Pillars */}
-        <section id="platform" className="py-32 px-6 bg-[var(--layer-0)] border-t border-[var(--border)]">
+        <section
+          id="platform"
+          className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300"
+        >
+          {/* Gradient divider overlay */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-amber)]/30 to-transparent" />
+
           <div className="max-w-6xl mx-auto">
-            <div className="mb-16">
+            <div className="mb-16 md:mb-20">
               <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
                 <div className="w-10 h-px bg-[var(--engram-amber)]" />
                 The Engram Ecosystem
               </div>
-              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,4vw,3rem)] leading-[1.1] mb-4">
+              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-6">
                 Four Integrated Services
               </h2>
-              <p className="font-[var(--font-body)] italic text-xl text-[var(--text-secondary)] max-w-3xl">
+              <p className="font-[var(--font-body)] italic text-lg sm:text-xl text-[var(--text-secondary)] max-w-3xl leading-relaxed">
                 A unified platform where each service complements the others, creating a
                 cohesive ecosystem for AI intelligence.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
               {platformPillars.map((pillar) => (
                 <Feature
                   key={pillar.title}
@@ -135,7 +141,7 @@ export default function Home() {
                   icon={pillar.icon}
                   color={pillar.color}
                   size="large"
-                  className="h-full"
+                  className="h-full group"
                 />
               ))}
             </div>
@@ -143,55 +149,58 @@ export default function Home() {
         </section>
 
         {/* Architecture Section */}
-        <section id="architecture" className="py-32 px-6 bg-[var(--layer-1)]">
+        <section id="architecture" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-1)] transition-all duration-300">
+          {/* Gradient divider overlay */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-violet)]/30 to-transparent" />
+
           <div className="max-w-6xl mx-auto">
-            <div className="mb-16">
+            <div className="mb-16 md:mb-20">
               <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
                 <div className="w-10 h-px bg-[var(--engram-amber)]" />
                 Technical Architecture
               </div>
-              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,4vw,3rem)] leading-[1.1] mb-4">
+              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
                 Engineered for Scale
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
               <div>
-                <h3 className="font-[var(--font-display)] font-semibold text-2xl mb-6 text-[var(--engram-violet-bright)]">
+                <h3 className="font-[var(--font-display)] font-semibold text-2xl md:text-3xl mb-8 text-[var(--engram-violet-bright)]">
                   Performance Metrics
                 </h3>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2 flex-shrink-0" />
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4 group">
+                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2.5 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
                     <div>
-                      <h4 className="font-[var(--font-display)] font-semibold mb-1">
+                      <h4 className="font-[var(--font-display)] font-semibold mb-2">
                         Sub-10ms Latency
                       </h4>
-                      <p className="font-[var(--font-body)] text-[var(--text-secondary)]">
+                      <p className="font-[var(--font-body)] text-[var(--text-secondary)] leading-relaxed">
                         Vector queries optimized for real-time AI interactions and responsive
                         dashboards.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2 flex-shrink-0" />
+                  <div className="flex items-start gap-4 group">
+                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2.5 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
                     <div>
-                      <h4 className="font-[var(--font-display)] font-semibold mb-1">
+                      <h4 className="font-[var(--font-display)] font-semibold mb-2">
                         Horizontal Scaling
                       </h4>
-                      <p className="font-[var(--font-body)] text-[var(--text-secondary)]">
+                      <p className="font-[var(--font-body)] text-[var(--text-secondary)] leading-relaxed">
                         Docker Compose orchestration with built-in sharding for multi-tenant
                         deployments.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2 flex-shrink-0" />
+                  <div className="flex items-start gap-4 group">
+                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2.5 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
                     <div>
-                      <h4 className="font-[var(--font-display)] font-semibold mb-1">
+                      <h4 className="font-[var(--font-display)] font-semibold mb-2">
                         99.9% Uptime SLA
                       </h4>
-                      <p className="font-[var(--font-body)] text-[var(--text-secondary)]">
+                      <p className="font-[var(--font-body)] text-[var(--text-secondary)] leading-relaxed">
                         Redundant services with automatic failover and health monitoring.
                       </p>
                     </div>
@@ -203,29 +212,52 @@ export default function Home() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl p-8 text-center"
+                  className="group relative rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    backdropFilter: 'blur(8px)',
+                  }}
                 >
+                  {/* Subtle glow on hover */}
                   <div
-                    className="font-[var(--font-display)] font-bold text-3xl mb-2"
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{
-                      color:
+                      background: `radial-gradient(circle, ${
                         stat.color === 'amber'
-                          ? 'var(--engram-amber)'
+                          ? 'rgba(242,169,59,0.1)'
                           : stat.color === 'violet'
-                            ? 'var(--engram-violet)'
+                            ? 'rgba(124,92,191,0.1)'
                             : stat.color === 'teal'
-                              ? 'var(--engram-teal)'
-                              : 'var(--engram-rose)',
+                              ? 'rgba(46,196,196,0.08)'
+                              : 'rgba(224,92,127,0.08)'
+                      } 0%, transparent 70%)`,
                     }}
-                  >
-                    {stat.value}
-                  </div>
-                  <div className="font-[var(--font-mono)] text-sm text-[var(--text-muted)]">
-                    {stat.label}
+                  />
+
+                  <div className="relative">
+                    <div
+                      className="font-[var(--font-display)] font-bold text-3xl md:text-4xl mb-2 transition-transform duration-300 group-hover:scale-105"
+                      style={{
+                        color:
+                          stat.color === 'amber'
+                            ? 'var(--engram-amber)'
+                            : stat.color === 'violet'
+                              ? 'var(--engram-violet)'
+                              : stat.color === 'teal'
+                                ? 'var(--engram-teal)'
+                                : 'var(--engram-rose)',
+                      }}
+                    >
+                      {stat.value}
+                    </div>
+                    <div className="font-[var(--font-mono)] text-xs sm:text-sm text-[var(--text-muted)]">
+                      {stat.label}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -234,48 +266,80 @@ export default function Home() {
         </section>
 
         {/* Integration Section */}
-        <section className="py-32 px-6 bg-[var(--layer-0)]">
+        <section className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300">
+          {/* Gradient divider overlay */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-teal)]/30 to-transparent" />
+
           <div className="max-w-6xl mx-auto">
-            <div className="mb-16">
+            <div className="mb-16 md:mb-20">
               <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
                 <div className="w-10 h-px bg-[var(--engram-amber)]" />
                 Seamless Integration
               </div>
-              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,4vw,3rem)] leading-[1.1] mb-4">
+              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
                 Connect Everywhere
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {integrations.map((integration) => (
-                <div
-                  key={integration.name}
-                  className="bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl p-8 group hover:border-[var(--border-violet)] transition-all duration-300"
-                >
-                  <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                    {integration.icon}
+              {integrations.map((integration, idx) => {
+                const colorMap = ['amber', 'violet', 'teal', 'rose', 'amber', 'violet'];
+                const color = colorMap[idx % colorMap.length];
+                const colorVars = {
+                  amber: 'var(--engram-amber)',
+                  violet: 'var(--engram-violet)',
+                  teal: 'var(--engram-teal)',
+                  rose: 'var(--engram-rose)',
+                };
+
+                return (
+                  <div
+                    key={integration.name}
+                    className="group relative rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-2 overflow-hidden"
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: `1px solid rgba(255,255,255,0.06)`,
+                    }}
+                  >
+                    {/* Colored border glow on hover */}
+                    <div
+                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                      style={{
+                        border: `2px solid ${colorVars[color as keyof typeof colorVars]}`,
+                        boxShadow: `0 0 24px ${colorVars[color as keyof typeof colorVars]}20`,
+                      }}
+                    />
+
+                    <div className="relative">
+                      <div className="text-4xl mb-4 group-hover:scale-125 transition-transform duration-300 inline-block">
+                        {integration.icon}
+                      </div>
+                      <h3 className="font-[var(--font-display)] font-bold text-xl mb-2">
+                        {integration.name}
+                      </h3>
+                      <p className="font-[var(--font-mono)] text-sm text-[var(--text-muted)]">
+                        {integration.description}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="font-[var(--font-display)] font-bold text-xl mb-2">
-                    {integration.name}
-                  </h3>
-                  <p className="font-[var(--font-mono)] text-sm text-[var(--text-muted)]">
-                    {integration.description}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
 
         {/* Use Cases Section */}
-        <section className="py-32 px-6 bg-[var(--layer-1)]">
+        <section className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-1)] transition-all duration-300">
+          {/* Gradient divider overlay */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-rose)]/30 to-transparent" />
+
           <div className="max-w-6xl mx-auto">
-            <div className="mb-16">
+            <div className="mb-16 md:mb-20">
               <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
                 <div className="w-10 h-px bg-[var(--engram-amber)]" />
                 Real-World Applications
               </div>
-              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,4vw,3rem)] leading-[1.1] mb-4">
+              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
                 Built for Real-World Intelligence
               </h2>
             </div>
@@ -287,7 +351,7 @@ export default function Home() {
                   title={useCase.title}
                   description={useCase.description}
                   color={useCase.color}
-                  className="h-full"
+                  className="h-full group"
                 />
               ))}
             </div>
@@ -295,21 +359,33 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-32 px-6 bg-[var(--layer-0)]">
+        <section className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300">
+          {/* Gradient divider overlay */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-amber)]/30 to-transparent" />
+
           <div className="max-w-4xl mx-auto text-center">
             <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-6">
               Ready to Get Started?
             </div>
-            <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-6">
+            <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,6vw,3.5rem)] leading-[1.1] mb-6 sm:mb-8">
               Deploy the Full Platform in Minutes
             </h2>
-            <p className="font-[var(--font-body)] italic text-xl text-[var(--text-secondary)] mb-8 max-w-2xl mx-auto">
+            <p className="font-[var(--font-body)] italic text-lg sm:text-xl text-[var(--text-secondary)] mb-10 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
               One Docker Compose file orchestrates all four integrated services with proper networking,
               environment variables, and persistence.
             </p>
 
-            <div className="code-block mb-12 text-center">
-              <span>docker compose up -d</span>
+            <div
+              className="inline-block rounded-xl p-6 sm:p-8 mb-12 sm:mb-14 transition-all duration-300 group hover:shadow-lg"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(242,169,59,0.3)',
+                boxShadow: '0 0 0 1px rgba(242,169,59,0.1) inset',
+              }}
+            >
+              <code className="font-[var(--font-mono)] text-sm sm:text-base text-[var(--engram-amber)] tracking-widest block whitespace-nowrap">
+                docker compose up -d
+              </code>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -322,13 +398,32 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
+
+            {/* Scroll indicator hint */}
+            <div className="mt-16 flex justify-center opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="animate-bounce">
+                <svg
+                  className="w-5 h-5 text-[var(--engram-amber)]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="py-12 px-6 bg-[var(--deep)] border-t border-[var(--border)]">
+        <footer className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-[var(--deep)] border-t border-[var(--border)] transition-all duration-300">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-6 h-6 bg-[var(--engram-amber)] rounded-full flex items-center justify-center">
@@ -344,98 +439,107 @@ export default function Home() {
               </div>
 
               <div>
-                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-3">
+                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-4">
                   Platform
                 </h4>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   <li>
                     <a
                       href="#platform"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       AiMemory
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
                     <a
                       href="#platform"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       AiCrawler
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
                     <a
                       href="#platform"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       MCP Server
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
                     <a
                       href="#platform"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       Dashboard
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-3">
+                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-4">
                   Resources
                 </h4>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   <li>
                     <a
                       href="/knowledge-base"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       Knowledge Base
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
                     <a
                       href="/getting-started"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       Getting Started
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
                     <a
                       href="#"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       API Docs
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
                     <a
                       href="#architecture"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       Architecture
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-3">
+                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-4">
                   Community
                 </h4>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   <li>
                     <a
                       href="https://github.com/engram"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       GitHub
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
@@ -443,17 +547,19 @@ export default function Home() {
                       href="https://discord.gg/engram"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       Discord
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
                     <a
                       href="#"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       Changelog
+                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                 </ul>

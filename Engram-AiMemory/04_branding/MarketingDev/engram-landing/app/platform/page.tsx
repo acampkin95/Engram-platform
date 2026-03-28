@@ -33,7 +33,7 @@ export default function PlatformPage() {
 
         <div className="space-y-6 mb-16">
           <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase flex items-center gap-3">
-            <div className="w-10 h-px bg-[var(--engram-amber)]" />
+            <div className="w-10 h-px bg-gradient-to-r from-[var(--engram-amber)] to-transparent" />
             The Engram Ecosystem
           </div>
 
@@ -68,39 +68,45 @@ export default function PlatformPage() {
             return (
               <Link key={product.slug} href={`/platform/${product.slug}`}>
                 <div
-                  className="group relative h-full rounded-lg border border-[var(--border)] bg-[var(--surface-1)] hover:bg-[var(--surface-2)] transition-all duration-300 p-8 overflow-hidden cursor-pointer"
+                  className="group relative h-full rounded-xl border border-[var(--border)] bg-[var(--surface-1)]/40 backdrop-blur-xl hover:bg-[var(--surface-2)]/60 transition-all duration-500 p-8 overflow-hidden cursor-pointer hover:shadow-lg"
                   style={{
-                    borderTop: `2px solid ${colorVar}`,
+                    borderTop: `4px solid ${colorVar}`,
                   }}
                 >
                   {/* Hover glow effect */}
                   <div
-                    className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"
+                    className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl"
                     style={{
-                      background: `radial-gradient(600px at 50% 50%, ${colorVar}10, transparent)`,
+                      background: `radial-gradient(600px at 50% 50%, ${colorVar}15, transparent)`,
                     }}
                   />
 
                   {/* Content */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 relative z-10">
                     {/* Icon and Header */}
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h2 className="font-[var(--font-display)] font-bold text-xl text-[var(--text-primary)]">
+                        <h2 className="font-[var(--font-display)] font-bold text-2xl text-[var(--text-primary)] group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r transition-all duration-300"
+                          style={{
+                            backgroundImage: `linear-gradient(135deg, ${colorVar}, var(--engram-amber))`,
+                          }}>
                           {product.name}
                         </h2>
                         <p
-                          className="text-sm font-[var(--font-mono)] mt-1"
+                          className="text-sm font-[var(--font-mono)] mt-2 tracking-wide"
                           style={{ color: colorVar }}
                         >
                           {product.tagline}
                         </p>
                       </div>
                       {Icon && (
-                        <div style={{ color: colorVar }}>
+                        <div
+                          style={{ color: colorVar }}
+                          className="group-hover:scale-110 transition-transform duration-300"
+                        >
                           <Icon
-                            size={32}
-                            className="group-hover:text-[var(--engram-amber)] transition-colors flex-shrink-0"
+                            size={40}
+                            className="group-hover:drop-shadow-lg flex-shrink-0"
                           />
                         </div>
                       )}
@@ -109,12 +115,14 @@ export default function PlatformPage() {
                     {/* Features */}
                     <div className="space-y-2 pt-4">
                       {product.features.slice(0, 3).map((feature, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
+                        <div key={idx} className="flex items-start gap-3 group/item">
                           <div
-                            className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
+                            className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0 group-hover/item:scale-125 transition-transform"
                             style={{ background: colorVar }}
                           />
-                          <p className="text-sm text-[var(--text-secondary)]">{feature.title}</p>
+                          <p className="text-sm text-[var(--text-secondary)] group-hover/item:text-[var(--text-primary)] transition-colors">
+                            {feature.title}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -125,14 +133,14 @@ export default function PlatformPage() {
                         {product.techStack.slice(0, 3).map((tech) => (
                           <span
                             key={tech}
-                            className="px-2 py-1 rounded text-xs font-[var(--font-mono)] bg-[var(--layer-1)] text-[var(--text-muted)]"
+                            className="px-2.5 py-1 rounded-md text-xs font-[var(--font-mono)] bg-[var(--layer-1)]/60 text-[var(--text-muted)] border border-[var(--border)]/30 group-hover:border-[var(--border)] transition-colors"
                           >
                             {tech}
                           </span>
                         ))}
                         {product.techStack.length > 3 && (
-                          <span className="px-2 py-1 text-xs font-[var(--font-mono)] text-[var(--text-muted)]">
-                            +{product.techStack.length - 3} more
+                          <span className="px-2.5 py-1 text-xs font-[var(--font-mono)] text-[var(--text-muted)]">
+                            +{product.techStack.length - 3}
                           </span>
                         )}
                       </div>
@@ -140,14 +148,15 @@ export default function PlatformPage() {
 
                     {/* Port and Link */}
                     <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
-                      <span className="text-xs font-[var(--font-mono)] text-[var(--text-muted)]">
-                        Port <span style={{ color: colorVar }}>{product.port}</span>
+                      <span className="text-xs font-[var(--font-mono)] text-[var(--text-muted)] tracking-wider">
+                        PORT <span style={{ color: colorVar }} className="font-semibold">{product.port}</span>
                       </span>
                       <span
-                        className="text-sm font-[var(--font-display)] font-semibold group-hover:translate-x-1 transition-transform"
+                        className="text-sm font-[var(--font-display)] font-semibold group-hover:translate-x-2 transition-transform duration-300 flex items-center gap-1"
                         style={{ color: colorVar }}
                       >
-                        Learn More →
+                        Explore
+                        <Icons.ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                       </span>
                     </div>
                   </div>
@@ -160,9 +169,14 @@ export default function PlatformPage() {
 
       {/* Data Flow Section */}
       <section className="py-20">
-        <h2 className="font-[var(--font-display)] font-bold text-3xl text-center mb-16">
-          How Engram Works
-        </h2>
+        <div className="space-y-4 mb-16">
+          <h2 className="font-[var(--font-display)] font-bold text-4xl text-center">
+            How Engram Works
+          </h2>
+          <p className="text-center text-[var(--text-secondary)] text-sm max-w-2xl mx-auto">
+            A coordinated pipeline where each service plays a critical role
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-2">
           {[
@@ -187,22 +201,24 @@ export default function PlatformPage() {
               color: 'rose',
             },
           ].map((step, idx) => (
-            <div key={idx} className="relative">
+            <div key={idx} className="relative group">
               {/* Step Box */}
               <div
-                className="rounded-lg border border-[var(--border)] bg-[var(--layer-1)] p-6 h-full flex flex-col justify-between"
+                className="rounded-lg border border-[var(--border)] bg-[var(--layer-1)]/40 backdrop-blur-md p-6 h-full flex flex-col justify-between hover:bg-[var(--layer-1)]/60 transition-all duration-300 hover:border-[var(--border)] hover:shadow-md"
                 style={{
-                  borderLeft: `2px solid var(--engram-${step.color})`,
+                  borderLeft: `3px solid var(--engram-${step.color})`,
                 }}
               >
                 <div>
                   <div
-                    className="font-[var(--font-mono)] text-sm font-bold mb-2"
+                    className="font-[var(--font-mono)] text-sm font-bold mb-3 tracking-wide"
                     style={{ color: `var(--engram-${step.color})` }}
                   >
                     {step.product}
                   </div>
-                  <p className="text-sm text-[var(--text-secondary)]">{step.description}</p>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
               </div>
 
@@ -210,10 +226,15 @@ export default function PlatformPage() {
               {idx < 3 && (
                 <div className="hidden md:flex absolute -right-5 top-1/2 transform -translate-y-1/2 z-10">
                   <div
-                    className="w-5 h-px"
-                    style={{ background: 'var(--engram-teal)', opacity: 0.3 }}
+                    className="w-5 h-px group-hover:w-8 transition-all duration-300"
+                    style={{
+                      background: `linear-gradient(90deg, var(--engram-teal)80, transparent)`,
+                    }}
                   />
-                  <Icons.ChevronRight size={20} className="text-[var(--text-muted)]" />
+                  <Icons.ChevronRight
+                    size={20}
+                    className="text-[var(--engram-teal)]/60 group-hover:text-[var(--engram-teal)] transition-colors"
+                  />
                 </div>
               )}
             </div>
@@ -227,21 +248,31 @@ export default function PlatformPage() {
       </section>
 
       {/* Integration Callout */}
-      <section className="relative rounded-lg border border-[var(--engram-amber)] bg-gradient-to-br from-[var(--engram-amber-glow)] to-transparent p-12 overflow-hidden">
-        <div className="absolute inset-0 -z-10 opacity-30 blur-2xl" />
+      <section className="relative rounded-xl border border-[var(--engram-amber)]/30 bg-gradient-to-br from-[var(--engram-amber-glow)]/5 via-transparent to-transparent p-12 overflow-hidden backdrop-blur-sm hover:border-[var(--engram-amber)]/50 transition-all duration-300">
+        <div className="absolute inset-0 -z-10">
+          <div
+            className="absolute inset-0 opacity-20 blur-3xl"
+            style={{
+              background: `radial-gradient(ellipse at 20% 50%, var(--engram-amber)10, transparent)`,
+            }}
+          />
+        </div>
 
         <div className="relative z-10 max-w-3xl">
           <h2 className="font-[var(--font-display)] font-bold text-3xl text-[var(--text-primary)] mb-4">
             Deploy Everything with One Command
           </h2>
 
-          <p className="text-[var(--text-secondary)] mb-8">
+          <p className="text-[var(--text-secondary)] mb-8 leading-relaxed">
             Use Docker Compose to spin up the entire Engram platform locally or on your
             infrastructure. All services coordinate automatically.
           </p>
 
           <div
-            className="rounded-lg p-6 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-2 border-[var(--engram-amber)] mb-8 overflow-x-auto"
+            className="rounded-lg p-6 font-[var(--font-mono)] text-sm bg-[var(--layer-2)] border-l-4 border-[var(--engram-amber)] mb-8 overflow-x-auto shadow-md"
+            style={{
+              background: 'linear-gradient(135deg, var(--layer-2), var(--layer-1))',
+            }}
           >
             <span className="text-[var(--engram-amber)]">$</span>{' '}
             <span className="text-[var(--text-primary)]">docker compose up -d</span>
