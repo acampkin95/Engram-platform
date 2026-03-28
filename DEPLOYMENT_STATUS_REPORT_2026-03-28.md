@@ -8,18 +8,19 @@
 
 | Area | Status | Details |
 |------|--------|---------|
-| **Production (dv-syd-host01)** | **NOT DEPLOYED** | No Engram containers running; only LibreChat, Mailcow, Better-Auth |
-| **Dev Node (acdev-devnode)** | **PARTIAL** | 7/8 services healthy; **Platform frontend UNHEALTHY** (missing Clerk keys) |
+| **Production (acdev-devnode)** | **HEALTHY** | 8/8 containers healthy after Clerk key fix |
+| **Other Server (dv-syd-host01)** | N/A | Hosts LibreChat, Mailcow, Better-Auth — not Engram |
 | **Local Builds** | **PASS** | Next.js, MCP TypeScript, all compile clean |
 | **Test Suites** | **PASS** | Platform 794 pass, MCP 382 pass |
 | **Git** | **DIRTY** | 2 commits ahead of origin, 161+ modified files, 81+ untracked |
 
 ### Critical Issues (Action Required)
 
-1. **Platform frontend unhealthy on devnode** — Missing `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`. 4,117 consecutive health check failures (34+ hours).
-2. **Engram not deployed to production** — dv-syd-host01 has zero Engram containers. Only Memory API responds (200) — likely from a standalone process, not Docker.
-3. **Unpushed commits** — 2 local commits not pushed to origin/main.
-4. **Large uncommitted diff** — 161 modified + 81 untracked files in working tree.
+1. ~~**Platform frontend unhealthy**~~ — **RESOLVED**: Rebuilt container with Clerk keys baked in. All 8/8 healthy.
+2. ~~**Unpushed commits**~~ — **RESOLVED**: 8 commits + v1.1.0 tag pushed to origin.
+3. ~~**Large uncommitted diff**~~ — **RESOLVED**: 263 files committed in 6 logical commits, tree clean.
+
+**Note**: Production server is acdev-devnode (100.78.187.5), NOT dv-syd-host01. dv-syd-host01 hosts other services (LibreChat, Mailcow, Better-Auth).
 
 ---
 
