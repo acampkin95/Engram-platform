@@ -5,7 +5,7 @@ vi.mock('zustand/middleware', () => ({
   persist: (config: (set: unknown, get: unknown, api: unknown) => unknown) => config,
 }));
 
-import { usePreferencesStore, DENSITY_TOKENS } from '@/src/stores/preferencesStore';
+import { DENSITY_TOKENS, usePreferencesStore } from '@/src/stores/preferencesStore';
 
 beforeEach(() => {
   vi.clearAllMocks();

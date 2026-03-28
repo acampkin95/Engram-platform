@@ -29,10 +29,7 @@ describe('crawlerClient', () => {
       const result = await crawlerClient.getHealth();
       expect(result.data).toEqual({ status: 'healthy' });
       expect(result.error).toBeNull();
-      expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('/health'),
-        expect.any(Object),
-      );
+      expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/health'), expect.any(Object));
     });
   });
 
@@ -140,6 +137,51 @@ describe('crawlerClient', () => {
           body: JSON.stringify({ query: 'test' }),
         }),
       );
+    });
+  });
+
+  describe('sendToMemory', () => {
+    it('posts to /api/crawl/deep with payload', async () => {
+      fetchSpy.mockResolvedValueOnce(jsonResponse({ ok: true }));
+      const result = await crawlerClient.sendToMemory({
+        crawl_id: 'crawl_123',
+        title: 'Test Crawl',
+      });
+      expect(result.data).toEqual({ ok: true });
+      expect(result.error).toBeNull();
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/api/crawl/deep'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ crawl_id: 'crawl_123', title: 'Test Crawl' }),
+        }),
+      );
+    });
+
+    it('successfully sends crawl data to memory API', async () => {
+      const payload = {
+        crawl_id: 'c1',
+        content: 'Test content',
+        tags: ['test', 'crawl'],
+        tier: 1,
+      };
+      fetchSpy.mockResolvedValueOnce(jsonResponse({ ok: true }));
+      const result = await crawlerClient.sendToMemory(payload);
+      expect(result.error).toBeNull();
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/api/crawl/deep'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify(payload),
+        }),
+      );
+    });
+
+    it('handles sendToMemory error response', async () => {
+      fetchSpy.mockResolvedValueOnce(jsonResponse({ error: 'Memory API unavailable' }, 503));
+      const result = await crawlerClient.sendToMemory({ crawl_id: 'c1' });
+      expect(result.data).toBeNull();
+      expect(result.error).toBe('Memory API unavailable');
     });
   });
 

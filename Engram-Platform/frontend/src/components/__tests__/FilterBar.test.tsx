@@ -1,8 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FilterBar } from '../FilterBar';
-import type { FilterValues } from '../FilterBar';
 
 describe('FilterBar', () => {
   const mockOnFiltersChange = vi.fn();
@@ -13,23 +12,13 @@ describe('FilterBar', () => {
 
   describe('Search Filter', () => {
     it('renders search input when showSearch is true', () => {
-      render(
-        <FilterBar
-          showSearch={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.getByPlaceholderText('Search…')).toBeInTheDocument();
     });
 
     it('does not render search input when showSearch is false', () => {
-      render(
-        <FilterBar
-          showSearch={false}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showSearch={false} onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.queryByPlaceholderText('Search…')).not.toBeInTheDocument();
     });
@@ -40,7 +29,7 @@ describe('FilterBar', () => {
           showSearch={true}
           placeholder="Find memories..."
           onFiltersChange={mockOnFiltersChange}
-        />
+        />,
       );
 
       expect(screen.getByPlaceholderText('Find memories...')).toBeInTheDocument();
@@ -48,12 +37,7 @@ describe('FilterBar', () => {
 
     it('calls onFiltersChange with search value on input change', async () => {
       const user = userEvent.setup();
-      render(
-        <FilterBar
-          showSearch={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByPlaceholderText('Search…') as HTMLInputElement;
       await user.type(input, 'test query');
@@ -68,7 +52,7 @@ describe('FilterBar', () => {
 
     it('shows search icon in search input', () => {
       const { container } = render(
-        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />
+        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />,
       );
 
       // Search icon should be in the search container
@@ -78,34 +62,19 @@ describe('FilterBar', () => {
 
   describe('Date Range Filter', () => {
     it('renders date range picker when showDateRange is true', () => {
-      render(
-        <FilterBar
-          showDateRange={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showDateRange={true} onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.getByLabelText('Select date range')).toBeInTheDocument();
     });
 
     it('does not render date range picker when showDateRange is false', () => {
-      render(
-        <FilterBar
-          showDateRange={false}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showDateRange={false} onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.queryByLabelText('Select date range')).not.toBeInTheDocument();
     });
 
     it('displays default "Date range" text', () => {
-      render(
-        <FilterBar
-          showDateRange={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showDateRange={true} onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.getByText('Date range')).toBeInTheDocument();
     });
@@ -113,24 +82,14 @@ describe('FilterBar', () => {
 
   describe('Clear Button', () => {
     it('does not show clear button when no filters are active', () => {
-      render(
-        <FilterBar
-          showSearch={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.queryByLabelText('Clear all filters')).not.toBeInTheDocument();
     });
 
     it('shows clear button when search has value', async () => {
       const user = userEvent.setup();
-      render(
-        <FilterBar
-          showSearch={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByPlaceholderText('Search…');
       await user.type(input, 'test');
@@ -142,12 +101,7 @@ describe('FilterBar', () => {
 
     it('clears all filters when clear button is clicked', async () => {
       const user = userEvent.setup();
-      render(
-        <FilterBar
-          showSearch={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByPlaceholderText('Search…');
       await user.type(input, 'test');
@@ -171,9 +125,7 @@ describe('FilterBar', () => {
 
   describe('Filter Icon and Label', () => {
     it('displays filter icon and label', () => {
-      render(
-        <FilterBar onFiltersChange={mockOnFiltersChange} />
-      );
+      render(<FilterBar onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.getByText('Filters')).toBeInTheDocument();
     });
@@ -181,9 +133,7 @@ describe('FilterBar', () => {
 
   describe('Accessibility', () => {
     it('has correct aria-label on form', () => {
-      render(
-        <FilterBar onFiltersChange={mockOnFiltersChange} />
-      );
+      render(<FilterBar onFiltersChange={mockOnFiltersChange} />);
 
       const form = screen.getByLabelText('Filter and search');
       expect(form).toBeInTheDocument();
@@ -191,27 +141,21 @@ describe('FilterBar', () => {
     });
 
     it('provides aria-label for search input', () => {
-      render(
-        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByLabelText('Search');
       expect(input).toHaveAttribute('aria-describedby', 'search-help');
     });
 
     it('provides aria-label for date range picker', () => {
-      render(
-        <FilterBar showDateRange={true} onFiltersChange={mockOnFiltersChange} />
-      );
+      render(<FilterBar showDateRange={true} onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.getByLabelText('Select date range')).toBeInTheDocument();
     });
 
     it('provides aria-label for clear button', async () => {
       const user = userEvent.setup();
-      render(
-        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByPlaceholderText('Search…');
       await user.type(input, 'test');
@@ -225,10 +169,7 @@ describe('FilterBar', () => {
   describe('Custom className', () => {
     it('applies custom className to form', () => {
       const { container } = render(
-        <FilterBar
-          className="custom-filter-bar"
-          onFiltersChange={mockOnFiltersChange}
-        />
+        <FilterBar className="custom-filter-bar" onFiltersChange={mockOnFiltersChange} />,
       );
 
       const form = container.querySelector('form');
@@ -238,18 +179,14 @@ describe('FilterBar', () => {
 
   describe('Form submission', () => {
     it('renders as a form element', () => {
-      const { container } = render(
-        <FilterBar onFiltersChange={mockOnFiltersChange} />
-      );
+      const { container } = render(<FilterBar onFiltersChange={mockOnFiltersChange} />);
 
       expect(container.querySelector('form')).toBeInTheDocument();
     });
 
     it('accepts onFiltersChange callback', async () => {
       const user = userEvent.setup();
-      render(
-        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByPlaceholderText('Search…');
       await user.type(input, 'test');
@@ -269,7 +206,7 @@ describe('FilterBar', () => {
 
     it('renders form with proper visual layout', () => {
       const { container } = render(
-        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />
+        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />,
       );
 
       // Form should have flex layout
@@ -280,17 +217,13 @@ describe('FilterBar', () => {
 
   describe('Search Input Properties', () => {
     it('search input has aria-label', () => {
-      render(
-        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       expect(screen.getByLabelText('Search')).toBeInTheDocument();
     });
 
     it('search input has aria-describedby pointing to help text', () => {
-      render(
-        <FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByLabelText('Search');
       expect(input).toHaveAttribute('aria-describedby', 'search-help');
@@ -304,11 +237,7 @@ describe('FilterBar', () => {
   describe('Multiple Filter Inputs', () => {
     it('can render search with date range together', () => {
       render(
-        <FilterBar
-          showSearch={true}
-          showDateRange={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
+        <FilterBar showSearch={true} showDateRange={true} onFiltersChange={mockOnFiltersChange} />,
       );
 
       expect(screen.getByPlaceholderText('Search…')).toBeInTheDocument();
@@ -317,18 +246,14 @@ describe('FilterBar', () => {
 
     it('emits changes with all active filter values', async () => {
       const user = userEvent.setup();
-      render(
-        <FilterBar
-          showSearch={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByPlaceholderText('Search…');
       await user.type(input, 'memory');
 
       await waitFor(() => {
-        const lastCall = mockOnFiltersChange.mock.calls[mockOnFiltersChange.mock.calls.length - 1][0];
+        const lastCall =
+          mockOnFiltersChange.mock.calls[mockOnFiltersChange.mock.calls.length - 1][0];
         expect(lastCall.search).toBe('memory');
       });
     });
@@ -337,12 +262,7 @@ describe('FilterBar', () => {
   describe('Zod Schema Integration', () => {
     it('validates filter schema with optional fields', async () => {
       const user = userEvent.setup();
-      render(
-        <FilterBar
-          showSearch={true}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
+      render(<FilterBar showSearch={true} onFiltersChange={mockOnFiltersChange} />);
 
       const input = screen.getByPlaceholderText('Search…');
       await user.type(input, 'test');
@@ -350,7 +270,8 @@ describe('FilterBar', () => {
       await waitFor(() => {
         // Should accept optional filter values
         expect(mockOnFiltersChange).toHaveBeenCalled();
-        const lastCall = mockOnFiltersChange.mock.calls[mockOnFiltersChange.mock.calls.length - 1][0];
+        const lastCall =
+          mockOnFiltersChange.mock.calls[mockOnFiltersChange.mock.calls.length - 1][0];
         expect(lastCall).toHaveProperty('search');
       });
     });

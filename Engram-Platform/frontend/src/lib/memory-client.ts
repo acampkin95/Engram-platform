@@ -102,12 +102,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<Result<T>> 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
-      ...(init?.headers as Record<string, string> ?? {}),
+      ...((init?.headers as Record<string, string>) ?? {}),
     };
     const response = await fetch(`${MEMORY_BASE}${path}`, { ...init, headers });
     const data = await response.json().catch(() => null);
     if (!response.ok) {
-      return { data: null, error: (data as { error?: string } | null)?.error ?? `Request failed (${response.status})` };
+      return {
+        data: null,
+        error: (data as { error?: string } | null)?.error ?? `Request failed (${response.status})`,
+      };
     }
     return { data: data as T, error: null };
   } catch (error) {
@@ -119,7 +122,7 @@ function toQueryString(params?: Record<string, unknown>): string {
   if (!params) return '';
   const entries = Object.entries(params).filter(([, v]) => v != null);
   if (entries.length === 0) return '';
-  return '?' + new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
+  return `?${new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString()}`;
 }
 
 export const memoryClient = {

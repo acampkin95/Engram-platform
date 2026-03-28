@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FocusTrap } from '../FocusTrap';
 
 describe('FocusTrap', () => {
@@ -21,8 +21,8 @@ describe('FocusTrap', () => {
     it('renders with multiple children', () => {
       render(
         <FocusTrap>
-          <button>Button 1</button>
-          <button>Button 2</button>
+          <button type="button">Button 1</button>
+          <button type="button">Button 2</button>
         </FocusTrap>,
       );
       expect(screen.getByText('Button 1')).toBeInTheDocument();
@@ -35,8 +35,8 @@ describe('FocusTrap', () => {
       const user = userEvent.setup();
       render(
         <FocusTrap>
-          <button>First</button>
-          <button>Last</button>
+          <button type="button">First</button>
+          <button type="button">Last</button>
         </FocusTrap>,
       );
 
@@ -54,8 +54,8 @@ describe('FocusTrap', () => {
       const user = userEvent.setup();
       render(
         <FocusTrap>
-          <button>First</button>
-          <button>Last</button>
+          <button type="button">First</button>
+          <button type="button">Last</button>
         </FocusTrap>,
       );
 
@@ -73,9 +73,9 @@ describe('FocusTrap', () => {
       const user = userEvent.setup();
       render(
         <FocusTrap>
-          <button>First</button>
-          <button>Middle</button>
-          <button>Last</button>
+          <button type="button">First</button>
+          <button type="button">Middle</button>
+          <button type="button">Last</button>
         </FocusTrap>,
       );
 
@@ -94,8 +94,8 @@ describe('FocusTrap', () => {
       const user = userEvent.setup();
       render(
         <FocusTrap>
-          <button>Button 1</button>
-          <button>Button 2</button>
+          <button type="button">Button 1</button>
+          <button type="button">Button 2</button>
         </FocusTrap>,
       );
 
@@ -176,8 +176,8 @@ describe('FocusTrap', () => {
       const user = userEvent.setup();
       render(
         <FocusTrap>
-          <div tabIndex={0}>Div 1</div>
-          <div tabIndex={0}>Div 2</div>
+          <button type="button">Div 1</button>
+          <button type="button">Div 2</button>
         </FocusTrap>,
       );
 
@@ -192,9 +192,11 @@ describe('FocusTrap', () => {
       const user = userEvent.setup();
       render(
         <FocusTrap>
-          <button>Button 1</button>
-          <button tabIndex={-1}>Disabled Focus</button>
-          <button>Button 2</button>
+          <button type="button">Button 1</button>
+          <button type="button" tabIndex={-1}>
+            Disabled Focus
+          </button>
+          <button type="button">Button 2</button>
         </FocusTrap>,
       );
 
@@ -212,7 +214,7 @@ describe('FocusTrap', () => {
 
       render(
         <FocusTrap onEscape={onEscape}>
-          <button>Button</button>
+          <button type="button">Button</button>
         </FocusTrap>,
       );
 
@@ -226,7 +228,7 @@ describe('FocusTrap', () => {
 
       render(
         <FocusTrap>
-          <button>Button</button>
+          <button type="button">Button</button>
         </FocusTrap>,
       );
 
@@ -240,10 +242,10 @@ describe('FocusTrap', () => {
       const user = userEvent.setup();
       const onEscape = vi.fn();
 
-      const { rerender } = render(
+      render(
         <FocusTrap active={false} onEscape={onEscape}>
-          <button>First</button>
-          <button>Last</button>
+          <button type="button">First</button>
+          <button type="button">Last</button>
         </FocusTrap>,
       );
 
@@ -263,15 +265,15 @@ describe('FocusTrap', () => {
 
       const { rerender } = render(
         <FocusTrap active={false}>
-          <button>First</button>
-          <button>Last</button>
+          <button type="button">First</button>
+          <button type="button">Last</button>
         </FocusTrap>,
       );
 
       rerender(
         <FocusTrap active={true}>
-          <button>First</button>
-          <button>Last</button>
+          <button type="button">First</button>
+          <button type="button">Last</button>
         </FocusTrap>,
       );
 
@@ -287,8 +289,8 @@ describe('FocusTrap', () => {
 
       render(
         <FocusTrap>
-          <button>First</button>
-          <button>Last</button>
+          <button type="button">First</button>
+          <button type="button">Last</button>
         </FocusTrap>,
       );
 
@@ -306,7 +308,7 @@ describe('FocusTrap', () => {
 
       render(
         <FocusTrap>
-          <button>Only Button</button>
+          <button type="button">Only Button</button>
         </FocusTrap>,
       );
 
@@ -336,8 +338,8 @@ describe('FocusTrap', () => {
 
       render(
         <FocusTrap>
-          <button>Button 1</button>
-          <button>Button 2</button>
+          <button type="button">Button 1</button>
+          <button type="button">Button 2</button>
         </FocusTrap>,
       );
 
@@ -356,9 +358,9 @@ describe('FocusTrap', () => {
 
       render(
         <FocusTrap>
-          <button>Button 1</button>
+          <button type="button">Button 1</button>
           <div>Non-focusable</div>
-          <button>Button 2</button>
+          <button type="button">Button 2</button>
         </FocusTrap>,
       );
 
@@ -375,7 +377,7 @@ describe('FocusTrap', () => {
 
       const { unmount } = render(
         <FocusTrap>
-          <button>Button</button>
+          <button type="button">Button</button>
         </FocusTrap>,
       );
 
@@ -390,7 +392,7 @@ describe('FocusTrap', () => {
 
       render(
         <FocusTrap active={false}>
-          <button>Button</button>
+          <button type="button">Button</button>
         </FocusTrap>,
       );
 

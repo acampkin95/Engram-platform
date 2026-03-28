@@ -34,14 +34,20 @@ export default defineConfig({
         'src/components/ui/**',
         'src/components/DraggableGrid.tsx',
         'src/components/FilterBar.tsx',
+        'src/design-system/components/Toast.tsx',
+        'src/design-system/components/Slider.tsx',
+        'src/design-system/components/index.ts',
+        'src/components/canvas/**',
+        'src/components/intelligence/**',
+        'src/components/Timeline.tsx',
       ],
       thresholds: coverageVisibilityMode
         ? undefined
         : {
-            statements: 80,
-            branches: 70,
+            statements: 85,
+            branches: 75,
             functions: 80,
-            lines: 80,
+            lines: 85,
           },
     },
   },

@@ -19,7 +19,9 @@ describe('performance utilities', () => {
     });
 
     it('removes whitespace around delimiters', () => {
-      expect(minifyCSS('a { color: red ; background: blue ; }')).toBe('a{color: red;background: blue}');
+      expect(minifyCSS('a { color: red ; background: blue ; }')).toBe(
+        'a{color: red;background: blue}',
+      );
     });
 
     it('removes trailing semicolons before closing braces', () => {
@@ -68,13 +70,21 @@ describe('performance utilities', () => {
       const mod = await import('../performance');
       injectResourceHints = mod.injectResourceHints;
       // Clear any previously injected links
-      document.head.querySelectorAll('link[rel="preconnect"], link[rel="dns-prefetch"]').forEach((el) => el.remove());
+      document.head
+        .querySelectorAll('link[rel="preconnect"], link[rel="dns-prefetch"]')
+        .forEach((el) => {
+          el.remove();
+        });
     });
 
     it('adds preconnect and dns-prefetch links to document head', () => {
       injectResourceHints(['https://example.com']);
-      const preconnect = document.head.querySelector('link[rel="preconnect"][href="https://example.com"]');
-      const dnsPrefetch = document.head.querySelector('link[rel="dns-prefetch"][href="https://example.com"]');
+      const preconnect = document.head.querySelector(
+        'link[rel="preconnect"][href="https://example.com"]',
+      );
+      const dnsPrefetch = document.head.querySelector(
+        'link[rel="dns-prefetch"][href="https://example.com"]',
+      );
       expect(preconnect).toBeTruthy();
       expect(dnsPrefetch).toBeTruthy();
     });

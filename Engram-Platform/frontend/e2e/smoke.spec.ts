@@ -415,3 +415,85 @@ test.describe('Memory Graph', () => {
     });
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OSINT Canvas — intelligence workspace with entity graph, crawl stream, agents
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('OSINT Canvas', () => {
+  test('route loads without 500', async ({ page }) => {
+    const response = await page.goto('/dashboard/intelligence/canvas');
+    expect(response?.status()).not.toBe(500);
+  });
+
+  test('renders OSINT CANVAS header after content loads', async ({ page }) => {
+    await page.goto('/dashboard/intelligence/canvas');
+    await page.waitForLoadState('domcontentloaded');
+    const header = page.getByText('OSINT CANVAS', { exact: true });
+    await expect(header).toBeVisible({ timeout: SETTLE_TIMEOUT });
+  });
+
+  test('shows stat badges after content loads', async ({ page }) => {
+    await page.goto('/dashboard/intelligence/canvas');
+    await page.waitForLoadState('domcontentloaded');
+    const header = page.getByText('OSINT CANVAS', { exact: true });
+    await expect(header).toBeVisible({ timeout: SETTLE_TIMEOUT });
+    await expect(page.getByText('entities', { exact: false })).toBeVisible();
+    await expect(page.getByText('stream', { exact: false })).toBeVisible();
+  });
+
+  test('investigate toggle button enters and exits investigation mode', async ({ page }) => {
+    await page.goto('/dashboard/intelligence/canvas');
+    await page.waitForLoadState('domcontentloaded');
+    const header = page.getByText('OSINT CANVAS', { exact: true });
+    await expect(header).toBeVisible({ timeout: SETTLE_TIMEOUT });
+
+    const investigateBtn = page.getByRole('button', { name: /INVESTIGATE/i });
+    await investigateBtn.click();
+
+    const investigatingBtn = page.getByRole('button', { name: /INVESTIGATING/i });
+    await expect(investigatingBtn).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: /INVESTIGATE/i })).toBeVisible({ timeout: 5000 });
+  });
+
+  test('reset layout button is present in canvas', async ({ page }) => {
+    await page.goto('/dashboard/intelligence/canvas');
+    await page.waitForLoadState('domcontentloaded');
+    const header = page.getByText('OSINT CANVAS', { exact: true });
+    await expect(header).toBeVisible({ timeout: SETTLE_TIMEOUT });
+    await expect(page.getByRole('button', { name: /Reset Layout/i })).toBeVisible();
+  });
+
+  test('canvas panels render with correct labels', async ({ page }) => {
+    await page.goto('/dashboard/intelligence/canvas');
+    await page.waitForLoadState('domcontentloaded');
+    const header = page.getByText('OSINT CANVAS', { exact: true });
+    await expect(header).toBeVisible({ timeout: SETTLE_TIMEOUT });
+
+    const entityGraph = page.getByText('ENTITY GRAPH');
+    const crawlStream = page.getByText('CRAWL STREAM');
+    await expect(entityGraph.or(crawlStream).first()).toBeVisible();
+  });
+
+  test('stream panel shows live/paused indicator', async ({ page }) => {
+    await page.goto('/dashboard/intelligence/canvas');
+    await page.waitForLoadState('domcontentloaded');
+    const header = page.getByText('OSINT CANVAS', { exact: true });
+    await expect(header).toBeVisible({ timeout: SETTLE_TIMEOUT });
+
+    const liveOrPaused = page.getByText(/LIVE|PAUSED/, { exact: false });
+    await expect(liveOrPaused.first()).toBeVisible();
+  });
+
+  test('intelligence layer toggle buttons are present', async ({ page }) => {
+    await page.goto('/dashboard/intelligence/canvas');
+    await page.waitForLoadState('domcontentloaded');
+    const header = page.getByText('OSINT CANVAS', { exact: true });
+    await expect(header).toBeVisible({ timeout: SETTLE_TIMEOUT });
+
+    const processedLayer = page.getByRole('button', { name: /PROCESSED/i });
+    await expect(processedLayer).toBeVisible();
+  });
+});

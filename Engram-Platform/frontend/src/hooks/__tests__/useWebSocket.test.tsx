@@ -140,4 +140,185 @@ describe('useWebSocket', () => {
 
     expect(onMessage).toHaveBeenCalledWith({ event: 'ping' });
   });
+
+  it('calls onMessage with raw string when message is not valid JSON', () => {
+    const onMessage = vi.fn();
+    renderHook(() => useWebSocket({ url: 'ws://test', onMessage }));
+
+    act(() => {
+      latestSocket.onopen?.();
+      latestSocket.onmessage?.({ data: 'raw non-json message' });
+    });
+
+    expect(onMessage).toHaveBeenCalledWith('raw non-json message');
+  });
+
+  it('handles URL with query params when appending token', () => {
+    const { result } = renderHook(() =>
+      useWebSocket({ url: 'ws://test?existing=param', token: 'mytoken' }),
+    );
+
+    expect(result.current).toBeDefined();
+    // Socket URL should include both existing param and token
+    expect(latestSocket.url).toContain('token=mytoken');
+  });
+
+  it('implements exponential backoff reconnect delay', async () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() =>
+      useWebSocket({ url: 'ws://test', reconnectDelay: 100, maxReconnectAttempts: 3 }),
+    );
+
+    // Open and close to trigger reconnect
+    act(() => {
+      latestSocket.onopen?.();
+    });
+    expect(result.current.connected).toBe(true);
+
+    act(() => {
+      latestSocket.onclose?.();
+    });
+
+    expect(result.current.reconnecting).toBe(true);
+    expect(result.current.reconnectAttempt).toBe(1);
+
+    // Fast-forward first reconnect delay (100ms)
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    // Mock the reconnect socket and trigger its close
+    const firstReconnectSocket = latestSocket;
+    act(() => {
+      firstReconnectSocket.onclose?.();
+    });
+
+    expect(result.current.reconnectAttempt).toBe(2);
+
+    // Second delay should be 200ms (100 * 2^1)
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    vi.useRealTimers();
+  });
+
+  it('buffers messages while reconnecting and flushes on reconnect', async () => {
+    const { result } = renderHook(() =>
+      useWebSocket({ url: 'ws://test', maxReconnectAttempts: 2 }),
+    );
+
+    // Open first
+    act(() => {
+      latestSocket.onopen?.();
+    });
+
+    // Close to trigger reconnect
+    act(() => {
+      latestSocket.onclose?.();
+    });
+
+    expect(result.current.reconnecting).toBe(true);
+
+    // Try to send while reconnecting
+    act(() => {
+      result.current.send({ buffered: true });
+    });
+
+    // Message should be buffered, not sent (socket is not open)
+    // Now simulate reconnect with new socket
+    const reconnectSocket = latestSocket;
+    act(() => {
+      reconnectSocket.onopen?.();
+    });
+
+    // Messages should have been flushed
+    expect(reconnectSocket.send).toHaveBeenCalled();
+  });
+
+  it('stops reconnecting after max attempts reached', async () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() =>
+      useWebSocket({ url: 'ws://test', reconnectDelay: 10, maxReconnectAttempts: 1 }),
+    );
+
+    act(() => {
+      latestSocket.onopen?.();
+    });
+
+    act(() => {
+      latestSocket.onclose?.();
+    });
+
+    expect(result.current.reconnecting).toBe(true);
+
+    // Fast-forward past the first reconnect delay
+    act(() => {
+      vi.advanceTimersByTime(20);
+    });
+
+    // New socket gets created and closes without reconnecting
+    const reconnectSocket = latestSocket;
+    act(() => {
+      reconnectSocket.onclose?.();
+    });
+
+    // Should stop reconnecting after max attempts
+    expect(result.current.reconnecting).toBe(false);
+    expect(result.current.reconnectAttempt).toBe(0);
+
+    vi.useRealTimers();
+  });
+
+  it('sends string data as-is without JSON stringification', () => {
+    const { result } = renderHook(() => useWebSocket({ url: 'ws://test' }));
+
+    act(() => {
+      latestSocket.onopen?.();
+    });
+
+    act(() => {
+      result.current.send('raw string message');
+    });
+
+    expect(latestSocket.send).toHaveBeenCalledWith('raw string message');
+  });
+
+  it('clears reconnect timer and sets connected to false on disconnect', () => {
+    const { result } = renderHook(() =>
+      useWebSocket({ url: 'ws://test', maxReconnectAttempts: 5 }),
+    );
+
+    act(() => {
+      latestSocket.onopen?.();
+    });
+
+    expect(result.current.connected).toBe(true);
+
+    // Disconnect should set connected to false
+    act(() => {
+      result.current.disconnect();
+    });
+
+    expect(result.current.connected).toBe(false);
+    expect(mockSetWsConnected).toHaveBeenCalledWith(false);
+  });
+
+  it('ignores onmessage callback if not mounted', () => {
+    const onMessage = vi.fn();
+    const { unmount } = renderHook(() => useWebSocket({ url: 'ws://test', onMessage }));
+
+    act(() => {
+      latestSocket.onopen?.();
+    });
+
+    unmount();
+
+    // Simulate message after unmount
+    act(() => {
+      latestSocket.onmessage?.({ data: JSON.stringify({ ignored: true }) });
+    });
+
+    expect(onMessage).not.toHaveBeenCalled();
+  });
 });

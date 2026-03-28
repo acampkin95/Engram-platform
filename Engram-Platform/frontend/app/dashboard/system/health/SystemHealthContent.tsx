@@ -8,6 +8,7 @@ import {
   RefreshCw,
   RotateCcw,
   Server,
+  Settings,
   ShieldAlert,
   Trash2,
 } from 'lucide-react';
@@ -165,13 +166,16 @@ export default function SystemHealthContent() {
     const result = await systemClient.sendNotification({
       subject: 'Engram system dashboard test notification',
       text: 'This is a test notification from the unified system health dashboard.',
+      channels: ['email', 'ntfy'],
+      priority: 'default',
+      tags: ['test', 'system-health'],
     });
     setBusyAction(null);
     if (result.error) {
       addToast({ type: 'error', message: result.error });
       return;
     }
-    addToast({ type: 'success', message: 'Test notification sent' });
+    addToast({ type: 'success', message: 'Test notification sent to all channels' });
   };
 
   const summary = snapshot?.summary;
@@ -219,7 +223,7 @@ export default function SystemHealthContent() {
               Realtime Admin Surface
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-[#f0eef8] font-display">System Health</h1>
+          <h1 className="text-2xl font-bold font-display text-[#f0eef8]">System Health</h1>
           <p className="text-sm text-[#a09bb8]">
             Unified operational control surface for the Engram stack.
           </p>
@@ -341,6 +345,12 @@ export default function SystemHealthContent() {
                 >
                   <Bell className="h-4 w-4" /> Send Test Notification
                 </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => window.location.href = '/dashboard/system/settings'}
+                >
+                  <Settings className="h-4 w-4" /> Alert Settings
+                </Button>
               </div>
 
               <div className="grid gap-2">
@@ -349,7 +359,7 @@ export default function SystemHealthContent() {
                   .map((service) => (
                     <div
                       key={service}
-                      className="flex items-center justify-between rounded-lg border border-[#1e1e3a] bg-[#0d0d1a] px-3 py-2"
+                      className="flex items-center justify-between rounded-lg border border-[#222633]/60 bg-[#13151c] px-3 py-2"
                     >
                       <span className="text-sm text-[#f0eef8]">{service}</span>
                       <div className="flex gap-2">
@@ -462,7 +472,7 @@ export default function SystemHealthContent() {
                 aria-label="Log service filter"
                 value={activeService}
                 onChange={(e) => setActiveService(e.target.value)}
-                className="rounded-md border border-[#2a2a50] bg-[#090818] px-3 py-1.5 text-xs text-[#f0eef8]"
+                className="rounded-md border border-[#2a2f3e]/60 bg-[#13151c] px-3 py-1.5 text-xs text-[#f0eef8]"
               >
                 <option value="all">All services</option>
                 {controlTargets
@@ -476,7 +486,7 @@ export default function SystemHealthContent() {
             </div>
           }
         >
-          <div className="rounded-xl border border-[#1e1e3a] bg-[#090818] p-3">
+          <div className="rounded-xl border border-[#222633]/60 bg-[#13151c] p-3">
             <div className="mb-4 space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">

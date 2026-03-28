@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { OnboardingTour } from '../OnboardingTour';
 
 // Mock next-themes and zustand store
@@ -17,13 +17,13 @@ import { usePreferencesStore } from '@/src/stores/preferencesStore';
 const mockUsePreferencesStore = usePreferencesStore as any;
 
 // Setup global mocks for ResizeObserver and MutationObserver
-const createMockResizeObserver = () => ({
+const _createMockResizeObserver = () => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 });
 
-const createMockMutationObserver = () => ({
+const _createMockMutationObserver = () => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
 });
@@ -134,7 +134,13 @@ describe('OnboardingTour', () => {
   it('advances to next step on action button click', async () => {
     const user = userEvent.setup();
     const steps = [
-      { id: 'step1', title: 'Step 1', content: 'Content 1', placement: 'center' as const, action: { label: 'Next', onClick: vi.fn() } },
+      {
+        id: 'step1',
+        title: 'Step 1',
+        content: 'Content 1',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: vi.fn() },
+      },
       { id: 'step2', title: 'Step 2', content: 'Content 2', placement: 'center' as const },
     ];
 
@@ -155,8 +161,20 @@ describe('OnboardingTour', () => {
   it('goes back to previous step when Back button is clicked', async () => {
     const user = userEvent.setup();
     const steps = [
-      { id: 'step1', title: 'Step 1', content: 'Content 1', placement: 'center' as const, action: { label: 'Next', onClick: vi.fn() } },
-      { id: 'step2', title: 'Step 2', content: 'Content 2', placement: 'center' as const, action: { label: 'Next', onClick: vi.fn() } },
+      {
+        id: 'step1',
+        title: 'Step 1',
+        content: 'Content 1',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: vi.fn() },
+      },
+      {
+        id: 'step2',
+        title: 'Step 2',
+        content: 'Content 2',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: vi.fn() },
+      },
     ];
 
     render(<OnboardingTour steps={steps} />);
@@ -166,7 +184,7 @@ describe('OnboardingTour', () => {
     });
 
     // Advance to step 2
-    let nextButton = screen.getByRole('button', { name: 'Next' });
+    const nextButton = screen.getByRole('button', { name: 'Next' });
     await user.click(nextButton);
 
     await waitFor(() => {
@@ -176,8 +194,8 @@ describe('OnboardingTour', () => {
     // Go back - get all buttons and find the Back button (should be visible now)
     const allButtons = screen.getAllByRole('button');
     const backButton = allButtons.find((btn) => btn.textContent === 'Back');
-    expect(backButton).toBeInTheDocument();
-    await user.click(backButton!);
+    expect(backButton).toBeDefined();
+    if (backButton) await user.click(backButton);
 
     await waitFor(() => {
       expect(screen.getByText('Step 1')).toBeInTheDocument();
@@ -187,8 +205,20 @@ describe('OnboardingTour', () => {
   it('shows Back button only after first step', async () => {
     const user = userEvent.setup();
     const steps = [
-      { id: 'step1', title: 'Step 1', content: 'Content 1', placement: 'center' as const, action: { label: 'Next', onClick: vi.fn() } },
-      { id: 'step2', title: 'Step 2', content: 'Content 2', placement: 'center' as const, action: { label: 'Next', onClick: vi.fn() } },
+      {
+        id: 'step1',
+        title: 'Step 1',
+        content: 'Content 1',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: vi.fn() },
+      },
+      {
+        id: 'step2',
+        title: 'Step 2',
+        content: 'Content 2',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: vi.fn() },
+      },
     ];
 
     render(<OnboardingTour steps={steps} />);
@@ -216,8 +246,20 @@ describe('OnboardingTour', () => {
   it('completes tour on last step action click', async () => {
     const user = userEvent.setup();
     const steps = [
-      { id: 'step1', title: 'Step 1', content: 'Content 1', placement: 'center' as const, action: { label: 'Next', onClick: vi.fn() } },
-      { id: 'step2', title: 'Step 2', content: 'Content 2', placement: 'center' as const, action: { label: 'Finish', onClick: vi.fn() } },
+      {
+        id: 'step1',
+        title: 'Step 1',
+        content: 'Content 1',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: vi.fn() },
+      },
+      {
+        id: 'step2',
+        title: 'Step 2',
+        content: 'Content 2',
+        placement: 'center' as const,
+        action: { label: 'Finish', onClick: vi.fn() },
+      },
     ];
 
     render(<OnboardingTour steps={steps} onComplete={mockOnComplete} />);
@@ -244,7 +286,13 @@ describe('OnboardingTour', () => {
     const user = userEvent.setup();
     const stepAction = vi.fn();
     const steps = [
-      { id: 'step1', title: 'Step 1', content: 'Content 1', placement: 'center' as const, action: { label: 'Next', onClick: stepAction } },
+      {
+        id: 'step1',
+        title: 'Step 1',
+        content: 'Content 1',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: stepAction },
+      },
       { id: 'step2', title: 'Step 2', content: 'Content 2', placement: 'center' as const },
     ];
 
@@ -316,8 +364,20 @@ describe('OnboardingTour', () => {
   it('renders with correct step count in progress indicator', async () => {
     const user = userEvent.setup();
     const steps = [
-      { id: 'step1', title: 'Step 1', content: 'Content 1', placement: 'center' as const, action: { label: 'Next', onClick: vi.fn() } },
-      { id: 'step2', title: 'Step 2', content: 'Content 2', placement: 'center' as const, action: { label: 'Next', onClick: vi.fn() } },
+      {
+        id: 'step1',
+        title: 'Step 1',
+        content: 'Content 1',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: vi.fn() },
+      },
+      {
+        id: 'step2',
+        title: 'Step 2',
+        content: 'Content 2',
+        placement: 'center' as const,
+        action: { label: 'Next', onClick: vi.fn() },
+      },
       { id: 'step3', title: 'Step 3', content: 'Content 3', placement: 'center' as const },
     ];
 
@@ -357,7 +417,7 @@ describe('OnboardingTour', () => {
           Target Element
         </div>
         <OnboardingTour steps={steps} />
-      </>
+      </>,
     );
 
     await waitFor(() => {

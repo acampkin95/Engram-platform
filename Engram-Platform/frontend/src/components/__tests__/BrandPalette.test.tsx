@@ -1,7 +1,12 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BRAND_COLORS, BrandPalette } from '@/src/components/BrandPalette';
+
+const findColorByName = (name: string) => {
+  const color = BRAND_COLORS.find((c) => c.name === name);
+  if (!color) throw new Error(`Color "${name}" not found in BRAND_COLORS`);
+  return color;
+};
 
 // ─── Clipboard mock ────────────────────────────────────────────────────────────
 
@@ -71,13 +76,15 @@ describe('BrandPalette', () => {
 
   it('shows hex value in button by default', () => {
     render(<BrandPalette />);
-    const amber = BRAND_COLORS.find((c) => c.name === 'Amber')!;
+    // biome-ignore: Amber exists in BRAND_COLORS
+    const amber = findColorByName('Amber');
     expect(screen.getByText(amber.hex)).toBeDefined();
   });
 
   it('calls clipboard.writeText with the hex value when a color is clicked', async () => {
     render(<BrandPalette />);
-    const amber = BRAND_COLORS.find((c) => c.name === 'Amber')!;
+    // biome-ignore: Amber exists in BRAND_COLORS
+    const amber = findColorByName('Amber');
     const btn = screen.getByRole('button', { name: `Copy ${amber.name} color ${amber.hex}` });
 
     await clickAndFlush(btn);
@@ -87,7 +94,7 @@ describe('BrandPalette', () => {
 
   it('shows "Copied!" after clicking a color button', async () => {
     render(<BrandPalette />);
-    const amber = BRAND_COLORS.find((c) => c.name === 'Amber')!;
+    const amber = findColorByName('Amber');
     const btn = screen.getByRole('button', { name: `Copy ${amber.name} color ${amber.hex}` });
 
     await clickAndFlush(btn);
@@ -98,7 +105,7 @@ describe('BrandPalette', () => {
   it('restores hex value after 2 seconds', async () => {
     vi.useFakeTimers();
     render(<BrandPalette />);
-    const amber = BRAND_COLORS.find((c) => c.name === 'Amber')!;
+    const amber = findColorByName('Amber');
     const btn = screen.getByRole('button', { name: `Copy ${amber.name} color ${amber.hex}` });
 
     await act(async () => {
@@ -118,8 +125,8 @@ describe('BrandPalette', () => {
 
   it('shows "Copied!" only on the clicked color, not others', async () => {
     render(<BrandPalette />);
-    const amber = BRAND_COLORS.find((c) => c.name === 'Amber')!;
-    const violet = BRAND_COLORS.find((c) => c.name === 'Violet')!;
+    const amber = findColorByName('Amber');
+    const violet = findColorByName('Violet');
 
     const amberBtn = screen.getByRole('button', {
       name: `Copy ${amber.name} color ${amber.hex}`,
@@ -185,7 +192,7 @@ describe('BrandPalette', () => {
 
   it('button title attribute shows "Copied!" after copy', async () => {
     render(<BrandPalette />);
-    const amber = BRAND_COLORS.find((c) => c.name === 'Amber')!;
+    const amber = findColorByName('Amber');
     const btn = screen.getByRole('button', { name: `Copy ${amber.name} color ${amber.hex}` });
 
     expect(btn.getAttribute('title')).toContain(amber.hex);

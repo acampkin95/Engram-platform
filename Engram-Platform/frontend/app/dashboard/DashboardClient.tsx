@@ -22,6 +22,7 @@ import {
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
+import { PageTransition } from '@/src/components/Animations';
 import {
   CommandPalette,
   CommandPaletteHint,
@@ -36,7 +37,7 @@ import { NavItem } from '@/src/design-system/components/NavItem';
 import { SidebarGroup } from '@/src/design-system/components/SidebarGroup';
 import { StatusDot } from '@/src/design-system/components/StatusDot';
 import { EngramLogo } from '@/src/design-system/EngramLogo';
-import { useCommandPaletteKeyboard } from '@/src/hooks/useKeyboardShortcuts';
+import { useCommandPaletteKeyboard, usePowerUserShortcuts } from '@/src/hooks/useKeyboardShortcuts';
 import { MotionProvider } from '@/src/providers/MotionProvider';
 import { useUIStore } from '@/src/stores/uiStore';
 
@@ -60,6 +61,7 @@ const memoryNav = [
 ] as const;
 
 const intelligenceNav = [
+  { href: '/dashboard/intelligence/canvas', icon: Layers, label: 'OSINT Canvas' },
   { href: '/dashboard/intelligence/search', icon: SearchCode, label: 'Unified Search' },
   { href: '/dashboard/intelligence/investigations', icon: FileSearch, label: 'Investigations' },
   { href: '/dashboard/intelligence/knowledge-graph', icon: Share2, label: 'Knowledge Graph' },
@@ -77,8 +79,8 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 bg-[var(--color-deep)] border-r border-white/[0.06] transition-all duration-300 overflow-hidden"
-      style={{ width: collapsed ? 64 : 240 }}
+      className="flex flex-col flex-shrink-0 bg-[var(--color-deep)] border-r border-white/[0.06] transition-all duration-300 overflow-hidden contain-layout"
+      style={{ width: collapsed ? 64 : 240, willChange: 'width' }}
     >
       {/* Logo */}
       <div className="px-3 py-4 border-b border-white/[0.06] flex-shrink-0">
@@ -192,6 +194,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard/intelligence/investigations')) return 'Investigations';
   if (pathname.startsWith('/dashboard/intelligence/knowledge-graph')) return 'Knowledge Graph';
   if (pathname.startsWith('/dashboard/intelligence/chat')) return 'RAG Chat';
+  if (pathname.startsWith('/dashboard/intelligence/canvas')) return 'OSINT Canvas';
   if (pathname.startsWith('/dashboard/system/health')) return 'System Health';
   return 'Platform';
 }
@@ -237,12 +240,19 @@ export function DashboardClient({ children }: Readonly<{ children: ReactNode }>)
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+  const isCanvasRoute = pathname.includes('/canvas');
 
   useCommandPaletteKeyboard(
     () => setCommandPaletteOpen(true),
     () => setCommandPaletteOpen(false),
     commandPaletteOpen,
   );
+
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  usePowerUserShortcuts({
+    onShowShortcuts: () => setShortcutsModalOpen(true),
+    onToggleSidebar: toggleSidebar,
+  });
 
   return (
     <MotionProvider>
@@ -255,8 +265,13 @@ export function DashboardClient({ children }: Readonly<{ children: ReactNode }>)
       <Sidebar pathname={pathname} collapsed={collapsed} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header pathname={pathname} />
-        <main id="main-content" className="flex-1 overflow-y-auto p-6">
-          {children}
+        <main
+          id="main-content"
+          className={
+            isCanvasRoute ? 'flex-1 overflow-hidden' : 'flex-1 overflow-y-auto p-6 scroll-container'
+          }
+        >
+          <PageTransition>{children}</PageTransition>
         </main>
       </div>
       {commandPaletteOpen && (

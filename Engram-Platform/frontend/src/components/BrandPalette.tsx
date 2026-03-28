@@ -41,15 +41,11 @@ export function BrandPalette({ className }: BrandPaletteProps) {
   };
 
   return (
-    <div
-      className={className}
-      role="list"
-      aria-label="Brand color palette"
-    >
+    <ul className={className} aria-label="Brand color palette">
       {BRAND_COLORS.map((color) => {
         const copied = copiedHex === color.hex;
         return (
-          <div key={color.hex} role="listitem">
+          <li key={color.hex} className="list-none">
             <button
               type="button"
               onClick={() => handleCopy(color.hex)}
@@ -75,9 +71,9 @@ export function BrandPalette({ className }: BrandPaletteProps) {
                 {copied ? 'Copied!' : color.hex}
               </span>
             </button>
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }

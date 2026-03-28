@@ -62,8 +62,8 @@ export function useRAGChat({
   lmStudioUrl = 'http://localhost:1234/v1',
   model = 'local-model',
   contextMemoryCount = 5,
-  memoryWsUrl,
-  authToken,
+  memoryWsUrl: _memoryWsUrl,
+  authToken: _authToken,
 }: UseRAGChatOptions = {}): UseRAGChatReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);

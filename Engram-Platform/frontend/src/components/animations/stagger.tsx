@@ -3,80 +3,80 @@
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import type { ReactNode } from 'react';
 
-// ─── Stagger Container Variants ────────────────────────────────────────────
+const smoothEase = [0.22, 1, 0.36, 1] as const;
 
 export const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.05,
+      staggerChildren: 0.06,
+      delayChildren: 0.04,
     },
   },
 };
 
 export const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16, filter: 'blur(2px)' },
   show: {
     opacity: 1,
     y: 0,
+    filter: 'blur(0px)',
     transition: {
       type: 'spring',
-      stiffness: 300,
-      damping: 24,
+      stiffness: 400,
+      damping: 28,
+      mass: 0.6,
     },
   },
 };
 
-// Fast stagger for quick feedback
 export const fastContainerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.03,
+      staggerChildren: 0.025,
       delayChildren: 0,
     },
   },
 };
 
 export const fastItemVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
+  hidden: { opacity: 0, scale: 0.96 },
   show: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.15, ease: 'easeOut' },
+    transition: { duration: 0.18, ease: smoothEase },
   },
 };
 
-// Card grid stagger (for dashboard cards)
 export const cardContainerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
+      staggerChildren: 0.08,
+      delayChildren: 0.06,
     },
   },
 };
 
 export const cardItemVariants: Variants = {
-  hidden: { opacity: 0, y: 24, scale: 0.96 },
+  hidden: { opacity: 0, y: 20, scale: 0.97, filter: 'blur(3px)' },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
+    filter: 'blur(0px)',
     transition: {
       type: 'spring',
-      stiffness: 260,
-      damping: 22,
+      stiffness: 320,
+      damping: 24,
+      mass: 0.7,
     },
   },
 };
-
-// ─── Stagger Container Component ───────────────────────────────────────────
 
 interface StaggerContainerProps {
   children: ReactNode;
@@ -116,8 +116,6 @@ export function StaggerContainer({
   );
 }
 
-// ─── Stagger Item Component ────────────────────────────────────────────────
-
 interface StaggerItemProps {
   children: ReactNode;
   className?: string;
@@ -143,8 +141,6 @@ export function StaggerItem({ children, className = '', variant = 'default' }: S
     </motion.div>
   );
 }
-
-// ─── Pre-built Stagger List ────────────────────────────────────────────────
 
 interface StaggerListProps<T> {
   items: T[];

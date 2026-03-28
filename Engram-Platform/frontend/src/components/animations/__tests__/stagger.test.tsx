@@ -33,7 +33,7 @@ describe('stagger animation helpers', () => {
     expect(containerVariants.show).toBeDefined();
     expect(fastContainerVariants.show).toBeDefined();
     expect(cardContainerVariants.show).toBeDefined();
-    expect(itemVariants.hidden).toEqual({ opacity: 0, y: 20 });
+    expect(itemVariants.hidden).toEqual({ opacity: 0, y: 16, filter: 'blur(2px)' });
   });
 
   it('renders stagger container and item with motion wrappers', () => {

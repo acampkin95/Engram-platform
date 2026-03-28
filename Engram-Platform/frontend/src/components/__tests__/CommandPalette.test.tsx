@@ -25,13 +25,13 @@ const uiState = {
 };
 
 vi.mock('@/src/stores/preferencesStore', () => ({
-  usePreferencesStore: vi.fn((selector?: Function) =>
+  usePreferencesStore: vi.fn((selector?: (...args: unknown[]) => unknown) =>
     typeof selector === 'function' ? selector(prefsState) : prefsState,
   ),
 }));
 
 vi.mock('@/src/stores/uiStore', () => ({
-  useUIStore: vi.fn((selector?: Function) =>
+  useUIStore: vi.fn((selector?: (...args: unknown[]) => unknown) =>
     typeof selector === 'function' ? selector(uiState) : uiState,
   ),
 }));
@@ -44,7 +44,7 @@ describe('CommandPalette', () => {
   };
 
   const mockOnClose = vi.fn();
-  const mockOnShowShortcuts = vi.fn();
+  const _mockOnShowShortcuts = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -181,7 +181,9 @@ describe('CommandPalette', () => {
     const user = userEvent.setup();
     render(<CommandPalette onClose={mockOnClose} />);
 
-    const backdrop = screen.getByRole('dialog').querySelector('[aria-hidden="true"]') as HTMLElement;
+    const backdrop = screen
+      .getByRole('dialog')
+      .querySelector('[aria-hidden="true"]') as HTMLElement;
     await user.click(backdrop);
 
     expect(mockOnClose).toHaveBeenCalledOnce();
@@ -318,7 +320,8 @@ describe('KeyboardShortcutsModal', () => {
   it('displays all shortcut categories', () => {
     render(<KeyboardShortcutsModal onClose={mockOnClose} />);
 
-    expect(screen.getByText('Global')).toBeInTheDocument();
+    expect(screen.getByText('Navigation')).toBeInTheDocument();
+    expect(screen.getByText('Go To (G then key)')).toBeInTheDocument();
     expect(screen.getByText('Data Tables')).toBeInTheDocument();
     expect(screen.getByText('Modals')).toBeInTheDocument();
   });
@@ -355,7 +358,9 @@ describe('KeyboardShortcutsModal', () => {
     const user = userEvent.setup();
     render(<KeyboardShortcutsModal onClose={mockOnClose} />);
 
-    const backdrop = screen.getByRole('dialog').querySelector('[aria-hidden="true"]') as HTMLElement;
+    const backdrop = screen
+      .getByRole('dialog')
+      .querySelector('[aria-hidden="true"]') as HTMLElement;
     await user.click(backdrop);
 
     expect(mockOnClose).toHaveBeenCalledOnce();

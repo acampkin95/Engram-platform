@@ -6,6 +6,38 @@ All notable changes to the Engram Platform orchestration layer are documented he
 
 ## [Unreleased]
 
+### Added
+- **Dual-channel notifications** — Resend email + ntfy.sh push via `sendNotification()` multi-channel dispatcher
+- **Notification settings UI** — `/dashboard/system/settings` with channel status, test buttons, inline test results, and "Test All Channels" button
+- **System nav tabs** — `SystemNav.tsx` tab navigation between Health and Settings pages (amber active indicator, mono uppercase)
+- **Automated health alerts** — `checkAndAlertHealth()` monitors status changes and auto-dispatches (degraded/offline/recovery) with alert deduplication
+- **Notification log** — in-memory log of last 50 dispatches via `GET /api/system/notifications/log`
+- **Health alert endpoint** — `POST /api/system/health/alert` triggers health check and conditional alert
+- **Environment variables** — `RESEND_API_KEY`, `EMAIL_FROM`, `NTFY_API_KEY`, `NTFY_TOPIC_URL` in `.env.example`
+- **68 new tests** — 49 API route tests (channels/priority/tags/settings) + 19 UI component tests (NotificationSettings + SystemNav)
+- **Error boundary** — `settings/error.tsx` matching health page pattern
+
+### Changed
+- **Notification API route** — extended schema with `channels`, `priority`, `tags` fields
+- **`system-admin.ts`** — refactored into composable `sendViaResend` + `sendViaNtfy`; deprecated `sendAdminNotification` wrapper succeeds if any channel works
+- **Health page** — test notification button sends to all channels with tags; new "Alert Settings" link button
+- **Branding overhaul** — all notification UI uses Engram design tokens (success/critical/teal/amber/violet/text/layer)
+- **ntfy topic URL masked** — `getNotificationChannelStatus()` returns masked URL for security
+
+### Documentation
+- **`docs/NOTIFICATIONS.md`** — configuration, API reference, architecture, ntfy.sh setup, troubleshooting
+
+---
+
+- **OSINT Canvas** (`/dashboard/intelligence/canvas`) — Tactical intelligence workspace with composable panels
+  - Entity graph (XYFlow), real-time crawl stream, agent console, entity inspector
+  - WebSocket streaming from Crawler API for live job updates
+  - Drag-and-drop panel reordering via grid-based `Canvas` component
+  - Memory depth time range selector (1h/6h/24h/48h/1w/30d) in intelligence layer toggle
+  - Investigation mode with ESC key shortcut for focused analysis
+  - 10 E2E smoke tests covering route health, panel rendering, and keyboard interactions
+- **OSINT Canvas E2E tests** — 10 Playwright smoke tests for canvas route (requires dev server)
+
 ### Fixed
 - **Platform API clients now functional** — Replaced stub `memoryClient` and `crawlerClient` with real fetch-based implementations. Dashboard now displays live data from Memory API and Crawler API instead of empty arrays/mock data.
   - `memory-client.ts`: Routes through `/api/memory/` (nginx proxy) with `X-API-Key` auth header

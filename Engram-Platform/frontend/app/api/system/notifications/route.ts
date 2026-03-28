@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAdminAccess } from '@/src/server/admin-access';
-import { sendAdminNotification } from '@/src/server/system-admin';
+import { sendNotification } from '@/src/server/system-admin';
 
 const schema = z.object({
   to: z
@@ -22,13 +22,16 @@ const schema = z.object({
     .min(1)
     .max(10000)
     .transform((s) => s.trim()),
+  channels: z.array(z.enum(['email', 'ntfy'])).optional(),
+  priority: z.enum(['low', 'default', 'high', 'urgent']).optional(),
+  tags: z.array(z.string().max(50)).optional(),
 });
 
 export async function POST(request: Request) {
   try {
     await requireAdminAccess();
     const payload = schema.parse(await request.json());
-    const result = await sendAdminNotification(payload);
+    const result = await sendNotification(payload);
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(

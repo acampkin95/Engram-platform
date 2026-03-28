@@ -1,8 +1,8 @@
-import { render, screen, within, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { DraggableGrid, useGridLayout } from '../DraggableGrid';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GridItem } from '../DraggableGrid';
+import { DraggableGrid, useGridLayout } from '../DraggableGrid';
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
@@ -48,9 +48,7 @@ describe('DraggableGrid', () => {
 
   describe('Basic Rendering', () => {
     it('renders grid on mount in SSR mode', () => {
-      const { container } = render(
-        <DraggableGrid items={defaultItems} />
-      );
+      render(<DraggableGrid items={defaultItems} />);
 
       // Should render in static grid mode initially
       expect(screen.getByTestId('widget-1-content')).toBeInTheDocument();
@@ -112,7 +110,7 @@ describe('DraggableGrid', () => {
     });
 
     it('displays maximize button in header', async () => {
-      const { container } = render(<DraggableGrid items={defaultItems} />);
+      render(<DraggableGrid items={defaultItems} />);
 
       // All items should have expand buttons
       const expandButtons = screen.getAllByLabelText('Maximize');
@@ -156,7 +154,7 @@ describe('DraggableGrid', () => {
     });
 
     it('renders grid cards with proper structure', () => {
-      const { container } = render(<DraggableGrid items={defaultItems} />);
+      render(<DraggableGrid items={defaultItems} />);
 
       // All items should have grid card containers
       defaultItems.forEach((item) => {
@@ -183,12 +181,7 @@ describe('DraggableGrid', () => {
 
   describe('Layout Persistence', () => {
     it('calls onLayoutChange when layout changes', () => {
-      render(
-        <DraggableGrid
-          items={defaultItems}
-          onLayoutChange={mockOnLayoutChange}
-        />
-      );
+      render(<DraggableGrid items={defaultItems} onLayoutChange={mockOnLayoutChange} />);
 
       // onLayoutChange should be called during initialization
       expect(mockOnLayoutChange).toHaveBeenCalled();
@@ -201,31 +194,23 @@ describe('DraggableGrid', () => {
           items={defaultItems}
           storageKey="custom-key"
           onLayoutChange={mockOnLayoutChange}
-        />
+        />,
       );
 
       expect(screen.getByTestId('widget-1-content')).toBeInTheDocument();
     });
 
     it('passes layout to onLayoutChange callback', () => {
-      render(
-        <DraggableGrid
-          items={defaultItems}
-          onLayoutChange={mockOnLayoutChange}
-        />
-      );
+      render(<DraggableGrid items={defaultItems} onLayoutChange={mockOnLayoutChange} />);
 
       // Should be called with layout information
-      expect(mockOnLayoutChange).toHaveBeenCalledWith(
-        expect.any(Array),
-        expect.any(Object)
-      );
+      expect(mockOnLayoutChange).toHaveBeenCalledWith(expect.any(Array), expect.any(Object));
     });
   });
 
   describe('Responsive Columns', () => {
     it('uses default column configuration', () => {
-      const { container } = render(<DraggableGrid items={defaultItems} />);
+      render(<DraggableGrid items={defaultItems} />);
 
       // Should render without error with default cols
       expect(screen.getByTestId('widget-1-content')).toBeInTheDocument();
@@ -234,9 +219,7 @@ describe('DraggableGrid', () => {
     it('accepts custom column configuration', () => {
       const customCols = { lg: 8, md: 6, sm: 4, xs: 2, xxs: 1 };
 
-      render(
-        <DraggableGrid items={defaultItems} cols={customCols} />
-      );
+      render(<DraggableGrid items={defaultItems} cols={customCols} />);
 
       expect(screen.getByTestId('widget-1-content')).toBeInTheDocument();
     });
@@ -244,9 +227,7 @@ describe('DraggableGrid', () => {
     it('respects column constraints in default layout', () => {
       const customCols = { lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 };
 
-      render(
-        <DraggableGrid items={defaultItems} cols={customCols} />
-      );
+      render(<DraggableGrid items={defaultItems} cols={customCols} />);
 
       // Should not crash and render all items
       expect(screen.getByTestId('widget-1-content')).toBeInTheDocument();
@@ -263,9 +244,7 @@ describe('DraggableGrid', () => {
     });
 
     it('accepts custom row height', () => {
-      render(
-        <DraggableGrid items={defaultItems} rowHeight={80} />
-      );
+      render(<DraggableGrid items={defaultItems} rowHeight={80} />);
 
       expect(screen.getByTestId('widget-1-content')).toBeInTheDocument();
     });
@@ -350,9 +329,7 @@ describe('DraggableGrid', () => {
     });
 
     it('disables dragging when isDraggable is false', () => {
-      const { container } = render(
-        <DraggableGrid items={defaultItems} isDraggable={false} />
-      );
+      render(<DraggableGrid items={defaultItems} isDraggable={false} />);
 
       // Should still render
       expect(screen.getByTestId('widget-1-content')).toBeInTheDocument();
@@ -366,22 +343,14 @@ describe('DraggableGrid', () => {
     });
 
     it('disables resizing when isResizable is false', () => {
-      render(
-        <DraggableGrid items={defaultItems} isResizable={false} />
-      );
+      render(<DraggableGrid items={defaultItems} isResizable={false} />);
 
       expect(screen.getByTestId('widget-1-content')).toBeInTheDocument();
     });
 
     it('disables dragging and resizing when widget is expanded', async () => {
       const user = userEvent.setup();
-      const { container } = render(
-        <DraggableGrid
-          items={defaultItems}
-          isDraggable={true}
-          isResizable={true}
-        />
-      );
+      render(<DraggableGrid items={defaultItems} isDraggable={true} isResizable={true} />);
 
       const expandButtons = screen.getAllByLabelText('Maximize');
       await user.click(expandButtons[0]);
@@ -395,9 +364,7 @@ describe('DraggableGrid', () => {
 
   describe('Custom className', () => {
     it('applies custom className to container', () => {
-      const { container } = render(
-        <DraggableGrid items={defaultItems} className="custom-grid" />
-      );
+      const { container } = render(<DraggableGrid items={defaultItems} className="custom-grid" />);
 
       const gridContainer = container.querySelector('.custom-grid');
       expect(gridContainer).toBeInTheDocument();
@@ -416,7 +383,7 @@ describe('DraggableGrid', () => {
 describe('useGridLayout', () => {
   it('provides resetLayout function', () => {
     const { result } = require('@testing-library/react').renderHook(() =>
-      useGridLayout('test-key')
+      useGridLayout('test-key'),
     );
 
     expect(result.current.resetLayout).toBeDefined();
@@ -425,7 +392,7 @@ describe('useGridLayout', () => {
 
   it('resetLayout is a function', () => {
     const { result } = require('@testing-library/react').renderHook(() =>
-      useGridLayout('test-key')
+      useGridLayout('test-key'),
     );
 
     expect(result.current.resetLayout).toEqual(expect.any(Function));
@@ -433,11 +400,11 @@ describe('useGridLayout', () => {
 
   it('returns stable resetLayout function on multiple calls', () => {
     const { result: result1 } = require('@testing-library/react').renderHook(() =>
-      useGridLayout('test-key-1')
+      useGridLayout('test-key-1'),
     );
 
     const { result: result2 } = require('@testing-library/react').renderHook(() =>
-      useGridLayout('test-key-2')
+      useGridLayout('test-key-2'),
     );
 
     expect(result1.current.resetLayout).toEqual(expect.any(Function));

@@ -1,4 +1,4 @@
-export { FadeIn, PageTransition, SlideIn } from './PageTransition';
+export { FadeIn, PageTransition, ScaleIn, SlideIn } from './PageTransition';
 export {
   containerVariants,
   itemVariants,

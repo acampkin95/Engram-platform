@@ -41,6 +41,31 @@ export const colors = {
     intelligence: 'var(--color-memory-tier1)',
     intelligenceDim: 'var(--color-primary-400)',
   },
+  functional: {
+    intelligence: 'var(--color-intelligence)',
+    anomaly: 'var(--color-anomaly)',
+    active: 'var(--color-active)',
+    success: 'var(--color-success)',
+    critical: 'var(--color-critical)',
+    neutral: 'var(--color-neutral)',
+  },
+  entity: {
+    person: 'var(--color-intelligence)',
+    organization: 'var(--color-active)',
+    location: 'var(--color-success)',
+    document: 'var(--color-anomaly)',
+    event: 'var(--color-rose)',
+    artifact: 'var(--color-neutral)',
+    unknown: 'var(--color-text-muted)',
+  },
+  relationship: {
+    associated: 'var(--color-border-strong)',
+    communicated: 'var(--color-intelligence)',
+    located_at: 'var(--color-success)',
+    owns: 'var(--color-anomaly)',
+    member_of: 'var(--color-active)',
+    referenced: 'var(--color-neutral)',
+  },
 } as const;
 
 export const fonts = {
@@ -93,3 +118,30 @@ export const sectionColors: Record<SystemSection, { accent: string; dim: string;
 
 export type ColorKey = keyof typeof colors;
 export type SectionKey = keyof typeof sectionColors;
+
+export type StatusColor =
+  | 'intelligence'
+  | 'anomaly'
+  | 'active'
+  | 'success'
+  | 'critical'
+  | 'neutral';
+
+export type EntityType =
+  | 'person'
+  | 'organization'
+  | 'location'
+  | 'document'
+  | 'event'
+  | 'artifact'
+  | 'unknown';
+
+export type RelationshipType =
+  | 'associated'
+  | 'communicated'
+  | 'located_at'
+  | 'owns'
+  | 'member_of'
+  | 'referenced';
+
+export type IntelligenceLayer = 'raw' | 'processed' | 'agent';

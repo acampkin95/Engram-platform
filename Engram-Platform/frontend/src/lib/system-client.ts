@@ -43,10 +43,29 @@ export const systemClient = {
       body: JSON.stringify(payload),
     });
   },
-  sendNotification(payload: { to?: string[]; subject: string; text: string }) {
+  sendNotification(payload: {
+    to?: string[];
+    subject: string;
+    text: string;
+    channels?: ('email' | 'ntfy')[];
+    priority?: 'low' | 'default' | 'high' | 'urgent';
+    tags?: string[];
+  }) {
     return request('/api/system/notifications', {
       method: 'POST',
       body: JSON.stringify(payload),
+    });
+  },
+  getNotificationSettings() {
+    return request('/api/system/notifications/settings');
+  },
+  getNotificationLog() {
+    return request('/api/system/notifications/log');
+  },
+  testNotificationChannel(channel: 'email' | 'ntfy') {
+    return request('/api/system/notifications/settings', {
+      method: 'PUT',
+      body: JSON.stringify({ channel }),
     });
   },
   subscribeLogs(
@@ -62,5 +81,8 @@ export const systemClient = {
     if (handlers.onMessage) source.onmessage = handlers.onMessage;
     if (handlers.onError) source.onerror = handlers.onError;
     return source;
+  },
+  triggerHealthAlert() {
+    return request('/api/system/health/alert', { method: 'POST' });
   },
 };

@@ -1,13 +1,9 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useKeyboardShortcuts } from '@/src/hooks/useKeyboardShortcuts';
 import type { KeyboardShortcut } from '@/src/hooks/useKeyboardShortcuts';
+import { useKeyboardShortcuts } from '@/src/hooks/useKeyboardShortcuts';
 
-function fireKey(
-  key: string,
-  opts: Partial<KeyboardEventInit> = {},
-  target?: EventTarget,
-) {
+function fireKey(key: string, opts: Partial<KeyboardEventInit> = {}, target?: EventTarget) {
   const event = new KeyboardEvent('keydown', {
     key,
     bubbles: true,
@@ -30,9 +26,7 @@ describe('useKeyboardShortcuts', () => {
   });
 
   it('calls action when matching key is pressed', () => {
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 'a', description: 'test', action },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 'a', description: 'test', action }];
     renderHook(() => useKeyboardShortcuts({ shortcuts }));
 
     fireKey('a');
@@ -40,9 +34,7 @@ describe('useKeyboardShortcuts', () => {
   });
 
   it('does not call action for non-matching key', () => {
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 'a', description: 'test', action },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 'a', description: 'test', action }];
     renderHook(() => useKeyboardShortcuts({ shortcuts }));
 
     fireKey('b');
@@ -50,9 +42,7 @@ describe('useKeyboardShortcuts', () => {
   });
 
   it('matches key case-insensitively', () => {
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 'A', description: 'test', action },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 'A', description: 'test', action }];
     renderHook(() => useKeyboardShortcuts({ shortcuts }));
 
     fireKey('a');
@@ -110,9 +100,7 @@ describe('useKeyboardShortcuts', () => {
   });
 
   it('rejects key without modifiers when meta is held but not required', () => {
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 'a', description: 'test', action },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 'a', description: 'test', action }];
     renderHook(() => useKeyboardShortcuts({ shortcuts }));
 
     fireKey('a', { metaKey: true });
@@ -120,9 +108,7 @@ describe('useKeyboardShortcuts', () => {
   });
 
   it('does not fire when enabled is false', () => {
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 'a', description: 'test', action },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 'a', description: 'test', action }];
     renderHook(() => useKeyboardShortcuts({ shortcuts, enabled: false }));
 
     fireKey('a');
@@ -130,9 +116,7 @@ describe('useKeyboardShortcuts', () => {
   });
 
   it('ignores keydown events from input elements', () => {
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 'a', description: 'test', action },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 'a', description: 'test', action }];
     renderHook(() => useKeyboardShortcuts({ shortcuts }));
 
     const input = document.createElement('input');
@@ -144,9 +128,7 @@ describe('useKeyboardShortcuts', () => {
   });
 
   it('ignores keydown events from textarea elements', () => {
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 'a', description: 'test', action },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 'a', description: 'test', action }];
     renderHook(() => useKeyboardShortcuts({ shortcuts }));
 
     const textarea = document.createElement('textarea');
@@ -158,9 +140,7 @@ describe('useKeyboardShortcuts', () => {
   });
 
   it('removes event listener on unmount', () => {
-    const shortcuts: KeyboardShortcut[] = [
-      { key: 'a', description: 'test', action },
-    ];
+    const shortcuts: KeyboardShortcut[] = [{ key: 'a', description: 'test', action }];
     const { unmount } = renderHook(() => useKeyboardShortcuts({ shortcuts }));
 
     unmount();

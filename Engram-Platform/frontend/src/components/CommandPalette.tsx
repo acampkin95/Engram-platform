@@ -3,6 +3,7 @@ import {
   Bell,
   ChevronRight,
   Circle,
+  Clock,
   Command,
   Database,
   FileSearch,
@@ -68,7 +69,38 @@ const NAV_ITEMS: CommandItem[] = [
     action: () => {},
     section: 'Navigate',
   },
-  { id: 'system', label: 'System Health', icon: Settings, action: () => {}, section: 'Admin' },
+  {
+    id: 'timeline',
+    label: 'Timeline',
+    icon: Clock,
+    action: () => {},
+    section: 'Navigate',
+    shortcut: 'G then T',
+  },
+  {
+    id: 'graph',
+    label: 'Knowledge Graph',
+    icon: LayoutDashboard,
+    action: () => {},
+    section: 'Navigate',
+    shortcut: 'G then G',
+  },
+  {
+    id: 'intelligence',
+    label: 'Intelligence Chat',
+    icon: Command,
+    action: () => {},
+    section: 'Navigate',
+    shortcut: 'G then I',
+  },
+  {
+    id: 'system',
+    label: 'System Health',
+    icon: Settings,
+    action: () => {},
+    section: 'Admin',
+    shortcut: 'G then S',
+  },
 ];
 
 const ACTIONS: CommandItem[] = [
@@ -104,6 +136,9 @@ function buildCommandItems(
       osint: '/dashboard/crawler/osint',
       memories: '/dashboard/memory/memories',
       investigations: '/dashboard/crawler/investigations',
+      timeline: '/dashboard/memory/timeline',
+      graph: '/dashboard/memory/graph',
+      intelligence: '/dashboard/intelligence/chat',
       system: '/dashboard/system/health',
     };
     return {
@@ -363,14 +398,24 @@ export function KeyboardShortcutsModal({ onClose }: { onClose: () => void }) {
 
   const shortcuts = [
     {
-      category: 'Global',
+      category: 'Navigation',
       items: [
         { key: '⌘ K', description: 'Open command palette' },
         { key: '⌘ B', description: 'Toggle sidebar' },
+        { key: '/', description: 'Focus search' },
         { key: '?', description: 'Show keyboard shortcuts' },
+      ],
+    },
+    {
+      category: 'Go To (G then key)',
+      items: [
         { key: 'G then H', description: 'Go to Home' },
         { key: 'G then M', description: 'Go to Memories' },
         { key: 'G then C', description: 'Go to Crawl' },
+        { key: 'G then T', description: 'Go to Timeline' },
+        { key: 'G then G', description: 'Go to Graph' },
+        { key: 'G then I', description: 'Go to Intelligence' },
+        { key: 'G then S', description: 'Go to System' },
       ],
     },
     {

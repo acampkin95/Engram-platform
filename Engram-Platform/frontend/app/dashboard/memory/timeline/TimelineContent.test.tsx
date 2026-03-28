@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import { test, vi } from 'vitest';
 import TimelineContent from './TimelineContent';
 
-// Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({
@@ -17,6 +16,13 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: vi.fn(() => ({
+    getTotalSize: () => 0,
+    getVirtualItems: () => [],
+  })),
+}));
+
 vi.mock('swr', () => ({
   default: vi.fn((key: string) => {
     if (key?.includes('matters')) {
@@ -24,10 +30,6 @@ vi.mock('swr', () => ({
     }
     return { data: { data: { results: [] } }, error: null, isLoading: false, mutate: vi.fn() };
   }),
-}));
-
-vi.mock('date-fns', () => ({
-  format: vi.fn(() => 'Jan 1, 2024'),
 }));
 
 vi.mock('@/src/lib/memory-client', () => ({
@@ -40,5 +42,5 @@ test('renders TimelineContent without crashing', async () => {
   render(<TimelineContent />);
 
   await screen.findByText('Timeline');
-  await screen.findByText('No events found');
+  await screen.findByText(/No events found/);
 });

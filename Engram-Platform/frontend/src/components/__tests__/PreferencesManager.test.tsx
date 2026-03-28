@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PreferencesManager } from '../PreferencesManager';
 
 // Mock the preferencesStore
@@ -486,7 +486,7 @@ describe('PreferencesManager', () => {
   describe('useEffect dependency tracking', () => {
     it('re-applies styles when density changes', () => {
       const mockUsePreferencesStore = usePreferencesStore as any;
-      let callCount = 0;
+      let _callCount = 0;
       let currentState = {
         density: 'compact',
         animationLevel: 'full',
@@ -496,7 +496,7 @@ describe('PreferencesManager', () => {
       const setPropertySpy = vi.spyOn(document.documentElement.style, 'setProperty');
 
       mockUsePreferencesStore.mockImplementation((selector: any) => {
-        callCount++;
+        _callCount++;
         return selector(currentState);
       });
 

@@ -362,36 +362,200 @@ export async function runSystemControl(input: { target: ServiceTarget; action: S
   return { ok: true, output: stdout || stderr };
 }
 
+async function sendViaResend(input: {
+  to?: string[];
+  subject: string;
+  text: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+  const recipients = input.to?.filter(Boolean) ?? [];
+
+  if (!apiKey || !from) {
+    return { success: false, error: 'RESEND_API_KEY or EMAIL_FROM not configured' };
+  }
+  if (recipients.length === 0) {
+    return { success: false, error: 'No email recipients specified' };
+  }
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: recipients,
+        subject: input.subject,
+        text: input.text,
+      }),
+    });
+
+    return response.ok
+      ? { success: true }
+      : { success: false, error: `Resend: ${response.status}` };
+  } catch (err) {
+    return { success: false, error: `Resend: ${err instanceof Error ? err.message : 'unknown'}` };
+  }
+}
+
+async function sendViaNtfy(input: {
+  subject: string;
+  text: string;
+  priority?: string;
+  tags?: string[];
+}): Promise<{ success: boolean; error?: string }> {
+  const topicUrl = process.env.NTFY_TOPIC_URL;
+  const apiKey = process.env.NTFY_API_KEY;
+
+  if (!topicUrl) {
+    return { success: false, error: 'NTFY_TOPIC_URL not configured' };
+  }
+
+  const headers: Record<string, string> = {
+    Title: input.subject,
+    Priority: input.priority ?? 'default',
+    Tags: (input.tags ?? ['engram']).join(','),
+  };
+  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+
+  try {
+    const response = await fetch(topicUrl, {
+      method: 'POST',
+      headers,
+      body: input.text,
+    });
+
+    return response.ok
+      ? { success: true }
+      : { success: false, error: `ntfy: ${response.status}` };
+  } catch (err) {
+    return { success: false, error: `ntfy: ${err instanceof Error ? err.message : 'unknown'}` };
+  }
+}
+
+export async function sendNotification(input: {
+  to?: string[];
+  subject: string;
+  text: string;
+  channels?: ('email' | 'ntfy')[];
+  priority?: 'low' | 'default' | 'high' | 'urgent';
+  tags?: string[];
+}): Promise<Record<string, { success: boolean; error?: string }>> {
+  const channels = input.channels ?? ['email', 'ntfy'];
+  const results: Record<string, { success: boolean; error?: string }> = {};
+
+  if (channels.includes('email')) {
+    results.email = await sendViaResend(input);
+  }
+  if (channels.includes('ntfy')) {
+    results.ntfy = await sendViaNtfy(input);
+  }
+
+  notificationLog.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    timestamp: new Date().toISOString(),
+    subject: input.subject,
+    channels,
+    results,
+  });
+  if (notificationLog.length > MAX_LOG_ENTRIES) notificationLog.shift();
+
+  return results;
+}
+
+export function getNotificationChannelStatus() {
+  const resendKey = process.env.RESEND_API_KEY;
+  const emailFrom = process.env.EMAIL_FROM;
+  const ntfyTopic = process.env.NTFY_TOPIC_URL;
+  const ntfyKey = process.env.NTFY_API_KEY;
+
+  return {
+    resend: {
+      configured: Boolean(resendKey && emailFrom),
+      from: emailFrom ? emailFrom.replace(/^(.{3}).*(@.*)$/, '$1***$2') : null,
+    },
+    ntfy: {
+      configured: Boolean(ntfyTopic),
+      topicUrl: ntfyTopic ? ntfyTopic.replace(/\/[^/]+$/, '/***') : null,
+      authenticated: Boolean(ntfyKey),
+    },
+  };
+}
+
+interface NotificationLogEntry {
+  id: string;
+  timestamp: string;
+  subject: string;
+  channels: string[];
+  results: Record<string, { success: boolean; error?: string }>;
+}
+
+const notificationLog: NotificationLogEntry[] = [];
+const MAX_LOG_ENTRIES = 50;
+
+export function getNotificationLog(): NotificationLogEntry[] {
+  return [...notificationLog].reverse();
+}
+
+let lastAlertedStatus: string | null = null;
+
+export async function checkAndAlertHealth(): Promise<{ alerted: boolean; status: string }> {
+  const snapshot = await getSystemHealthSnapshot();
+  const currentStatus = snapshot.summary.status;
+
+  // Only alert on status CHANGES to degraded or offline (not repeated)
+  if (currentStatus !== 'healthy' && currentStatus !== lastAlertedStatus) {
+    const unhealthyServices = snapshot.services
+      .filter((s) => s.health !== 'healthy')
+      .map((s) => `${s.name}: ${s.health}`)
+      .join(', ');
+
+    await sendNotification({
+      subject: `Engram system ${currentStatus}`,
+      text: `System status changed to ${currentStatus}. Affected services: ${unhealthyServices}`,
+      channels: ['email', 'ntfy'],
+      priority: currentStatus === 'offline' ? 'urgent' : 'high',
+      tags: ['system-health', currentStatus],
+    });
+    lastAlertedStatus = currentStatus;
+    return { alerted: true, status: currentStatus };
+  }
+
+  // Reset when healthy again
+  if (currentStatus === 'healthy' && lastAlertedStatus) {
+    await sendNotification({
+      subject: 'Engram system recovered',
+      text: `System status recovered to healthy. All ${snapshot.summary.totalServices} services operational.`,
+      channels: ['email', 'ntfy'],
+      priority: 'default',
+      tags: ['system-health', 'recovered'],
+    });
+    lastAlertedStatus = null;
+    return { alerted: true, status: 'recovered' };
+  }
+
+  lastAlertedStatus = currentStatus;
+  return { alerted: false, status: currentStatus };
+}
+
+/** @deprecated Use sendNotification instead */
 export async function sendAdminNotification(input: {
   to?: string[];
   subject: string;
   text: string;
 }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM;
-  const recipients = input.to?.filter(Boolean) ?? [];
+  const results = await sendNotification(input);
+  const anySuccess = Object.values(results).some((r) => r.success);
 
-  if (!apiKey || !from || recipients.length === 0) {
-    throw new Error('Resend is not configured');
+  if (!anySuccess) {
+    const errors = Object.entries(results)
+      .filter(([, r]) => !r.success)
+      .map(([ch, r]) => `${ch}: ${r.error}`)
+      .join('; ');
+    throw new Error(errors || 'All notification channels failed');
   }
-
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to: recipients,
-      subject: input.subject,
-      text: input.text,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Resend request failed: ${response.status}`);
-  }
-
-  return response.json();
+  return results;
 }

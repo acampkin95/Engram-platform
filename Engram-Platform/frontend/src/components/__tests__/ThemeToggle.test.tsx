@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ThemeToggle } from '../ThemeToggle';
@@ -31,7 +31,7 @@ describe('ThemeToggle', () => {
       resolvedTheme: 'dark',
     });
 
-    const { rerender } = render(<ThemeToggle />);
+    render(<ThemeToggle />);
 
     // Initially renders a placeholder div to prevent hydration mismatch
     const placeholder = document.querySelector('.w-8.h-8');
@@ -149,7 +149,14 @@ describe('ThemeToggle', () => {
 
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('type', 'button');
-    expect(button).toHaveClass('flex', 'items-center', 'justify-center', 'w-8', 'h-8', 'rounded-md');
+    expect(button).toHaveClass(
+      'flex',
+      'items-center',
+      'justify-center',
+      'w-8',
+      'h-8',
+      'rounded-md',
+    );
   });
 
   it('applies hover styles to button', () => {
@@ -230,7 +237,7 @@ describe('ThemeToggle', () => {
       resolvedTheme: 'dark',
     });
 
-    const { container } = render(<ThemeToggle />);
+    render(<ThemeToggle />);
 
     // First render should have placeholder div
     // After useEffect, should render button

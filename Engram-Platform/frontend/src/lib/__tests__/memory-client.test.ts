@@ -175,6 +175,67 @@ describe('memoryClient', () => {
     });
   });
 
+  describe('matter operations', () => {
+    it('getMatters posts to /graph/query with matters query type', async () => {
+      fetchSpy.mockResolvedValueOnce(jsonResponse({ matters: [], total: 0 }));
+      const result = await memoryClient.getMatters();
+      expect(result.data).toEqual({ matters: [], total: 0 });
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/graph/query'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ query_type: 'matters' }),
+        }),
+      );
+    });
+
+    it('createMatter posts to /graph/entities', async () => {
+      const matter = { matter_id: 'mat1', title: 'Test Matter', status: 'open' };
+      fetchSpy.mockResolvedValueOnce(jsonResponse(matter));
+      const result = await memoryClient.createMatter({ title: 'Test Matter' });
+      expect(result.data).toEqual(matter);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/graph/entities'),
+        expect.objectContaining({ method: 'POST' }),
+      );
+    });
+
+    it('updateMatter sends PUT to /graph/entities/:id with encoded ID', async () => {
+      fetchSpy.mockResolvedValueOnce(jsonResponse({ ok: true }));
+      const result = await memoryClient.updateMatter('mat-id-123', { status: 'closed' });
+      expect(result.error).toBeNull();
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/graph/entities/'),
+        expect.objectContaining({
+          method: 'PUT',
+          body: JSON.stringify({ status: 'closed' }),
+        }),
+      );
+    });
+
+    it('updateMatter encodes special characters in matter ID', async () => {
+      fetchSpy.mockResolvedValueOnce(jsonResponse({ ok: true }));
+      const specialId = 'mat/id?with=special&chars';
+      await memoryClient.updateMatter(specialId, { status: 'closed' });
+
+      const callUrl = fetchSpy.mock.calls[0][0] as string;
+      // Verify the ID is encoded (/ becomes %2F, ? becomes %3F, etc.)
+      expect(callUrl).toContain('/graph/entities/');
+      expect(callUrl).not.toContain('?');
+      expect(callUrl).not.toContain('&');
+    });
+
+    it('deleteMatter sends DELETE to /graph/entities/:id with encoded ID', async () => {
+      fetchSpy.mockResolvedValueOnce(jsonResponse({ ok: true }));
+      const result = await memoryClient.deleteMatter('mat_456');
+      expect(result.error).toBeNull();
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/graph/entities/mat_456'),
+        expect.objectContaining({ method: 'DELETE' }),
+      );
+    });
+  });
+
   describe('error handling', () => {
     it('returns error on non-ok response', async () => {
       fetchSpy.mockResolvedValueOnce(jsonResponse({ error: 'Unauthorized' }, 401));

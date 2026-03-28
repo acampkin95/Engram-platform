@@ -1,6 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PageTransition, FadeIn, SlideIn, StaggerContainer, StaggerItem, StaggerList } from '../Animations';
+import { describe, it, vi } from 'vitest';
+import {
+  FadeIn,
+  PageTransition,
+  SlideIn,
+  StaggerContainer,
+  StaggerItem,
+  StaggerList,
+} from '../Animations';
 
 // Mock framer-motion to control animation behavior in tests
 vi.mock('framer-motion', async () => {
@@ -80,7 +87,7 @@ describe('Animations', () => {
     });
 
     it('applies delay prop', () => {
-      const { container } = render(
+      render(
         <FadeIn delay={0.5}>
           <div>Delayed content</div>
         </FadeIn>,
@@ -365,25 +372,17 @@ describe('Animations', () => {
     });
 
     it('defaults to card variant when not specified', () => {
-      render(
-        <StaggerList
-          items={testItems}
-          renderItem={(item) => <div>{item.name}</div>}
-        />,
-      );
+      render(<StaggerList items={testItems} renderItem={(item) => <div>{item.name}</div>} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
     });
 
     it('passes index to renderItem', () => {
-      const renderItem = vi.fn((item: TestItem, index: number) => <div>{`${item.name} (${index})`}</div>);
+      const renderItem = vi.fn((item: TestItem, index: number) => (
+        <div>{`${item.name} (${index})`}</div>
+      ));
 
-      render(
-        <StaggerList
-          items={testItems}
-          renderItem={renderItem}
-        />,
-      );
+      render(<StaggerList items={testItems} renderItem={renderItem} />);
 
       expect(renderItem).toHaveBeenCalledWith(testItems[0], 0);
       expect(renderItem).toHaveBeenCalledWith(testItems[1], 1);
@@ -404,7 +403,7 @@ describe('Animations', () => {
     });
 
     it('renders empty list when no items provided', () => {
-      const { container } = render(
+      render(
         <StaggerList
           items={[] as Array<{ id: string; name: string }>}
           renderItem={(item: { id: string; name: string }) => <div>{item.name}</div>}
@@ -420,12 +419,7 @@ describe('Animations', () => {
         { id: 'unique-2', name: 'Item 2' },
       ];
 
-      render(
-        <StaggerList
-          items={items}
-          renderItem={(item) => <div>{item.name}</div>}
-        />,
-      );
+      render(<StaggerList items={items} renderItem={(item) => <div>{item.name}</div>} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
@@ -437,12 +431,7 @@ describe('Animations', () => {
         { id: 2, name: 'Item 2' },
       ];
 
-      render(
-        <StaggerList
-          items={items}
-          renderItem={(item) => <div>{item.name}</div>}
-        />,
-      );
+      render(<StaggerList items={items} renderItem={(item) => <div>{item.name}</div>} />);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
@@ -478,7 +467,7 @@ describe('Animations', () => {
           <SlideIn direction="up">
             <div>From up</div>
           </SlideIn>
-        </>
+        </>,
       );
 
       expect(screen.getByText('From left')).toBeInTheDocument();

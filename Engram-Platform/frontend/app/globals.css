@@ -6,19 +6,54 @@
   /* ═══════════════════════════════════════
      ENGRAM BRAND SYSTEM — DESIGN TOKENS
      Multi-layer AI Memory System
+     Tactical OSINT Interface v2.0
   ═══════════════════════════════════════ */
 
-  /* Core depth palette */
-  --color-void: #03020a;
-  --color-deep: #090818;
-  --color-layer-0: #0c0b1c;
-  --color-layer-1: #120f2b;
-  --color-layer-2: #1a1638;
-  --color-layer-3: #221d45;
-  --color-layer-4: #2c2658;
+  /* Core depth palette — TRUE BLACK foundation */
+  --color-void: #0a0b10;
+  --color-deep: #0f1117;
+  --color-layer-0: #13151c;
+  --color-layer-1: #1a1d28;
+  --color-layer-2: #222633;
+  --color-layer-3: #2a2f3e;
+  --color-layer-4: #343a4d;
   --color-panel: #0d0b1a;
 
-  /* Brand colors */
+  /* ─── FUNCTIONAL COLOR CHANNELS ─────────────────────────
+     Colors are FUNCTIONAL, not decorative.
+     Each channel has semantic meaning for OSINT operations.
+  ─────────────────────────────────────────────────────── */
+
+  /* Intelligence — Data nodes, processed information, signals */
+  --color-intelligence: #00d4ff;
+  --color-intelligence-dim: rgba(0, 212, 255, 0.15);
+  --color-intelligence-glow: rgba(0, 212, 255, 0.4);
+
+  /* Anomaly — Warnings, flagged items, risk indicators */
+  --color-anomaly: #ffb020;
+  --color-anomaly-dim: rgba(255, 176, 32, 0.15);
+  --color-anomaly-glow: rgba(255, 176, 32, 0.4);
+
+  /* Active Process — Running crawls, active agents, in-progress */
+  --color-active: #7c5cff;
+  --color-active-dim: rgba(124, 92, 255, 0.15);
+  --color-active-glow: rgba(124, 92, 255, 0.4);
+
+  /* Success/Online — Healthy services, completed tasks, verified */
+  --color-success: #2ee6a6;
+  --color-success-dim: rgba(46, 230, 166, 0.15);
+  --color-success-glow: rgba(46, 230, 166, 0.4);
+
+  /* Critical/Error — Failures, errors, issues requiring attention */
+  --color-critical: #ff4757;
+  --color-critical-dim: rgba(255, 71, 87, 0.15);
+  --color-critical-glow: rgba(255, 71, 87, 0.4);
+
+  /* Neutral/Context — Idle, pending, metadata */
+  --color-neutral: #6b7280;
+  --color-neutral-dim: rgba(107, 114, 128, 0.15);
+
+  /* Brand colors (legacy aliases) */
   --color-amber: #f2a93b;
   --color-amber-bright: #ffc15e;
   --color-amber-dim: #b87b20;
@@ -483,6 +518,38 @@
 }
 
 /* ═══════════════════════════════════════
+   VIEW TRANSITIONS API
+   Native browser page transitions
+═══════════════════════════════════════ */
+
+@keyframes view-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes view-fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+::view-transition-old(root) {
+  animation: view-fade-out 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+::view-transition-new(root) {
+  animation: view-fade-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Shared element transitions for cards */
+::view-transition-old(card) {
+  animation: view-fade-out 0.15s ease-out forwards;
+}
+
+::view-transition-new(card) {
+  animation: view-fade-in 0.2s ease-out forwards;
+}
+
+/* ═══════════════════════════════════════
    PERFORMANCE OPTIMIZATIONS
    Additional animations and utilities
 ═══════════════════════════════════════ */
@@ -517,6 +584,19 @@
   contain-intrinsic-size: 0 500px;
 }
 
+/* Layout containment for independent sections */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
 /* Will-change for animated elements */
 .will-change-transform {
   will-change: transform;
@@ -526,10 +606,27 @@
   will-change: opacity;
 }
 
+.will-change-auto {
+  will-change: auto;
+}
+
 /* GPU acceleration hints */
 .gpu-accelerated {
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* Smooth scroll with performance */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimized overflow containers */
+.scroll-container {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Lazy loading blur effect */

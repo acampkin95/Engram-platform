@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LiveRegionProvider, useLiveRegion } from '../LiveRegion';
 
 // Test component that uses the live region hook
@@ -9,11 +9,13 @@ function TestComponent() {
 
   return (
     <div>
-      <button onClick={() => announce('Polite announcement')}>Announce Polite</button>
-      <button onClick={() => announce('Assertive announcement', 'assertive')}>
+      <button type="button" onClick={() => announce('Polite announcement')}>
+        Announce Polite
+      </button>
+      <button type="button" onClick={() => announce('Assertive announcement', 'assertive')}>
         Announce Assertive
       </button>
-      <button onClick={() => announce('Custom assertive', 'assertive')}>
+      <button type="button" onClick={() => announce('Custom assertive', 'assertive')}>
         Custom Assertive
       </button>
     </div>
@@ -93,7 +95,7 @@ describe('LiveRegion', () => {
 
   describe('useLiveRegion hook', () => {
     it('provides announce function', () => {
-      const { container } = render(
+      render(
         <LiveRegionProvider>
           <TestComponent />
         </LiveRegionProvider>,
@@ -326,7 +328,11 @@ describe('LiveRegion', () => {
       function TestEmptyComponent() {
         const { announce } = useLiveRegion();
 
-        return <button onClick={() => announce('')}>Announce Empty</button>;
+        return (
+          <button type="button" onClick={() => announce('')}>
+            Announce Empty
+          </button>
+        );
       }
 
       render(
@@ -350,7 +356,7 @@ describe('LiveRegion', () => {
         const { announce } = useLiveRegion();
 
         return (
-          <button onClick={() => announce('Error: "Special" & <characters>')}>
+          <button type="button" onClick={() => announce('Error: "Special" & <characters>')}>
             Announce Special
           </button>
         );
@@ -376,7 +382,11 @@ describe('LiveRegion', () => {
       function TestLongComponent() {
         const { announce } = useLiveRegion();
 
-        return <button onClick={() => announce(longMessage)}>Announce Long</button>;
+        return (
+          <button type="button" onClick={() => announce(longMessage)}>
+            Announce Long
+          </button>
+        );
       }
 
       render(

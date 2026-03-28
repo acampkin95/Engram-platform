@@ -17,6 +17,8 @@ const {
   getRecentLogsMock,
   runMaintenanceActionMock,
   sendAdminNotificationMock,
+  sendNotificationMock,
+  getNotificationChannelStatusMock,
 } = vi.hoisted(() => ({
   getSystemHealthSnapshotMock: vi.fn(),
   runSystemControlMock: vi.fn(),
@@ -24,6 +26,8 @@ const {
   getRecentLogsMock: vi.fn(),
   runMaintenanceActionMock: vi.fn(),
   sendAdminNotificationMock: vi.fn(),
+  sendNotificationMock: vi.fn(),
+  getNotificationChannelStatusMock: vi.fn(),
 }));
 
 vi.mock('@clerk/nextjs/server', () => ({
@@ -41,6 +45,8 @@ vi.mock('@/src/server/system-admin', () => ({
   getRecentLogs: getRecentLogsMock,
   runMaintenanceAction: runMaintenanceActionMock,
   sendAdminNotification: sendAdminNotificationMock,
+  sendNotification: sendNotificationMock,
+  getNotificationChannelStatus: getNotificationChannelStatusMock,
   SERVICE_ALLOWLIST: [
     'all',
     'crawler-api',
@@ -479,7 +485,7 @@ describe('System API Routes', () => {
   describe('POST /api/system/notifications', () => {
     it('should send admin notification when authorized', async () => {
       requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
-      sendAdminNotificationMock.mockResolvedValue({ id: 'email-123', ok: true });
+      sendNotificationMock.mockResolvedValue({ email: { success: true }, ntfy: { success: true } });
 
       const { POST } = await import('../notifications/route');
       const request = new Request('http://localhost/api/system/notifications', {
@@ -495,8 +501,8 @@ describe('System API Routes', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data).toEqual({ id: 'email-123', ok: true });
-      expect(sendAdminNotificationMock).toHaveBeenCalledWith({
+      expect(data).toEqual({ email: { success: true }, ntfy: { success: true } });
+      expect(sendNotificationMock).toHaveBeenCalledWith({
         to: ['admin@example.com'],
         subject: 'System Alert',
         text: 'A system issue has occurred',
@@ -505,7 +511,7 @@ describe('System API Routes', () => {
 
     it('should lowercase email addresses without extra spaces', async () => {
       requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
-      sendAdminNotificationMock.mockResolvedValue({ id: 'email-123', ok: true });
+      sendNotificationMock.mockResolvedValue({ email: { success: true }, ntfy: { success: true } });
 
       const { POST } = await import('../notifications/route');
       const request = new Request('http://localhost/api/system/notifications', {
@@ -520,7 +526,7 @@ describe('System API Routes', () => {
       const response = await POST(request);
 
       expect(response.status).toBe(200);
-      expect(sendAdminNotificationMock).toHaveBeenCalledWith({
+      expect(sendNotificationMock).toHaveBeenCalledWith({
         to: ['admin@example.com', 'user@test.com'],
         subject: 'Alert',
         text: 'Message',
@@ -529,7 +535,7 @@ describe('System API Routes', () => {
 
     it('should trim subject and text', async () => {
       requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
-      sendAdminNotificationMock.mockResolvedValue({ id: 'email-123', ok: true });
+      sendNotificationMock.mockResolvedValue({ email: { success: true }, ntfy: { success: true } });
 
       const { POST } = await import('../notifications/route');
       const request = new Request('http://localhost/api/system/notifications', {
@@ -544,7 +550,7 @@ describe('System API Routes', () => {
       const response = await POST(request);
 
       expect(response.status).toBe(200);
-      expect(sendAdminNotificationMock).toHaveBeenCalledWith({
+      expect(sendNotificationMock).toHaveBeenCalledWith({
         to: ['admin@example.com'],
         subject: 'System Alert',
         text: 'A system issue has occurred',
@@ -689,6 +695,253 @@ describe('System API Routes', () => {
 
       expect(response.status).toBe(400);
       expect(data.error).toBeDefined();
+    });
+
+    it('should send notification to ntfy only when channels specified', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+      sendNotificationMock.mockResolvedValue({ ntfy: { success: true } });
+
+      const { POST } = await import('../notifications/route');
+      const request = new Request('http://localhost/api/system/notifications', {
+        method: 'POST',
+        body: JSON.stringify({
+          subject: 'Alert',
+          text: 'Message',
+          channels: ['ntfy'],
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data).toEqual({ ntfy: { success: true } });
+      expect(sendNotificationMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channels: ['ntfy'],
+        }),
+      );
+    });
+
+    it('should send notification with priority', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+      sendNotificationMock.mockResolvedValue({ email: { success: true }, ntfy: { success: true } });
+
+      const { POST } = await import('../notifications/route');
+      const request = new Request('http://localhost/api/system/notifications', {
+        method: 'POST',
+        body: JSON.stringify({
+          subject: 'Alert',
+          text: 'Message',
+          priority: 'high',
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(sendNotificationMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          priority: 'high',
+        }),
+      );
+    });
+
+    it('should send notification with tags', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+      sendNotificationMock.mockResolvedValue({ email: { success: true }, ntfy: { success: true } });
+
+      const { POST } = await import('../notifications/route');
+      const request = new Request('http://localhost/api/system/notifications', {
+        method: 'POST',
+        body: JSON.stringify({
+          subject: 'Alert',
+          text: 'Message',
+          tags: ['test', 'alert'],
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(sendNotificationMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: ['test', 'alert'],
+        }),
+      );
+    });
+
+    it('should reject invalid channel name', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+
+      const { POST } = await import('../notifications/route');
+      const request = new Request('http://localhost/api/system/notifications', {
+        method: 'POST',
+        body: JSON.stringify({
+          subject: 'Alert',
+          text: 'Message',
+          channels: ['sms'],
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBeDefined();
+    });
+  });
+
+  describe('GET /api/system/notifications/settings', () => {
+    it('should return channel status when authenticated', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+      const mockStatus = {
+        email: { configured: true, lastTestTime: null },
+        ntfy: { configured: true, lastTestTime: '2026-03-27T10:00:00Z' },
+      };
+      getNotificationChannelStatusMock.mockReturnValue(mockStatus);
+
+      const { GET } = await import('../notifications/settings/route');
+      const response = await GET();
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data).toEqual(mockStatus);
+    });
+
+    it('should return 401 when not authenticated', async () => {
+      requireAdminAccessMock.mockRejectedValue(new Error('Unauthorized'));
+
+      const { GET } = await import('../notifications/settings/route');
+      const response = await GET();
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Unauthorized');
+    });
+
+    it('should return 403 when user lacks admin permissions', async () => {
+      requireAdminAccessMock.mockRejectedValue(new Error('Forbidden'));
+
+      const { GET } = await import('../notifications/settings/route');
+      const response = await GET();
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toBe('Forbidden');
+    });
+  });
+
+  describe('PUT /api/system/notifications/settings', () => {
+    it('should test a channel when admin is authorized', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+      sendNotificationMock.mockResolvedValue({ ntfy: { success: true } });
+
+      const { PUT } = await import('../notifications/settings/route');
+      const request = new Request('http://localhost/api/system/notifications/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ channel: 'ntfy' }),
+      });
+
+      const response = await PUT(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data).toEqual({ ntfy: { success: true } });
+      expect(sendNotificationMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channels: ['ntfy'],
+          tags: ['test'],
+        }),
+      );
+    });
+
+    it('should test email channel', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+      sendNotificationMock.mockResolvedValue({ email: { success: true } });
+
+      const { PUT } = await import('../notifications/settings/route');
+      const request = new Request('http://localhost/api/system/notifications/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ channel: 'email' }),
+      });
+
+      const response = await PUT(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(sendNotificationMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channels: ['email'],
+          tags: ['test'],
+        }),
+      );
+    });
+
+    it('should return 401 when not authenticated', async () => {
+      requireAdminAccessMock.mockRejectedValue(new Error('Unauthorized'));
+
+      const { PUT } = await import('../notifications/settings/route');
+      const request = new Request('http://localhost/api/system/notifications/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ channel: 'ntfy' }),
+      });
+
+      const response = await PUT(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Unauthorized');
+    });
+
+    it('should return 403 when user lacks admin permissions', async () => {
+      requireAdminAccessMock.mockRejectedValue(new Error('Forbidden'));
+
+      const { PUT } = await import('../notifications/settings/route');
+      const request = new Request('http://localhost/api/system/notifications/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ channel: 'ntfy' }),
+      });
+
+      const response = await PUT(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toBe('Forbidden');
+    });
+
+    it('should reject invalid channel name', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+
+      const { PUT } = await import('../notifications/settings/route');
+      const request = new Request('http://localhost/api/system/notifications/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ channel: 'sms' }),
+      });
+
+      const response = await PUT(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe('Invalid channel');
+    });
+
+    it('should reject missing channel field', async () => {
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_admin', mode: 'allowlist' });
+
+      const { PUT } = await import('../notifications/settings/route');
+      const request = new Request('http://localhost/api/system/notifications/settings', {
+        method: 'PUT',
+        body: JSON.stringify({}),
+      });
+
+      const response = await PUT(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe('Invalid channel');
     });
   });
 });
