@@ -5,28 +5,14 @@ all known information about an entity (person, organization, or alias)
 and supports incremental enrichment through the deep crawl pipeline.
 """
 
-
 from __future__ import annotations
 import uuid
 from datetime import datetime, UTC
 from typing import Any
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from pydantic import BaseModel, Field, model_validator
-
 
 class EntityType(StrEnum):
     """Type of entity being investigated."""
@@ -35,7 +21,6 @@ class EntityType(StrEnum):
     ORGANIZATION = "organization"
     ALIAS = "alias"  # Potential alias of another entity
     UNKNOWN = "unknown"
-
 
 class DataSource(StrEnum):
     """Where entity data originated."""
@@ -53,7 +38,6 @@ class DataSource(StrEnum):
     LM_INFERENCE = "lm_inference"  # LLM-extracted
     MANUAL_ENTRY = "manual_entry"
 
-
 class VerificationStatus(StrEnum):
     """How verified a data point is."""
 
@@ -63,7 +47,6 @@ class VerificationStatus(StrEnum):
     CONTRADICTED = "contradicted"  # Conflicting information
     DISPUTED = "disputed"  # Flagged as potentially false
 
-
 class ConfidenceLevel(StrEnum):
     """Overall confidence in data accuracy."""
 
@@ -71,7 +54,6 @@ class ConfidenceLevel(StrEnum):
     MEDIUM = "medium"  # 30-70%
     HIGH = "high"  # 70-90%
     VERY_HIGH = "very_high"  # 90-100%
-
 
 class RiskLevel(StrEnum):
     """Risk assessment for the entity."""
@@ -82,7 +64,6 @@ class RiskLevel(StrEnum):
     HIGH = "high"
     CRITICAL = "critical"
 
-
 class Gender(StrEnum):
     """Gender identification if known."""
 
@@ -91,11 +72,9 @@ class Gender(StrEnum):
     NON_BINARY = "non_binary"
     UNKNOWN = "unknown"
 
-
 # ============================================================================
 # COMPONENT MODELS - Individual data points with source tracking
 # ============================================================================
-
 
 class SourcedDataPoint(BaseModel):
     """Base class for data points with source tracking."""
@@ -109,7 +88,6 @@ class SourcedDataPoint(BaseModel):
     last_seen: datetime = Field(default_factory=lambda: datetime.now(UTC))
     notes: str | None = None
 
-
 class NameInfo(SourcedDataPoint):
     """Name information with components."""
 
@@ -122,7 +100,6 @@ class NameInfo(SourcedDataPoint):
     maiden_name: str | None = None
     aliases: list[str] = Field(default_factory=list)
 
-
 class PhoneInfo(SourcedDataPoint):
     """Phone number with metadata."""
 
@@ -134,7 +111,6 @@ class PhoneInfo(SourcedDataPoint):
     is_disposable: bool = False
     is_active: bool | None = None
 
-
 class EmailInfo(SourcedDataPoint):
     """Email address with metadata."""
 
@@ -145,7 +121,6 @@ class EmailInfo(SourcedDataPoint):
     is_business: bool = False
     deliverable: bool | None = None
     breach_count: int = 0
-
 
 class AddressInfo(SourcedDataPoint):
     """Physical address."""
@@ -161,7 +136,6 @@ class AddressInfo(SourcedDataPoint):
     longitude: float | None = None
     address_type: str | None = None  # residential, business, postal
 
-
 class DateInfo(SourcedDataPoint):
     """Date with precision tracking."""
 
@@ -171,7 +145,6 @@ class DateInfo(SourcedDataPoint):
     day: int | None = None
     precision: str = "full"  # full, month, year, approximate
     display: str | None = None  # Human-readable
-
 
 class EmploymentInfo(SourcedDataPoint):
     """Employment/occupation information."""
@@ -185,7 +158,6 @@ class EmploymentInfo(SourcedDataPoint):
     is_current: bool = True
     location: str | None = None
 
-
 class EducationInfo(SourcedDataPoint):
     """Educational background."""
 
@@ -196,7 +168,6 @@ class EducationInfo(SourcedDataPoint):
     start_year: int | None = None
     end_year: int | None = None
     is_verified: bool = False
-
 
 class SocialProfile(SourcedDataPoint):
     """Social media profile reference."""
@@ -216,7 +187,6 @@ class SocialProfile(SourcedDataPoint):
     is_verified: bool = False
     is_private: bool = False
 
-
 class ImageReference(SourcedDataPoint):
     """Reference to an image associated with the entity."""
 
@@ -234,7 +204,6 @@ class ImageReference(SourcedDataPoint):
     is_stock_photo: bool | None = None
     is_ai_generated: bool | None = None
 
-
 class RelationshipInfo(SourcedDataPoint):
     """Relationship to another entity."""
 
@@ -247,7 +216,6 @@ class RelationshipInfo(SourcedDataPoint):
     is_current: bool = True
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
 
-
 class UsernameInfo(SourcedDataPoint):
     """Username/handle across platforms."""
 
@@ -256,11 +224,9 @@ class UsernameInfo(SourcedDataPoint):
     platforms_checked: list[str] = Field(default_factory=list)
     availability_status: dict[str, bool] = Field(default_factory=dict)  # platform: is_registered
 
-
 # ============================================================================
 # ENTITY PROFILE - Main model
 # ============================================================================
-
 
 class EntityProfile(BaseModel):
     """Complete entity profile for OSINT investigation.
@@ -487,9 +453,14 @@ class EntityProfile(BaseModel):
             self.keywords.append(keyword)
             self.updated_at = datetime.now(UTC)
 
+    def _score_boolean_field(self, has_value: bool, weight: float) -> float:
+        return weight if has_value else 0.0
+
+    def _score_list_field(self, items: list, multiplier: float, weight: float) -> float:
+        return min(len(items) * multiplier, weight) if items else 0.0
+
     def calculate_completeness(self) -> float:
         """Calculate profile completeness score."""
-        score = 0.0
         weights = {
             "primary_name": 0.15,
             "date_of_birth": 0.10,
@@ -503,34 +474,22 @@ class EntityProfile(BaseModel):
             "keywords": 0.05,
         }
 
-        if self.primary_name:
-            score += weights["primary_name"]
-        if self.date_of_birth:
-            score += weights["date_of_birth"]
-        if self.phones:
-            score += min(len(self.phones) * 0.05, weights["phones"])
-        if self.emails:
-            score += min(len(self.emails) * 0.05, weights["emails"])
-        if self.addresses:
-            score += min(len(self.addresses) * 0.05, weights["addresses"])
-        if self.social_profiles:
-            score += min(len(self.social_profiles) * 0.03, weights["social_profiles"])
-        if self.images:
-            score += min(len(self.images) * 0.03, weights["images"])
-        if self.occupations:
-            score += min(len(self.occupations) * 0.05, weights["occupations"])
-        if self.relationships:
-            score += min(len(self.relationships) * 0.02, weights["relationships"])
-        if self.keywords:
-            score += min(len(self.keywords) * 0.01, weights["keywords"])
+        score = 0.0
+        score += self._score_boolean_field(bool(self.primary_name), weights["primary_name"])
+        score += self._score_boolean_field(bool(self.date_of_birth), weights["date_of_birth"])
+        score += self._score_list_field(self.phones, 0.05, weights["phones"])
+        score += self._score_list_field(self.emails, 0.05, weights["emails"])
+        score += self._score_list_field(self.addresses, 0.05, weights["addresses"])
+        score += self._score_list_field(self.social_profiles, 0.03, weights["social_profiles"])
+        score += self._score_list_field(self.images, 0.03, weights["images"])
+        score += self._score_list_field(self.occupations, 0.05, weights["occupations"])
+        score += self._score_list_field(self.relationships, 0.02, weights["relationships"])
+        score += self._score_list_field(self.keywords, 0.01, weights["keywords"])
 
         self.completeness_score = min(score, 1.0)
         return self.completeness_score
 
-    def get_all_search_terms(self) -> set[str]:
-        """Get all searchable terms from the profile."""
-        terms = set()
-
+    def _extract_primary_name_terms(self, terms: set[str]) -> None:
         if self.primary_name:
             terms.add(self.primary_name.value)
             if self.primary_name.first_name:
@@ -538,38 +497,49 @@ class EntityProfile(BaseModel):
             if self.primary_name.last_name:
                 terms.add(self.primary_name.last_name)
 
+    def _extract_known_names_terms(self, terms: set[str]) -> None:
         for name in self.known_names:
             terms.add(name.value)
             for alias in name.aliases:
                 terms.add(alias)
 
+    def _extract_phone_terms(self, terms: set[str]) -> None:
         for phone in self.phones:
             terms.add(phone.value)
             if phone.formatted:
                 terms.add(phone.formatted)
 
+    def _extract_email_terms(self, terms: set[str]) -> None:
         for email in self.emails:
             terms.add(email.value)
             local_part = email.value.split("@")[0]
             terms.add(local_part)
 
+    def _extract_username_terms(self, terms: set[str]) -> None:
         for username in self.usernames:
             terms.add(username.value)
 
+    def _extract_address_terms(self, terms: set[str]) -> None:
         for addr in self.addresses:
             terms.add(addr.value)
             if addr.city:
                 terms.add(addr.city)
 
+    def get_all_search_terms(self) -> set[str]:
+        """Get all searchable terms from the profile."""
+        terms: set[str] = set()
+        self._extract_primary_name_terms(terms)
+        self._extract_known_names_terms(terms)
+        self._extract_phone_terms(terms)
+        self._extract_email_terms(terms)
+        self._extract_username_terms(terms)
+        self._extract_address_terms(terms)
         terms.update(self.keywords)
-
         return terms
-
 
 # ============================================================================
 # REQUEST/RESPONSE MODELS
 # ============================================================================
-
 
 class CreateEntityRequest(BaseModel):
     """Request to create a new entity profile."""
@@ -603,7 +573,6 @@ class CreateEntityRequest(BaseModel):
             )
         return self
 
-
 class EntitySearchRequest(BaseModel):
     """Request to search for entities."""
 
@@ -614,7 +583,6 @@ class EntitySearchRequest(BaseModel):
     username: str | None = None
     investigation_id: str | None = None
     limit: int = Field(default=20, ge=1, le=100)
-
 
 class EntitySummary(BaseModel):
     """Lightweight entity summary for listings."""
@@ -633,7 +601,6 @@ class EntitySummary(BaseModel):
     updated_at: datetime
     investigation_id: str | None = None
 
-
 class EntityMergeRequest(BaseModel):
     """Request to merge two entities."""
 
@@ -641,7 +608,6 @@ class EntityMergeRequest(BaseModel):
     secondary_entity_id: str
     merge_strategy: str = "keep_both"  # keep_both, prefer_primary, prefer_newer
     notes: str | None = None
-
 
 class EnrichEntityRequest(BaseModel):
     """Request to enrich an entity with new data."""

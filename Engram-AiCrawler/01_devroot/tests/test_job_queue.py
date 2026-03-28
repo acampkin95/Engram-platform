@@ -205,9 +205,13 @@ class TestOsintJobQueue:
     @pytest.mark.asyncio
     async def test_cancel_pending_job(self, job_queue):
         """Pending job can be cancelled."""
-        await job_queue.start()
-
+        # Don't start the queue processor to keep job in PENDING state
+        # so we can test cancellation of a pending (not yet running) job
         job_id = await job_queue.enqueue(JobType.ENTITY_SCAN, {})
+
+        # Verify job is PENDING before cancelling
+        job = await job_queue.get_job(job_id)
+        assert job.status == JobStatus.PENDING
 
         cancelled = await job_queue.cancel_job(job_id)
 
@@ -215,13 +219,10 @@ class TestOsintJobQueue:
         job = await job_queue.get_job(job_id)
         assert job.status == JobStatus.CANCELLED
 
-        await job_queue.stop()
-
     @pytest.mark.asyncio
     async def test_cancel_completed_job_fails(self, job_queue):
         """Completed job cannot be cancelled."""
-        await job_queue.start()
-
+        # Don't start the queue - we manually set status to COMPLETED
         job_id = await job_queue.enqueue(JobType.ENTITY_SCAN, {})
 
         job = await job_queue.get_job(job_id)
@@ -230,8 +231,6 @@ class TestOsintJobQueue:
 
         cancelled = await job_queue.cancel_job(job_id)
         assert cancelled is False
-
-        await job_queue.stop()
 
     @pytest.mark.asyncio
     async def test_list_jobs(self, job_queue):

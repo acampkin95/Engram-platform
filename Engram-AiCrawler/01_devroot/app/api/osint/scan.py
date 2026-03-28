@@ -187,6 +187,91 @@ async def get_scan_result(scan_id: str) -> dict[str, Any]:
     return data
 
 
+def _export_as_json(data: dict[str, Any], include_set: set[str], filename: str) -> Response:
+    if "aliases" not in include_set:
+        data.pop("profile_urls", None)
+    if "metadata" not in include_set:
+        data.pop("review", None)
+        data.pop("summary", None)
+        data.pop("stored_document_ids", None)
+    kg = data.get("knowledge_graph")
+    if isinstance(kg, dict):
+        if "entities" not in include_set:
+            kg.pop("entities", None)
+        if "relationships" not in include_set:
+            kg.pop("relationships", None)
+    return Response(
+        content=json.dumps(data, indent=2, default=str),
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+def _write_csv_rows(
+    writer: Any,
+    data: dict[str, Any],
+    base: list[Any],
+    include_set: set[str],
+) -> None:
+    if "aliases" in include_set:
+        for pu in data.get("profile_urls", []):
+            writer.writerow(
+                ["profile_url"] + base
+                + [pu.get("platform", ""), pu.get("url", ""), "", "", "", "", "", "", "", ""]
+            )
+    for cr in data.get("crawl_results", []):
+        writer.writerow(
+            ["crawl_result"] + base
+            + ["", cr.get("url", ""), cr.get("success", ""), cr.get("word_count", ""), "", "", "", "", "", ""]
+        )
+    kg_data = data.get("knowledge_graph") or {}
+    if "entities" in include_set:
+        for entity in kg_data.get("entities", []):
+            writer.writerow(
+                ["entity"] + base
+                + ["", "", "", "", entity.get("name", ""), entity.get("entity_type", ""), "", "", "", ""]
+            )
+    if "relationships" in include_set:
+        for rel in kg_data.get("relationships", []):
+            writer.writerow(
+                ["relationship"] + base
+                + ["", "", "", "", "", "", rel.get("source_id", ""), rel.get("target_id", ""),
+                   rel.get("relation_type", ""), rel.get("confidence", "")]
+            )
+    if "metadata" in include_set:
+        review = data.get("review") or {}
+        summary_str = (
+            f"kept:{review.get('kept', 0)},"
+            f"deranked:{review.get('deranked', 0)},"
+            f"archived:{review.get('archived', 0)},"
+            f"avg_relevance:{review.get('average_relevance', 0)}"
+        )
+        writer.writerow(["metadata"] + base + ["", "", "", "", summary_str, "", "", "", "", ""])
+
+
+def _export_as_csv(data: dict[str, Any], include_set: set[str], filename: str) -> Response:
+    output = io.StringIO()
+    writer = csv.writer(output)
+    base = [
+        data.get("scan_id", ""),
+        data.get("username", ""),
+        data.get("stage", ""),
+        data.get("started_at", ""),
+        data.get("completed_at", ""),
+    ]
+    writer.writerow([
+        "type", "scan_id", "username", "stage", "started_at", "completed_at",
+        "platform", "url", "crawl_success", "word_count",
+        "entity_name", "entity_type", "rel_source", "rel_target", "rel_type", "rel_confidence",
+    ])
+    _write_csv_rows(writer, data, base, include_set)
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @router.get("/scan/{scan_id}/export")
 async def export_scan_result(
     scan_id: str,
@@ -203,161 +288,5 @@ async def export_scan_result(
     filename = f"osint-{safe_name}-{scan_id[:8]}.{fmt}"
 
     if fmt == "json":
-        data_json: dict[str, Any] = data
-        if "aliases" not in include_set:
-            data_json.pop("profile_urls", None)
-        if "metadata" not in include_set:
-            data_json.pop("review", None)
-            data_json.pop("summary", None)
-            data_json.pop("stored_document_ids", None)
-        kg = data_json.get("knowledge_graph")
-        if isinstance(kg, dict):
-            if "entities" not in include_set:
-                kg.pop("entities", None)
-            if "relationships" not in include_set:
-                kg.pop("relationships", None)
-        content_str = json.dumps(data_json, indent=2, default=str)
-        return Response(
-            content=content_str,
-            media_type="application/json",
-            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-        )
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-    data_csv: dict[str, Any] = data
-    base = [
-        data_csv.get("scan_id", ""),
-        data_csv.get("username", ""),
-        data_csv.get("stage", ""),
-        data_csv.get("started_at", ""),
-        data_csv.get("completed_at", ""),
-    ]
-
-    writer.writerow(
-        [
-            "type",
-            "scan_id",
-            "username",
-            "stage",
-            "started_at",
-            "completed_at",
-            "platform",
-            "url",
-            "crawl_success",
-            "word_count",
-            "entity_name",
-            "entity_type",
-            "rel_source",
-            "rel_target",
-            "rel_type",
-            "rel_confidence",
-        ]
-    )
-
-    if "aliases" in include_set:
-        for pu in data_csv.get("profile_urls", []):
-            writer.writerow(
-                ["profile_url"]
-                + base
-                + [
-                    pu.get("platform", ""),
-                    pu.get("url", ""),
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                ]
-            )
-
-    for cr in data_csv.get("crawl_results", []):
-        writer.writerow(
-            ["crawl_result"]
-            + base
-            + [
-                "",
-                cr.get("url", ""),
-                cr.get("success", ""),
-                cr.get("word_count", ""),
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-            ]
-        )
-
-    kg_data = data_csv.get("knowledge_graph") or {}
-    if "entities" in include_set:
-        for entity in kg_data.get("entities", []):
-            writer.writerow(
-                ["entity"]
-                + base
-                + [
-                    "",
-                    "",
-                    "",
-                    "",
-                    entity.get("name", ""),
-                    entity.get("entity_type", ""),
-                    "",
-                    "",
-                    "",
-                    "",
-                ]
-            )
-
-    if "relationships" in include_set:
-        for rel in kg_data.get("relationships", []):
-            writer.writerow(
-                ["relationship"]
-                + base
-                + [
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    rel.get("source_id", ""),
-                    rel.get("target_id", ""),
-                    rel.get("relation_type", ""),
-                    rel.get("confidence", ""),
-                ]
-            )
-
-    if "metadata" in include_set:
-        review = data_csv.get("review") or {}
-        summary_str = (
-            f"kept:{review.get('kept', 0)},"
-            f"deranked:{review.get('deranked', 0)},"
-            f"archived:{review.get('archived', 0)},"
-            f"avg_relevance:{review.get('average_relevance', 0)}"
-        )
-        writer.writerow(
-            ["metadata"]
-            + base
-            + [
-                "",
-                "",
-                "",
-                "",
-                summary_str,
-                "",
-                "",
-                "",
-                "",
-                "",
-            ]
-        )
-
-    return Response(
-        content=output.getvalue(),
-        media_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
+        return _export_as_json(data, include_set, filename)
+    return _export_as_csv(data, include_set, filename)

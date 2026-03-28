@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import os
 import uuid as _uuid
-from typing import Any, Optional
+from typing import Any
 
 import chromadb
 
@@ -12,7 +12,7 @@ from app.core.exceptions import StorageError
 
 logger = logging.getLogger(__name__)
 
-_client: Optional[ChromaDBClient] = None
+_client: ChromaDBClient | None = None
 
 
 class ChromaDBClient:

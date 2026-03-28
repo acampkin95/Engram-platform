@@ -107,66 +107,82 @@ async def search_knowledge_graph(request: SearchEntitiesRequest) -> dict[str, An
         raise HTTPException(status_code=500, detail="Internal error searching knowledge graph")
 
 
+async def _collect_all_graphs(
+    tracker: SemanticTracker,
+    scan_ids: list[str],
+) -> tuple[list[Entity], list[Relationship]]:
+    all_entities: list[Entity] = []
+    all_relationships: list[Relationship] = []
+    for sid in scan_ids:
+        graph = await tracker.get_graph(sid)
+        if graph is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No knowledge graph found for scan {sid}",
+            )
+        all_entities.extend(graph.entities)
+        all_relationships.extend(graph.relationships)
+    return all_entities, all_relationships
+
+
+def _merge_entity_list(
+    all_entities: list[Entity],
+) -> tuple[dict[tuple, Entity], dict[str, str], set]:
+    merged_map: dict[tuple, Entity] = {}
+    id_remap: dict[str, str] = {}
+    overlap_keys: set = set()
+    for entity in all_entities:
+        key = (entity.name.lower().strip(), entity.entity_type.lower().strip())
+        if key in merged_map:
+            canonical = merged_map[key]
+            id_remap[entity.id] = canonical.id
+            for k, v in entity.attributes.items():
+                if k not in canonical.attributes:
+                    canonical.attributes[k] = v
+            overlap_keys.add(key)
+        else:
+            merged_map[key] = Entity(
+                id=entity.id,
+                name=entity.name,
+                entity_type=entity.entity_type,
+                attributes=dict(entity.attributes),
+            )
+            id_remap[entity.id] = entity.id
+    return merged_map, id_remap, overlap_keys
+
+
+def _merge_relationship_list(
+    all_relationships: list[Relationship],
+    id_remap: dict[str, str],
+) -> list[Relationship]:
+    seen_rels: set = set()
+    merged: list[Relationship] = []
+    for rel in all_relationships:
+        src = id_remap.get(rel.source_id, rel.source_id)
+        tgt = id_remap.get(rel.target_id, rel.target_id)
+        rel_key = (src, tgt, rel.relation_type)
+        if rel_key not in seen_rels:
+            seen_rels.add(rel_key)
+            merged.append(
+                Relationship(
+                    source_id=src,
+                    target_id=tgt,
+                    relation_type=rel.relation_type,
+                    confidence=rel.confidence,
+                    evidence=rel.evidence,
+                )
+            )
+    return merged
+
+
 @router.post("/merge-scans")
 async def merge_scan_graphs(request: MergeScanGraphsRequest) -> dict[str, Any]:
     try:
         tracker = _get_tracker()
-        all_entities: list[Entity] = []
-        all_relationships: list[Relationship] = []
-
-        for sid in request.scan_ids:
-            graph = await tracker.get_graph(sid)
-            if graph is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"No knowledge graph found for scan {sid}",
-                )
-            all_entities.extend(graph.entities)
-            all_relationships.extend(graph.relationships)
-
-        merged_map: dict[tuple, Entity] = {}
-        id_remap: dict[str, str] = {}
-        overlap_keys: set = set()
-
-        for entity in all_entities:
-            key = (entity.name.lower().strip(), entity.entity_type.lower().strip())
-            if key in merged_map:
-                canonical = merged_map[key]
-                id_remap[entity.id] = canonical.id
-                for k, v in entity.attributes.items():
-                    if k not in canonical.attributes:
-                        canonical.attributes[k] = v
-                overlap_keys.add(key)
-            else:
-                merged_map[key] = Entity(
-                    id=entity.id,
-                    name=entity.name,
-                    entity_type=entity.entity_type,
-                    attributes=dict(entity.attributes),
-                )
-                id_remap[entity.id] = entity.id
-
-        seen_rels: set = set()
-        merged_relationships: list[Relationship] = []
-
-        for rel in all_relationships:
-            src: str = id_remap[rel.source_id] if rel.source_id in id_remap else rel.source_id
-            tgt: str = id_remap[rel.target_id] if rel.target_id in id_remap else rel.target_id
-            rel_key = (src, tgt, rel.relation_type)
-            if rel_key not in seen_rels:
-                seen_rels.add(rel_key)
-                merged_relationships.append(
-                    Relationship(
-                        source_id=src,
-                        target_id=tgt,
-                        relation_type=rel.relation_type,
-                        confidence=rel.confidence,
-                        evidence=rel.evidence,
-                    )
-                )
-
+        all_entities, all_relationships = await _collect_all_graphs(tracker, request.scan_ids)
+        merged_map, id_remap, overlap_keys = _merge_entity_list(all_entities)
+        merged_relationships = _merge_relationship_list(all_relationships, id_remap)
         merged_entities = list(merged_map.values())
-
         return {
             "scan_ids": request.scan_ids,
             "entities": [e.model_dump() for e in merged_entities],

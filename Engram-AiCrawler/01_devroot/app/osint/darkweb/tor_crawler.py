@@ -21,31 +21,17 @@ import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
 # Types
 # ---------------------------------------------------------------------------
-
 
 class TorStatus(StrEnum):
     DISCONNECTED = "disconnected"
@@ -53,7 +39,6 @@ class TorStatus(StrEnum):
     CONNECTED = "connected"
     CIRCUIT_BUILDING = "circuit_building"
     ERROR = "error"
-
 
 @dataclass
 class TorCircuit:
@@ -63,7 +48,6 @@ class TorCircuit:
     built_at: datetime
     requests_made: int = 0
     max_requests: int = 50  # rotate after N requests
-
 
 @dataclass
 class DarkWebPage:
@@ -98,7 +82,6 @@ class DarkWebPage:
             "error": self.error,
         }
 
-
 @dataclass
 class TorCrawlConfig:
     """Configuration for Tor crawler."""
@@ -124,11 +107,9 @@ class TorCrawlConfig:
     follow_redirects: bool = True
     max_page_size_mb: float = 5.0
 
-
 # ---------------------------------------------------------------------------
 # Tor Controller (stem-based)
 # ---------------------------------------------------------------------------
-
 
 class TorController:
     """Manages Tor circuits via stem control protocol."""
@@ -245,16 +226,13 @@ class TorController:
     def is_available(self) -> bool:
         return self._status in (TorStatus.CONNECTED, TorStatus.CIRCUIT_BUILDING)
 
-
 # ---------------------------------------------------------------------------
 # HTML Parser (minimal, no heavy deps)
 # ---------------------------------------------------------------------------
 
-
 def _extract_title(html: str) -> str:
     m = re.search(r"<title[^>]*>([^<]+)</title>", html, re.IGNORECASE)
     return m.group(1).strip() if m else ""
-
 
 def _extract_text(html: str) -> str:
     """Strip tags and return visible text."""
@@ -263,7 +241,6 @@ def _extract_text(html: str) -> str:
     text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
-
 
 def _extract_links(html: str, base_url: str) -> list[str]:
     """Extract href links from HTML."""
@@ -280,7 +257,6 @@ def _extract_links(html: str, base_url: str) -> list[str]:
         else:
             links.append(href)
     return list(dict.fromkeys(links))  # deduplicate preserving order
-
 
 def _extract_forms(html: str) -> list[dict[str, Any]]:
     """Extract form structures."""
@@ -310,17 +286,14 @@ def _extract_forms(html: str) -> list[dict[str, Any]]:
         )
     return forms
 
-
 def _find_keywords(text: str, keywords: list[str]) -> list[str]:
     """Return which keywords appear in text (case-insensitive)."""
     text_lower = text.lower()
     return [kw for kw in keywords if kw.lower() in text_lower]
 
-
 # ---------------------------------------------------------------------------
 # Main Tor Crawler
 # ---------------------------------------------------------------------------
-
 
 class TorCrawler:
     """
@@ -561,13 +534,11 @@ class TorCrawler:
             "socks_proxy": (f"{self.config.tor_socks_host}:{self.config.tor_socks_port}"),
         }
 
-
 # ---------------------------------------------------------------------------
 # Singleton accessor
 # ---------------------------------------------------------------------------
 
 _tor_crawler_instance: TorCrawler | None = None
-
 
 def get_tor_crawler(config: TorCrawlConfig | None = None) -> TorCrawler:
     """Get or create the global TorCrawler instance."""
@@ -575,7 +546,6 @@ def get_tor_crawler(config: TorCrawlConfig | None = None) -> TorCrawler:
     if _tor_crawler_instance is None:
         _tor_crawler_instance = TorCrawler(config or TorCrawlConfig())
     return _tor_crawler_instance
-
 
 def is_onion_url(url: str) -> bool:
     """Check if a URL points to a .onion hidden service."""

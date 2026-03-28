@@ -12,25 +12,11 @@ The registry is the single source of truth used by:
 
 from __future__ import annotations
 
-from enum import Enum
-
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from urllib.parse import quote_plus
 
 from pydantic import BaseModel
-
 
 class PlatformCategory(StrEnum):
     PEOPLE_SEARCH = "people_search"
@@ -43,7 +29,6 @@ class PlatformCategory(StrEnum):
     DARK_WEB = "dark_web"
     GENERAL = "general"
 
-
 class AntiBotLevel(StrEnum):
     """How aggressively the platform blocks scrapers."""
 
@@ -51,7 +36,6 @@ class AntiBotLevel(StrEnum):
     MEDIUM = "medium"  # Basic JS checks, rate limiting
     HIGH = "high"  # Login walls, CAPTCHA, fingerprinting
     VERY_HIGH = "very_high"  # Requires real account session
-
 
 class PlatformAdapter(BaseModel):
     """Metadata and URL-building for one OSINT platform."""
@@ -100,11 +84,9 @@ class PlatformAdapter(BaseModel):
             return None
         return self.profile_url_template.format(username=username)
 
-
 # ---------------------------------------------------------------------------
 # Registry
 # ---------------------------------------------------------------------------
-
 
 class PlatformRegistry:
     """Singleton registry of all supported platforms."""
@@ -162,7 +144,6 @@ class PlatformRegistry:
 
     def ids(self) -> list[str]:
         return list(self._platforms.keys())
-
 
 # ---------------------------------------------------------------------------
 # Built-in platform definitions
@@ -473,13 +454,11 @@ _BUILTIN_PLATFORMS: list[PlatformAdapter] = [
     ),
 ]
 
-
 # ---------------------------------------------------------------------------
 # Module-level singleton
 # ---------------------------------------------------------------------------
 
 _registry: PlatformRegistry | None = None
-
 
 def get_registry() -> PlatformRegistry:
     """Return the module-level PlatformRegistry singleton."""

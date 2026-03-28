@@ -611,8 +611,15 @@ class FaceClusterer:
         """Return face clusters for non-duplicate entries with local files."""
         if not self._available:
             return []
+        candidates = self._load_candidates(entries)
+        if not candidates:
+            return []
+        encoding_map = self._build_encoding_map(candidates)
+        if not encoding_map:
+            return []
+        return self._greedy_cluster(encoding_map, entity_id)
 
-        # Load raw bytes for each non-duplicate entry
+    def _load_candidates(self, entries: list[CatalogEntry]) -> list[tuple[CatalogEntry, bytes]]:
         candidates: list[tuple[CatalogEntry, bytes]] = []
         for entry in entries:
             if entry.is_duplicate or not entry.local_path:
@@ -620,18 +627,17 @@ class FaceClusterer:
             path = Path(entry.local_path)
             if path.exists():
                 candidates.append((entry, path.read_bytes()))
+        return candidates
 
-        if not candidates:
-            return []
-
-        # Build encoding map: image_id → list[np.ndarray]
-        encoding_map: dict[str, list[np.ndarray]] = {}
+    def _build_encoding_map(
+        self, candidates: list[tuple[CatalogEntry, bytes]]
+    ) -> dict[str, list]:
+        encoding_map: dict[str, list] = {}
         for entry, raw in candidates:
             try:
                 result = self._svc.detect_faces(raw)  # type: ignore[union-attr]
                 entry.faces_detected = result.faces_detected
                 if result.faces_detected > 0:
-                    # Re-extract raw encodings (detect_faces only stores hash)
                     import face_recognition as _fr
                     import numpy as np
 
@@ -642,34 +648,30 @@ class FaceClusterer:
                         encoding_map[entry.image_id] = list(encs)
             except Exception as exc:
                 logger.debug("Face encoding failed for %s: %s", entry.image_id, exc)
+        return encoding_map
 
-        if not encoding_map:
-            return []
+    def _greedy_cluster(self, encoding_map: dict[str, list], entity_id: str) -> list[FaceCluster]:
+        import face_recognition as _fr
+        import numpy as np
 
-        # Greedy clustering
         clusters: list[FaceCluster] = []
-        assigned: dict[str, str] = {}  # image_id → cluster_id
-
+        assigned: dict[str, str] = {}
         image_ids = list(encoding_map.keys())
+
         for img_id in image_ids:
             if img_id in assigned:
                 continue
-
             encs = encoding_map[img_id]
             cluster = FaceCluster(entity_id=entity_id)
             cluster.image_ids.append(img_id)
             cluster.representative_image_id = img_id
             assigned[img_id] = cluster.cluster_id
 
-            # Compare against remaining
             for other_id in image_ids:
                 if other_id in assigned:
                     continue
-                other_encs = encoding_map[other_id]
                 try:
-                    import face_recognition as _fr
-
-                    dists = _fr.face_distance(encs, other_encs[0])
+                    dists = _fr.face_distance(encs, encoding_map[other_id][0])
                     best = float(np.min(dists))
                     if best <= self.threshold:
                         cluster.image_ids.append(other_id)
@@ -949,13 +951,7 @@ class ImageIntelligencePipeline:
         # 3.2 Face clustering
         clusters = self.clusterer.cluster_catalog(catalog_entries, entity_id)
         logger.info("Built %d face clusters", len(clusters))
-
-        # Update cluster_id on entries
-        for cluster in clusters:
-            for img_id in cluster.image_ids:
-                for entry in catalog_entries:
-                    if entry.image_id == img_id:
-                        entry.cluster_id = cluster.cluster_id
+        self._assign_cluster_ids(catalog_entries, clusters)
 
         # 3.3 Reverse image search (limit to unique, non-duplicate images with public URLs)
         reverse_results: list[ReverseSearchResult] = []
@@ -963,18 +959,7 @@ class ImageIntelligencePipeline:
             searchable = [e for e in catalog_entries if not e.is_duplicate and e.source_url][
                 :max_reverse_search
             ]
-
-            search_tasks = [
-                self.reverse_searcher.search_all(e.source_url, self.reverse_engines)  # type: ignore[arg-type]
-                for e in searchable
-            ]
-            gathered = await asyncio.gather(*search_tasks, return_exceptions=True)
-            for r in gathered:
-                if isinstance(r, list):
-                    reverse_results.extend(r)
-            logger.info(
-                "Reverse search: %d results across %d images", len(reverse_results), len(searchable)
-            )
+            reverse_results = await self._gather_reverse_results(searchable)
 
         # 3.4 EXIF already extracted during catalog ingest
 
@@ -983,7 +968,47 @@ class ImageIntelligencePipeline:
             entity_id, catalog_entries, clusters, reverse_results
         )
 
-        # 3.6 Fake ID signals — aggregate across all entries
+        # 3.6 Fake ID signals
+        fake_signals = self._aggregate_fake_signals(catalog_entries)
+        identity_score.fake_id_signals = fake_signals
+
+        # Persist updated catalog
+        self.catalog.save_catalog(entity_id, catalog_entries)
+
+        return ImageIntelligenceReport(
+            entity_id=entity_id,
+            catalog=catalog_entries,
+            face_clusters=clusters,
+            reverse_search_results=reverse_results,
+            identity_score=identity_score,
+            fake_id_signals=fake_signals,
+        )
+
+    def _assign_cluster_ids(
+        self, catalog_entries: list[CatalogEntry], clusters: list[FaceCluster]
+    ) -> None:
+        for cluster in clusters:
+            for img_id in cluster.image_ids:
+                for entry in catalog_entries:
+                    if entry.image_id == img_id:
+                        entry.cluster_id = cluster.cluster_id
+
+    async def _gather_reverse_results(
+        self, searchable: list[CatalogEntry]
+    ) -> list[ReverseSearchResult]:
+        search_tasks = [
+            self.reverse_searcher.search_all(e.source_url, self.reverse_engines)  # type: ignore[arg-type]
+            for e in searchable
+        ]
+        gathered = await asyncio.gather(*search_tasks, return_exceptions=True)
+        results: list[ReverseSearchResult] = []
+        for r in gathered:
+            if isinstance(r, list):
+                results.extend(r)
+        logger.info("Reverse search: %d results across %d images", len(results), len(searchable))
+        return results
+
+    def _aggregate_fake_signals(self, catalog_entries: list[CatalogEntry]) -> FakeIdSignals:
         all_ai_evidence: list[str] = []
         all_stock_evidence: list[str] = []
         all_anomalies: list[str] = []
@@ -1008,7 +1033,7 @@ class ImageIntelligencePipeline:
             if signals.missing_exif:
                 missing_count += 1
 
-        fake_signals = FakeIdSignals(
+        return FakeIdSignals(
             is_likely_ai_generated=bool(all_ai_evidence),
             ai_generation_evidence=list(set(all_ai_evidence)),
             is_likely_stock_photo=bool(all_stock_evidence),
@@ -1017,20 +1042,6 @@ class ImageIntelligencePipeline:
             missing_exif=missing_count > 0,
             stripped_exif=stripped_count > 0,
             overall_suspicion_score=round(max_suspicion, 3),
-        )
-
-        identity_score.fake_id_signals = fake_signals
-
-        # Persist updated catalog
-        self.catalog.save_catalog(entity_id, catalog_entries)
-
-        return ImageIntelligenceReport(
-            entity_id=entity_id,
-            catalog=catalog_entries,
-            face_clusters=clusters,
-            reverse_search_results=reverse_results,
-            identity_score=identity_score,
-            fake_id_signals=fake_signals,
         )
 
     async def analyze_single(

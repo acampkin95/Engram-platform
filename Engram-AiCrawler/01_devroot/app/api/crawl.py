@@ -143,7 +143,7 @@ async def start_crawl(
     This endpoint is protected for modification operations.
     """
     try:
-        validate_url(str(request.url))
+        await validate_url(str(request.url))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"URL validation failed: {e}")
 
@@ -309,7 +309,7 @@ async def deep_crawl(
     This endpoint requires elevated privileges due to resource intensity.
     """
     try:
-        validate_url(str(request.start_url))
+        await validate_url(str(request.start_url))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"URL validation failed: {e}")
 

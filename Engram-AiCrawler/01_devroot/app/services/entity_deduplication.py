@@ -20,6 +20,7 @@ Merge strategy:
 
 from __future__ import annotations
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, UTC
 from difflib import SequenceMatcher
@@ -231,6 +232,110 @@ class EntityDeduplicationService:
         # Return only groups with 2+ entities
         return [group for group in groups.values() if len(group) > 1]
 
+    def _merge_value_field(
+        self,
+        merged_list: list,
+        secondary_list: list,
+        existing: set,
+        key_fn: Callable,
+        result: MergeResult,
+        count_skipped: bool = True,
+    ) -> None:
+        for item in secondary_list:
+            k = key_fn(item)
+            if k not in existing:
+                merged_list.append(item)
+                result.data_points_added += 1
+                existing.add(k)
+            elif count_skipped:
+                result.data_points_skipped += 1
+
+    def _merge_value_fields(
+        self,
+        merged: EntityProfile,
+        secondary: EntityProfile,
+        result: MergeResult,
+    ) -> None:
+        fields = [
+            (merged.emails, secondary.emails, lambda e: e.value.lower()),
+            (merged.phones, secondary.phones, lambda p: _normalize_phone(p.value)),
+            (merged.usernames, secondary.usernames, lambda u: u.value.lower()),
+            (merged.addresses, secondary.addresses, lambda a: a.value.lower()),
+            (merged.images, secondary.images, lambda i: i.value),
+        ]
+        for merged_list, sec_list, key_fn in fields:
+            existing = {key_fn(item) for item in merged_list}
+            count_skipped = merged_list is not merged.images
+            self._merge_value_field(merged_list, sec_list, existing, key_fn, result, count_skipped)
+
+    def _merge_social_profiles(
+        self,
+        merged: EntityProfile,
+        secondary: EntityProfile,
+        result: MergeResult,
+    ) -> None:
+        existing = {
+            (s.platform, s.username or s.profile_url) for s in merged.social_profiles
+        }
+        for profile in secondary.social_profiles:
+            key = (profile.platform, profile.username or profile.profile_url)
+            if key not in existing:
+                merged.social_profiles.append(profile)
+                result.data_points_added += 1
+                existing.add(key)
+            else:
+                result.data_points_skipped += 1
+
+    def _merge_keywords(
+        self, merged: EntityProfile, secondary: EntityProfile
+    ) -> None:
+        existing = set(merged.keywords)
+        for kw in secondary.keywords:
+            if kw not in existing:
+                merged.keywords.append(kw)
+                existing.add(kw)
+
+    def _merge_occupations(
+        self,
+        merged: EntityProfile,
+        secondary: EntityProfile,
+        result: MergeResult,
+    ) -> None:
+        existing = {o.value.lower() for o in merged.occupations}
+        for occ in secondary.occupations:
+            if occ.value.lower() not in existing:
+                merged.occupations.append(occ)
+                result.data_points_added += 1
+                existing.add(occ.value.lower())
+
+    def _merge_names(
+        self,
+        merged: EntityProfile,
+        primary: EntityProfile,
+        secondary: EntityProfile,
+        result: MergeResult,
+    ) -> None:
+        if secondary.primary_name and merged.primary_name:
+            for alias in secondary.primary_name.aliases:
+                if alias not in merged.primary_name.aliases:
+                    merged.primary_name.aliases.append(alias)
+        elif secondary.primary_name and not merged.primary_name:
+            merged.primary_name = secondary.primary_name
+            result.data_points_added += 1
+
+        if (
+            primary.primary_name
+            and secondary.primary_name
+            and primary.primary_name.value != secondary.primary_name.value
+        ):
+            if merged.primary_name:
+                if secondary.primary_name.value not in merged.primary_name.aliases:
+                    merged.primary_name.aliases.append(secondary.primary_name.value)
+            result.conflicts.append(
+                f"Name conflict: '{primary.primary_name.value}' vs "
+                f"'{secondary.primary_name.value}' — secondary added as alias"
+            )
+
     def merge(
         self,
         primary: EntityProfile,
@@ -271,109 +376,11 @@ class EntityDeduplicationService:
             }
         )
 
-        # Build dedup sets from primary
-        existing_emails = {e.value.lower() for e in merged.emails}
-        existing_phones = {_normalize_phone(p.value) for p in merged.phones}
-        existing_usernames = {u.value.lower() for u in merged.usernames}
-        existing_addresses = {a.value.lower() for a in merged.addresses}
-        existing_images = {i.value for i in merged.images}
-        existing_social = {
-            (s.platform, s.username or s.profile_url) for s in merged.social_profiles
-        }
-
-        # Merge emails
-        for email in secondary.emails:
-            if email.value.lower() not in existing_emails:
-                merged.emails.append(email)
-                result.data_points_added += 1
-                existing_emails.add(email.value.lower())
-            else:
-                result.data_points_skipped += 1
-
-        # Merge phones
-        for phone in secondary.phones:
-            if _normalize_phone(phone.value) not in existing_phones:
-                merged.phones.append(phone)
-                result.data_points_added += 1
-                existing_phones.add(_normalize_phone(phone.value))
-            else:
-                result.data_points_skipped += 1
-
-        # Merge usernames
-        for username in secondary.usernames:
-            if username.value.lower() not in existing_usernames:
-                merged.usernames.append(username)
-                result.data_points_added += 1
-                existing_usernames.add(username.value.lower())
-            else:
-                result.data_points_skipped += 1
-
-        # Merge addresses
-        for address in secondary.addresses:
-            if address.value.lower() not in existing_addresses:
-                merged.addresses.append(address)
-                result.data_points_added += 1
-                existing_addresses.add(address.value.lower())
-            else:
-                result.data_points_skipped += 1
-
-        # Merge images
-        for image in secondary.images:
-            if image.value not in existing_images:
-                merged.images.append(image)
-                result.data_points_added += 1
-                existing_images.add(image.value)
-
-        # Merge social profiles
-        for profile in secondary.social_profiles:
-            key = (profile.platform, profile.username or profile.profile_url)
-            if key not in existing_social:
-                merged.social_profiles.append(profile)
-                result.data_points_added += 1
-                existing_social.add(key)
-            else:
-                result.data_points_skipped += 1
-
-        # Merge keywords
-        existing_keywords = set(merged.keywords)
-        for kw in secondary.keywords:
-            if kw not in existing_keywords:
-                merged.keywords.append(kw)
-                existing_keywords.add(kw)
-
-        # Merge occupations
-        existing_occ = {o.value.lower() for o in merged.occupations}
-        for occ in secondary.occupations:
-            if occ.value.lower() not in existing_occ:
-                merged.occupations.append(occ)
-                result.data_points_added += 1
-                existing_occ.add(occ.value.lower())
-
-        # Merge aliases in primary_name
-        if secondary.primary_name and merged.primary_name:
-            sec_aliases = set(secondary.primary_name.aliases)
-            for alias in sec_aliases:
-                if alias not in merged.primary_name.aliases:
-                    merged.primary_name.aliases.append(alias)
-        elif secondary.primary_name and not merged.primary_name:
-            # Secondary has a name, primary doesn't — use secondary's
-            merged.primary_name = secondary.primary_name
-            result.data_points_added += 1
-
-        # Check for conflicting names (flag for review)
-        if (
-            primary.primary_name
-            and secondary.primary_name
-            and primary.primary_name.value != secondary.primary_name.value
-        ):
-            # Add secondary name as alias
-            if merged.primary_name:
-                if secondary.primary_name.value not in merged.primary_name.aliases:
-                    merged.primary_name.aliases.append(secondary.primary_name.value)
-            result.conflicts.append(
-                f"Name conflict: '{primary.primary_name.value}' vs "
-                f"'{secondary.primary_name.value}' — secondary added as alias"
-            )
+        self._merge_value_fields(merged, secondary, result)
+        self._merge_social_profiles(merged, secondary, result)
+        self._merge_keywords(merged, secondary)
+        self._merge_occupations(merged, secondary, result)
+        self._merge_names(merged, primary, secondary, result)
 
         # Merge notes
         merged.notes.extend(secondary.notes)

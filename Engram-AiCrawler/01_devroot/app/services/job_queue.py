@@ -31,20 +31,8 @@ import os
 import traceback
 import uuid
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from pathlib import Path
 from typing import Any
@@ -56,14 +44,12 @@ logger = logging.getLogger(__name__)
 # Job model
 # ---------------------------------------------------------------------------
 
-
 class JobStatus(StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
-
 
 class JobType(StrEnum):
     ENTITY_SCAN = "entity_scan"
@@ -73,7 +59,6 @@ class JobType(StrEnum):
     IMAGE_INTEL = "image_intel"
     CASE_EXPORT = "case_export"
     CUSTOM = "custom"
-
 
 class OsintJob:
     """Represents a single queued OSINT job."""
@@ -136,11 +121,9 @@ class OsintJob:
         job.progress_message = data.get("progress_message", "")
         return job
 
-
 # ---------------------------------------------------------------------------
 # Job store (Redis with file fallback)
 # ---------------------------------------------------------------------------
-
 
 class JobStore:
     """Persist job state to Redis, falling back to a JSON file store."""
@@ -256,7 +239,6 @@ class JobStore:
             return True
         return True
 
-
 # ---------------------------------------------------------------------------
 # Worker pool
 # ---------------------------------------------------------------------------
@@ -264,12 +246,10 @@ class JobStore:
 # Registry of handler functions: job_type → async callable(job) → Any
 _HANDLERS: dict[str, Callable[[OsintJob], Coroutine[Any, Any, Any]]] = {}
 
-
 def register_handler(job_type: JobType, handler: Callable) -> None:
     """Register an async handler for a job type."""
     _HANDLERS[job_type.value] = handler
     logger.info("JobQueue: registered handler for %s", job_type.value)
-
 
 class OsintJobQueue:
     """Async worker pool for OSINT jobs.
@@ -462,20 +442,17 @@ class OsintJobQueue:
         finally:
             await self._store.save(job)
 
-
 # ---------------------------------------------------------------------------
 # Singleton
 # ---------------------------------------------------------------------------
 
 _queue_instance: OsintJobQueue | None = None
 
-
 def get_job_queue() -> OsintJobQueue:
     global _queue_instance
     if _queue_instance is None:
         _queue_instance = OsintJobQueue()
     return _queue_instance
-
 
 async def ensure_queue_started() -> OsintJobQueue:
     """Get queue and start workers if not already running."""

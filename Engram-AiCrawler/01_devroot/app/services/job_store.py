@@ -201,6 +201,32 @@ class JobStore:
         """Return ``True`` if *job_id* exists in the store."""
         return await self.get(job_id) is not None
 
+    async def _process_raw_values(
+        self, ids: list, raws: list
+    ) -> tuple[list[Any], list[str]]:
+        results = []
+        stale_ids = []
+        for job_id, raw in zip(ids, raws):
+            if raw is None:
+                stale_ids.append(job_id)
+            else:
+                try:
+                    results.append(self._decode(raw))
+                except Exception:
+                    stale_ids.append(job_id)
+        return results, stale_ids
+
+    async def _cleanup_stale_ids(self, stale_ids: list[str]) -> None:
+        if not stale_ids:
+            return
+        try:
+            clean_client = await _get_redis()
+            if clean_client:
+                await clean_client.srem(self._index_key(), *stale_ids)
+                await clean_client.aclose()
+        except Exception:
+            pass
+
     async def values(self) -> list[Any]:
         """Return all stored dicts in this namespace."""
         client = await _get_redis()
@@ -215,25 +241,8 @@ class JobStore:
                     pipe.get(self._key(job_id))
                 raws = await pipe.execute()
                 await client.aclose()
-                results = []
-                stale_ids = []
-                for job_id, raw in zip(ids, raws):
-                    if raw is None:
-                        stale_ids.append(job_id)
-                    else:
-                        try:
-                            results.append(self._decode(raw))
-                        except Exception:
-                            stale_ids.append(job_id)
-                # Clean up stale index entries lazily
-                if stale_ids:
-                    try:
-                        clean_client = await _get_redis()
-                        if clean_client:
-                            await clean_client.srem(self._index_key(), *stale_ids)
-                            await clean_client.aclose()
-                    except Exception:
-                        pass
+                results, stale_ids = await self._process_raw_values(ids, raws)
+                await self._cleanup_stale_ids(stale_ids)
                 return results
             except Exception as exc:
                 logger.warning("Redis values failed (%s) — using fallback", exc)

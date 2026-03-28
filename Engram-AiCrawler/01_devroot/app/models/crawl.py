@@ -3,20 +3,8 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, HttpUrl
 from typing import Any
 from datetime import datetime
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 class CrawlStatus(StrEnum):
     PENDING = "pending"
@@ -25,13 +13,11 @@ class CrawlStatus(StrEnum):
     FAILED = "failed"
     CANCELLED = "cancelled"
 
-
 class ExtractionType(StrEnum):
     LLM = "llm"
     CSS = "css"
     REGEX = "regex"
     COSINE = "cosine"
-
 
 class CrawlRequest(BaseModel):
     url: HttpUrl
@@ -51,7 +37,6 @@ class CrawlRequest(BaseModel):
     overlap_rate: float = Field(default=0.1, ge=0.0, le=1.0)
     owner_id: str | None = None
 
-
 class CrawlResponse(BaseModel):
     crawl_id: str
     url: str
@@ -68,12 +53,10 @@ class CrawlResponse(BaseModel):
     error_message: str | None = None
     metadata: dict[str, Any] | None = None
 
-
 class BatchCrawlRequest(BaseModel):
     urls: list[HttpUrl] = Field(..., min_length=1, max_length=50)
     config: CrawlRequest | None = None
     max_concurrent: int = Field(default=5, ge=1, le=20)
-
 
 class DeepCrawlRequest(BaseModel):
     start_url: HttpUrl
@@ -85,11 +68,9 @@ class DeepCrawlRequest(BaseModel):
     include_patterns: list[str] | None = None
     keyword_focus: list[str] | None = None
 
-
 class ChatMessage(BaseModel):
     role: str = Field(..., pattern="^(user|assistant|system)$")
     content: str
-
 
 class ChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(..., min_length=1)
@@ -97,7 +78,6 @@ class ChatRequest(BaseModel):
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     max_tokens: int | None = Field(default=None, ge=1)
     stream: bool = False
-
 
 class ChatResponse(BaseModel):
     message_id: str
@@ -107,7 +87,6 @@ class ChatResponse(BaseModel):
     finish_reason: str | None = None
     usage: dict[str, int] | None = None
     created_at: datetime
-
 
 class DataSetMetadata(BaseModel):
     data_set_id: str
@@ -119,7 +98,6 @@ class DataSetMetadata(BaseModel):
     size_bytes: int = Field(default=0, ge=0)
     file_count: int = Field(default=0, ge=0)
     tags: list[str] | None = None
-
 
 class MigrateRequest(BaseModel):
     target_tier: str = Field(..., pattern="^(hot|warm|cold|archive)$")

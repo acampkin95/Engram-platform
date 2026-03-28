@@ -20,20 +20,8 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 
@@ -43,11 +31,9 @@ from app.osint.darkweb.crypto_tracer import CryptoTraceResult, AddressRisk
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
 # Risk Scoring
 # ---------------------------------------------------------------------------
-
 
 class OverallRisk(StrEnum):
     CRITICAL = "critical"  # Immediate action required
@@ -56,7 +42,6 @@ class OverallRisk(StrEnum):
     MODERATE = "moderate"  # Some concerns, monitor
     LOW = "low"  # Minimal risk signals
     UNKNOWN = "unknown"  # Insufficient data
-
 
 @dataclass
 class RiskFactor:
@@ -75,11 +60,9 @@ class RiskFactor:
             "evidence": self.evidence,
         }
 
-
 # ---------------------------------------------------------------------------
 # Correlation Evidence
 # ---------------------------------------------------------------------------
-
 
 @dataclass
 class CorroboratingEvidence:
@@ -97,7 +80,6 @@ class CorroboratingEvidence:
             "sources": self.sources,
             "confidence": self.confidence,
         }
-
 
 @dataclass
 class IdentityInconsistency:
@@ -122,11 +104,9 @@ class IdentityInconsistency:
             "explanation": self.explanation,
         }
 
-
 # ---------------------------------------------------------------------------
 # Unified Entity Intelligence
 # ---------------------------------------------------------------------------
-
 
 @dataclass
 class UnifiedEntityProfile:
@@ -221,11 +201,9 @@ class UnifiedEntityProfile:
             "correlation_duration_s": self.correlation_duration_s,
         }
 
-
 # ---------------------------------------------------------------------------
 # Risk Scorer
 # ---------------------------------------------------------------------------
-
 
 class RiskScorer:
     """
@@ -268,165 +246,191 @@ class RiskScorer:
         score = 0.0
         factors: list[RiskFactor] = []
 
-        # ---- Breach signals ----
-        if breach_result:
-            sev = breach_result.highest_severity
-            if sev == BreachSeverity.CRITICAL:
-                score += self.WEIGHTS["breach_critical"]
-                factors.append(
-                    RiskFactor(
-                        source="breach",
-                        factor="Critical breach exposure (passwords + PII)",
-                        weight=self.WEIGHTS["breach_critical"] / 100,
-                        evidence=[
-                            b.breach_name
-                            for b in breach_result.breaches
-                            if b.severity == BreachSeverity.CRITICAL
-                        ],
-                    )
-                )
-            elif sev == BreachSeverity.HIGH:
-                score += self.WEIGHTS["breach_high"]
-                factors.append(
-                    RiskFactor(
-                        source="breach",
-                        factor="High-severity breach exposure",
-                        weight=self.WEIGHTS["breach_high"] / 100,
-                        evidence=[b.breach_name for b in breach_result.breaches[:3]],
-                    )
-                )
-            elif sev == BreachSeverity.MEDIUM:
-                score += self.WEIGHTS["breach_medium"]
-                factors.append(
-                    RiskFactor(
-                        source="breach",
-                        factor="Medium-severity breach exposure",
-                        weight=self.WEIGHTS["breach_medium"] / 100,
-                        evidence=[b.breach_name for b in breach_result.breaches[:3]],
-                    )
-                )
-            elif sev == BreachSeverity.LOW:
-                score += self.WEIGHTS["breach_low"]
-                factors.append(
-                    RiskFactor(
-                        source="breach",
-                        factor="Low-severity breach exposure (email only)",
-                        weight=self.WEIGHTS["breach_low"] / 100,
-                        evidence=[b.breach_name for b in breach_result.breaches[:3]],
-                    )
-                )
+        breach_score, breach_factors = self._score_breach_signals(breach_result)
+        score += breach_score
+        factors.extend(breach_factors)
 
-            # Multiple breaches bonus
-            if len(breach_result.breaches) > 3:
-                score += self.WEIGHTS["multiple_breaches"]
-                factors.append(
-                    RiskFactor(
-                        source="breach",
-                        factor=f"Multiple breaches ({len(breach_result.breaches)})",
-                        weight=self.WEIGHTS["multiple_breaches"] / 100,
-                        evidence=[f"{len(breach_result.breaches)} total breach records"],
-                    )
-                )
+        darkweb_score, darkweb_factors = self._score_darkweb_signals(monitor_result)
+        score += darkweb_score
+        factors.extend(darkweb_factors)
 
-            # Paste exposure
-            if breach_result.paste_count > 0:
-                score += self.WEIGHTS["paste_exposure"]
-                factors.append(
-                    RiskFactor(
-                        source="breach",
-                        factor=f"Paste site exposure ({breach_result.paste_count} pastes)",
-                        weight=self.WEIGHTS["paste_exposure"] / 100,
-                        evidence=[f"{breach_result.paste_count} paste records found"],
-                    )
-                )
-
-        # ---- Dark web signals ----
-        if monitor_result:
-            ht = monitor_result.highest_threat
-            if ht == ThreatLevel.CRITICAL:
-                score += self.WEIGHTS["darkweb_critical"]
-                factors.append(
-                    RiskFactor(
-                        source="darkweb",
-                        factor="Critical dark web mention (PII/direct threat)",
-                        weight=self.WEIGHTS["darkweb_critical"] / 100,
-                        evidence=[
-                            m.site_name
-                            for m in monitor_result.mentions
-                            if m.threat_level == ThreatLevel.CRITICAL
-                        ],
-                    )
-                )
-            elif ht == ThreatLevel.HIGH:
-                score += self.WEIGHTS["darkweb_high"]
-                factors.append(
-                    RiskFactor(
-                        source="darkweb",
-                        factor="High-threat dark web mention",
-                        weight=self.WEIGHTS["darkweb_high"] / 100,
-                        evidence=[m.site_name for m in monitor_result.mentions[:3]],
-                    )
-                )
-            elif ht == ThreatLevel.MEDIUM:
-                score += self.WEIGHTS["darkweb_medium"]
-                factors.append(
-                    RiskFactor(
-                        source="darkweb",
-                        factor="Medium-threat dark web mention",
-                        weight=self.WEIGHTS["darkweb_medium"] / 100,
-                        evidence=[m.site_name for m in monitor_result.mentions[:3]],
-                    )
-                )
-            elif ht == ThreatLevel.LOW:
-                score += self.WEIGHTS["darkweb_low"]
-                factors.append(
-                    RiskFactor(
-                        source="darkweb",
-                        factor="Low-threat dark web mention",
-                        weight=self.WEIGHTS["darkweb_low"] / 100,
-                        evidence=[m.site_name for m in monitor_result.mentions[:3]],
-                    )
-                )
-
-        # ---- Crypto signals ----
-        if crypto_result:
-            cr = crypto_result.highest_risk
-            if cr == AddressRisk.CRITICAL:
-                score += self.WEIGHTS["crypto_critical"]
-                factors.append(
-                    RiskFactor(
-                        source="crypto",
-                        factor="Critical crypto risk (known mixer/darknet market)",
-                        weight=self.WEIGHTS["crypto_critical"] / 100,
-                        evidence=[
-                            p.address
-                            for p in crypto_result.profiles
-                            if p.risk_level == AddressRisk.CRITICAL
-                        ],
-                    )
-                )
-            elif cr == AddressRisk.HIGH:
-                score += self.WEIGHTS["crypto_high"]
-                factors.append(
-                    RiskFactor(
-                        source="crypto",
-                        factor="High crypto risk (mixer/tumbler patterns)",
-                        weight=self.WEIGHTS["crypto_high"] / 100,
-                        evidence=[p.address[:16] + "..." for p in crypto_result.profiles[:3]],
-                    )
-                )
-            elif cr == AddressRisk.MEDIUM:
-                score += self.WEIGHTS["crypto_medium"]
-                factors.append(
-                    RiskFactor(
-                        source="crypto",
-                        factor="Moderate crypto risk (unhosted wallet)",
-                        weight=self.WEIGHTS["crypto_medium"] / 100,
-                        evidence=[p.address[:16] + "..." for p in crypto_result.profiles[:3]],
-                    )
-                )
+        crypto_score, crypto_factors = self._score_crypto_signals(crypto_result)
+        score += crypto_score
+        factors.extend(crypto_factors)
 
         return min(score, 100.0), factors
+
+    def _score_breach_signals(
+        self, breach_result: BreachScanResult | None
+    ) -> tuple[float, list[RiskFactor]]:
+        if not breach_result:
+            return 0.0, []
+        score = 0.0
+        factors: list[RiskFactor] = []
+        sev = breach_result.highest_severity
+        if sev == BreachSeverity.CRITICAL:
+            score += self.WEIGHTS["breach_critical"]
+            factors.append(
+                RiskFactor(
+                    source="breach",
+                    factor="Critical breach exposure (passwords + PII)",
+                    weight=self.WEIGHTS["breach_critical"] / 100,
+                    evidence=[
+                        b.breach_name
+                        for b in breach_result.breaches
+                        if b.severity == BreachSeverity.CRITICAL
+                    ],
+                )
+            )
+        elif sev == BreachSeverity.HIGH:
+            score += self.WEIGHTS["breach_high"]
+            factors.append(
+                RiskFactor(
+                    source="breach",
+                    factor="High-severity breach exposure",
+                    weight=self.WEIGHTS["breach_high"] / 100,
+                    evidence=[b.breach_name for b in breach_result.breaches[:3]],
+                )
+            )
+        elif sev == BreachSeverity.MEDIUM:
+            score += self.WEIGHTS["breach_medium"]
+            factors.append(
+                RiskFactor(
+                    source="breach",
+                    factor="Medium-severity breach exposure",
+                    weight=self.WEIGHTS["breach_medium"] / 100,
+                    evidence=[b.breach_name for b in breach_result.breaches[:3]],
+                )
+            )
+        elif sev == BreachSeverity.LOW:
+            score += self.WEIGHTS["breach_low"]
+            factors.append(
+                RiskFactor(
+                    source="breach",
+                    factor="Low-severity breach exposure (email only)",
+                    weight=self.WEIGHTS["breach_low"] / 100,
+                    evidence=[b.breach_name for b in breach_result.breaches[:3]],
+                )
+            )
+        if len(breach_result.breaches) > 3:
+            score += self.WEIGHTS["multiple_breaches"]
+            factors.append(
+                RiskFactor(
+                    source="breach",
+                    factor=f"Multiple breaches ({len(breach_result.breaches)})",
+                    weight=self.WEIGHTS["multiple_breaches"] / 100,
+                    evidence=[f"{len(breach_result.breaches)} total breach records"],
+                )
+            )
+        if breach_result.paste_count > 0:
+            score += self.WEIGHTS["paste_exposure"]
+            factors.append(
+                RiskFactor(
+                    source="breach",
+                    factor=f"Paste site exposure ({breach_result.paste_count} pastes)",
+                    weight=self.WEIGHTS["paste_exposure"] / 100,
+                    evidence=[f"{breach_result.paste_count} paste records found"],
+                )
+            )
+        return score, factors
+
+    def _score_darkweb_signals(
+        self, monitor_result: MonitorResult | None
+    ) -> tuple[float, list[RiskFactor]]:
+        if not monitor_result:
+            return 0.0, []
+        score = 0.0
+        factors: list[RiskFactor] = []
+        ht = monitor_result.highest_threat
+        if ht == ThreatLevel.CRITICAL:
+            score += self.WEIGHTS["darkweb_critical"]
+            factors.append(
+                RiskFactor(
+                    source="darkweb",
+                    factor="Critical dark web mention (PII/direct threat)",
+                    weight=self.WEIGHTS["darkweb_critical"] / 100,
+                    evidence=[
+                        m.site_name
+                        for m in monitor_result.mentions
+                        if m.threat_level == ThreatLevel.CRITICAL
+                    ],
+                )
+            )
+        elif ht == ThreatLevel.HIGH:
+            score += self.WEIGHTS["darkweb_high"]
+            factors.append(
+                RiskFactor(
+                    source="darkweb",
+                    factor="High-threat dark web mention",
+                    weight=self.WEIGHTS["darkweb_high"] / 100,
+                    evidence=[m.site_name for m in monitor_result.mentions[:3]],
+                )
+            )
+        elif ht == ThreatLevel.MEDIUM:
+            score += self.WEIGHTS["darkweb_medium"]
+            factors.append(
+                RiskFactor(
+                    source="darkweb",
+                    factor="Medium-threat dark web mention",
+                    weight=self.WEIGHTS["darkweb_medium"] / 100,
+                    evidence=[m.site_name for m in monitor_result.mentions[:3]],
+                )
+            )
+        elif ht == ThreatLevel.LOW:
+            score += self.WEIGHTS["darkweb_low"]
+            factors.append(
+                RiskFactor(
+                    source="darkweb",
+                    factor="Low-threat dark web mention",
+                    weight=self.WEIGHTS["darkweb_low"] / 100,
+                    evidence=[m.site_name for m in monitor_result.mentions[:3]],
+                )
+            )
+        return score, factors
+
+    def _score_crypto_signals(
+        self, crypto_result: CryptoTraceResult | None
+    ) -> tuple[float, list[RiskFactor]]:
+        if not crypto_result:
+            return 0.0, []
+        score = 0.0
+        factors: list[RiskFactor] = []
+        cr = crypto_result.highest_risk
+        if cr == AddressRisk.CRITICAL:
+            score += self.WEIGHTS["crypto_critical"]
+            factors.append(
+                RiskFactor(
+                    source="crypto",
+                    factor="Critical crypto risk (known mixer/darknet market)",
+                    weight=self.WEIGHTS["crypto_critical"] / 100,
+                    evidence=[
+                        p.address
+                        for p in crypto_result.profiles
+                        if p.risk_level == AddressRisk.CRITICAL
+                    ],
+                )
+            )
+        elif cr == AddressRisk.HIGH:
+            score += self.WEIGHTS["crypto_high"]
+            factors.append(
+                RiskFactor(
+                    source="crypto",
+                    factor="High crypto risk (mixer/tumbler patterns)",
+                    weight=self.WEIGHTS["crypto_high"] / 100,
+                    evidence=[p.address[:16] + "..." for p in crypto_result.profiles[:3]],
+                )
+            )
+        elif cr == AddressRisk.MEDIUM:
+            score += self.WEIGHTS["crypto_medium"]
+            factors.append(
+                RiskFactor(
+                    source="crypto",
+                    factor="Moderate crypto risk (unhosted wallet)",
+                    weight=self.WEIGHTS["crypto_medium"] / 100,
+                    evidence=[p.address[:16] + "..." for p in crypto_result.profiles[:3]],
+                )
+            )
+        return score, factors
 
     def score_to_risk(self, score: float) -> OverallRisk:
         if score >= 80:
@@ -441,11 +445,9 @@ class RiskScorer:
             return OverallRisk.LOW
         return OverallRisk.UNKNOWN
 
-
 # ---------------------------------------------------------------------------
 # Correlator
 # ---------------------------------------------------------------------------
-
 
 class EntityCorrelator:
     """
@@ -496,37 +498,15 @@ class EntityCorrelator:
         )
         overall_risk = self.scorer.score_to_risk(risk_score)
 
-        # ---- Extract dark web summary ----
-        darkweb_mentions = 0
-        darkweb_threat_level = None
-        darkweb_sites: list[str] = []
-        if monitor_result:
-            darkweb_mentions = len(monitor_result.mentions)
-            if monitor_result.highest_threat:
-                darkweb_threat_level = monitor_result.highest_threat.value
-            darkweb_sites = list({m.site_name for m in monitor_result.mentions})
-
-        # ---- Extract breach summary ----
-        breach_count = 0
-        breach_severity = None
-        exposed_data_types: list[str] = []
-        paste_count = 0
-        if breach_result:
-            breach_count = len(breach_result.breaches)
-            paste_count = len(breach_result.pastes)
-            if breach_result.highest_severity:
-                breach_severity = breach_result.highest_severity.value
-            exposed_data_types = breach_result.exposed_data_types
-
-        # ---- Extract crypto summary ----
-        crypto_addresses: list[str] = []
-        crypto_risk = None
-        crypto_total_value_usd = None
-        if crypto_result:
-            crypto_addresses = crypto_result.addresses_queried
-            if crypto_result.highest_risk:
-                crypto_risk = crypto_result.highest_risk.value
-            crypto_total_value_usd = crypto_result.total_usd_value
+        darkweb_mentions, darkweb_threat_level, darkweb_sites = self._extract_darkweb_summary(
+            monitor_result
+        )
+        breach_count, breach_severity, exposed_data_types, paste_count = (
+            self._extract_breach_summary(breach_result)
+        )
+        crypto_addresses, crypto_risk, crypto_total_value_usd = self._extract_crypto_summary(
+            crypto_result
+        )
 
         # ---- Surface web data ----
         known_aliases = surface_data.get("aliases", [])
@@ -565,18 +545,9 @@ class EntityCorrelator:
             inconsistencies,
         )
 
-        # ---- Data sources used ----
-        data_sources: list[str] = []
-        if breach_result:
-            data_sources.append("HIBP Breach Database")
-            if breach_result.paste_count > 0:
-                data_sources.append("Paste Site Monitor")
-        if monitor_result:
-            data_sources.append("Dark Web Marketplace Monitor")
-        if crypto_result:
-            data_sources.append("Blockchain Analysis")
-        if surface_data:
-            data_sources.extend(surface_sources)
+        data_sources = self._build_data_sources(
+            breach_result, monitor_result, crypto_result, surface_data, surface_sources
+        )
 
         return UnifiedEntityProfile(
             entity_name=entity_name,
@@ -610,6 +581,57 @@ class EntityCorrelator:
             correlation_duration_s=time.time() - start_time,
         )
 
+    def _extract_darkweb_summary(
+        self, monitor_result: MonitorResult | None
+    ) -> tuple[int, str | None, list[str]]:
+        if not monitor_result:
+            return 0, None, []
+        threat_level = monitor_result.highest_threat.value if monitor_result.highest_threat else None
+        sites = list({m.site_name for m in monitor_result.mentions})
+        return len(monitor_result.mentions), threat_level, sites
+
+    def _extract_breach_summary(
+        self, breach_result: BreachScanResult | None
+    ) -> tuple[int, str | None, list[str], int]:
+        if not breach_result:
+            return 0, None, [], 0
+        severity = breach_result.highest_severity.value if breach_result.highest_severity else None
+        return (
+            len(breach_result.breaches),
+            severity,
+            breach_result.exposed_data_types,
+            len(breach_result.pastes),
+        )
+
+    def _extract_crypto_summary(
+        self, crypto_result: CryptoTraceResult | None
+    ) -> tuple[list[str], str | None, float | None]:
+        if not crypto_result:
+            return [], None, None
+        risk = crypto_result.highest_risk.value if crypto_result.highest_risk else None
+        return crypto_result.addresses_queried, risk, crypto_result.total_usd_value
+
+    def _build_data_sources(
+        self,
+        breach_result: BreachScanResult | None,
+        monitor_result: MonitorResult | None,
+        crypto_result: CryptoTraceResult | None,
+        surface_data: dict[str, Any],
+        surface_sources: list[str],
+    ) -> list[str]:
+        sources: list[str] = []
+        if breach_result:
+            sources.append("HIBP Breach Database")
+            if breach_result.paste_count > 0:
+                sources.append("Paste Site Monitor")
+        if monitor_result:
+            sources.append("Dark Web Marketplace Monitor")
+        if crypto_result:
+            sources.append("Blockchain Analysis")
+        if surface_data:
+            sources.extend(surface_sources)
+        return sources
+
     def _find_corroborating_evidence(
         self,
         breach_result: BreachScanResult | None,
@@ -618,58 +640,78 @@ class EntityCorrelator:
         surface_data: dict[str, Any],
     ) -> list[CorroboratingEvidence]:
         """Find values that appear in multiple independent sources."""
-        corroborating = []
+        corroborating: list[CorroboratingEvidence] = []
+        corroborating.extend(
+            self._corroborate_emails(breach_result, set(surface_data.get("emails", [])))
+        )
+        corroborating.extend(
+            self._corroborate_usernames(monitor_result, set(surface_data.get("usernames", [])))
+        )
+        corroborating.extend(self._corroborate_crypto_addresses(crypto_result, monitor_result))
+        return corroborating
 
-        # Email corroboration: surface web email found in breach
-        surface_emails = set(surface_data.get("emails", []))
-        if breach_result and surface_emails:
-            breach_emails = set(breach_result.query_terms)
-            matched = surface_emails & breach_emails
-            for email in matched:
-                sources = ["surface_web_osint"]
-                if any(b.query_term == email for b in breach_result.breaches):
-                    sources.append("hibp_breach_database")
-                if len(sources) > 1:
-                    corroborating.append(
+    def _corroborate_emails(
+        self, breach_result: BreachScanResult | None, surface_emails: set[str]
+    ) -> list[CorroboratingEvidence]:
+        if not breach_result or not surface_emails:
+            return []
+        matched = surface_emails & set(breach_result.query_terms)
+        result = []
+        for email in matched:
+            sources = ["surface_web_osint"]
+            if any(b.query_term == email for b in breach_result.breaches):
+                sources.append("hibp_breach_database")
+            if len(sources) > 1:
+                result.append(
+                    CorroboratingEvidence(
+                        evidence_type="email",
+                        value=email,
+                        sources=sources,
+                        confidence=0.95,
+                    )
+                )
+        return result
+
+    def _corroborate_usernames(
+        self, monitor_result: MonitorResult | None, surface_usernames: set[str]
+    ) -> list[CorroboratingEvidence]:
+        if not monitor_result or not surface_usernames:
+            return []
+        result = []
+        for mention in monitor_result.mentions:
+            for term in mention.matched_terms:
+                if term in surface_usernames:
+                    result.append(
                         CorroboratingEvidence(
-                            evidence_type="email",
-                            value=email,
-                            sources=sources,
-                            confidence=0.95,
+                            evidence_type="username",
+                            value=term,
+                            sources=["surface_web_osint", mention.site_name],
+                            confidence=mention.confidence,
                         )
                     )
+        return result
 
-        # Username corroboration: surface username found in dark web mention
-        surface_usernames = set(surface_data.get("usernames", []))
-        if monitor_result and surface_usernames:
-            for mention in monitor_result.mentions:
-                for term in mention.matched_terms:
-                    if term in surface_usernames:
-                        corroborating.append(
-                            CorroboratingEvidence(
-                                evidence_type="username",
-                                value=term,
-                                sources=["surface_web_osint", mention.site_name],
-                                confidence=mention.confidence,
-                            )
+    def _corroborate_crypto_addresses(
+        self,
+        crypto_result: CryptoTraceResult | None,
+        monitor_result: MonitorResult | None,
+    ) -> list[CorroboratingEvidence]:
+        if not crypto_result or not monitor_result:
+            return []
+        crypto_addrs = set(crypto_result.addresses_queried)
+        result = []
+        for mention in monitor_result.mentions:
+            for addr in crypto_addrs:
+                if addr.lower() in mention.context_snippet.lower():
+                    result.append(
+                        CorroboratingEvidence(
+                            evidence_type="crypto_address",
+                            value=addr,
+                            sources=["blockchain_analysis", mention.site_name],
+                            confidence=0.9,
                         )
-
-        # Crypto addresses in dark web context
-        if crypto_result and monitor_result:
-            crypto_addrs = set(crypto_result.addresses_queried)
-            for mention in monitor_result.mentions:
-                for addr in crypto_addrs:
-                    if addr.lower() in mention.context_snippet.lower():
-                        corroborating.append(
-                            CorroboratingEvidence(
-                                evidence_type="crypto_address",
-                                value=addr,
-                                sources=["blockchain_analysis", mention.site_name],
-                                confidence=0.9,
-                            )
-                        )
-
-        return corroborating
+                    )
+        return result
 
     def _detect_inconsistencies(self, surface_data: dict[str, Any]) -> list[IdentityInconsistency]:
         """Detect identity inconsistencies within surface web data."""
@@ -859,13 +901,11 @@ class EntityCorrelator:
 
         return actions
 
-
 # ---------------------------------------------------------------------------
 # Singleton accessor
 # ---------------------------------------------------------------------------
 
 _correlator_instance: EntityCorrelator | None = None
-
 
 def get_entity_correlator() -> EntityCorrelator:
     """Get or create the global EntityCorrelator instance."""

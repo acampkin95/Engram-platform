@@ -15,30 +15,16 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
-
 
 class CaseStatus(StrEnum):
     DRAFT = "draft"
@@ -47,13 +33,11 @@ class CaseStatus(StrEnum):
     CLOSED = "closed"
     ARCHIVED = "archived"
 
-
 class CasePriority(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     URGENT = "urgent"
-
 
 class EvidenceType(StrEnum):
     URL = "url"
@@ -66,7 +50,6 @@ class EvidenceType(StrEnum):
     IMAGE_INTEL = "image_intel"
     RELATIONSHIP_GRAPH = "relationship_graph"
     EXTERNAL_FILE = "external_file"
-
 
 class TimelineEventType(StrEnum):
     CASE_CREATED = "case_created"
@@ -87,11 +70,9 @@ class TimelineEventType(StrEnum):
     EXPORT_GENERATED = "export_generated"
     INVESTIGATOR_ASSIGNED = "investigator_assigned"
 
-
 # ---------------------------------------------------------------------------
 # Component models
 # ---------------------------------------------------------------------------
-
 
 class EvidenceItem(BaseModel):
     """A single piece of evidence attached to a case."""
@@ -113,7 +94,6 @@ class EvidenceItem(BaseModel):
     added_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     metadata: dict[str, Any] = Field(default_factory=dict)
 
-
 class TimelineEvent(BaseModel):
     """A single timestamped event in the case timeline."""
 
@@ -126,7 +106,6 @@ class TimelineEvent(BaseModel):
     occurred_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     metadata: dict[str, Any] = Field(default_factory=dict)
 
-
 class CaseNote(BaseModel):
     """Free-text investigator note attached to a case."""
 
@@ -136,7 +115,6 @@ class CaseNote(BaseModel):
     is_flagged: bool = False  # Highlight for report inclusion
     created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     updated_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
-
 
 class CaseSubject(BaseModel):
     """A person / organisation that is the subject of this case."""
@@ -148,11 +126,9 @@ class CaseSubject(BaseModel):
     notes: str | None = None
     added_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
 
-
 # ---------------------------------------------------------------------------
 # Case — top-level model
 # ---------------------------------------------------------------------------
-
 
 class Case(BaseModel):
     """Full OSINT investigation case."""
@@ -247,11 +223,9 @@ class Case(BaseModel):
         )
         return note
 
-
 # ---------------------------------------------------------------------------
 # Request / response helpers
 # ---------------------------------------------------------------------------
-
 
 class CreateCaseRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=300)
@@ -262,7 +236,6 @@ class CreateCaseRequest(BaseModel):
     client_reference: str | None = None
     jurisdiction: str | None = None
     tags: list[str] = Field(default_factory=list)
-
 
 class UpdateCaseRequest(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=300)
@@ -276,7 +249,6 @@ class UpdateCaseRequest(BaseModel):
     risk_level: str | None = None
     risk_score: float | None = None
     fraud_probability: float | None = None
-
 
 class CaseSummary(BaseModel):
     """Lightweight case listing row."""

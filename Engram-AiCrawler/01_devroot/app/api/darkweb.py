@@ -372,40 +372,9 @@ async def full_darkweb_scan(req: FullScanRequest):
     import asyncio
 
     try:
-        tasks = {}
+        tasks = _build_scan_tasks(req)
 
-        # ---- Marketplace scan ----
-        if req.include_darkweb:
-            monitor = _get_marketplace_monitor(req.simulation_mode)
-            additional = req.aliases + req.usernames + req.emails
-            tasks["monitor"] = monitor.scan_entity(
-                entity_name=req.entity_name,
-                additional_terms=additional or None,
-                include_clearnet=True,
-                max_sites=10,
-            )
-
-        # ---- Breach scan ----
-        if req.include_breach:
-            scanner = _get_breach_scanner(req.simulation_mode)
-            tasks["breach"] = scanner.scan(
-                emails=req.emails or None,
-                usernames=req.usernames or None,
-                phone_numbers=req.phone_numbers or None,
-                full_name=req.entity_name,
-                check_pastes=True,
-            )
-
-        # ---- Crypto trace ----
-        if req.include_crypto and req.crypto_addresses:
-            tracer = _get_crypto_tracer(req.simulation_mode)
-            tasks["crypto"] = tracer.trace_addresses(
-                addresses=req.crypto_addresses,
-                max_txs_per_address=20,
-            )
-
-        # Run all in parallel
-        results = {}
+        results: dict[str, Any] = {}
         if tasks:
             gathered = await asyncio.gather(*tasks.values(), return_exceptions=True)
             for key, result in zip(tasks.keys(), gathered):
@@ -415,19 +384,8 @@ async def full_darkweb_scan(req: FullScanRequest):
                 else:
                     results[key] = result
 
-        # ---- Correlate ----
         correlator = _get_correlator()
-
-        # Build surface data from request
-        surface_data = req.surface_data or {}
-        if req.emails:
-            surface_data.setdefault("emails", req.emails)
-        if req.aliases:
-            surface_data.setdefault("aliases", req.aliases)
-        if req.usernames:
-            surface_data.setdefault("usernames", req.usernames)
-        if req.phone_numbers:
-            surface_data.setdefault("phone_numbers", req.phone_numbers)
+        surface_data = _build_surface_data(req)
 
         profile = correlator.correlate(
             entity_name=req.entity_name,
@@ -437,25 +395,70 @@ async def full_darkweb_scan(req: FullScanRequest):
             surface_data=surface_data,
         )
 
-        # Build full response
-        response: dict[str, Any] = {
-            "entity_name": req.entity_name,
-            "unified_profile": profile.to_dict(),
-            "sub_scan_results": {},
-        }
-
-        if "monitor" in results and results["monitor"]:
-            response["sub_scan_results"]["marketplace"] = results["monitor"].to_dict()
-        if "breach" in results and results["breach"]:
-            response["sub_scan_results"]["breach"] = results["breach"].to_dict()
-        if "crypto" in results and results["crypto"]:
-            response["sub_scan_results"]["crypto"] = results["crypto"].to_dict()
-
-        return response
+        return _build_scan_response(req.entity_name, profile, results)
 
     except Exception as exc:
         logger.error(f"Full dark web scan error: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+def _build_scan_tasks(req: FullScanRequest) -> dict[str, Any]:
+    tasks: dict[str, Any] = {}
+    if req.include_darkweb:
+        monitor = _get_marketplace_monitor(req.simulation_mode)
+        additional = req.aliases + req.usernames + req.emails
+        tasks["monitor"] = monitor.scan_entity(
+            entity_name=req.entity_name,
+            additional_terms=additional or None,
+            include_clearnet=True,
+            max_sites=10,
+        )
+    if req.include_breach:
+        scanner = _get_breach_scanner(req.simulation_mode)
+        tasks["breach"] = scanner.scan(
+            emails=req.emails or None,
+            usernames=req.usernames or None,
+            phone_numbers=req.phone_numbers or None,
+            full_name=req.entity_name,
+            check_pastes=True,
+        )
+    if req.include_crypto and req.crypto_addresses:
+        tracer = _get_crypto_tracer(req.simulation_mode)
+        tasks["crypto"] = tracer.trace_addresses(
+            addresses=req.crypto_addresses,
+            max_txs_per_address=20,
+        )
+    return tasks
+
+
+def _build_surface_data(req: FullScanRequest) -> dict[str, Any]:
+    surface_data = req.surface_data or {}
+    if req.emails:
+        surface_data.setdefault("emails", req.emails)
+    if req.aliases:
+        surface_data.setdefault("aliases", req.aliases)
+    if req.usernames:
+        surface_data.setdefault("usernames", req.usernames)
+    if req.phone_numbers:
+        surface_data.setdefault("phone_numbers", req.phone_numbers)
+    return surface_data
+
+
+def _build_scan_response(
+    entity_name: str, profile: Any, results: dict[str, Any]
+) -> dict[str, Any]:
+    response: dict[str, Any] = {
+        "entity_name": entity_name,
+        "unified_profile": profile.to_dict(),
+        "sub_scan_results": {},
+    }
+    if results.get("monitor"):
+        response["sub_scan_results"]["marketplace"] = results["monitor"].to_dict()
+    if results.get("breach"):
+        response["sub_scan_results"]["breach"] = results["breach"].to_dict()
+    if results.get("crypto"):
+        response["sub_scan_results"]["crypto"] = results["crypto"].to_dict()
+    return response
 
 
 # ---------------------------------------------------------------------------

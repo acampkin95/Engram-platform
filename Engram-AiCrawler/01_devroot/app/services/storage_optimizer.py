@@ -27,20 +27,8 @@ import logging
 import os
 import shutil
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from pathlib import Path
 from typing import Any
@@ -52,13 +40,11 @@ logger = logging.getLogger(__name__)
 # Tier definitions
 # ---------------------------------------------------------------------------
 
-
 class StorageTier(StrEnum):
     HOT = "hot"
     WARM = "warm"
     COLD = "cold"
     ARCHIVE = "archive"
-
 
 # Seconds before promotion to next tier
 _TIER_AGE_SECONDS: dict[StorageTier, int] = {
@@ -77,11 +63,9 @@ _TIER_PATHS: dict[StorageTier, Path] = {
 
 _TIER_ORDER = [StorageTier.HOT, StorageTier.WARM, StorageTier.COLD, StorageTier.ARCHIVE]
 
-
 # ---------------------------------------------------------------------------
 # Artifact types
 # ---------------------------------------------------------------------------
-
 
 class ArtifactType(StrEnum):
     SCAN_RESULT = "scan_result"
@@ -92,11 +76,9 @@ class ArtifactType(StrEnum):
     FRAUD_GRAPH = "fraud_graph"
     DEEP_CRAWL = "deep_crawl"
 
-
 # ---------------------------------------------------------------------------
 # 6.1  StorageOptimizer
 # ---------------------------------------------------------------------------
-
 
 class StorageOptimizer:
     """OSINT-aware tiered storage manager.
@@ -354,6 +336,43 @@ class StorageOptimizer:
         )
         return True
 
+    def _find_aged_artifacts(
+        self, src_tier: StorageTier, max_age: int, now: datetime
+    ) -> list[str]:
+        to_migrate = []
+        index = self._load_index(src_tier)
+        for artifact_id, entry in index.items():
+            try:
+                created = datetime.fromisoformat(entry["created_at"])
+                if (now - created).total_seconds() > max_age:
+                    to_migrate.append(artifact_id)
+            except Exception:
+                pass
+        return to_migrate
+
+    def _migrate_artifacts(
+        self, to_migrate: list[str], dst_tier: StorageTier, label: str,
+        counts: dict[str, int]
+    ) -> None:
+        for artifact_id in to_migrate:
+            if self.promote(artifact_id, dst_tier):
+                counts[label] += 1
+
+    def _compress_archive_artifacts(self, archive_index: dict, counts: dict[str, int]) -> None:
+        for artifact_id, entry in archive_index.items():
+            path = self.paths[StorageTier.ARCHIVE] / entry["filename"]
+            if path.exists() and not path.name.endswith(".gz"):
+                gz_path = path.with_suffix(path.suffix + ".gz")
+                try:
+                    with open(path, "rb") as f_in, gzip.open(gz_path, "wb") as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+                    path.unlink()
+                    entry["filename"] = gz_path.name
+                    archive_index[artifact_id] = entry
+                    counts["archived"] += 1
+                except Exception as exc:
+                    logger.warning("Failed to compress archive artifact %s: %s", artifact_id, exc)
+
     def run_lifecycle_cycle(self) -> dict[str, int]:
         """Migrate aged artifacts down the tier chain. Returns migration counts."""
         counts: dict[str, int] = {"hot→warm": 0, "warm→cold": 0, "cold→archive": 0, "archived": 0}
@@ -369,35 +388,11 @@ class StorageOptimizer:
             max_age = _TIER_AGE_SECONDS[src_tier]
             if max_age <= 0:
                 continue
-            index = self._load_index(src_tier)
-            to_migrate = []
-            for artifact_id, entry in index.items():
-                try:
-                    created = datetime.fromisoformat(entry["created_at"])
-                    if (now - created).total_seconds() > max_age:
-                        to_migrate.append(artifact_id)
-                except Exception:
-                    pass
-            for artifact_id in to_migrate:
-                if self.promote(artifact_id, dst_tier):
-                    counts[label] += 1
+            to_migrate = self._find_aged_artifacts(src_tier, max_age, now)
+            self._migrate_artifacts(to_migrate, dst_tier, label, counts)
 
-        # Compress cold→archive moves
         archive_index = self._load_index(StorageTier.ARCHIVE)
-        for artifact_id, entry in archive_index.items():
-            path = self.paths[StorageTier.ARCHIVE] / entry["filename"]
-            if path.exists() and not path.name.endswith(".gz"):
-                gz_path = path.with_suffix(path.suffix + ".gz")
-                try:
-                    with open(path, "rb") as f_in, gzip.open(gz_path, "wb") as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-                    path.unlink()
-                    # Update index filename
-                    entry["filename"] = gz_path.name
-                    archive_index[artifact_id] = entry
-                    counts["archived"] += 1
-                except Exception as exc:
-                    logger.warning("Failed to compress archive artifact %s: %s", artifact_id, exc)
+        self._compress_archive_artifacts(archive_index, counts)
         self._save_index(StorageTier.ARCHIVE, archive_index)
 
         logger.info("Lifecycle cycle: %s", counts)
@@ -529,13 +524,11 @@ class StorageOptimizer:
         results.sort(key=lambda e: e.get("created_at", ""), reverse=True)
         return results[offset : offset + limit]
 
-
 # ---------------------------------------------------------------------------
 # Singleton
 # ---------------------------------------------------------------------------
 
 _optimizer_instance: StorageOptimizer | None = None
-
 
 def get_storage_optimizer() -> StorageOptimizer:
     global _optimizer_instance
@@ -543,11 +536,9 @@ def get_storage_optimizer() -> StorageOptimizer:
         _optimizer_instance = StorageOptimizer()
     return _optimizer_instance
 
-
 # ---------------------------------------------------------------------------
 # 6.2  OSINT Redis Cache Layer
 # ---------------------------------------------------------------------------
-
 
 class OsintCacheKeys:
     """Canonical Redis key builders for OSINT pipeline caching."""
@@ -587,7 +578,6 @@ class OsintCacheKeys:
     def dedup_check(cls, fingerprint: str) -> str:
         return f"{cls.PREFIX}dedup:{cls._hash(fingerprint)}"
 
-
 # TTL constants (seconds)
 class OsintCacheTTL:
     SCAN_RESULT = 3600 * 6  # 6 hours — scans are expensive
@@ -597,7 +587,6 @@ class OsintCacheTTL:
     IMAGE_HASH = 3600 * 24  # 24 hours — hashes are stable
     ALIAS_SET = 3600 * 6  # 6 hours
     DEDUP_CHECK = 3600 * 1  # 1 hour
-
 
 class OsintCache:
     """OSINT-domain cache layer on top of Redis.
@@ -740,7 +729,6 @@ class OsintCache:
         except Exception as exc:
             return {"error": str(exc)}
 
-
 class _NullRedis:
     """No-op Redis stub for when Redis is unavailable."""
 
@@ -759,13 +747,11 @@ class _NullRedis:
     async def info(self, *a, **kw):
         return {}
 
-
 # ---------------------------------------------------------------------------
 # Singleton
 # ---------------------------------------------------------------------------
 
 _osint_cache_instance: OsintCache | None = None
-
 
 def get_osint_cache() -> OsintCache:
     global _osint_cache_instance

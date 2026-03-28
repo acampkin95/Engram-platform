@@ -192,25 +192,46 @@ class ThreatIntelService:
             fallback_used=True,
         )
 
+    def _build_vt_url(self, indicator: str, indicator_type: str) -> str:
+        cfg = self._settings.virustotal
+        if indicator_type == "file_hash":
+            return f"{cfg.base_url}/files/{indicator}"
+        elif indicator_type == "url":
+            import base64
+            url_id = base64.urlsafe_b64encode(indicator.encode()).decode().rstrip("=")
+            return f"{cfg.base_url}/urls/{url_id}"
+        elif indicator_type == "domain":
+            return f"{cfg.base_url}/domains/{indicator}"
+        elif indicator_type == "ip":
+            return f"{cfg.base_url}/ip_addresses/{indicator}"
+        else:
+            raise OsintServiceError(f"Unsupported VT indicator type: {indicator_type}")
+
+    def _extract_vendor_results(self, results_raw: dict) -> list[dict]:
+        return [
+            {
+                "vendor": vendor,
+                "category": info.get("category"),
+                "result": info.get("result"),
+            }
+            for vendor, info in list(results_raw.items())[:50]
+        ]
+
+    def _extract_threat_names(self, results_raw: dict) -> list[str]:
+        threat_names = []
+        for info in results_raw.values():
+            r = info.get("result")
+            if r and r not in ("clean", "unrated"):
+                threat_names.append(r)
+        return list(set(threat_names))[:20]
+
     async def _vt_api_check(self, indicator: str, indicator_type: str) -> VirusTotalResult:
         cfg = self._settings.virustotal
         session = await self._get_session()
         headers = {"x-apikey": cfg.api_key}
 
         try:
-            if indicator_type == "file_hash":
-                url = f"{cfg.base_url}/files/{indicator}"
-            elif indicator_type == "url":
-                import base64
-
-                url_id = base64.urlsafe_b64encode(indicator.encode()).decode().rstrip("=")
-                url = f"{cfg.base_url}/urls/{url_id}"
-            elif indicator_type == "domain":
-                url = f"{cfg.base_url}/domains/{indicator}"
-            elif indicator_type == "ip":
-                url = f"{cfg.base_url}/ip_addresses/{indicator}"
-            else:
-                raise OsintServiceError(f"Unsupported VT indicator type: {indicator_type}")
+            url = self._build_vt_url(indicator, indicator_type)
 
             async with session.get(url, headers=headers) as resp:
                 if resp.status == 429:
@@ -230,27 +251,11 @@ class ThreatIntelService:
             stats = attrs.get("last_analysis_stats", {})
             results_raw = attrs.get("last_analysis_results", {})
 
-            vendor_results = [
-                {
-                    "vendor": vendor,
-                    "category": info.get("category"),
-                    "result": info.get("result"),
-                }
-                for vendor, info in list(results_raw.items())[:50]
-            ]
-
             malicious = stats.get("malicious", 0)
             suspicious = stats.get("suspicious", 0)
             harmless = stats.get("harmless", 0)
             undetected = stats.get("undetected", 0)
             total_vendors = malicious + suspicious + harmless + undetected
-
-            threat_names = []
-            for info in results_raw.values():
-                r = info.get("result")
-                if r and r not in ("clean", "unrated"):
-                    threat_names.append(r)
-            threat_names = list(set(threat_names))[:20]
 
             return VirusTotalResult(
                 indicator=indicator,
@@ -261,10 +266,10 @@ class ThreatIntelService:
                 harmless=harmless,
                 undetected=undetected,
                 total_vendors=total_vendors,
-                threat_names=threat_names,
+                threat_names=self._extract_threat_names(results_raw),
                 last_analysis_date=attrs.get("last_analysis_date"),
                 reputation_score=attrs.get("reputation"),
-                vendor_results=vendor_results,
+                vendor_results=self._extract_vendor_results(results_raw),
                 fallback_used=False,
             )
         except (ProviderRateLimitError, ProviderUnavailableError):

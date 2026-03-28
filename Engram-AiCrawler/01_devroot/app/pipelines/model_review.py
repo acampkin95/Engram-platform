@@ -3,20 +3,8 @@
 import json
 import logging
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 
@@ -26,17 +14,14 @@ from app.services.lm_studio_bridge import LMStudioBridge
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
 # Models
 # ---------------------------------------------------------------------------
-
 
 class ReviewDecision(StrEnum):
     KEEP = "keep"
     DERANK = "derank"
     ARCHIVE = "archive"
-
 
 class ReviewResult(BaseModel):
     crawl_id: str
@@ -47,7 +32,6 @@ class ReviewResult(BaseModel):
     keywords_found: list[str]
     timestamp: str
 
-
 class BatchReviewResult(BaseModel):
     results: list[ReviewResult]
     total_reviewed: int
@@ -56,7 +40,6 @@ class BatchReviewResult(BaseModel):
     archived: int
     average_relevance: float
     timestamp: str
-
 
 # ---------------------------------------------------------------------------
 # Prompt
@@ -89,11 +72,9 @@ Scoring guide:
 - 0.0-0.29: Not relevant, noise or unrelated content
 """
 
-
 # ---------------------------------------------------------------------------
 # Pipeline
 # ---------------------------------------------------------------------------
-
 
 class ModelReviewPipeline:
     """Reviews crawl results using LM Studio for relevance scoring."""

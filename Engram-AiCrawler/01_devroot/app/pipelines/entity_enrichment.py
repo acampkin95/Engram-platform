@@ -270,98 +270,148 @@ class EntityEnrichmentPipeline:
 
         for pii in extracted_pii:
             source = _classify_source(pii.source_url)
-
-            # Emails
-            for email in pii.emails:
-                norm = email.lower()
-                if norm not in existing_emails:
-                    entity.add_email(email, source, pii.source_url)
-                    stats.new_data_points += 1
-                    existing_emails.add(norm)
-                else:
-                    stats.duplicate_data_points += 1
-
-            # Phones
-            for phone in pii.phones:
-                norm = _normalize_phone(phone)
-                if norm not in existing_phones:
-                    entity.add_phone(phone, source, pii.source_url)
-                    stats.new_data_points += 1
-                    existing_phones.add(norm)
-                else:
-                    stats.duplicate_data_points += 1
-
-            # Usernames
-            for username in pii.usernames:
-                norm = username.lower()
-                if norm not in existing_usernames:
-                    entity.add_username(username, source=source)
-                    stats.new_data_points += 1
-                    existing_usernames.add(norm)
-                else:
-                    stats.duplicate_data_points += 1
-
-            # Addresses
-            for address in pii.addresses:
-                norm = address.lower()
-                if norm not in existing_addresses:
-                    entity.add_address(address, source, pii.source_url)
-                    stats.new_data_points += 1
-                    existing_addresses.add(norm)
-                else:
-                    stats.duplicate_data_points += 1
-
-            # Images
-            for img_url in pii.image_urls:
-                if img_url not in existing_images:
-                    entity.add_image(img_url, source, source_url=pii.source_url)
-                    stats.new_images += 1
-                    existing_images.add(img_url)
-
-            # Social profiles
-            for profile in pii.social_profiles:
-                key = (
-                    profile.get("platform", ""),
-                    profile.get("username", "") or profile.get("url", ""),
-                )
-                if key not in existing_social:
-                    entity.add_social_profile(
-                        profile.get("url") or profile.get("username", ""),
-                        profile.get("platform", "unknown"),
-                        source=source,
-                        username=profile.get("username"),
-                    )
-                    stats.new_social_profiles += 1
-                    existing_social.add(key)
-                else:
-                    stats.duplicate_data_points += 1
-
-            # Keywords
+            self._enrich_emails(entity, pii, stats, existing_emails, source)
+            self._enrich_phones(entity, pii, stats, existing_phones, source)
+            self._enrich_usernames(entity, pii, stats, existing_usernames, source)
+            self._enrich_addresses(entity, pii, stats, existing_addresses, source)
+            self._enrich_images(entity, pii, stats, existing_images, source)
+            self._enrich_social_profiles(entity, pii, stats, existing_social, source)
             for keyword in pii.keywords:
                 entity.add_keyword(keyword)
-
-            # Occupations
             for occupation in pii.occupations:
                 _add_occupation_if_new(entity, occupation, source)
-
-            # Relationships (stored in notes for now — full relationship model is Phase 3)
-            for rel in pii.relationships:
-                if rel.get("name") and rel.get("relation"):
-                    entity.notes.append(
-                        {
-                            "type": "relationship",
-                            "name": rel["name"],
-                            "relation": rel["relation"],
-                            "confidence": rel.get("confidence", "0.5"),
-                            "source_url": pii.source_url,
-                        }
-                    )
-                    stats.new_relationships += 1
+            self._enrich_relationships(entity, pii, stats)
 
         # Recalculate completeness after enrichment
         entity.calculate_completeness()
 
         return stats
+
+    def _enrich_emails(
+        self,
+        entity: EntityProfile,
+        pii: ExtractedPII,
+        stats: EnrichmentResult,
+        existing: set[str],
+        source: DataSource,
+    ) -> None:
+        for email in pii.emails:
+            norm = email.lower()
+            if norm not in existing:
+                entity.add_email(email, source, pii.source_url)
+                stats.new_data_points += 1
+                existing.add(norm)
+            else:
+                stats.duplicate_data_points += 1
+
+    def _enrich_phones(
+        self,
+        entity: EntityProfile,
+        pii: ExtractedPII,
+        stats: EnrichmentResult,
+        existing: set[str],
+        source: DataSource,
+    ) -> None:
+        for phone in pii.phones:
+            norm = _normalize_phone(phone)
+            if norm not in existing:
+                entity.add_phone(phone, source, pii.source_url)
+                stats.new_data_points += 1
+                existing.add(norm)
+            else:
+                stats.duplicate_data_points += 1
+
+    def _enrich_usernames(
+        self,
+        entity: EntityProfile,
+        pii: ExtractedPII,
+        stats: EnrichmentResult,
+        existing: set[str],
+        source: DataSource,
+    ) -> None:
+        for username in pii.usernames:
+            norm = username.lower()
+            if norm not in existing:
+                entity.add_username(username, source=source)
+                stats.new_data_points += 1
+                existing.add(norm)
+            else:
+                stats.duplicate_data_points += 1
+
+    def _enrich_addresses(
+        self,
+        entity: EntityProfile,
+        pii: ExtractedPII,
+        stats: EnrichmentResult,
+        existing: set[str],
+        source: DataSource,
+    ) -> None:
+        for address in pii.addresses:
+            norm = address.lower()
+            if norm not in existing:
+                entity.add_address(address, source, pii.source_url)
+                stats.new_data_points += 1
+                existing.add(norm)
+            else:
+                stats.duplicate_data_points += 1
+
+    def _enrich_images(
+        self,
+        entity: EntityProfile,
+        pii: ExtractedPII,
+        stats: EnrichmentResult,
+        existing: set[str],
+        source: DataSource,
+    ) -> None:
+        for img_url in pii.image_urls:
+            if img_url not in existing:
+                entity.add_image(img_url, source, source_url=pii.source_url)
+                stats.new_images += 1
+                existing.add(img_url)
+
+    def _enrich_social_profiles(
+        self,
+        entity: EntityProfile,
+        pii: ExtractedPII,
+        stats: EnrichmentResult,
+        existing: set[tuple[str, str]],
+        source: DataSource,
+    ) -> None:
+        for profile in pii.social_profiles:
+            key = (
+                profile.get("platform", ""),
+                profile.get("username", "") or profile.get("url", ""),
+            )
+            if key not in existing:
+                entity.add_social_profile(
+                    profile.get("url") or profile.get("username", ""),
+                    profile.get("platform", "unknown"),
+                    source=source,
+                    username=profile.get("username"),
+                )
+                stats.new_social_profiles += 1
+                existing.add(key)
+            else:
+                stats.duplicate_data_points += 1
+
+    def _enrich_relationships(
+        self,
+        entity: EntityProfile,
+        pii: ExtractedPII,
+        stats: EnrichmentResult,
+    ) -> None:
+        for rel in pii.relationships:
+            if rel.get("name") and rel.get("relation"):
+                entity.notes.append(
+                    {
+                        "type": "relationship",
+                        "name": rel["name"],
+                        "relation": rel["relation"],
+                        "confidence": rel.get("confidence", "0.5"),
+                        "source_url": pii.source_url,
+                    }
+                )
+                stats.new_relationships += 1
 
     # ------------------------------------------------------------------
     # Internal extraction

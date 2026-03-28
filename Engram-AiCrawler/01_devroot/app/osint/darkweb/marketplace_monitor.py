@@ -18,20 +18,8 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 
@@ -39,11 +27,9 @@ from app.osint.darkweb.tor_crawler import TorCrawler, TorCrawlConfig, DarkWebPag
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
 # Enums & Types
 # ---------------------------------------------------------------------------
-
 
 class SiteCategory(StrEnum):
     MARKETPLACE = "marketplace"
@@ -53,14 +39,12 @@ class SiteCategory(StrEnum):
     NEWS = "news"
     INTELLIGENCE = "intelligence"
 
-
 class ThreatLevel(StrEnum):
     CRITICAL = "critical"  # Active threat / direct mention with PII
     HIGH = "high"  # Strong match, likely relevant
     MEDIUM = "medium"  # Partial match, needs review
     LOW = "low"  # Weak signal
     INFO = "info"  # Informational only
-
 
 @dataclass
 class DarkWebSite:
@@ -74,7 +58,6 @@ class DarkWebSite:
     requires_registration: bool = False
     language: str = "en"
     tags: list[str] = field(default_factory=list)
-
 
 @dataclass
 class EntityMention:
@@ -106,7 +89,6 @@ class EntityMention:
             "page_title": self.page_title,
             "confidence": self.confidence,
         }
-
 
 @dataclass
 class MonitorResult:
@@ -160,7 +142,6 @@ class MonitorResult:
             "errors": self.errors,
             "tor_available": self.tor_available,
         }
-
 
 # ---------------------------------------------------------------------------
 # Known Dark Web Sites Registry
@@ -240,11 +221,9 @@ CLEARNET_INTELLIGENCE_SITES: list[DarkWebSite] = [
     ),
 ]
 
-
 # ---------------------------------------------------------------------------
 # Threat Scorer
 # ---------------------------------------------------------------------------
-
 
 class ThreatScorer:
     """Score entity mentions by threat level based on context."""
@@ -320,7 +299,6 @@ class ThreatScorer:
             return ThreatLevel.LOW, base_confidence
         return ThreatLevel.INFO, base_confidence * 0.5
 
-
 def _extract_context(text: str, term: str, window: int = 200) -> str:
     """Extract surrounding context around a matched term."""
     idx = text.lower().find(term.lower())
@@ -335,11 +313,9 @@ def _extract_context(text: str, term: str, window: int = 200) -> str:
         snippet = snippet + "…"
     return snippet
 
-
 # ---------------------------------------------------------------------------
 # Marketplace Monitor
 # ---------------------------------------------------------------------------
-
 
 class MarketplaceMonitor:
     """
@@ -544,13 +520,11 @@ class MarketplaceMonitor:
 
         return mentions, pages_scanned
 
-
 # ---------------------------------------------------------------------------
 # Singleton accessor
 # ---------------------------------------------------------------------------
 
 _monitor_instance: MarketplaceMonitor | None = None
-
 
 def get_marketplace_monitor(
     simulation_mode: bool = False,

@@ -11,20 +11,8 @@ import json
 import logging
 import os
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any, Union
 from collections.abc import AsyncIterator
@@ -32,7 +20,6 @@ from collections.abc import AsyncIterator
 import redis.asyncio as aioredis
 
 logger = logging.getLogger(__name__)
-
 
 class EventType(StrEnum):
     """Typed event taxonomy for the OSINT pipeline."""
@@ -43,7 +30,6 @@ class EventType(StrEnum):
     ENTITY_EXTRACTED = "entity.extracted"
     SCAN_PROGRESS = "scan.progress"
     GRAPH_UPDATED = "graph.updated"
-
 
 # Map event types to their Redis stream names
 STREAM_MAPPING: dict[str, str] = {
@@ -60,7 +46,6 @@ DEFAULT_STREAM = "default_events"
 
 # Maximum entries per stream (prevents unbounded growth)
 STREAM_MAXLEN = 10_000
-
 
 class EventBus:
     """Redis Streams-based event bus for inter-service communication.
@@ -249,10 +234,8 @@ class EventBus:
             logger.error(f"Failed to trim stream '{stream}': {e}")
             return 0
 
-
 # Global singleton
 _event_bus: EventBus | None = None
-
 
 def get_event_bus() -> EventBus:
     """Get the global EventBus singleton."""
@@ -260,7 +243,6 @@ def get_event_bus() -> EventBus:
     if _event_bus is None:
         _event_bus = EventBus()
     return _event_bus
-
 
 async def close_event_bus() -> None:
     """Close the global EventBus connection."""

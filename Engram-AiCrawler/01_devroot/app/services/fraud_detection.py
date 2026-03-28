@@ -25,6 +25,7 @@ from collections import defaultdict
 from datetime import datetime, UTC
 from difflib import SequenceMatcher
 from pathlib import Path
+from collections.abc import Callable
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -101,30 +102,14 @@ class IdentityResolver:
     independently of the full ORM layer.
     """
 
-    def resolve(self, profiles: list[dict[str, Any]]) -> ResolvedIdentity:
-        """Merge *profiles* into a single ResolvedIdentity.
+    def _extract_field_value(self, item: Any) -> str | None:
+        if isinstance(item, dict):
+            return item.get("value")
+        return str(item) if item else None
 
-        Args:
-            profiles: List of entity profile dicts.  Expected keys (all
-                optional): entity_id, primary_name, known_names, emails,
-                phones, addresses, usernames, social_profiles, images,
-                date_of_birth.
-        """
-        emails: set[str] = set()
-        phones: set[str] = set()
-        addresses: set[str] = set()
-        usernames: set[str] = set()
-        social_urls: set[str] = set()
-        image_hashes: set[str] = set()
+    def _collect_names(self, profiles: list[dict[str, Any]]) -> list[str]:
         names: list[str] = []
-        entity_ids: list[str] = []
-        dobs: list[str] = []
-
         for p in profiles:
-            if p.get("entity_id"):
-                entity_ids.append(p["entity_id"])
-
-            # Names
             for name_field in ("primary_name", "known_names"):
                 raw = p.get(name_field)
                 if isinstance(raw, str) and raw:
@@ -137,66 +122,77 @@ class IdentityResolver:
                             names.append(n)
                         elif isinstance(n, dict) and n.get("value"):
                             names.append(n["value"])
+        return names
 
-            # Emails
-            for e in p.get("emails", []):
-                val = e.get("value") if isinstance(e, dict) else str(e)
+    def _collect_field_set(
+        self,
+        profiles: list[dict[str, Any]],
+        field: str,
+        normalizer: Callable[[str], str] | None = None,
+    ) -> set[str]:
+        result: set[str] = set()
+        for p in profiles:
+            for item in p.get(field, []):
+                val = self._extract_field_value(item)
                 if val:
-                    emails.add(_norm_email(val))
+                    result.add(normalizer(val) if normalizer else val.strip())
+        return result
 
-            # Phones
-            for ph in p.get("phones", []):
-                val = ph.get("value") if isinstance(ph, dict) else str(ph)
-                if val:
-                    phones.add(_norm_phone(val))
-
-            # Addresses
-            for addr in p.get("addresses", []):
-                val = addr.get("value") if isinstance(addr, dict) else str(addr)
-                if val:
-                    addresses.add(_norm_address(val))
-
-            # Usernames
-            for u in p.get("usernames", []):
-                val = u.get("value") if isinstance(u, dict) else str(u)
-                if val:
-                    usernames.add(val.strip().lower())
-
-            # Social profiles
-            for sp in p.get("social_profiles", []):
-                val = sp.get("value") if isinstance(sp, dict) else str(sp)
-                if val:
-                    social_urls.add(val.strip())
-
-            # Image hashes
+    def _collect_image_hashes(self, profiles: list[dict[str, Any]]) -> set[str]:
+        hashes: set[str] = set()
+        for p in profiles:
             for img in p.get("images", []):
                 h = img.get("image_hash") if isinstance(img, dict) else None
                 if h:
-                    image_hashes.add(h)
+                    hashes.add(h)
+        return hashes
 
-            # DOB
+    def _collect_dobs(self, profiles: list[dict[str, Any]]) -> list[str]:
+        dobs: list[str] = []
+        for p in profiles:
             dob = p.get("date_of_birth")
             if isinstance(dob, dict) and dob.get("display"):
                 dobs.append(dob["display"])
             elif isinstance(dob, str) and dob:
                 dobs.append(dob)
+        return dobs
 
-        # Canonical name: most common normalised name
-        canonical_name: str | None = None
-        unique_names: list[str] = []
+    def _determine_canonical(self, names: list[str]) -> tuple[str | None, list[str]]:
         seen_norm: set[str] = set()
+        unique_names: list[str] = []
         for n in names:
             nn = _norm_name(n)
             if nn not in seen_norm:
                 seen_norm.add(nn)
                 unique_names.append(n)
         if unique_names:
-            canonical_name = unique_names[0]
-            aliases_list = unique_names[1:]
-        else:
-            aliases_list = []
+            return unique_names[0], unique_names[1:]
+        return None, []
 
-        # Confidence: rises with number of corroborating sources
+    def resolve(self, profiles: list[dict[str, Any]]) -> ResolvedIdentity:
+        """Merge *profiles* into a single ResolvedIdentity.
+
+        Args:
+            profiles: List of entity profile dicts.  Expected keys (all
+                optional): entity_id, primary_name, known_names, emails,
+                phones, addresses, usernames, social_profiles, images,
+                date_of_birth.
+        """
+        entity_ids = [p["entity_id"] for p in profiles if p.get("entity_id")]
+
+        names = self._collect_names(profiles)
+        emails = self._collect_field_set(profiles, "emails", _norm_email)
+        phones = self._collect_field_set(profiles, "phones", _norm_phone)
+        addresses = self._collect_field_set(profiles, "addresses", _norm_address)
+        usernames = self._collect_field_set(
+            profiles, "usernames", lambda v: v.strip().lower()
+        )
+        social_urls = self._collect_field_set(profiles, "social_profiles")
+        image_hashes = self._collect_image_hashes(profiles)
+        dobs = self._collect_dobs(profiles)
+
+        canonical_name, aliases_list = self._determine_canonical(names)
+
         source_count = len(profiles)
         pivot_count = len(emails) + len(phones) + len(image_hashes) + len(usernames)
         confidence = min(0.3 + 0.1 * source_count + 0.05 * pivot_count, 1.0)
@@ -636,16 +632,26 @@ class RelationshipMapper:
     The result exposes hidden networks (sock-puppet rings, fraud clusters).
     """
 
-    def build_graph(
-        self,
-        profiles: list[dict[str, Any]],
-        graph_id: str | None = None,
-    ) -> EntityGraph:
-        """Build entity relationship graph from *profiles*."""
-        # Build pivot index: pivot_key → set of entity_ids
+    _PIVOT_CONFIDENCE = {
+        "email": 0.95,
+        "phone": 0.90,
+        "image_hash": 0.88,
+        "username": 0.80,
+        "address": 0.70,
+    }
+
+    _PIVOT_FIELDS: list[tuple[str, str, Callable[[str], str] | None]] = [
+        ("emails", "email", _norm_email),
+        ("phones", "phone", _norm_phone),
+        ("addresses", "address", _norm_address),
+        ("usernames", "username", lambda v: v.strip().lower()),
+    ]
+
+    def _build_pivot_index(
+        self, profiles: list[dict[str, Any]]
+    ) -> tuple[dict[str, set[str]], list[str]]:
         index: dict[str, set[str]] = defaultdict(set)
         entity_ids: list[str] = []
-
         for p in profiles:
             eid = p.get(
                 "entity_id",
@@ -654,53 +660,32 @@ class RelationshipMapper:
                 ],
             )
             entity_ids.append(eid)
-
-            for e in p.get("emails", []):
-                val = e.get("value") if isinstance(e, dict) else str(e)
-                if val:
-                    index[f"email:{_norm_email(val)}"].add(eid)
-
-            for ph in p.get("phones", []):
-                val = ph.get("value") if isinstance(ph, dict) else str(ph)
-                if val:
-                    index[f"phone:{_norm_phone(val)}"].add(eid)
-
-            for addr in p.get("addresses", []):
-                val = addr.get("value") if isinstance(addr, dict) else str(addr)
-                if val:
-                    index[f"address:{_norm_address(val)}"].add(eid)
-
-            for u in p.get("usernames", []):
-                val = u.get("value") if isinstance(u, dict) else str(u)
-                if val:
-                    index[f"username:{val.strip().lower()}"].add(eid)
-
+            for field, prefix, normalizer in self._PIVOT_FIELDS:
+                for item in p.get(field, []):
+                    val = item.get("value") if isinstance(item, dict) else str(item)
+                    if val:
+                        key = f"{prefix}:{normalizer(val)}" if normalizer else f"{prefix}:{val}"
+                        index[key].add(eid)
             for img in p.get("images", []):
                 h = img.get("image_hash") if isinstance(img, dict) else None
                 if h:
                     index[f"image_hash:{h}"].add(eid)
+        return index, entity_ids
 
-        # Build links from pivot groups with 2+ entities
+    def _generate_links(
+        self, index: dict[str, set[str]]
+    ) -> tuple[list[EntityLink], dict[str, int]]:
         links: list[EntityLink] = []
         pivot_summary: dict[str, int] = defaultdict(int)
-
         for pivot_key, eids in index.items():
             if len(eids) < 2:
                 continue
             pivot_type, _, pivot_value = pivot_key.partition(":")
             pivot_summary[pivot_type] += 1
-
+            conf = self._PIVOT_CONFIDENCE.get(pivot_type, 0.60)
             eids_list = sorted(eids)
             for i in range(len(eids_list)):
                 for j in range(i + 1, len(eids_list)):
-                    # Confidence varies by pivot type
-                    conf = {
-                        "email": 0.95,
-                        "phone": 0.90,
-                        "image_hash": 0.88,
-                        "username": 0.80,
-                        "address": 0.70,
-                    }.get(pivot_type, 0.60)
                     links.append(
                         EntityLink(
                             from_entity_id=eids_list[i],
@@ -710,8 +695,11 @@ class RelationshipMapper:
                             confidence=conf,
                         )
                     )
+        return links, pivot_summary
 
-        # Connected components (Union-Find)
+    def _find_clusters(
+        self, entity_ids: list[str], links: list[EntityLink]
+    ) -> list[list[str]]:
         parent = {eid: eid for eid in entity_ids}
 
         def find(x: str) -> str:
@@ -732,7 +720,17 @@ class RelationshipMapper:
         cluster_map: dict[str, list[str]] = defaultdict(list)
         for eid in entity_ids:
             cluster_map[find(eid)].append(eid)
-        clusters = [sorted(v) for v in cluster_map.values() if len(v) > 1]
+        return [sorted(v) for v in cluster_map.values() if len(v) > 1]
+
+    def build_graph(
+        self,
+        profiles: list[dict[str, Any]],
+        graph_id: str | None = None,
+    ) -> EntityGraph:
+        """Build entity relationship graph from *profiles*."""
+        index, entity_ids = self._build_pivot_index(profiles)
+        links, pivot_summary = self._generate_links(index)
+        clusters = self._find_clusters(entity_ids, links)
 
         gid = graph_id or hashlib.sha256("|".join(sorted(entity_ids)).encode()).hexdigest()[:16]
 

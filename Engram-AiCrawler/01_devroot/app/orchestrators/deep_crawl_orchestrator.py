@@ -13,26 +13,13 @@ The key difference from OSINTScanOrchestrator:
 - DeepCrawlOrchestrator: entity → search vectors → crawl → extract → update entity → repeat
 """
 
-
 from __future__ import annotations
 import asyncio
 import logging
 import os
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 from collections.abc import Callable, Coroutine
@@ -54,11 +41,9 @@ from app.osint.platform_crawler import PlatformCrawlRouter
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
 # Models
 # ---------------------------------------------------------------------------
-
 
 class DeepCrawlStage(StrEnum):
     """Stages in the deep crawl pipeline."""
@@ -73,7 +58,6 @@ class DeepCrawlStage(StrEnum):
     COMPLETED = "completed"
     FAILED = "failed"
 
-
 class SearchVector(BaseModel):
     """A search vector generated from entity data."""
 
@@ -84,7 +68,6 @@ class SearchVector(BaseModel):
     priority: int = Field(default=1, ge=1, le=10)  # Higher = more likely to yield results
     source_data: dict[str, Any] = Field(default_factory=dict)  # What entity data generated this
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-
 
 class CrawlIteration(BaseModel):
     """One iteration of the deep crawl."""
@@ -99,7 +82,6 @@ class CrawlIteration(BaseModel):
     started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     completed_at: datetime | None = None
     diminishing_returns: bool = False  # Less than 10% new data
-
 
 class DeepCrawlRequest(BaseModel):
     """Request to start a deep crawl."""
@@ -129,7 +111,6 @@ class DeepCrawlRequest(BaseModel):
 
     # Context
     query_context: str = ""  # Additional context for LLM
-
 
 class DeepCrawlResult(BaseModel):
     """Result of a deep crawl operation."""
@@ -161,7 +142,6 @@ class DeepCrawlResult(BaseModel):
 
     # Error handling
     error: str | None = None
-
 
 class ExtractedData(BaseModel):
     """Data extracted from a crawl result."""
@@ -197,15 +177,12 @@ class ExtractedData(BaseModel):
     raw_text: str | None = None
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
 
-
 # Type alias for progress callback
 ProgressCallback = Callable[[str, DeepCrawlStage, dict[str, Any]], Coroutine[Any, Any, None]]
-
 
 # ---------------------------------------------------------------------------
 # Search Vector Generator
 # ---------------------------------------------------------------------------
-
 
 class SearchVectorGenerator:
     """Generates search vectors from entity data using LM Studio."""
@@ -673,11 +650,9 @@ Generate queries that are likely to yield NEW information not already known."""
 
         return "\n".join(parts)
 
-
 # ---------------------------------------------------------------------------
 # Deep Crawl Orchestrator
 # ---------------------------------------------------------------------------
-
 
 class DeepCrawlOrchestrator:
     """Orchestrates recursive deep crawling based on entity data.
@@ -711,6 +686,20 @@ class DeepCrawlOrchestrator:
         )
         self.crawl_router = PlatformCrawlRouter(max_concurrent=5)
 
+    def _check_diminishing_returns(
+        self, crawl_count: int, new_count: int, threshold: float,
+        diminishing_count: int, iteration_num: int, iteration: CrawlIteration,
+    ) -> tuple[bool, int]:
+        if crawl_count <= 0:
+            return False, diminishing_count
+        new_ratio = new_count / crawl_count
+        if new_ratio < threshold:
+            diminishing_count += 1
+            iteration.diminishing_returns = True
+            logger.info(f"Iteration {iteration_num}: diminishing returns ({new_ratio:.1%} new)")
+            return diminishing_count >= 2, diminishing_count
+        return False, 0
+
     async def run_deep_crawl(self, request: DeepCrawlRequest) -> DeepCrawlResult:
         """Execute the deep crawl pipeline."""
 
@@ -724,18 +713,7 @@ class DeepCrawlOrchestrator:
         try:
             # ---- Stage 1: Initialize Entity ----
             await self._emit(result.crawl_id, DeepCrawlStage.INITIALIZING, {})
-
-            if request.entity_id:
-                # Load existing entity (would need a store)
-                # For now, create from request
-                result.entity = await self._load_or_create_entity(request)
-            elif request.create_entity:
-                result.entity = self._create_entity_from_request(request.create_entity)
-            else:
-                raise ValueError("Either entity_id or create_entity is required")
-
-            if request.investigation_id:
-                result.entity.investigation_id = request.investigation_id
+            await self._init_entity_stage(request, result)
 
             # ---- Main crawl loop ----
             iteration_num = 0
@@ -811,20 +789,14 @@ class DeepCrawlOrchestrator:
                     {"new": enrichment_stats["new"], "duplicates": enrichment_stats["duplicates"]},
                 )
 
-                if len(crawl_results) > 0:
-                    new_ratio = enrichment_stats["new"] / len(crawl_results)
-                    if new_ratio < request.min_new_data_threshold:
-                        diminishing_count += 1
-                        iteration.diminishing_returns = True
-                        logger.info(
-                            f"Iteration {iteration_num}: diminishing returns ({new_ratio:.1%} new)"
-                        )
-
-                        if diminishing_count >= 2:
-                            result.stopped_reason = "diminishing_returns"
-                            break
-                    else:
-                        diminishing_count = 0
+                should_stop, diminishing_count = self._check_diminishing_returns(
+                    len(crawl_results), enrichment_stats["new"],
+                    request.min_new_data_threshold, diminishing_count,
+                    iteration_num, iteration,
+                )
+                if should_stop:
+                    result.stopped_reason = "diminishing_returns"
+                    break
 
                 # Complete iteration
                 iteration.completed_at = datetime.now(UTC)
@@ -867,6 +839,20 @@ class DeepCrawlOrchestrator:
         return result
 
     # -- Entity Management --
+
+    async def _init_entity_stage(
+        self,
+        request: "DeepCrawlRequest",
+        result: "DeepCrawlResult",
+    ) -> None:
+        if request.entity_id:
+            result.entity = await self._load_or_create_entity(request)
+        elif request.create_entity:
+            result.entity = self._create_entity_from_request(request.create_entity)
+        else:
+            raise ValueError("Either entity_id or create_entity is required")
+        if request.investigation_id:
+            result.entity.investigation_id = request.investigation_id
 
     async def _load_or_create_entity(self, request: DeepCrawlRequest) -> EntityProfile:
         """Load existing entity or create from request."""

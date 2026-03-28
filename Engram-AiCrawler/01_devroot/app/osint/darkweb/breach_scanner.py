@@ -22,20 +22,8 @@ import os
 import time
 from dataclasses import dataclass
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 from urllib.parse import quote
@@ -46,14 +34,12 @@ logger = logging.getLogger(__name__)
 # Types
 # ---------------------------------------------------------------------------
 
-
 class BreachSeverity(StrEnum):
     CRITICAL = "critical"  # Password + PII exposed
     HIGH = "high"  # Password or sensitive data
     MEDIUM = "medium"  # Email + metadata
     LOW = "low"  # Email only
     INFO = "info"  # Paste mention, no credentials
-
 
 @dataclass
 class BreachRecord:
@@ -91,7 +77,6 @@ class BreachRecord:
             "found_at": self.found_at.isoformat(),
         }
 
-
 @dataclass
 class PasteRecord:
     """A paste site finding."""
@@ -120,7 +105,6 @@ class PasteRecord:
             "query_term": self.query_term,
             "found_at": self.found_at.isoformat(),
         }
-
 
 @dataclass
 class BreachScanResult:
@@ -181,7 +165,6 @@ class BreachScanResult:
             "errors": self.errors,
         }
 
-
 # ---------------------------------------------------------------------------
 # Severity classifier
 # ---------------------------------------------------------------------------
@@ -203,7 +186,6 @@ _HIGH_DATA_CLASSES = {
     "Financial data",
 }
 
-
 def _classify_severity(data_classes: list[str]) -> BreachSeverity:
     classes_set = set(data_classes)
     if classes_set & _CRITICAL_DATA_CLASSES:
@@ -216,11 +198,9 @@ def _classify_severity(data_classes: list[str]) -> BreachSeverity:
         return BreachSeverity.LOW
     return BreachSeverity.INFO
 
-
 # ---------------------------------------------------------------------------
 # HIBP Client
 # ---------------------------------------------------------------------------
-
 
 class HIBPClient:
     """
@@ -355,11 +335,9 @@ class HIBPClient:
         except Exception as exc:
             return 0, str(exc)
 
-
 # ---------------------------------------------------------------------------
 # Paste Monitor (public paste APIs)
 # ---------------------------------------------------------------------------
-
 
 class PasteMonitor:
     """Monitor public paste sites for entity mentions."""
@@ -428,11 +406,9 @@ class PasteMonitor:
 
         return records
 
-
 # ---------------------------------------------------------------------------
 # Main Breach Scanner
 # ---------------------------------------------------------------------------
-
 
 class BreachScanner:
     """
@@ -648,13 +624,11 @@ class BreachScanner:
 
         return breaches, pastes
 
-
 # ---------------------------------------------------------------------------
 # Singleton accessor
 # ---------------------------------------------------------------------------
 
 _breach_scanner_instance: BreachScanner | None = None
-
 
 def get_breach_scanner(
     simulation_mode: bool = False,

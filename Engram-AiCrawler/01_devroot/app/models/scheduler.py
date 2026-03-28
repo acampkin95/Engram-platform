@@ -2,23 +2,10 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 from typing import Any
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from datetime import datetime
-
 
 class ScheduleFrequency(StrEnum):
     ONCE = "once"
@@ -28,12 +15,10 @@ class ScheduleFrequency(StrEnum):
     MONTHLY = "monthly"
     CUSTOM = "custom"
 
-
 class ScheduleStatus(StrEnum):
     PENDING = "pending"
     SUCCESS = "success"
     FAILED = "failed"
-
 
 class ScheduleBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
@@ -42,10 +27,8 @@ class ScheduleBase(BaseModel):
     cron_expression: str | None = None
     enabled: bool = True
 
-
 class CreateSchedule(ScheduleBase):
     pass
-
 
 class UpdateSchedule(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=100)
@@ -53,7 +36,6 @@ class UpdateSchedule(BaseModel):
     frequency: ScheduleFrequency | None = None
     cron_expression: str | None = None
     enabled: bool | None = None
-
 
 class Schedule(ScheduleBase):
     id: str

@@ -11,7 +11,7 @@ import os
 import time
 from dataclasses import dataclass, field
 from functools import wraps
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 from collections.abc import Callable
 
 if TYPE_CHECKING:
@@ -162,7 +162,7 @@ def get_osint_settings() -> OsintProviderSettings:
 # Shared aiohttp session — create once, reuse across all OSINT services
 # ---------------------------------------------------------------------------
 
-_http_session: Optional[aiohttp.ClientSession] = None
+_http_session: aiohttp.ClientSession | None = None
 
 
 async def get_http_session() -> aiohttp.ClientSession:

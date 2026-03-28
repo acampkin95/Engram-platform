@@ -46,29 +46,26 @@ def _is_private_ip(ip_str: str) -> bool:
         return False
 
 
-async def validate_url(url: str) -> bool:
-    parsed = urlparse(url)
-
+def _validate_url_parsing(parsed) -> None:
     if not parsed.scheme or not parsed.hostname:
         raise ValueError("Malformed URL: missing scheme or hostname")
 
-    if parsed.scheme.lower() in BLOCKED_SCHEMES:
-        raise ValueError(f"Blocked URL scheme: {parsed.scheme}")
+def _validate_url_scheme(scheme: str) -> None:
+    scheme_lower = scheme.lower()
+    if scheme_lower in BLOCKED_SCHEMES:
+        raise ValueError(f"Blocked URL scheme: {scheme}")
+    if scheme_lower not in ("http", "https"):
+        raise ValueError(f"Only HTTP/HTTPS schemes allowed, got: {scheme}")
 
-    if parsed.scheme.lower() not in ("http", "https"):
-        raise ValueError(f"Only HTTP/HTTPS schemes allowed, got: {parsed.scheme}")
-
-    hostname = parsed.hostname.lower()
-
+def _validate_url_hostname(hostname: str) -> None:
     if hostname in BLOCKED_HOSTNAMES:
         raise ValueError(f"Blocked hostname: {hostname}")
-
     if any(hostname.endswith(suffix) for suffix in BLOCKED_HOSTNAME_SUFFIXES):
         raise ValueError(f"Blocked hostname suffix: {hostname}")
-
     if _is_private_ip(hostname):
         raise ValueError(f"Blocked private IP address: {hostname}")
 
+async def _validate_url_resolution(hostname: str) -> None:
     try:
         resolved_ips = await asyncio.to_thread(
             socket.getaddrinfo, hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM
@@ -78,10 +75,17 @@ async def validate_url(url: str) -> bool:
             if _is_private_ip(ip):
                 raise ValueError(f"URL resolves to private IP {ip} (hostname: {hostname})")
     except socket.gaierror:
-        pass  # DNS resolution failure is not a security issue here
+        pass
     except ValueError:
-        raise  # Re-raise our own ValueError
+        raise
 
+async def validate_url(url: str) -> bool:
+    parsed = urlparse(url)
+    _validate_url_parsing(parsed)
+    _validate_url_scheme(parsed.scheme)
+    hostname = parsed.hostname.lower()
+    _validate_url_hostname(hostname)
+    await _validate_url_resolution(hostname)
     return True
 
 

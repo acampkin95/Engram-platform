@@ -13,26 +13,13 @@ Backward Compatibility:
     enhanced caching via get_or_compute() with stampede prevention.
 """
 
-
 from __future__ import annotations
 import asyncio
 import hashlib
 import json
 import logging
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from collections.abc import Awaitable, Callable
 
@@ -52,11 +39,9 @@ DEFAULT_TTL = 3600
 CRAWL_RESULT_PREFIX = "crawl:result:"
 LM_RESPONSE_PREFIX = "lm:response:"
 
-
 # ---------------------------------------------------------------------------
 # Cache tiers (new in v0.3.0)
 # ---------------------------------------------------------------------------
-
 
 class CacheTier(StrEnum):
     """Cache tier with tier-specific TTL values.
@@ -70,7 +55,6 @@ class CacheTier(StrEnum):
     NEGATIVE = "neg"  # Failed URLs (negative cache)
     LLM = "llm"  # LM Studio responses
 
-
 # TTL in seconds per tier
 TIER_TTL: dict[CacheTier, int] = {
     CacheTier.HOT: 3600,  # 1 hour
@@ -80,15 +64,12 @@ TIER_TTL: dict[CacheTier, int] = {
     CacheTier.LLM: 14400,  # 4 hours
 }
 
-
 # ---------------------------------------------------------------------------
 # Original functions (unchanged from v0.2.0)
 # ---------------------------------------------------------------------------
 
-
 def _make_key(prefix: str, identifier: str) -> str:
     return f"{prefix}{hashlib.sha256(identifier.encode()).hexdigest()[:32]}"
-
 
 async def get_cache_client() -> aioredis.Redis:
     global _cache_client
@@ -97,7 +78,6 @@ async def get_cache_client() -> aioredis.Redis:
 
         _cache_client = await get_redis_pool()
     return _cache_client
-
 
 async def cache_get(prefix: str, identifier: str) -> dict | None:
     try:
@@ -113,7 +93,6 @@ async def cache_get(prefix: str, identifier: str) -> dict | None:
         logger.warning(f"Cache read failed (failing open): {e}")
         return None
 
-
 async def cache_set(prefix: str, identifier: str, value: dict, ttl: int = DEFAULT_TTL) -> bool:
     try:
         client = await get_cache_client()
@@ -126,7 +105,6 @@ async def cache_set(prefix: str, identifier: str, value: dict, ttl: int = DEFAUL
         logger.warning(f"Cache write failed: {e}")
         return False
 
-
 async def cache_delete(prefix: str, identifier: str) -> bool:
     try:
         client = await get_cache_client()
@@ -137,22 +115,17 @@ async def cache_delete(prefix: str, identifier: str) -> bool:
         logger.warning(f"Cache delete failed: {e}")
         return False
 
-
 async def get_crawl_result(url: str) -> dict | None:
     return await cache_get(CRAWL_RESULT_PREFIX, url)
-
 
 async def set_crawl_result(url: str, result: dict, ttl: int = DEFAULT_TTL) -> bool:
     return await cache_set(CRAWL_RESULT_PREFIX, url, result, ttl)
 
-
 async def get_lm_response(prompt_hash: str) -> dict | None:
     return await cache_get(LM_RESPONSE_PREFIX, prompt_hash)
 
-
 async def set_lm_response(prompt_hash: str, response: dict, ttl: int = 1800) -> bool:
     return await cache_set(LM_RESPONSE_PREFIX, prompt_hash, response, ttl)
-
 
 async def close_cache():
     global _cache_client, _cache_pool
@@ -169,12 +142,10 @@ async def close_cache():
     _cache_client = None
     _cache_pool = None
 
-
 # ---------------------------------------------------------------------------
 # CacheLayer: Multi-layer cache with stampede prevention (new in v0.3.0)
 # Architecture Decision: ADR-001 Section 7
 # ---------------------------------------------------------------------------
-
 
 class CacheLayer:
     """Multi-layer cache with stampede prevention via mutex locks.
@@ -202,6 +173,68 @@ class CacheLayer:
     def __init__(self, client: aioredis.Redis):
         self._redis = client
 
+    async def _try_cache_hit(self, key: str) -> dict | None:
+        try:
+            cached = await self._redis.get(key)
+            if cached is not None:
+                logger.debug(f"CacheLayer HIT: {key}")
+                return json.loads(cached)
+        except Exception as e:
+            logger.warning(f"CacheLayer read failed (failing open): {e}")
+        return None
+
+    async def _try_negative_cache(self, key: str) -> bool:
+        neg_key = f"cache:neg:{key}"
+        try:
+            if await self._redis.exists(neg_key):
+                logger.debug(f"CacheLayer NEGATIVE HIT: {key}")
+                return True
+        except Exception:
+            pass
+        return False
+
+    async def _try_acquire_lock(self, key: str) -> tuple[bool, str | None]:
+        lock_key = f"lock:{key}"
+        try:
+            lock_acquired = await self._redis.set(
+                lock_key, "1", nx=True, ex=self.LOCK_TIMEOUT
+            )
+            return lock_acquired, lock_key if lock_acquired else None
+        except Exception as e:
+            logger.warning(f"CacheLayer lock acquire failed: {e}")
+            return True, None
+
+    async def _wait_for_lock_result(self, key: str) -> dict | None:
+        max_retries = int(self.LOCK_TIMEOUT / self.LOCK_RETRY_DELAY)
+        for _ in range(max_retries):
+            await asyncio.sleep(self.LOCK_RETRY_DELAY)
+            try:
+                cached = await self._redis.get(key)
+                if cached is not None:
+                    return json.loads(cached)
+            except Exception:
+                pass
+        logger.warning(f"CacheLayer timed out waiting for lock: {key}")
+        return None
+
+    async def _store_compute_result(
+        self, key: str, result: dict | None, ttl: int, neg_key: str
+    ) -> None:
+        if result is not None:
+            serialized = json.dumps(result, default=str)
+            await self._redis.set(key, serialized, ex=ttl)
+            logger.debug(f"CacheLayer SET: {key} (ttl={ttl}s)")
+        else:
+            await self._redis.set(neg_key, "1", ex=TIER_TTL[CacheTier.NEGATIVE])
+            logger.debug(f"CacheLayer NEG SET: {neg_key}")
+
+    async def _handle_compute_error(self, key: str, exc: Exception, neg_key: str) -> None:
+        logger.error(f"CacheLayer compute failed for {key}: {exc}")
+        try:
+            await self._redis.set(neg_key, "1", ex=TIER_TTL[CacheTier.NEGATIVE])
+        except Exception:
+            pass
+
     async def get_or_compute(
         self,
         key: str,
@@ -226,70 +259,28 @@ class CacheLayer:
         Returns:
             Cached or freshly computed dict, or None on timeout/failure.
         """
-        # 1. Fast path: cache hit
-        try:
-            cached = await self._redis.get(key)
-            if cached is not None:
-                logger.debug(f"CacheLayer HIT: {key}")
-                return json.loads(cached)
-        except Exception as e:
-            logger.warning(f"CacheLayer read failed (failing open): {e}")
-
-        # 2. Check negative cache
         neg_key = f"cache:neg:{key}"
-        try:
-            if await self._redis.exists(neg_key):
-                logger.debug(f"CacheLayer NEGATIVE HIT: {key}")
-                return None
-        except Exception:
-            pass  # Fail open
 
-        # 3. Acquire mutex lock
-        lock_key = f"lock:{key}"
-        acquired_lock_key: str | None = lock_key
-        try:
-            lock_acquired = await self._redis.set(lock_key, "1", nx=True, ex=self.LOCK_TIMEOUT)
-        except Exception as e:
-            logger.warning(f"CacheLayer lock acquire failed: {e}")
-            # Proceed without lock (fail-open)
-            lock_acquired = True
-            acquired_lock_key = None
+        hit = await self._try_cache_hit(key)
+        if hit is not None:
+            return hit
 
-        if not lock_acquired:
-            # Another worker is computing — poll cache until result appears
-            max_retries = int(self.LOCK_TIMEOUT / self.LOCK_RETRY_DELAY)
-            for _ in range(max_retries):
-                await asyncio.sleep(self.LOCK_RETRY_DELAY)
-                try:
-                    cached = await self._redis.get(key)
-                    if cached is not None:
-                        return json.loads(cached)
-                except Exception:
-                    pass
-            logger.warning(f"CacheLayer timed out waiting for lock: {key}")
+        neg_hit = await self._try_negative_cache(key)
+        if neg_hit:
             return None
 
-        # 4 & 5. Compute and store
+        lock_acquired, acquired_lock_key = await self._try_acquire_lock(key)
+        if not lock_acquired:
+            return await self._wait_for_lock_result(key)
+
         try:
             result = await compute_fn()
-            if result is not None:
-                serialized = json.dumps(result, default=str)
-                await self._redis.set(key, serialized, ex=ttl)
-                logger.debug(f"CacheLayer SET: {key} (ttl={ttl}s)")
-            else:
-                # Negative cache for failures
-                await self._redis.set(neg_key, "1", ex=TIER_TTL[CacheTier.NEGATIVE])
-                logger.debug(f"CacheLayer NEG SET: {neg_key}")
+            await self._store_compute_result(key, result, ttl, neg_key)
             return result
         except Exception as e:
-            logger.error(f"CacheLayer compute failed for {key}: {e}")
-            try:
-                await self._redis.set(neg_key, "1", ex=TIER_TTL[CacheTier.NEGATIVE])
-            except Exception:
-                pass
+            await self._handle_compute_error(key, e, neg_key)
             return None
         finally:
-            # 6. Release lock
             if acquired_lock_key is not None:
                 try:
                     await self._redis.delete(acquired_lock_key)
@@ -351,10 +342,8 @@ class CacheLayer:
         prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:16]
         return f"cache:llm:{prompt_hash}"
 
-
 # CacheLayer singleton
 _cache_layer: CacheLayer | None = None
-
 
 async def get_cache_layer() -> CacheLayer:
     """Get the global CacheLayer singleton (reuses existing Redis pool)."""
@@ -363,7 +352,6 @@ async def get_cache_layer() -> CacheLayer:
         client = await get_cache_client()
         _cache_layer = CacheLayer(client)
     return _cache_layer
-
 
 async def close_cache_layer() -> None:
     """Reset the CacheLayer singleton.

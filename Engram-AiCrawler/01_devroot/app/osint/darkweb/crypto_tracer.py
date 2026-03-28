@@ -25,30 +25,16 @@ import re
 import time
 from dataclasses import dataclass
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
 # Types
 # ---------------------------------------------------------------------------
-
 
 class CryptoNetwork(StrEnum):
     BITCOIN = "bitcoin"
@@ -57,14 +43,12 @@ class CryptoNetwork(StrEnum):
     MONERO = "monero"  # Note: Monero is privacy coin, limited tracing
     UNKNOWN = "unknown"
 
-
 class AddressRisk(StrEnum):
     CRITICAL = "critical"  # Known scam/darknet market/sanctioned
     HIGH = "high"  # Mixer/tumbler, high-risk exchange
     MEDIUM = "medium"  # Unhosted wallet, peer-to-peer
     LOW = "low"  # Known exchange, regulated
     CLEAN = "clean"  # Verified clean / no risk signals
-
 
 @dataclass
 class Transaction:
@@ -92,7 +76,6 @@ class Transaction:
             "counterparty_addresses": self.counterparty_addresses,
             "confirmations": self.confirmations,
         }
-
 
 @dataclass
 class AddressProfile:
@@ -138,7 +121,6 @@ class AddressProfile:
             "error": self.error,
         }
 
-
 @dataclass
 class CryptoTraceResult:
     """Result of tracing one or more crypto addresses."""
@@ -167,7 +149,6 @@ class CryptoTraceResult:
             "errors": self.errors,
         }
 
-
 # ---------------------------------------------------------------------------
 # Address Detection
 # ---------------------------------------------------------------------------
@@ -176,7 +157,6 @@ _BTC_REGEX = re.compile(r"\b(bc1[a-zA-HJ-NP-Z0-9]{25,87}|[13][a-km-zA-HJ-NP-Z1-9
 _ETH_REGEX = re.compile(r"\b(0x[a-fA-F0-9]{40})\b")
 _LTC_REGEX = re.compile(r"\b([LM][a-km-zA-HJ-NP-Z1-9]{26,33}|ltc1[a-z0-9]{25,87})\b")
 _XMR_REGEX = re.compile(r"\b(4[0-9AB][1-9A-HJ-NP-Za-km-z]{93})\b")
-
 
 def detect_crypto_addresses(text: str) -> dict[str, list[str]]:
     """
@@ -191,7 +171,6 @@ def detect_crypto_addresses(text: str) -> dict[str, list[str]]:
         "monero": list(dict.fromkeys(_XMR_REGEX.findall(text))),
     }
 
-
 def classify_address_network(address: str) -> CryptoNetwork:
     """Detect which blockchain network an address belongs to."""
     if _BTC_REGEX.match(address):
@@ -203,7 +182,6 @@ def classify_address_network(address: str) -> CryptoNetwork:
     if _XMR_REGEX.match(address):
         return CryptoNetwork.MONERO
     return CryptoNetwork.UNKNOWN
-
 
 # ---------------------------------------------------------------------------
 # Known Exchange Address Prefixes / Clusters
@@ -227,21 +205,17 @@ HIGH_RISK_LABELS: dict[str, str] = {
     "1Bh9RBsB7u3VPbGwNwMkjFqFJwrHsNJdAD": "Known Mixer",
 }
 
-
 def _lookup_exchange_label(address: str) -> str | None:
     """Check if address is a known exchange."""
     return KNOWN_EXCHANGE_ADDRESSES.get(address)
-
 
 def _lookup_risk_label(address: str) -> str | None:
     """Check if address is flagged as high-risk."""
     return HIGH_RISK_LABELS.get(address)
 
-
 # ---------------------------------------------------------------------------
 # Bitcoin Tracer (Blockchain.info)
 # ---------------------------------------------------------------------------
-
 
 class BitcoinTracer:
     """Query Bitcoin address data via Blockchain.info public API."""
@@ -392,11 +366,9 @@ class BitcoinTracer:
             return AddressRisk.MEDIUM, signals
         return AddressRisk.CLEAN, []
 
-
 # ---------------------------------------------------------------------------
 # Ethereum Tracer (Etherscan)
 # ---------------------------------------------------------------------------
-
 
 class EthereumTracer:
     """Query Ethereum address data via Etherscan API."""
@@ -551,11 +523,9 @@ class EthereumTracer:
             return AddressRisk.MEDIUM, signals
         return AddressRisk.CLEAN, []
 
-
 # ---------------------------------------------------------------------------
 # Main Crypto Tracer
 # ---------------------------------------------------------------------------
-
 
 class CryptoTracer:
     """
@@ -759,13 +729,11 @@ class CryptoTracer:
             )
         return profiles
 
-
 # ---------------------------------------------------------------------------
 # Singleton accessor
 # ---------------------------------------------------------------------------
 
 _crypto_tracer_instance: CryptoTracer | None = None
-
 
 def get_crypto_tracer(simulation_mode: bool = False) -> CryptoTracer:
     """Get or create the global CryptoTracer instance."""

@@ -248,7 +248,7 @@ async def health_check():
         from app.services.lm_studio_bridge import check_lm_studio_connection
 
         lm_studio_status = await asyncio.wait_for(check_lm_studio_connection(), timeout=5.0)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.warning("LM Studio health check timed out (5s)")
         lm_studio_status = "disconnected"
     except Exception as e:

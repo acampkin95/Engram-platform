@@ -6,27 +6,14 @@ Each stage emits a WebSocket event on the ``osint_scan:{scan_id}`` topic so
 clients can track progress in real-time.
 """
 
-
 from __future__ import annotations
 import asyncio
 import logging
 import os
 import uuid
 from datetime import datetime, UTC
-from enum import Enum
 
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of StrEnum for Python < 3.11"""
-
-        def __new__(cls, value):
-            obj = str.__new__(cls, value)
-            obj._value_ = value
-            return obj
-
+from enum import StrEnum
 
 from typing import Any
 from collections.abc import Callable, Coroutine
@@ -45,11 +32,9 @@ from app.storage.chromadb_client import ChromaDBClient, get_chromadb_client
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
 # Models
 # ---------------------------------------------------------------------------
-
 
 class ScanStage(StrEnum):
     PENDING = "pending"
@@ -64,7 +49,6 @@ class ScanStage(StrEnum):
     BUILDING_GRAPH = "building_graph"
     COMPLETED = "completed"
     FAILED = "failed"
-
 
 class ScanRequest(BaseModel):
     username: str
@@ -83,7 +67,6 @@ class ScanRequest(BaseModel):
     # Pre-generated scan_id from API layer (ensures WS topic matches)
     scan_id: str | None = None
 
-
 class CrawlResultItem(BaseModel):
     crawl_id: str
     url: str
@@ -91,7 +74,6 @@ class CrawlResultItem(BaseModel):
     markdown: str | None = None
     error: str | None = None
     word_count: int = 0
-
 
 class ScanResult(BaseModel):
     scan_id: str
@@ -111,15 +93,12 @@ class ScanResult(BaseModel):
     completed_at: str = ""
     summary: dict[str, Any] = Field(default_factory=dict)
 
-
 # Type alias for the progress callback
 ProgressCallback = Callable[[str, ScanStage, dict[str, Any]], Coroutine[Any, Any, None]]
-
 
 # ---------------------------------------------------------------------------
 # Orchestrator
 # ---------------------------------------------------------------------------
-
 
 class OSINTScanOrchestrator:
     """Coordinates the full OSINT scan pipeline.
@@ -224,82 +203,10 @@ class OSINTScanOrchestrator:
                 return result
 
             # ---- Stage 2.5: Face matching (optional) ----
-            if request.reference_photo_labels:
-                try:
-                    from app.osint.face_recognition_service import FaceRecognitionService
-
-                    if FaceRecognitionService.is_available():
-                        await self._emit(
-                            scan_id,
-                            ScanStage.FACE_MATCHING,
-                            {
-                                "labels": request.reference_photo_labels,
-                                "urls_count": len(successful),
-                            },
-                        )
-                        result.stage = ScanStage.FACE_MATCHING
-
-                        face_service = FaceRecognitionService()
-                        crawled_urls = [cr.url for cr in successful]
-                        face_results = await face_service.batch_match_urls(
-                            crawled_urls,
-                            max_concurrent=request.max_concurrent_crawls,
-                        )
-                        result.face_matches = face_results
-
-                        total_face_matches = sum(
-                            (r.get("result") or {}).get("total_matches", 0) for r in face_results
-                        )
-                        await self._emit(
-                            scan_id,
-                            ScanStage.FACE_MATCHING,
-                            {
-                                "urls_scanned": len(face_results),
-                                "total_matches": total_face_matches,
-                            },
-                        )
-                    else:
-                        logger.warning(
-                            f"Scan {scan_id}: face_recognition not installed — skipping face matching"
-                        )
-                except ImportError:
-                    logger.warning(
-                        f"Scan {scan_id}: face_recognition_service not available — skipping"
-                    )
+            await self._run_face_matching_stage(scan_id, request, result, successful)
 
             # ---- Stage 2.6: WHOIS / Threat Intel / Email OSINT (parallel) ----
-            osint_tasks = []
-            request.target_domain or (result.profile_urls and len(result.profile_urls) > 0)
-            domain_target = request.target_domain
-
-            if request.enable_whois and domain_target:
-                osint_tasks.append(
-                    ("whois", self._run_whois_stage(scan_id, domain_target, request.target_ip))
-                )
-            if request.enable_threat_intel and (request.target_ip or domain_target):
-                osint_tasks.append(
-                    ("threat", self._run_threat_stage(scan_id, request.target_ip, domain_target))
-                )
-            if request.enable_email_osint and request.target_email:
-                osint_tasks.append(("email", self._run_email_stage(scan_id, request.target_email)))
-
-            if osint_tasks:
-                labels = [t[0] for t in osint_tasks]
-                coros = [t[1] for t in osint_tasks]
-                await self._emit(scan_id, ScanStage.WHOIS_LOOKUP, {"services": labels})
-
-                osint_results = await asyncio.gather(*coros, return_exceptions=True)
-
-                for label, res in zip(labels, osint_results):
-                    if isinstance(res, Exception):
-                        logger.warning(f"Scan {scan_id}: {label} stage failed: {res}")
-                        continue
-                    if label == "whois":
-                        result.whois_data = res  # type: ignore[assignment]
-                    elif label == "threat":
-                        result.threat_intel_data = res  # type: ignore[assignment]
-                    elif label == "email":
-                        result.email_osint_data = res  # type: ignore[assignment]
+            await self._run_parallel_osint_stages(scan_id, request, result)
 
             # ---- Stage 3: Reviewing ----
             await self._emit(scan_id, ScanStage.REVIEWING, {"items": len(successful)})
@@ -381,6 +288,87 @@ class OSINTScanOrchestrator:
         return result
 
     # -- Internal helpers ---------------------------------------------------
+
+    async def _run_face_matching_stage(
+        self,
+        scan_id: str,
+        request: "ScanRequest",
+        result: "ScanResult",
+        successful: list,
+    ) -> None:
+        if not request.reference_photo_labels:
+            return
+        try:
+            from app.osint.face_recognition_service import FaceRecognitionService
+
+            if not FaceRecognitionService.is_available():
+                logger.warning(
+                    f"Scan {scan_id}: face_recognition not installed — skipping face matching"
+                )
+                return
+
+            await self._emit(
+                scan_id,
+                ScanStage.FACE_MATCHING,
+                {"labels": request.reference_photo_labels, "urls_count": len(successful)},
+            )
+            result.stage = ScanStage.FACE_MATCHING
+            face_service = FaceRecognitionService()
+            crawled_urls = [cr.url for cr in successful]
+            face_results = await face_service.batch_match_urls(
+                crawled_urls,
+                max_concurrent=request.max_concurrent_crawls,
+            )
+            result.face_matches = face_results
+            total_face_matches = sum(
+                (r.get("result") or {}).get("total_matches", 0) for r in face_results
+            )
+            await self._emit(
+                scan_id,
+                ScanStage.FACE_MATCHING,
+                {"urls_scanned": len(face_results), "total_matches": total_face_matches},
+            )
+        except ImportError:
+            logger.warning(
+                f"Scan {scan_id}: face_recognition_service not available — skipping"
+            )
+
+    async def _run_parallel_osint_stages(
+        self,
+        scan_id: str,
+        request: "ScanRequest",
+        result: "ScanResult",
+    ) -> None:
+        domain_target = request.target_domain
+        osint_tasks = []
+        if request.enable_whois and domain_target:
+            osint_tasks.append(
+                ("whois", self._run_whois_stage(scan_id, domain_target, request.target_ip))
+            )
+        if request.enable_threat_intel and (request.target_ip or domain_target):
+            osint_tasks.append(
+                ("threat", self._run_threat_stage(scan_id, request.target_ip, domain_target))
+            )
+        if request.enable_email_osint and request.target_email:
+            osint_tasks.append(("email", self._run_email_stage(scan_id, request.target_email)))
+
+        if not osint_tasks:
+            return
+
+        labels = [t[0] for t in osint_tasks]
+        coros = [t[1] for t in osint_tasks]
+        await self._emit(scan_id, ScanStage.WHOIS_LOOKUP, {"services": labels})
+        osint_results = await asyncio.gather(*coros, return_exceptions=True)
+        for label, res in zip(labels, osint_results):
+            if isinstance(res, Exception):
+                logger.warning(f"Scan {scan_id}: {label} stage failed: {res}")
+                continue
+            if label == "whois":
+                result.whois_data = res  # type: ignore[assignment]
+            elif label == "threat":
+                result.threat_intel_data = res  # type: ignore[assignment]
+            elif label == "email":
+                result.email_osint_data = res  # type: ignore[assignment]
 
     async def _crawl_urls(
         self,
