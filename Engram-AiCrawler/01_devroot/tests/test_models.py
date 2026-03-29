@@ -2,7 +2,8 @@
 
 import pytest
 from pydantic import ValidationError
-from datetime import datetime, UTC
+from app._compat import UTC
+from datetime import datetime
 from app.models.crawl import (
     CrawlRequest,
     CrawlResponse,

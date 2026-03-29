@@ -9,7 +9,7 @@ Provides:
 """
 
 import hmac
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 # Using bcrypt directly — passlib 1.7.4 is incompatible with bcrypt 5.x
@@ -18,7 +18,6 @@ from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 from jose import ExpiredSignatureError, JWTError, jwt
 
-from memory_system.compat import UTC
 from memory_system.config import get_settings
 
 # ---------------------------------------------------------------------------

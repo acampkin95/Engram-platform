@@ -16,7 +16,7 @@ export default function CodeBlock({ code }: CodeBlockProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      console.error("Failed to copy code");
+      // Clipboard API may not be available in all contexts
     }
   };
 

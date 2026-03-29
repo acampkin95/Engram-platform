@@ -1,6 +1,7 @@
 """Tests for DeepCrawlOrchestrator and SearchVectorGenerator."""
 import pytest
-from datetime import datetime, UTC
+from app._compat import UTC
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.models.entity import (

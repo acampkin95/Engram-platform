@@ -1,11 +1,15 @@
-'use client';
-
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { products, getColorVar } from '@/app/lib/platform-data';
 import { Button } from '@/app/components/ui/Button';
 import * as Icons from 'lucide-react';
 
-const iconMap: Record<string, React.ComponentType<{ size: number; className: string }>> = {
+export const metadata: Metadata = {
+  title: "Platform | Engram",
+  description: "Explore the four core services that power Engram: Memory API for vector storage, Crawler for OSINT, MCP Server for unified access, and Dashboard for visualization.",
+};
+
+const iconMapClient: Record<string, React.ComponentType<{ size: number; className: string }>> = {
   Brain: Icons.Brain,
   Globe: Icons.Globe,
   Server: Icons.Server,
@@ -62,7 +66,7 @@ export default function PlatformPage() {
         {/* Product Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
           {products.map((product) => {
-            const Icon = iconMap[product.icon];
+            const Icon = iconMapClient[product.icon];
             const colorVar = getColorVar(product.color);
 
             return (

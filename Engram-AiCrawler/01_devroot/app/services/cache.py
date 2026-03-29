@@ -19,7 +19,7 @@ import hashlib
 import json
 import logging
 
-from enum import StrEnum
+from app._compat import StrEnum
 
 from collections.abc import Awaitable, Callable
 

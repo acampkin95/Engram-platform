@@ -1,13 +1,13 @@
 """Global entity registry client — SubjectPerson and SubjectOrganisation (no multi-tenancy)."""
+
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from rich.console import Console
 
-from memory_system.compat import UTC
 from memory_system.config import SUBJECT_ORGANISATION, SUBJECT_PERSON
 from memory_system.investigation.models import (
     SubjectOrgCreate,
@@ -46,10 +46,15 @@ class GlobalRegistryClient:
                 limit=1,
                 return_metadata=MetadataQuery(certainty=True),
             )
-            if results.objects and (results.objects[0].metadata.certainty or 0) >= self.UPSERT_CERTAINTY_THRESHOLD:
+            if (
+                results.objects
+                and (results.objects[0].metadata.certainty or 0) >= self.UPSERT_CERTAINTY_THRESHOLD
+            ):
                 # Update existing
                 obj = results.objects[0]
-                existing_matter_ids = list(set(obj.properties.get("matter_ids", []) + person.matter_ids))
+                existing_matter_ids = list(
+                    set(obj.properties.get("matter_ids", []) + person.matter_ids)
+                )
                 existing_aliases = list(set(obj.properties.get("aliases", []) + person.aliases))
                 now = datetime.now(UTC)
                 collection.data.update(
@@ -106,9 +111,14 @@ class GlobalRegistryClient:
                 limit=1,
                 return_metadata=MetadataQuery(certainty=True),
             )
-            if results.objects and (results.objects[0].metadata.certainty or 0) >= self.UPSERT_CERTAINTY_THRESHOLD:
+            if (
+                results.objects
+                and (results.objects[0].metadata.certainty or 0) >= self.UPSERT_CERTAINTY_THRESHOLD
+            ):
                 obj = results.objects[0]
-                existing_matter_ids = list(set(obj.properties.get("matter_ids", []) + org.matter_ids))
+                existing_matter_ids = list(
+                    set(obj.properties.get("matter_ids", []) + org.matter_ids)
+                )
                 existing_aliases = list(set(obj.properties.get("aliases", []) + org.aliases))
                 now = datetime.now(UTC)
                 collection.data.update(
@@ -174,7 +184,9 @@ class GlobalRegistryClient:
             console.print(f"[yellow]search_organisations failed: {exc}[/yellow]")
             return []
 
-    async def add_matter_to_subject(self, subject_id: str, matter_id: str, collection_name: str) -> None:
+    async def add_matter_to_subject(
+        self, subject_id: str, matter_id: str, collection_name: str
+    ) -> None:
         """Append matter_id to subject's matter_ids[] if not already present."""
         collection = self._client.collections.get(collection_name)
         try:
@@ -211,6 +223,7 @@ class GlobalRegistryClient:
     async def list_persons_for_matter(self, matter_id: str) -> list[SubjectPersonResponse]:
         """List all persons associated with a matter."""
         from weaviate.classes.query import Filter
+
         collection = self._client.collections.get(SUBJECT_PERSON)
         try:
             results = collection.query.fetch_objects(
@@ -224,6 +237,7 @@ class GlobalRegistryClient:
     async def list_organisations_for_matter(self, matter_id: str) -> list[SubjectOrgResponse]:
         """List all organisations associated with a matter."""
         from weaviate.classes.query import Filter
+
         collection = self._client.collections.get(SUBJECT_ORGANISATION)
         try:
             results = collection.query.fetch_objects(

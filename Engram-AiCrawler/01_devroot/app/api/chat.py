@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from fastapi import Request, APIRouter, HTTPException
 from app.models.crawl import ChatRequest, ChatResponse
 from app.websocket.manager import manager

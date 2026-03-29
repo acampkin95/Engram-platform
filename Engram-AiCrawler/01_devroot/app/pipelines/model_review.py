@@ -2,9 +2,10 @@
 
 import json
 import logging
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 
-from enum import StrEnum
+from app._compat import StrEnum
 
 from typing import Any
 

@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
-from memory_system.compat import UTC
 from memory_system.memory import Memory, SourceType
 
 
@@ -52,17 +51,17 @@ class SourceCredibilityManager:
     ) -> float:
         """Calculate confidence score for a specific source."""
         # Fallback to AI_ASSISTANT if source_type isn't in profiles
-        profile = self.source_profiles.get(source_type, self.source_profiles[SourceType.AI_ASSISTANT])
-
-        metrics = self.source_metrics.get(
-            source_id,
-            {
-                "accuracy_score": 0.5,
-                "verification_count": 0,
-                "total_contributions": 0,
-                "last_contribution": timestamp or datetime.now(UTC),
-            },
+        profile = self.source_profiles.get(
+            source_type, self.source_profiles[SourceType.AI_ASSISTANT]
         )
+
+        default_metrics: dict[str, Any] = {
+            "accuracy_score": 0.5,
+            "verification_count": 0,
+            "total_contributions": 0,
+            "last_contribution": timestamp or datetime.now(UTC),
+        }
+        metrics = self.source_metrics.get(source_id, default_metrics)
 
         now = datetime.now(UTC)
         last_contrib = metrics["last_contribution"]
@@ -82,7 +81,10 @@ class SourceCredibilityManager:
         complexity_penalty = (content_complexity - 1.0) * -0.1
 
         confidence = (
-            base_score * decay_modifier + accuracy_adj * 0.3 + verification_boost + complexity_penalty
+            base_score * decay_modifier
+            + accuracy_adj * 0.3
+            + verification_boost
+            + complexity_penalty
         )
 
         return max(profile["min_conf"], min(profile["max_conf"], confidence))

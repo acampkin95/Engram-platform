@@ -510,13 +510,16 @@ export default function GettingStartedPage() {
 
   return (
     <div className="min-h-screen bg-[var(--void)]">
+      {/* Page H1 - for SEO and semantics */}
+      <h1 className="sr-only">Getting Started with Engram</h1>
+
       {/* Progress Bar */}
       <div className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--void)]/95 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-[var(--font-display)] font-bold text-2xl text-[var(--text-primary)]">
+            <h2 className="font-[var(--font-display)] font-bold text-2xl text-[var(--text-primary)]">
               Getting Started
-            </h1>
+            </h2>
             <div className="flex items-center gap-4">
               <span className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)]">
                 {Math.round(progressPercent)}%

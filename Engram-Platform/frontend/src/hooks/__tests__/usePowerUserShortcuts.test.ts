@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { usePowerUserShortcuts, GOTO_ROUTES } from '@/src/hooks/useKeyboardShortcuts';
+import { GOTO_ROUTES, usePowerUserShortcuts } from '@/src/hooks/useKeyboardShortcuts';
 
 const mockPush = vi.fn();
 
@@ -50,13 +50,13 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
       // Don't run timers yet, just wait for first key
       fireKey('h');
-      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES['h']);
+      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES.h);
       expect(mockPush).toHaveBeenCalledWith('/dashboard/home');
     });
 
@@ -66,12 +66,12 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
       fireKey('m');
-      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES['m']);
+      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES.m);
       expect(mockPush).toHaveBeenCalledWith('/dashboard/memory/memories');
     });
 
@@ -81,12 +81,12 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
       fireKey('c');
-      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES['c']);
+      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES.c);
       expect(mockPush).toHaveBeenCalledWith('/dashboard/crawler/crawl');
     });
 
@@ -96,12 +96,12 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
       fireKey('t');
-      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES['t']);
+      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES.t);
       expect(mockPush).toHaveBeenCalledWith('/dashboard/memory/timeline');
     });
 
@@ -111,12 +111,12 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
       fireKey('g');
-      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES['g']);
+      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES.g);
       expect(mockPush).toHaveBeenCalledWith('/dashboard/memory/graph');
     });
 
@@ -126,12 +126,12 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
       fireKey('s');
-      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES['s']);
+      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES.s);
       expect(mockPush).toHaveBeenCalledWith('/dashboard/system/health');
     });
 
@@ -141,12 +141,12 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
       fireKey('i');
-      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES['i']);
+      expect(mockPush).toHaveBeenCalledWith(GOTO_ROUTES.i);
       expect(mockPush).toHaveBeenCalledWith('/dashboard/intelligence/chat');
     });
 
@@ -156,7 +156,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
@@ -170,7 +170,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
@@ -186,7 +186,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
@@ -202,7 +202,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
@@ -218,7 +218,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('?');
@@ -231,7 +231,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       const event = fireKey('?');
@@ -245,7 +245,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts: contentEditableOnShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       const div = document.createElement('div');
@@ -269,7 +269,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('/');
@@ -282,7 +282,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       const event = fireKey('/');
@@ -297,7 +297,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       const input = document.createElement('input');
@@ -314,7 +314,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       const textarea = document.createElement('textarea');
@@ -333,7 +333,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('/', { metaKey: true });
@@ -346,7 +346,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('/', { ctrlKey: true });
@@ -359,7 +359,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('/', { altKey: true });
@@ -372,7 +372,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g', { metaKey: true });
@@ -392,7 +392,7 @@ describe('usePowerUserShortcuts', () => {
           onToggleSidebar,
           onFocusSearch,
           enabled: false,
-        })
+        }),
       );
 
       fireKey('/');
@@ -416,7 +416,7 @@ describe('usePowerUserShortcuts', () => {
           onToggleSidebar,
           onFocusSearch,
           // enabled is not specified, should default to true
-        })
+        }),
       );
 
       fireKey('/');
@@ -431,7 +431,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
@@ -447,7 +447,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
@@ -464,7 +464,7 @@ describe('usePowerUserShortcuts', () => {
         usePowerUserShortcuts({
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       expect(() => fireKey('?', { shiftKey: true })).not.toThrow();
@@ -475,7 +475,7 @@ describe('usePowerUserShortcuts', () => {
         usePowerUserShortcuts({
           onShowShortcuts,
           onToggleSidebar,
-        })
+        }),
       );
 
       expect(() => fireKey('/')).not.toThrow();
@@ -486,7 +486,7 @@ describe('usePowerUserShortcuts', () => {
         usePowerUserShortcuts({
           onShowShortcuts,
           onFocusSearch,
-        })
+        }),
       );
 
       expect(() => fireKey('a')).not.toThrow();
@@ -500,7 +500,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('g');
@@ -514,7 +514,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       fireKey('G');
@@ -531,7 +531,7 @@ describe('usePowerUserShortcuts', () => {
           onShowShortcuts,
           onToggleSidebar,
           onFocusSearch,
-        })
+        }),
       );
 
       unmount();
@@ -548,7 +548,7 @@ describe('usePowerUserShortcuts', () => {
           initialProps: {
             opts: { onShowShortcuts, onToggleSidebar, onFocusSearch },
           },
-        }
+        },
       );
 
       fireKey('?');

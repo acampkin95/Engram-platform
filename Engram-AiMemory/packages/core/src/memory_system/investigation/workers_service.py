@@ -1,15 +1,14 @@
 """Docker service entrypoint for investigation AI workers."""
+
 from __future__ import annotations
 
 import asyncio
 import contextlib
 import os
 import signal
-from datetime import datetime
+from datetime import UTC, datetime
 
 from rich.console import Console
-
-from memory_system.compat import UTC
 
 console = Console()
 
@@ -77,10 +76,7 @@ async def run_workers_service() -> None:
 
         # Wait for next interval or shutdown
         with contextlib.suppress(TimeoutError):
-            await asyncio.wait_for(
-                shutdown_event.wait(),
-                timeout=WORKERS_INTERVAL * 60
-            )
+            await asyncio.wait_for(shutdown_event.wait(), timeout=WORKERS_INTERVAL * 60)
 
     console.print("[cyan]Investigation Workers Service stopped[/cyan]")
 

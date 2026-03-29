@@ -22,7 +22,8 @@ import logging
 import re
 import unicodedata
 from collections import defaultdict
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from difflib import SequenceMatcher
 from pathlib import Path
 from collections.abc import Callable

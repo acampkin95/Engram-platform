@@ -11,7 +11,12 @@ from unittest.mock import patch, AsyncMock, MagicMock
 
 from app.api.stats import router as stats_router
 from app.middleware import rate_limit as _rl_module
-from datetime import UTC
+# Python 3.9+ compatibility for UTC timezone
+try:
+    from app._compat import UTC
+except ImportError:
+    from datetime import timezone
+    UTC = timezone.utc
 
 # ---------------------------------------------------------------------------
 # App setup

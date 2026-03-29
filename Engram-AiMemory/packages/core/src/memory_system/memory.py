@@ -4,14 +4,12 @@ Memory data models and types.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum, StrEnum
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
-
-from memory_system.compat import UTC
 
 
 class MemoryTier(int, Enum):
@@ -45,8 +43,6 @@ class MemorySource(StrEnum):
     SYSTEM = "system"
     DOCUMENTATION = "documentation"
     EXTERNAL = "external"
-
-
 
 
 class SourceType(StrEnum):
@@ -90,15 +86,16 @@ class ProvenanceRecord(BaseModel):
     raw_input: str | None = None
 
 
-
 class TemporalResolution(StrEnum):
     EXACT = "exact"
     APPROXIMATE = "approximate"
     RELATIVE = "relative"
     UNKNOWN = "unknown"
 
+
 class TemporalBounds(BaseModel):
     """Define the chronological bounds of an event memory."""
+
     start_time: datetime | None = None
     end_time: datetime | None = None
     resolution: str = Field(default=TemporalResolution.UNKNOWN)
@@ -147,17 +144,19 @@ class Memory(BaseModel):
     embedding_dimension: int | None = Field(default=None, description="Vector dimension")
     last_accessed_at: datetime | None = Field(default=None, description="Last retrieval timestamp")
     decay_factor: float = Field(default=1.0, ge=0.0, le=1.0, description="Computed decay factor")
-    canonical_id: str | None = Field(default=None, description="Points to canonical if this is a duplicate")
+    canonical_id: str | None = Field(
+        default=None, description="Points to canonical if this is a duplicate"
+    )
     is_canonical: bool = Field(default=True, description="True if this is the master version")
-    rerank_score: float | None = Field(default=None, description="Reranker score (search results only)")
+    rerank_score: float | None = Field(
+        default=None, description="Reranker score (search results only)"
+    )
 
     # Relationships
     related_memory_ids: list[UUID] = Field(default_factory=list)
     parent_memory_id: UUID | None = Field(default=None)
 
     model_config = {"use_enum_values": True}
-
-
 
     # Advanced Integrity & Confidence Features
     overall_confidence: float = Field(ge=0.0, le=1.0, default=0.5)
@@ -179,8 +178,6 @@ class Memory(BaseModel):
     last_contradiction_check: datetime | None = None
     last_confidence_update: datetime | None = None
 
-
-
     # Temporal & Event Modeling Features
     temporal_bounds: TemporalBounds | None = None
     is_event: bool = Field(default=False)
@@ -200,6 +197,7 @@ class MemorySearchResult(BaseModel):
     composite_score: float = Field(default=0.0, ge=0.0)
     rerank_score: float | None = Field(default=None)
     rerank_position: int | None = Field(default=None)
+
 
 class MemoryQuery(BaseModel):
     """Query parameters for memory search."""
@@ -264,13 +262,14 @@ class MemoryAnalysis(BaseModel):
     model_config = {"use_enum_values": True}
 
 
-
 class KnowledgeEntity(BaseModel):
     """An entity node in the knowledge graph."""
 
     id: UUID = Field(default_factory=uuid4, description="Unique entity ID")
     name: str = Field(..., min_length=1, description="Entity name")
-    entity_type: str = Field(..., description="Type of entity (person, project, concept, tool, etc.)")
+    entity_type: str = Field(
+        ..., description="Type of entity (person, project, concept, tool, etc.)"
+    )
     description: str | None = Field(default=None, description="Optional description")
     project_id: str | None = Field(default=None, description="Project scope")
     tenant_id: str = Field(default="default", description="Tenant identifier")
@@ -286,13 +285,21 @@ class KnowledgeRelation(BaseModel):
     """A directed relation edge between two knowledge graph entities."""
 
     id: UUID = Field(default_factory=uuid4, description="Unique relation ID")
-    source_entity_id: UUID = Field(..., description="Source entity UUID (flat ID, not cross-reference)")
-    target_entity_id: UUID = Field(..., description="Target entity UUID (flat ID, not cross-reference)")
-    relation_type: str = Field(..., description="Relation type (works_on, depends_on, knows, uses, etc.)")
+    source_entity_id: UUID = Field(
+        ..., description="Source entity UUID (flat ID, not cross-reference)"
+    )
+    target_entity_id: UUID = Field(
+        ..., description="Target entity UUID (flat ID, not cross-reference)"
+    )
+    relation_type: str = Field(
+        ..., description="Relation type (works_on, depends_on, knows, uses, etc.)"
+    )
     weight: float = Field(default=1.0, ge=0.0, le=1.0, description="Relation strength (0-1)")
     project_id: str | None = Field(default=None, description="Project scope")
     tenant_id: str = Field(default="default", description="Tenant identifier")
-    context: str | None = Field(default=None, description="Optional context/description for the relation")
+    context: str | None = Field(
+        default=None, description="Optional context/description for the relation"
+    )
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     model_config = {"use_enum_values": True}
@@ -312,8 +319,12 @@ class MaintenanceTask(BaseModel):
 
     task_id: str = Field(default_factory=lambda: str(uuid4()))
     task_type: Literal[
-        "summarize", "score_importance", "detect_contradictions",
-        "consolidate", "extract_entities", "decay_update"
+        "summarize",
+        "score_importance",
+        "detect_contradictions",
+        "consolidate",
+        "extract_entities",
+        "decay_update",
     ]
     memory_ids: list[str] = Field(default_factory=list)
     priority: int = Field(default=5, ge=1, le=10)

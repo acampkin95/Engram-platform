@@ -26,7 +26,8 @@ import json
 import logging
 import re
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote_plus
@@ -639,7 +640,6 @@ class FaceClusterer:
                 entry.faces_detected = result.faces_detected
                 if result.faces_detected > 0:
                     import face_recognition as _fr
-                    import numpy as np
 
                     img_arr = self._svc._bytes_to_array(raw)  # type: ignore[union-attr]
                     locs = _fr.face_locations(img_arr)
@@ -652,7 +652,6 @@ class FaceClusterer:
 
     def _greedy_cluster(self, encoding_map: dict[str, list], entity_id: str) -> list[FaceCluster]:
         import face_recognition as _fr
-        import numpy as np
 
         clusters: list[FaceCluster] = []
         assigned: dict[str, str] = {}

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Navigation, Hero, Feature, Button, PlatformArchitecture } from './components';
+import { Hero, Feature, Button, PlatformArchitecture } from './components';
 
 const platformPillars = [
   {
@@ -103,10 +103,7 @@ const stats = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[var(--void)] text-[var(--text-primary)]">
-      <Navigation />
-
-      <div className="md:ml-[280px]">
+    <>
         <Hero />
 
         {/* Platform Overview - 4 Pillars */}
@@ -444,38 +441,41 @@ export default function Home() {
                 </h4>
                 <ul className="space-y-3">
                   <li>
-                    <a
-                      href="#platform"
+                    <Link
+                      href="/platform/memory"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       AiMemory
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="#platform"
+                    <Link
+                      href="/platform/crawler"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       AiCrawler
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="#platform"
+                    <Link
+                      href="/platform/mcp"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       MCP Server
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
+                    </Link>
                   </li>
                   <li>
                     <a
-                      href="#platform"
+                      href="https://memory.velocitydigi.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Dashboard (opens in new tab)"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
-                      Dashboard
+                      Dashboard ↗
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
@@ -488,31 +488,31 @@ export default function Home() {
                 </h4>
                 <ul className="space-y-3">
                   <li>
-                    <a
+                    <Link
                       href="/knowledge-base"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       Knowledge Base
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a
+                    <Link
                       href="/getting-started"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       Getting Started
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <Link
+                      href="/knowledge-base/api-reference"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
                       API Docs
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
+                    </Link>
                   </li>
                   <li>
                     <a
@@ -533,34 +533,37 @@ export default function Home() {
                 <ul className="space-y-3">
                   <li>
                     <a
-                      href="https://github.com/engram"
+                      href="https://github.com"
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label="GitHub (opens in new tab)"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
+                      title="Placeholder — will be updated with official Engram GitHub"
                     >
-                      GitHub
+                      GitHub ↗
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
                     <a
-                      href="https://discord.gg/engram"
+                      href="https://memory.velocitydigi.com"
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label="Dashboard (opens in new tab)"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
-                      Discord
+                      Dashboard ↗
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <Link
+                      href="/knowledge-base"
                       className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
                     >
-                      Changelog
+                      Knowledge Base
                       <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -573,7 +576,6 @@ export default function Home() {
             </div>
           </div>
         </footer>
-      </div>
-    </div>
+    </>
   );
 }

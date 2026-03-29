@@ -22,7 +22,8 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from difflib import SequenceMatcher
 
 from app.models.entity import (

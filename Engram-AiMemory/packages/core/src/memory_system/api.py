@@ -10,8 +10,9 @@ import logging
 import time
 import traceback
 from collections import Counter, deque
+from collections.abc import Iterator
 from contextlib import asynccontextmanager, suppress
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import (
@@ -29,8 +30,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from rich.console import Console
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
+
+
+async def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Rate limit exceeded. Please slow down."},
+    )
+
+
 from slowapi.util import get_remote_address
 
 from memory_system import (
@@ -46,7 +56,6 @@ from memory_system.auth import (
     require_auth,
     verify_password,
 )
-from memory_system.compat import UTC
 from memory_system.config import get_settings
 
 console = Console()
@@ -1697,7 +1706,7 @@ async def export_memories(
 
     if format == "csv":
 
-        def generate_csv():
+        def generate_csv() -> Iterator[str]:
             output = io.StringIO()
             writer = csv.DictWriter(
                 output,
@@ -1748,7 +1757,7 @@ async def export_memories(
         )
 
     # JSONL format (default)
-    def generate_jsonl():
+    def generate_jsonl() -> Iterator[str]:
         for mem in results:
             record = {
                 "id": str(mem.id),
@@ -1790,7 +1799,11 @@ async def bulk_delete_memories(
         for memory_id in body.memory_ids[: body.max_delete]:
             try:
                 # We need the tier to delete — fetch the memory first
-                mem = await _memory_system.get(memory_id)
+                mem = await _memory_system.get(
+                    memory_id,
+                    tier=MemoryTier.WORKING,  # default to working tier  # default tier for bulk lookup
+                    tenant_id=body.tenant_id or _api_settings.default_tenant_id,
+                )
                 if mem is None:
                     failed += 1
                     continue

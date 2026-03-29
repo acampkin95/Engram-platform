@@ -12,7 +12,8 @@ from __future__ import annotations
 
 import uuid
 import pytest
-from datetime import datetime, UTC
+from app._compat import UTC
+from datetime import datetime
 from unittest.mock import patch, AsyncMock, MagicMock
 from fastapi import FastAPI
 from fastapi.testclient import TestClient

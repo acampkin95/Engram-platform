@@ -7,9 +7,7 @@ Recency score formula: 2^(-age_days / half_life_days)
 from __future__ import annotations
 
 import math
-from datetime import datetime
-
-from memory_system.compat import UTC
+from datetime import UTC, datetime
 
 
 class MemoryDecay:
@@ -35,7 +33,6 @@ class MemoryDecay:
         decay = math.exp(-math.log(2) * age_days / self.half_life_days)
         return max(0.0, min(1.0, decay))
 
-
     def calculate_decay(
         self,
         created_at: datetime,
@@ -59,7 +56,6 @@ class MemoryDecay:
         return max(min_importance, decay * access_factor)
 
     def calculate_memory_fitness(
-
         self,
         access_count: int,
         importance: float,

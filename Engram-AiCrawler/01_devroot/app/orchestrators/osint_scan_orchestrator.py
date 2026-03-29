@@ -11,9 +11,10 @@ import asyncio
 import logging
 import os
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 
-from enum import StrEnum
+from app._compat import StrEnum
 
 from typing import Any
 from collections.abc import Callable, Coroutine
@@ -292,8 +293,8 @@ class OSINTScanOrchestrator:
     async def _run_face_matching_stage(
         self,
         scan_id: str,
-        request: "ScanRequest",
-        result: "ScanResult",
+        request: ScanRequest,
+        result: ScanResult,
         successful: list,
     ) -> None:
         if not request.reference_photo_labels:
@@ -336,8 +337,8 @@ class OSINTScanOrchestrator:
     async def _run_parallel_osint_stages(
         self,
         scan_id: str,
-        request: "ScanRequest",
-        result: "ScanResult",
+        request: ScanRequest,
+        result: ScanResult,
     ) -> None:
         domain_target = request.target_domain
         osint_tasks = []

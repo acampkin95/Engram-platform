@@ -37,10 +37,11 @@ class NomicEmbedder:
             logger.info(f"Loaded {self.MODEL_NAME} ({self.DIMENSION}-dim)")
 
     def embed(self, texts: list[str], task: str = "search_document") -> list[list[float]]:
-        """Embed texts with task prefix. Returns list of vectors."""
         import torch.nn.functional as functional
 
         self._load()
+        if self._model is None:
+            raise RuntimeError("Embedding model not loaded")
         prefixed = [f"{task}: {t}" for t in texts]
         embeddings = self._model.encode(prefixed, convert_to_tensor=True)
         # Matryoshka: normalize and truncate to requested dimension
@@ -85,11 +86,9 @@ class BGEReranker:
     def rerank(
         self, query: str, documents: list[str], top_k: int | None = None
     ) -> list[tuple[int, float]]:
-        """
-        Rerank documents by relevance to query.
-        Returns list of (original_index, score) sorted by score descending.
-        """
         self._load()
+        if self._model is None:
+            raise RuntimeError("Reranking model not loaded")
         pairs = [(query, doc) for doc in documents]
         scores = self._model.predict(pairs)
         indexed = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)

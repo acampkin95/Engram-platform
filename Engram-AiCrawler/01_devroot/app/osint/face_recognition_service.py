@@ -9,7 +9,8 @@ import json
 import logging
 import shutil
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from pathlib import Path
 from typing import Any
 

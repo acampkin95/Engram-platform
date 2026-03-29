@@ -27,7 +27,8 @@ marketplace_monitor:
 """
 from __future__ import annotations
 
-from datetime import datetime, UTC
+from app._compat import UTC
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest

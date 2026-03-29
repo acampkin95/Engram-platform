@@ -458,12 +458,14 @@ export function Hero() {
             className="flex flex-col sm:flex-row gap-4"
             style={{ animation: prefersReducedMotion ? 'none' : 'fadeUp 0.8s ease 1s both' }}
           >
-            <Button size="lg">Get Started</Button>
-            <Link href="#platform">
-              <Button variant="secondary" size="lg">
-                Explore Platform
-              </Button>
+            <Link href="/getting-started">
+              <Button size="lg">Get Started</Button>
             </Link>
+            <a href="https://memory.velocitydigi.com" target="_blank" rel="noopener noreferrer">
+              <Button variant="secondary" size="lg">
+                Launch Dashboard
+              </Button>
+            </a>
           </div>
         </div>
 

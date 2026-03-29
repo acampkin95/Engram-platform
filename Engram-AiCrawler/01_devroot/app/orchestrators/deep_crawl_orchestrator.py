@@ -17,9 +17,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 
-from enum import StrEnum
+from app._compat import StrEnum
 
 from typing import Any
 from collections.abc import Callable, Coroutine
@@ -842,8 +843,8 @@ class DeepCrawlOrchestrator:
 
     async def _init_entity_stage(
         self,
-        request: "DeepCrawlRequest",
-        result: "DeepCrawlResult",
+        request: DeepCrawlRequest,
+        result: DeepCrawlResult,
     ) -> None:
         if request.entity_id:
             result.entity = await self._load_or_create_entity(request)

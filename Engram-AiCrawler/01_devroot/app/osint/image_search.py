@@ -5,7 +5,8 @@ import base64
 import hashlib
 import io
 import logging
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from typing import Any
 
 import imagehash

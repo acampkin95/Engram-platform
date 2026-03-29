@@ -1,8 +1,8 @@
 from dataclasses import dataclass
+from datetime import UTC
 from enum import StrEnum
 from typing import Any
 
-from memory_system.compat import UTC
 from memory_system.memory import Memory
 
 

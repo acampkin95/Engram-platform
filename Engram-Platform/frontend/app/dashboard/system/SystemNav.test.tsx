@@ -20,7 +20,7 @@ test('renders both nav tabs', () => {
   render(<SystemNav />);
 
   expect(screen.getByText('System Health')).toBeInTheDocument();
-  expect(screen.getByText('Notification Settings')).toBeInTheDocument();
+  expect(screen.getByText('Alert Settings')).toBeInTheDocument();
 });
 
 test('highlights System Health tab when on /dashboard/system/health', () => {
@@ -33,14 +33,14 @@ test('highlights System Health tab when on /dashboard/system/health', () => {
   expect(systemHealthLink).toHaveClass('text-[#f0eef8]');
 });
 
-test('highlights Notification Settings tab when on /dashboard/system/settings', () => {
+test('highlights Alert Settings tab when on /dashboard/system/settings', () => {
   usePathnameMock.mockReturnValue('/dashboard/system/settings');
 
   render(<SystemNav />);
 
-  const notificationLink = screen.getByRole('link', { name: /Notification Settings/i });
-  expect(notificationLink).toHaveClass('border-[#f2a93b]');
-  expect(notificationLink).toHaveClass('text-[#f0eef8]');
+  const alertLink = screen.getByRole('link', { name: /Alert Settings/i });
+  expect(alertLink).toHaveClass('border-[#f2a93b]');
+  expect(alertLink).toHaveClass('text-[#f0eef8]');
 });
 
 test('does not highlight other tabs when not on active path', () => {
@@ -48,9 +48,9 @@ test('does not highlight other tabs when not on active path', () => {
 
   render(<SystemNav />);
 
-  const notificationLink = screen.getByRole('link', { name: /Notification Settings/i });
-  expect(notificationLink).toHaveClass('border-transparent');
-  expect(notificationLink).toHaveClass('text-[#a09bb8]');
+  const alertLink = screen.getByRole('link', { name: /Alert Settings/i });
+  expect(alertLink).toHaveClass('border-transparent');
+  expect(alertLink).toHaveClass('text-[#5c5878]');
 });
 
 test('renders correct hrefs for both tabs', () => {
@@ -59,16 +59,16 @@ test('renders correct hrefs for both tabs', () => {
   render(<SystemNav />);
 
   const systemHealthLink = screen.getByRole('link', { name: /System Health/i });
-  const notificationLink = screen.getByRole('link', { name: /Notification Settings/i });
+  const alertLink = screen.getByRole('link', { name: /Alert Settings/i });
 
   expect(systemHealthLink).toHaveAttribute('href', '/dashboard/system/health');
-  expect(notificationLink).toHaveAttribute('href', '/dashboard/system/settings');
+  expect(alertLink).toHaveAttribute('href', '/dashboard/system/settings');
 });
 
 test('renders Activity icon for System Health tab', () => {
   usePathnameMock.mockReturnValue('/dashboard/system/health');
 
-  const { container } = render(<SystemNav />);
+  render(<SystemNav />);
 
   const systemHealthLink = screen.getByRole('link', { name: /System Health/i });
 
@@ -76,14 +76,14 @@ test('renders Activity icon for System Health tab', () => {
   expect(svg).toBeInTheDocument();
 });
 
-test('renders Bell icon for Notification Settings tab', () => {
+test('renders Bell icon for Alert Settings tab', () => {
   usePathnameMock.mockReturnValue('/dashboard/system/health');
 
-  const { container } = render(<SystemNav />);
+  render(<SystemNav />);
 
-  const notificationLink = screen.getByRole('link', { name: /Notification Settings/i });
+  const alertLink = screen.getByRole('link', { name: /Alert Settings/i });
 
-  const svg = notificationLink.querySelector('svg');
+  const svg = alertLink.querySelector('svg');
   expect(svg).toBeInTheDocument();
 });
 
@@ -92,6 +92,6 @@ test('applies hover styles to inactive tabs', () => {
 
   render(<SystemNav />);
 
-  const notificationLink = screen.getByRole('link', { name: /Notification Settings/i });
-  expect(notificationLink).toHaveClass('hover:text-[#f0eef8]');
+  const alertLink = screen.getByRole('link', { name: /Alert Settings/i });
+  expect(alertLink).toHaveClass('hover:text-[#a09bb8]');
 });

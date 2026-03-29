@@ -1,14 +1,13 @@
 """AI worker services for investigation intelligence processing."""
+
 from __future__ import annotations
 
 import json
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from rich.console import Console
-
-from memory_system.compat import UTC
 
 console = Console()
 
@@ -16,6 +15,7 @@ console = Console()
 # ─────────────────────────────────────────────
 # Worker 1: Entity Extraction
 # ─────────────────────────────────────────────
+
 
 class EntityExtractionWorker:
     """Extract named entities from EvidenceDocument chunks and upsert into global registry.
@@ -26,11 +26,11 @@ class EntityExtractionWorker:
 
     # Regex patterns for basic NER
     PERSON_PATTERNS = [
-        r'\b([A-Z][a-z]+ [A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\b',  # FirstName LastName [MiddleName]
+        r"\b([A-Z][a-z]+ [A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\b",  # FirstName LastName [MiddleName]
     ]
     ORG_PATTERNS = [
-        r'\b([A-Z][A-Za-z\s&,\.]+(?:Ltd|Pty|Inc|Corp|LLC|Limited|Incorporated|Company|Co\.|Pty Ltd|P/L)\.?)\b',
-        r'\b([A-Z]{2,}(?:\s[A-Z]{2,})*)\b',  # Acronyms: FBI, CIA, ASIO
+        r"\b([A-Z][A-Za-z\s&,\.]+(?:Ltd|Pty|Inc|Corp|LLC|Limited|Incorporated|Company|Co\.|Pty Ltd|P/L)\.?)\b",
+        r"\b([A-Z]{2,}(?:\s[A-Z]{2,})*)\b",  # Acronyms: FBI, CIA, ASIO
     ]
 
     def __init__(self, weaviate_client, matter_client, registry_client, ai_router=None):
@@ -66,7 +66,11 @@ class EntityExtractionWorker:
             # Skip already-processed chunks
             metadata_raw = props.get("metadata", "{}")
             try:
-                metadata = json.loads(metadata_raw) if isinstance(metadata_raw, str) else (metadata_raw or {})
+                metadata = (
+                    json.loads(metadata_raw)
+                    if isinstance(metadata_raw, str)
+                    else (metadata_raw or {})
+                )
             except Exception:
                 metadata = {}
 
@@ -122,13 +126,19 @@ class EntityExtractionWorker:
                 )
                 chunks_processed += 1
             except Exception as exc:
-                console.print(f"[yellow]Failed to mark chunk {obj.uuid} as processed: {exc}[/yellow]")
+                console.print(
+                    f"[yellow]Failed to mark chunk {obj.uuid} as processed: {exc}[/yellow]"
+                )
 
         console.print(
             f"[green]EntityExtraction: {chunks_processed} chunks, "
             f"{persons_found} persons, {orgs_found} orgs for {matter_id}[/green]"
         )
-        return {"chunks_processed": chunks_processed, "persons_found": persons_found, "orgs_found": orgs_found}
+        return {
+            "chunks_processed": chunks_processed,
+            "persons_found": persons_found,
+            "orgs_found": orgs_found,
+        }
 
     def _extract_persons(self, text: str) -> list[str]:
         """Extract person names using regex patterns."""
@@ -166,6 +176,7 @@ class EntityExtractionWorker:
         )
         try:
             import json as _json
+
             # Use first provider's default model via router
             raw = await self._ai_router.chat_completion(
                 messages=[{"role": "user", "content": prompt}],
@@ -194,15 +205,16 @@ class EntityExtractionWorker:
 # Worker 2: Timeline Extraction
 # ─────────────────────────────────────────────
 
+
 class TimelineExtractionWorker:
     """Extract temporal events from EvidenceDocument chunks and insert into TimelineEvent."""
 
     # Date patterns to extract
     DATE_PATTERNS = [
-        r'\b(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})\b',          # DD/MM/YYYY or MM-DD-YYYY
-        r'\b(\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2})\b',             # YYYY-MM-DD
-        r'\b(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4})\b',  # 15 January 2024
-        r'\b((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4})\b',  # January 15, 2024
+        r"\b(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})\b",  # DD/MM/YYYY or MM-DD-YYYY
+        r"\b(\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2})\b",  # YYYY-MM-DD
+        r"\b(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4})\b",  # 15 January 2024
+        r"\b((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4})\b",  # January 15, 2024
     ]
 
     def __init__(self, weaviate_client, matter_client):
@@ -234,7 +246,11 @@ class TimelineExtractionWorker:
             props = obj.properties
             metadata_raw = props.get("metadata", "{}")
             try:
-                metadata = json.loads(metadata_raw) if isinstance(metadata_raw, str) else (metadata_raw or {})
+                metadata = (
+                    json.loads(metadata_raw)
+                    if isinstance(metadata_raw, str)
+                    else (metadata_raw or {})
+                )
             except Exception:
                 metadata = {}
 
@@ -274,7 +290,9 @@ class TimelineExtractionWorker:
                     properties={"metadata": json.dumps(metadata)},
                 )
             except Exception as exc:
-                console.print(f"[yellow]Failed to mark chunk {obj.uuid} timeline-processed: {exc}[/yellow]")
+                console.print(
+                    f"[yellow]Failed to mark chunk {obj.uuid} timeline-processed: {exc}[/yellow]"
+                )
 
         console.print(f"[green]TimelineExtraction: {events_created} events for {matter_id}[/green]")
         return {"events_created": events_created}
@@ -289,19 +307,22 @@ class TimelineExtractionWorker:
                 start = max(0, match.start() - 100)
                 end = min(len(content), match.end() + 100)
                 context = content[start:end].strip()
-                events.append({
-                    "date": date_str,
-                    "description": context,
-                    "source_chunk_id": chunk_id,
-                    "source_url": source_url,
-                    "confidence": 0.7,
-                })
+                events.append(
+                    {
+                        "date": date_str,
+                        "description": context,
+                        "source_chunk_id": chunk_id,
+                        "source_url": source_url,
+                        "confidence": 0.7,
+                    }
+                )
         return events
 
 
 # ─────────────────────────────────────────────
 # Worker 3: Contradiction Flagging
 # ─────────────────────────────────────────────
+
 
 class ContradictionFlaggingWorker:
     """Flag potential contradictions between timeline events for a matter.
@@ -337,11 +358,13 @@ class ContradictionFlaggingWorker:
             props = obj.properties
             date = props.get("event_date", "")
             if date:
-                by_date.setdefault(date, []).append({
-                    "id": str(obj.uuid),
-                    "description": props.get("description", ""),
-                    "source_url": props.get("source_url", ""),
-                })
+                by_date.setdefault(date, []).append(
+                    {
+                        "id": str(obj.uuid),
+                        "description": props.get("description", ""),
+                        "source_url": props.get("source_url", ""),
+                    }
+                )
 
         flagged_pairs = []
         for date, events in by_date.items():
@@ -388,6 +411,7 @@ class ContradictionFlaggingWorker:
         )
         try:
             import json as _json
+
             raw = await self._ai_router.chat_completion(
                 messages=[{"role": "user", "content": prompt}],
                 model="liquid/lfm2.5:1.2b",
@@ -416,6 +440,7 @@ class ContradictionFlaggingWorker:
 # ─────────────────────────────────────────────
 # Worker 4: Intelligence Report
 # ─────────────────────────────────────────────
+
 
 class IntelligenceReportWorker:
     """Generate structured intelligence report for a matter.
@@ -487,12 +512,10 @@ class IntelligenceReportWorker:
                 "organisations_identified": len(orgs),
             },
             "persons": [
-                {"id": p.id, "name": p.canonical_name, "aliases": p.aliases}
-                for p in persons
+                {"id": p.id, "name": p.canonical_name, "aliases": p.aliases} for p in persons
             ],
             "organisations": [
-                {"id": o.id, "name": o.canonical_name, "aliases": o.aliases}
-                for o in orgs
+                {"id": o.id, "name": o.canonical_name, "aliases": o.aliases} for o in orgs
             ],
             "timeline": sorted(timeline_events, key=lambda x: x["date"]),
         }
@@ -504,8 +527,7 @@ class IntelligenceReportWorker:
                 report_content["narrative"] = narrative
         else:
             report_content["note"] = (
-                "Structured data aggregation only. "
-                "Set ai_router for LLM narrative synthesis."
+                "Structured data aggregation only. Set ai_router for LLM narrative synthesis."
             )
 
         # Store report in IntelligenceReport collection
@@ -522,7 +544,9 @@ class IntelligenceReportWorker:
                     "version": 1,
                 },
             )
-            console.print(f"[green]IntelligenceReport generated for {matter_id}: {report_id}[/green]")
+            console.print(
+                f"[green]IntelligenceReport generated for {matter_id}: {report_id}[/green]"
+            )
         except Exception as exc:
             console.print(f"[red]Failed to store intelligence report: {exc}[/red]")
 

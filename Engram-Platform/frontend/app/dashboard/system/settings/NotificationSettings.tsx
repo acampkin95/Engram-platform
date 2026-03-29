@@ -47,12 +47,8 @@ function TestResultDisplay({ result }: { result: TestResult | null }) {
         result.success ? 'text-[#2ee6a6]' : 'text-[#ff4757]'
       }`}
     >
-      {result.success ? (
-        <CheckCircle className="h-3 w-3" />
-      ) : (
-        <XCircle className="h-3 w-3" />
-      )}
-      <span>{result.success ? 'Sent successfully' : result.error ?? 'Failed'}</span>
+      {result.success ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+      <span>{result.success ? 'Sent successfully' : (result.error ?? 'Failed')}</span>
       <span className="text-[#5c5878]">{timeLabel}</span>
     </div>
   );
@@ -133,9 +129,7 @@ export default function NotificationSettings() {
               Alert Channels
             </span>
           </div>
-          <h1 className="text-2xl font-bold font-display text-[#f0eef8]">
-            Notification Settings
-          </h1>
+          <h1 className="text-2xl font-bold font-display text-[#f0eef8]">Notification Settings</h1>
           <p className="text-sm text-[#a09bb8]">
             Configure email and push notification channels for system alerts.
           </p>
@@ -161,10 +155,7 @@ export default function NotificationSettings() {
                 />
                 {status?.resend.from && (
                   <p className="text-xs text-[#a09bb8]">
-                    Sender:{' '}
-                    <span className="font-mono text-[#f0eef8]">
-                      {status.resend.from}
-                    </span>
+                    Sender: <span className="font-mono text-[#f0eef8]">{status.resend.from}</span>
                   </p>
                 )}
                 {!status?.resend.configured && (
@@ -223,10 +214,7 @@ export default function NotificationSettings() {
                 </div>
                 {status?.ntfy.topicUrl && (
                   <p className="text-xs text-[#a09bb8]">
-                    Topic:{' '}
-                    <span className="font-mono text-[#f0eef8]">
-                      {status.ntfy.topicUrl}
-                    </span>
+                    Topic: <span className="font-mono text-[#f0eef8]">{status.ntfy.topicUrl}</span>
                   </p>
                 )}
                 {!status?.ntfy.configured && (
@@ -271,9 +259,7 @@ export default function NotificationSettings() {
               void testChannel('ntfy');
             }}
             loading={testing.size > 0}
-            disabled={
-              loading || (!status?.resend.configured && !status?.ntfy.configured)
-            }
+            disabled={loading || (!status?.resend.configured && !status?.ntfy.configured)}
           >
             <Send className="h-3.5 w-3.5" /> Test All Channels
           </Button>

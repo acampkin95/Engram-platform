@@ -2,7 +2,8 @@
 
 import json
 import pytest
-from datetime import datetime, UTC
+from app._compat import UTC
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.orchestrators.osint_scan_orchestrator import (

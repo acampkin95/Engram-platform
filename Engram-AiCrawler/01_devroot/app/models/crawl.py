@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, HttpUrl
 from typing import Any
 from datetime import datetime
 
-from enum import StrEnum
+from app._compat import StrEnum
 
 class CrawlStatus(StrEnum):
     PENDING = "pending"

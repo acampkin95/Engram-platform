@@ -36,9 +36,9 @@ test('renders loading state initially', async () => {
               },
               error: null,
             }),
-          100
+          100,
         );
-      })
+      }),
   );
 
   render(<NotificationSettings />);
@@ -179,7 +179,7 @@ test('shows success toast on successful test', async () => {
       expect.objectContaining({
         type: 'success',
         message: expect.stringContaining('Test email notification sent'),
-      })
+      }),
     );
   });
 });
@@ -214,7 +214,7 @@ test('shows error toast on failed test', async () => {
       expect.objectContaining({
         type: 'error',
         message: 'Invalid API key',
-      })
+      }),
     );
   });
 });

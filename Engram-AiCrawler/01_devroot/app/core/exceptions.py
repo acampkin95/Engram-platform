@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 
 
 class AppError(Exception):

@@ -127,7 +127,9 @@ export default function SystemHealthContent() {
             ];
             return next.slice(-250);
           });
-        } catch {}
+        } catch {
+          // Ignore malformed JSON from log stream — continue to next message
+        }
       },
       onError: () => {
         addToast({ type: 'error', message: 'Live log stream disconnected' });
@@ -347,7 +349,7 @@ export default function SystemHealthContent() {
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => window.location.href = '/dashboard/system/settings'}
+                  onClick={() => (window.location.href = '/dashboard/system/settings')}
                 >
                   <Settings className="h-4 w-4" /> Alert Settings
                 </Button>

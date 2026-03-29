@@ -12,7 +12,7 @@ The registry is the single source of truth used by:
 
 from __future__ import annotations
 
-from enum import StrEnum
+from app._compat import StrEnum
 
 from urllib.parse import quote_plus
 

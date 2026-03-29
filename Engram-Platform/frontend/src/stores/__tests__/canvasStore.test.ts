@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock localStorage for all tests
 const localStorageMock = (() => {
@@ -27,11 +27,10 @@ vi.mock('zustand/middleware', () => ({
 
 // Import AFTER mocking so the stores are created with the no-op persist.
 import {
+  type StreamItem,
   useCanvasStore,
   useIntelligenceStore,
   useStreamStore,
-  type CanvasPanel,
-  type StreamItem,
 } from '@/src/stores/canvasStore';
 
 // ─────────────────────────────────────────────────────────────────────────────────────
@@ -98,7 +97,7 @@ describe('useCanvasStore', () => {
         minHeight: 150,
         data: { someKey: 'someValue' },
       };
-      const id = useCanvasStore.getState().addPanel(panel);
+      const _id = useCanvasStore.getState().addPanel(panel);
 
       const state = useCanvasStore.getState();
       const addedPanel = state.panels[0];
@@ -217,7 +216,7 @@ describe('useCanvasStore', () => {
     });
 
     it('silently succeeds when updating non-existent panel', () => {
-      const id = useCanvasStore.getState().addPanel({
+      const _id = useCanvasStore.getState().addPanel({
         type: 'graph' as const,
         x: 0,
         y: 0,
@@ -353,7 +352,7 @@ describe('useCanvasStore', () => {
 
       const saved = localStorage.getItem('canvas-layout');
       expect(saved).toBeTruthy();
-      const parsed = JSON.parse(saved!);
+      const parsed = JSON.parse(saved as string);
       expect(parsed.gridCols).toBe(14);
       expect(parsed.panels).toHaveLength(1);
       expect(parsed.panels[0].id).toBe(id);
@@ -625,7 +624,15 @@ describe('useIntelligenceStore', () => {
     });
 
     it('accepts all valid entity types', () => {
-      const types = ['person', 'organization', 'location', 'document', 'event', 'artifact', 'unknown'] as const;
+      const types = [
+        'person',
+        'organization',
+        'location',
+        'document',
+        'event',
+        'artifact',
+        'unknown',
+      ] as const;
       useIntelligenceStore.getState().setEntityTypeFilter([...types]);
 
       expect(useIntelligenceStore.getState().entityTypeFilter).toEqual(types);
@@ -640,7 +647,14 @@ describe('useIntelligenceStore', () => {
     });
 
     it('accepts all valid status colors', () => {
-      const statuses = ['intelligence', 'anomaly', 'active', 'success', 'critical', 'neutral'] as const;
+      const statuses = [
+        'intelligence',
+        'anomaly',
+        'active',
+        'success',
+        'critical',
+        'neutral',
+      ] as const;
       useIntelligenceStore.getState().setStatusFilter([...statuses]);
 
       expect(useIntelligenceStore.getState().statusFilter).toEqual(statuses);
@@ -903,7 +917,9 @@ describe('useStreamStore', () => {
         metadata: {},
       }));
 
-      items.forEach((item) => useStreamStore.getState().addItem(item));
+      for (const item of items) {
+        useStreamStore.getState().addItem(item);
+      }
 
       const state = useStreamStore.getState();
       expect(state.items).toHaveLength(3);

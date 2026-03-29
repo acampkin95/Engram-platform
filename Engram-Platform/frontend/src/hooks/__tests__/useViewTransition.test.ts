@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useViewTransition, usePrefersReducedMotion } from '@/src/hooks/useViewTransition';
+import { usePrefersReducedMotion, useViewTransition } from '@/src/hooks/useViewTransition';
 
 describe('useViewTransition', () => {
   let mockStartViewTransition: ReturnType<typeof vi.fn>;
@@ -86,7 +86,7 @@ describe('useViewTransition', () => {
     });
 
     it('waits for transition.finished promise to resolve', async () => {
-      let resolveFinished: () => void;
+      let resolveFinished!: () => void;
       const finishedPromise = new Promise<void>((resolve) => {
         resolveFinished = resolve;
       });
@@ -108,7 +108,7 @@ describe('useViewTransition', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
       expect(transitionComplete).toBe(false);
 
-      resolveFinished!();
+      resolveFinished?.();
       await waitFor(() => {
         expect(transitionComplete).toBe(true);
       });
@@ -149,9 +149,7 @@ describe('useViewTransition', () => {
         return { finished: Promise.reject(error) };
       });
 
-      await expect(result.current.startViewTransition(vi.fn())).rejects.toThrow(
-        'Callback failed'
-      );
+      await expect(result.current.startViewTransition(vi.fn())).rejects.toThrow('Callback failed');
     });
   });
 
@@ -218,7 +216,7 @@ describe('useViewTransition', () => {
       });
 
       await expect(result.current.startViewTransition(throwingCallback)).rejects.toThrow(
-        'Sync error'
+        'Sync error',
       );
 
       (document as any).startViewTransition = mockStartViewTransition;
@@ -238,14 +236,16 @@ describe('useViewTransition', () => {
 
       // Cleanup
       const divs = document.querySelectorAll('div');
-      divs.forEach((div) => div.remove());
+      for (const div of divs) {
+        div.remove();
+      }
     });
   });
 });
 
 describe('usePrefersReducedMotion', () => {
-  let mockMatchMedia: ReturnType<typeof vi.fn>;
-  let originalMatchMedia: any;
+  let mockMatchMedia: ReturnType<typeof vi.fn> & ((query: string) => MediaQueryList);
+  let originalMatchMedia: typeof window.matchMedia;
 
   beforeEach(() => {
     originalMatchMedia = window.matchMedia;

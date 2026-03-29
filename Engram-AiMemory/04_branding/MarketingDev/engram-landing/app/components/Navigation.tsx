@@ -82,11 +82,17 @@ const navSections: NavSection[] = [
         href: '/getting-started',
         icon: <Rocket size={16} />,
       },
-      { label: 'API Reference', href: '#api', icon: <Code size={16} /> },
+      { label: 'API Reference', href: '/knowledge-base/api-reference', icon: <Code size={16} /> },
       {
         label: 'GitHub',
         href: 'https://github.com/engram',
         icon: <GitCommit size={16} />,
+        external: true,
+      },
+      {
+        label: 'Launch Dashboard',
+        href: 'https://memory.velocitydigi.com',
+        icon: <LayoutDashboard size={16} />,
         external: true,
       },
     ],
@@ -132,14 +138,14 @@ function NavItemComponent({ item, isActive }: NavItemProps) {
 
   if (item.external) {
     return (
-      <a href={item.href} target="_blank" rel="noopener noreferrer" className={baseClasses}>
+      <a href={item.href} target="_blank" rel="noopener noreferrer" aria-label={`${item.label} (opens in new tab)`} className={baseClasses}>
         {content}
       </a>
     );
   }
 
   return (
-    <Link href={item.href} className={baseClasses}>
+    <Link href={item.href} className={baseClasses} aria-current={isActive ? 'page' : undefined}>
       {content}
     </Link>
   );
@@ -225,10 +231,17 @@ export function Navigation() {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-[var(--border)]">
-            <Button variant="primary" size="sm" className="w-full">
-              Get Started
-            </Button>
+          <div className="p-4 border-t border-[var(--border)] space-y-2">
+            <Link href="/getting-started" className="block">
+              <Button variant="primary" size="sm" className="w-full">
+                Get Started
+              </Button>
+            </Link>
+            <a href="https://memory.velocitydigi.com" target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="secondary" size="sm" className="w-full">
+                Launch Dashboard
+              </Button>
+            </a>
           </div>
         </div>
       </nav>

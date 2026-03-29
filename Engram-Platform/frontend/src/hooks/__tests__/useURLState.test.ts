@@ -362,12 +362,8 @@ describe('useURLState hooks', () => {
       const { result } = renderHook(() => useSearchFilterState());
 
       // All three fields use parse(s) => s, so they return strings
-      expect(result.current.search === '' || typeof result.current.search === 'string').toBe(
-        true,
-      );
-      expect(result.current.filter === '' || typeof result.current.filter === 'string').toBe(
-        true,
-      );
+      expect(result.current.search === '' || typeof result.current.search === 'string').toBe(true);
+      expect(result.current.filter === '' || typeof result.current.filter === 'string').toBe(true);
       expect(result.current.sort === '' || typeof result.current.sort === 'string').toBe(true);
     });
 

@@ -4,12 +4,10 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from urllib.parse import urlparse
 
 from rich.console import Console
-
-from memory_system.compat import UTC
 
 console = Console()
 

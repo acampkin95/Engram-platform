@@ -1,7 +1,8 @@
 """In-memory investigation storage service."""
 
 from __future__ import annotations
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 
 from app.models.investigation import (
     Investigation,

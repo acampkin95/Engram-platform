@@ -738,7 +738,7 @@ describe('System API Routes', () => {
       });
 
       const response = await POST(request);
-      const data = await response.json();
+      const _data = await response.json();
 
       expect(response.status).toBe(200);
       expect(sendNotificationMock).toHaveBeenCalledWith(
@@ -763,7 +763,7 @@ describe('System API Routes', () => {
       });
 
       const response = await POST(request);
-      const data = await response.json();
+      const _data = await response.json();
 
       expect(response.status).toBe(200);
       expect(sendNotificationMock).toHaveBeenCalledWith(
@@ -869,7 +869,7 @@ describe('System API Routes', () => {
       });
 
       const response = await PUT(request);
-      const data = await response.json();
+      const _data = await response.json();
 
       expect(response.status).toBe(200);
       expect(sendNotificationMock).toHaveBeenCalledWith(

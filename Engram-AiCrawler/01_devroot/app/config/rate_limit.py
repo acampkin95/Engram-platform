@@ -3,7 +3,13 @@
 import os
 from dataclasses import dataclass
 from dotenv import load_dotenv
-from datetime import UTC
+
+# Python 3.9+ compatibility for UTC timezone
+try:
+    from datetime import UTC
+except ImportError:
+    from datetime import timezone
+    UTC = timezone.utc
 
 load_dotenv()
 

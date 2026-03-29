@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from typing import Union
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger

@@ -1,17 +1,22 @@
 // Store re-exports for the Engram Platform frontend.
 // Import all stores from here.
 
-export { useUIStore } from './uiStore';
 export {
+  type CanvasPanel,
+  type EntityType,
+  type IntelligenceLayer,
+  type PanelLayout,
+  type RelationshipType,
+  type StatusColor,
+  type StreamItem,
   useCanvasStore,
   useIntelligenceStore,
   useStreamStore,
-  type CanvasPanel,
-  type PanelLayout,
-  type IntelligenceLayer,
-  type StatusColor,
-  type EntityType,
-  type RelationshipType,
-  type StreamItem,
 } from './canvasStore';
-export { usePreferencesStore, type DensityMode, type AnimationLevel, DENSITY_TOKENS } from './preferencesStore';
+export {
+  type AnimationLevel,
+  DENSITY_TOKENS,
+  type DensityMode,
+  usePreferencesStore,
+} from './preferencesStore';
+export { useUIStore } from './uiStore';

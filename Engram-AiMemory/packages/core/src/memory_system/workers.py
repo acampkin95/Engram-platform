@@ -27,12 +27,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from rich.console import Console
 
-from memory_system.compat import UTC
 from memory_system.temporal import TemporalExtractor
 
 if TYPE_CHECKING:
@@ -97,6 +96,7 @@ class MaintenanceScheduler:
             return
 
         self._scheduler = AsyncIOScheduler()
+        assert self._scheduler is not None  # narrowed for mypy
 
         # Job 1: Score importance for new unprocessed memories
         self._scheduler.add_job(
@@ -244,7 +244,12 @@ class MaintenanceScheduler:
             except Exception:
                 available = False
 
-        if not available and not (self._ai_router or self._ollama) or not self._ai_router and not self._ollama:
+        if (
+            not available
+            and not (self._ai_router or self._ollama)
+            or not self._ai_router
+            and not self._ollama
+        ):
             available = False
 
         self._ai_available = available
@@ -670,7 +675,7 @@ class MaintenanceScheduler:
             self._stats["last_run"]["decay_update"] = datetime.now(UTC).isoformat()
             try:
                 settings = self._ms.settings
-                half_life = getattr(settings, "decay_half_life_days", 30.0)
+                half_life = int(getattr(settings, "decay_half_life_days", 30))
                 access_boost = getattr(settings, "decay_access_boost", 0.1)
                 min_importance = getattr(settings, "decay_min_importance", 0.1)
 
@@ -686,7 +691,7 @@ class MaintenanceScheduler:
                         try:
                             from memory_system.decay import MemoryDecay
 
-                            decay_calc = MemoryDecay(half_life_days=half_life)
+                            decay_calc = MemoryDecay(half_life_days=int(half_life))
                             new_decay = decay_calc.calculate_decay(
                                 created_at=memory.created_at,
                                 last_accessed=memory.last_accessed_at,

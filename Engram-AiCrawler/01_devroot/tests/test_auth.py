@@ -4,7 +4,8 @@ import pytest
 import jwt
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
-from datetime import datetime, timedelta, UTC
+from app._compat import UTC
+from datetime import datetime, timedelta
 from unittest.mock import patch
 import os
 from app.middleware import rate_limit as _rl_module

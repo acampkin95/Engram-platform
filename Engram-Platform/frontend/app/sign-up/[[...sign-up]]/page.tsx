@@ -6,7 +6,7 @@ export default function SignUpPage() {
       <SignUp
         appearance={{
           baseTheme: {
-            // @ts-expect-error
+            // @ts-expect-error — Clerk's types don't expose custom color props but accept them at runtime
             colors: {
               background: '#03020a',
               pageBackground: '#03020a',
@@ -21,7 +21,7 @@ export default function SignUpPage() {
             colorBackground: '#03020a',
             colorPrimary: '#f2a93b',
             colorText: '#f0eef8',
-            // @ts-expect-error
+            // @ts-expect-error — Clerk's types don't expose custom color props but accept them at runtime
             colorTextPlaceholder: '#a09bb8',
             colorInputBackground: 'rgba(255, 255, 255, 0.08)',
             colorBorder: 'rgba(255, 255, 255, 0.06)',

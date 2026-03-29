@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Copy, Check } from "lucide-react";
-import { kbArticles, KBArticle } from "@/app/lib/kb-data";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { kbArticles } from "@/app/lib/kb-data";
 import CodeBlock from "@/app/components/CodeBlock";
 import TableOfContents from "@/app/components/TableOfContents";
 
@@ -14,9 +14,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const article = kbArticles.find((a) => a.slug === params.slug);
+  const { slug } = await params;
+  const article = kbArticles.find((a) => a.slug === slug);
   if (!article) return {};
 
   return {
@@ -32,15 +33,16 @@ const colorMap = {
   rose: "--engram-rose",
 };
 
-export default function ArticlePage({
+export default async function ArticlePage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const article = kbArticles.find((a) => a.slug === params.slug);
+  const { slug } = await params;
+  const article = kbArticles.find((a) => a.slug === slug);
   if (!article) notFound();
 
-  const currentIndex = kbArticles.findIndex((a) => a.slug === params.slug);
+  const currentIndex = kbArticles.findIndex((a) => a.slug === slug);
   const prevArticle = currentIndex > 0 ? kbArticles[currentIndex - 1] : null;
   const nextArticle =
     currentIndex < kbArticles.length - 1 ? kbArticles[currentIndex + 1] : null;
@@ -139,50 +141,54 @@ export default function ArticlePage({
                   </div>
 
                   <div className="space-y-4 text-[var(--text-secondary)] leading-relaxed">
-                    {section.content.split("\n\n").map((paragraph, pIdx) => {
-                      // Check if paragraph contains code block
-                      if (paragraph.includes("```")) {
-                        const parts = paragraph.split(
-                          /```(?:[\w-]+)?\n([\s\S]*?)\n```/
-                        );
+                    {(() => {
+                      const content = section.content;
+                      const parts = content.split(/```(\w*)\n/);
+                      const elements: React.ReactNode[] = [];
 
-                        return (
-                          <div key={pIdx} className="space-y-4">
-                            {parts.map((part, partIdx) => {
-                              if (partIdx % 2 === 0) {
-                                // Text part
-                                if (part.trim()) {
-                                  return (
-                                    <p
-                                      key={partIdx}
-                                      className="text-base text-[var(--text-secondary)]"
-                                    >
-                                      {part}
+                      for (let i = 0; i < parts.length; i++) {
+                        if (i % 2 === 0) {
+                          // Text section — split into paragraphs
+                          const text = parts[i].trim();
+                          if (text) {
+                            text.split('\n\n').map((para, j) => {
+                              if (para.trim()) {
+                                elements.push(
+                                  <p key={`t-${i}-${j}`} className="text-base text-[var(--text-secondary)] leading-7">
+                                    {para.trim()}
+                                  </p>
+                                );
+                              }
+                            });
+                          }
+                        } else {
+                          // Language marker — next part is code
+                          const codeContent = parts[i + 1];
+                          if (codeContent) {
+                            const codeEnd = codeContent.indexOf('```');
+                            const code = codeEnd >= 0 ? codeContent.substring(0, codeEnd) : codeContent;
+                            const afterCode = codeEnd >= 0 ? codeContent.substring(codeEnd + 3) : '';
+                            elements.push(
+                              <CodeBlock key={`c-${i}`} code={code.trim()} />
+                            );
+                            // Handle text after closing ```
+                            if (afterCode.trim()) {
+                              afterCode.trim().split('\n\n').map((para, j) => {
+                                if (para.trim()) {
+                                  elements.push(
+                                    <p key={`a-${i}-${j}`} className="text-base text-[var(--text-secondary)] leading-7">
+                                      {para.trim()}
                                     </p>
                                   );
                                 }
-                              } else {
-                                // Code part
-                                return (
-                                  <CodeBlock key={partIdx} code={part} />
-                                );
-                              }
-                              return null;
-                            })}
-                          </div>
-                        );
+                              });
+                            }
+                            i++; // Skip the code content part
+                          }
+                        }
                       }
-
-                      // Regular paragraph
-                      return (
-                        <p
-                          key={pIdx}
-                          className="text-base text-[var(--text-secondary)] leading-7"
-                        >
-                          {paragraph}
-                        </p>
-                      );
-                    })}
+                      return elements;
+                    })()}
                   </div>
                 </section>
               ))}

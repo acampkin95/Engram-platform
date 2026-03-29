@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from fastapi import WebSocket
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 import fnmatch
 
 

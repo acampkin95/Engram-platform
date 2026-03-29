@@ -1,6 +1,7 @@
 """Threat Intelligence endpoints — WHOIS, DNS, IP, Shodan, VirusTotal, Email OSINT, Provider Status."""
 import logging
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query

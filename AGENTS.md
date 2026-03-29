@@ -71,10 +71,10 @@ cd Engram-Platform/frontend && npm install && npm run dev
 
 | Component | Language | Port | Status | Tests | Coverage |
 |-----------|----------|------|--------|-------|----------|
-| **AiMemory** | Python 3.11+ | 8000 | Stable | 901 pass | 78% |
-| **AiCrawler** | Python 3.11 | 11235 | Stable | 2393 pass | 81% |
-| **MCP** | TypeScript | 3000 | Stable | 382 pass | unmeasured |
-| **Platform** | Next.js 15 | 3002 | Stable | 794 pass | 85% |
+| **AiMemory** | Python 3.11+ | 8000 | Stable | 985 pass | ~80% |
+| **AiCrawler** | Python 3.11 | 11235 | Stable | 2393 pass | ~70% |
+| **MCP** | TypeScript | 3000 | Stable | 382 pass | ~90% |
+| **Platform** | Next.js 15 | 3002 | Stable | 1081 pass | ~93% |
 | **Weaviate** | Go | 8080 | Stable | — | — |
 | **Redis** | C | 6379, 6380 | Stable | — | — |
 

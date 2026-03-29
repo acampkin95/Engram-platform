@@ -5,7 +5,142 @@
 
 ---
 
-## [2026-03-28] — Engram Marketing Site Overhaul
+## [2026-03-29] — Progress Report, Sonar Scan & Documentation Update
+
+### Added
+- `PROGRESS_REPORT.md` — comprehensive project status covering all 4 subprojects, 105.5K LOC, 4,841 tests
+- SonarQube scan completed (v26.3.0): 59.8K LOC analyzed, 13 bugs, 1 vuln, 991 smells, 66 hotspots, 44.7% coverage, 2.1% duplication
+- Quality gate: FAILED (new code coverage 75.3% < 80%, 223 new issues, security hotspots unreviewed)
+
+### Fixed
+- `CLAUDE.md` — corrected Platform test coverage thresholds (85/75/80/85, was 80/70/80/80)
+
+### Documentation
+- Full documentation review: all AGENTS.md, CHANGELOG.md, READMEs verified current
+- Port mappings and architecture diagram confirmed accurate against docker-compose.yml
+
+---
+
+## [2026-03-29] — Sentry v8 → v10 Migration (L004 Resolved)
+
+### Security Blocker Fixed
+Migrated Sentry SDK from v8.28.0 to v10.46.0, resolving 2 high-severity security vulnerabilities.
+
+### Changed
+- **@sentry/nextjs**: Upgraded from ^8.28.0 to ^10.46.0
+- **sentry.client.config.ts**: Renamed to `instrumentation-client.ts` (v10 convention)
+- **instrumentation.ts**: Moved from `app/` to project root, added `onRequestError` hook
+- **next.config.ts**: Verified v10 compatibility (no changes needed)
+
+### Breaking Changes Addressed
+- Added `onRouterTransitionStart` export to instrumentation-client.ts
+- Added `onRequestError` hook to instrumentation.ts
+- Updated server-side initialization to support both nodejs and edge runtimes
+
+### Verification
+- ✅ All 1,081 tests passing (97 test files)
+- ✅ Build completes successfully with no Sentry warnings
+- ✅ npm audit: 0 vulnerabilities (L004 resolved)
+- ✅ No deprecated Sentry APIs in codebase
+- ✅ TypeScript compilation clean
+
+### Security Impact
+- **Before**: 2 high-severity vulnerabilities in Sentry/rollup dependencies
+- **After**: 0 vulnerabilities
+- **Status**: Production blocker removed
+
+### Files Modified
+- `package.json` - @sentry/nextjs version bump
+- `instrumentation-client.ts` - renamed, added v10 hook exports
+- `instrumentation.ts` - moved, added onRequestError
+
+---
+
+## [2026-03-29] — Loop 1: Baseline Mapping & Compatibility Fixes
+
+### 5-Loop E2E Testing Program - Loop 1 Complete
+Comprehensive baseline mapping and surface discovery across all Engram Platform services.
+
+### Fixed
+- **F001**: Python 3.9 UTC Import Error — Created `app/_compat.py` compatibility module, updated 33 files
+- **F002**: Python 3.9 StrEnum Import Error — Added compatibility shim, updated 22 model files
+- **F003**: Test File Trailing Comma Syntax Error — Fixed 10 test files with import issues
+- **F004**: Test File UTC Import Missing — Updated 10 test files to use compatibility module
+
+### Test Baseline
+- **Engram-AiMemory**: 985 passed, 3 skipped ✅
+- **Engram-MCP**: 382 passed ✅
+- **Engram-Platform**: 1081 passed ✅
+- **Engram-AiCrawler**: 2393 passed, 2 skipped ✅
+- **TOTAL**: 4841 tests passing
+
+### Deliverables Created
+- `SYSTEM_SURFACE_MAP.md` — Comprehensive service topology, API catalog, route mapping
+- `DEFECT_REGISTER.md` — 12 issues logged, 4 fixed, 8 open (1 high: Sentry migration)
+- `SECURITY_GATE_REPORT.md` — Security baseline with conditional pass
+- `LOOP1_SUMMARY.md` — Complete Loop 1 summary and readiness assessment
+
+### Compatibility
+- AiCrawler now fully compatible with Python 3.9+
+- All test collections pass without errors
+- Ready for Loop 2: Core E2E Flow Validation
+
+---
+
+## [2026-03-29] — 5-Loop E2E Testing, Hardening & Certification Program
+
+### Program Complete: 91.25% Readiness, Conditional GO
+
+**5-Loop Validation Program Results:**
+
+**Loop 1 - Baseline Mapping & Compatibility**
+- Fixed 4 Python 3.9 compatibility issues (UTC, StrEnum imports)
+- Created comprehensive system surface map
+- All 4,841 tests passing
+- Deliverables: SYSTEM_SURFACE_MAP.md, DEFECT_REGISTER.md, SECURITY_GATE_REPORT.md
+
+**Loop 2 - E2E Flow Validation**
+- Verified 15 Platform routes
+- Validated 160 Crawler API endpoints
+- Checked 5 MCP tool modules
+- No hardcoded secrets or URLs found
+
+**Loop 3 - Security Hardening**
+- Fixed Pydantic Config class deprecation (2 files)
+- Fixed Pydantic min_items deprecation (1 file)
+- Passed static security audit
+- No secrets in bundles or codebase
+
+**Loop 4 - Performance & Cleanup**
+- Verified code splitting configuration (17 chunks)
+- Cleaned macOS metadata files
+- Assessed bundle sizes (839MB node_modules - acceptable)
+- Deployment flow reviewed and operational
+
+**Loop 5 - Certification**
+- Final test baseline: 4,841 passing
+- Security gates: 5/6 passed (1 conditional)
+- Architecture verified and documented
+- **Verdict: CONDITIONAL GO** (1 blocker: Sentry v8→v10 migration)
+
+**Issues Fixed: 8**
+- F001-F004: Python 3.9 compatibility
+- H001-H002: Pydantic deprecations
+- Cleanup: macOS metadata files
+
+**Remaining Blocker: 1**
+- L004: Sentry/Rollup vulnerabilities (requires v8→v10 migration)
+
+**Deliverables:**
+- LOOP1_SUMMARY.md, LOOP2_SUMMARY.md, LOOP3_SUMMARY.md, LOOP4_SUMMARY.md
+- CERTIFICATION_REPORT.md, DEFECT_REGISTER.md, SYSTEM_SURFACE_MAP.md
+- SECURITY_GATE_REPORT.md
+
+**Readiness: 91.25%** - Certified for release pending Sentry migration
+
+---
+
+## [2026-03-28] — Engram Marketing Site Overhaul + Deployment
 
 ### Summary
 Comprehensive rebuild of the Engram marketing/landing site to showcase the unified Engram Platform (Memory + Crawler + MCP + Dashboard) with an interactive knowledge base and getting started guide.
@@ -31,12 +166,26 @@ Comprehensive rebuild of the Engram marketing/landing site to showcase the unifi
 - **Components**: Badge (CVA), Tabs, PlatformArchitecture diagram
 - **Data files**: `lib/kb-data.ts` (8 articles), `lib/platform-data.ts` (4 product definitions)
 
+### Polish Pass (7 Specialist Agents)
+- 4 Frontend Specialists: landing page, knowledge base, platform pages, getting started wizard
+- 2 Animation Artists: CSS animation system (17 keyframes, glassmorphism, scroll reveals), component animations (parallax, staggered entrances, shimmer effects)
+- 1 Senior Copywriter: content audit, removed marketing fluff, verified technical accuracy and port numbers
+
+### Deployed to memory.velocitydigi.com
+- Docker container `engram-landing` on engram-platform network (172.16.1.10:3099)
+- Docker nginx updated: `/` → landing site, `/dashboard` → platform frontend
+- All APIs preserved: `/api/memory/`, `/api/crawler/`, `/mcp`, `/ws`
+- PM2 removed in favor of Docker `--restart unless-stopped`
+- Landing Dockerfile at `/opt/engram-landing/Dockerfile`
+
 ### Technical
 - Next.js 16.1.6 + React 19 + Tailwind v4 + CVA
-- 19 static/SSG routes, all compiling cleanly
+- 17 static/SSG routes, all compiling cleanly
+- 8,141 lines across 24 source files
 - Added lucide-react for iconography
 - Server components where possible, client components only for interactivity
 - generateStaticParams for knowledge-base and platform dynamic routes
+- `prefers-reduced-motion` accessibility support throughout
 
 ---
 

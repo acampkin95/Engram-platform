@@ -7,7 +7,8 @@ thread. Use synchronous TestClient for the simpler endpoints.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta, UTC
+from app._compat import UTC
+from datetime import datetime, timedelta
 
 import httpx
 import pytest

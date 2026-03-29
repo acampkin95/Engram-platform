@@ -13,10 +13,12 @@ These files can be synced to/from the Weaviate memory system.
 import json
 import re
 from dataclasses import dataclass, field
-from datetime import UTC, datetime  # noqa: F401 — UTC re-exported for 15+ consumers
+from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
+
+__all__ = ["UTC"]
 
 from rich.console import Console
 

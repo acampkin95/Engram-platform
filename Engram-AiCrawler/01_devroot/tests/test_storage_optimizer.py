@@ -2,7 +2,8 @@
 
 import gzip
 import json
-from datetime import datetime, timedelta, UTC
+from app._compat import UTC
+from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 

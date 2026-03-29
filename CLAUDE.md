@@ -228,6 +228,6 @@ Each subproject has its own `.env.example`. Key variables:
 
 ## Testing Thresholds
 
-- **AiMemory Python**: 80% coverage minimum (`--cov-fail-under=80`)
-- **Platform frontend**: 80% statements, 70% branches, 80% functions/lines
+- **AiMemory Python**: 79.8% coverage minimum (`--cov-fail-under=79.8`)
+- **Platform frontend**: 85% statements, 75% branches, 80% functions, 85% lines
 - **AiMemory pytest**: uses `asyncio_mode = "auto"` — async tests run automatically

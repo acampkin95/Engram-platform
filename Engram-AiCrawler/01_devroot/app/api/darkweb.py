@@ -19,7 +19,13 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from datetime import UTC
+
+# Python 3.9+ compatibility for UTC timezone
+try:
+    from datetime import UTC
+except ImportError:
+    from datetime import timezone
+    UTC = timezone.utc
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +74,7 @@ class BreachScanRequest(BaseModel):
 
 
 class CryptoTraceRequest(BaseModel):
-    addresses: list[str] = Field(..., min_items=1, description="Crypto addresses to trace")
+    addresses: list[str] = Field(..., min_length=1, description="Crypto addresses to trace")
     max_txs_per_address: int = Field(20, ge=1, le=100)
     simulation_mode: bool = False
 

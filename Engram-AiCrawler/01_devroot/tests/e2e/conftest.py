@@ -13,8 +13,8 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 
-from datetime import UTC
-
+# Python 3.9+ compatibility for UTC timezone
+from app._compat import UTC
 
 # ---------------------------------------------------------------------------
 # Shared mock factories

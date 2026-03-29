@@ -1,7 +1,8 @@
 """Tests for authentication middleware."""
 
 import pytest
-from datetime import datetime, timedelta, UTC
+from app._compat import UTC
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch, PropertyMock
 from fastapi import Request, HTTPException
 

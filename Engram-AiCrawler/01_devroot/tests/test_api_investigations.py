@@ -22,7 +22,8 @@ from app.models.investigation import (
     InvestigationPriority,
     InvestigationSummary,
 )
-from datetime import datetime, UTC
+from app._compat import UTC
+from datetime import datetime
 
 # ── Minimal app ────────────────────────────────────────────────────────────────
 app = FastAPI()

@@ -2,18 +2,20 @@
 Weaviate client with 3-tier memory schema management.
 """
 
+from __future__ import annotations
+
 import json
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-if TYPE_CHECKING:
-    from weaviate import WeaviateClient
 from rich.console import Console
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from memory_system.compat import UTC
+if TYPE_CHECKING:
+    from weaviate import WeaviateClient
+
 from memory_system.config import (
     ENTITY_COLLECTION,
     RELATION_COLLECTION,
@@ -55,7 +57,7 @@ class WeaviateMemoryClient:
         self._client: WeaviateClient | None = None
 
     @property
-    def client(self) -> "WeaviateClient":
+    def client(self) -> WeaviateClient:
         """Get the Weaviate client, ensuring it is connected."""
         if self._client is None:
             raise RuntimeError("Weaviate client not connected")
@@ -387,7 +389,9 @@ class WeaviateMemoryClient:
             "effect_ids": memory.effect_ids,
         }
 
-    def _parse_json_field(self, props: dict, key: str, default: dict | list) -> dict | list:
+    def _parse_json_field(
+        self, props: dict, key: str, default: dict | list | None = None
+    ) -> dict | list | None:
         val = props.get(key)
         if not val:
             return default
@@ -672,7 +676,7 @@ class WeaviateMemoryClient:
         except Exception:
             return False
 
-    async def add_memories_batch(self, memories: list["Memory"]) -> tuple[list[UUID], list]:
+    async def add_memories_batch(self, memories: list[Memory]) -> tuple[list[UUID], list]:
         """Insert a batch of Memory objects into Weaviate, one at a time.
         Returns (successful_ids, failed_objects).
         """
@@ -1096,8 +1100,8 @@ class WeaviateMemoryClient:
 
     async def increment_access_count(
         self,
-        memory_id: "UUID",
-        tier: "MemoryTier",
+        memory_id: UUID,
+        tier: MemoryTier,
         current_count: int = 0,
         tenant_id: str | None = None,
     ) -> None:
@@ -1115,8 +1119,8 @@ class WeaviateMemoryClient:
 
     async def update_memory_fields(
         self,
-        memory_id: "UUID",
-        tier: "MemoryTier",
+        memory_id: UUID,
+        tier: MemoryTier,
         fields: dict,
         tenant_id: str | None = None,
     ) -> bool:
@@ -1140,8 +1144,8 @@ class WeaviateMemoryClient:
 
     async def update_memory_metadata(
         self,
-        memory_id: "UUID",
-        tier: "MemoryTier",
+        memory_id: UUID,
+        tier: MemoryTier,
         metadata: dict,
         tenant_id: str | None = None,
     ) -> bool:
@@ -1166,7 +1170,7 @@ class WeaviateMemoryClient:
 
     async def delete_expired_memories(
         self,
-        tier: "MemoryTier",
+        tier: MemoryTier,
         tenant_id: str | None = None,
     ) -> int:
         """Delete memories past their expires_at date. Returns count deleted."""
@@ -1205,12 +1209,12 @@ class WeaviateMemoryClient:
     async def find_similar_memories_by_vector(
         self,
         vector: list[float],
-        tier: "MemoryTier",
+        tier: MemoryTier,
         tenant_id: str | None = None,
         limit: int = 10,
         threshold: float = 0.9,
         project_id: str | None = None,
-    ) -> list["Memory"]:
+    ) -> list[Memory]:
         """Find memories with similar vectors (used for deduplication).
         Returns memories where cosine similarity >= threshold (distance <= 1 - threshold).
         """
@@ -1253,12 +1257,12 @@ class WeaviateMemoryClient:
 
     async def find_consolidation_candidates(
         self,
-        tier: "MemoryTier",
+        tier: MemoryTier,
         tenant_id: str | None = None,
         project_id: str | None = None,
         limit: int = 50,
         hours_back: int = 48,
-    ) -> list["Memory"]:
+    ) -> list[Memory]:
         """Find memories that are candidates for consolidation.
         Returns a flat list of recent memories from the specified tier.
         """

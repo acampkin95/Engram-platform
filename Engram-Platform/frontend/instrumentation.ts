@@ -20,3 +20,8 @@ export async function register() {
     }
   }
 }
+
+export async function onRequestError(error: unknown) {
+  const Sentry = await import('@sentry/nextjs');
+  Sentry.captureException(error);
+}

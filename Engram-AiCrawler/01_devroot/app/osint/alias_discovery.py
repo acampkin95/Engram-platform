@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 import logging
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from typing import Any
 
 from app.osint.platforms import get_platform, get_all_platforms

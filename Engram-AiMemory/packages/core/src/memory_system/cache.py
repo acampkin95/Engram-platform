@@ -50,8 +50,12 @@ class RedisCache:
         """Check if Redis is available."""
         return self._client is not None
 
+    def _require_client(self) -> redis.Redis:
+        if self._client is None:
+            raise RuntimeError("Redis client not connected")
+        return self._client
+
     def _check_connection(self) -> bool:
-        """Check connection and log warning if not available."""
         return self._client is not None
 
     async def connect(self) -> None:
@@ -67,7 +71,7 @@ class RedisCache:
             )
 
             # Test connection with timeout
-            await self._client.ping()
+            await self._require_client().ping()
             console.print("[green]✓ Connected to Redis[/green]")
         except redis.ConnectionError as e:
             console.print(f"[red]✗ Failed to connect to Redis: {e}[/red]")
@@ -80,7 +84,7 @@ class RedisCache:
     async def close(self) -> None:
         """Close Redis connection."""
         if self._client:
-            await self._client.close()
+            await self._require_client().close()
             console.print("[cyan]Redis connection closed[/cyan]")
 
     # ==================== Embedding Cache ====================
@@ -95,7 +99,7 @@ class RedisCache:
             return None
         key = self._embedding_key(text_hash)
         try:
-            cached = await self._client.get(key)
+            cached = await self._require_client().get(key)
             if cached:
                 return json.loads(cached)
         except Exception:
@@ -108,7 +112,7 @@ class RedisCache:
             return
         key = self._embedding_key(text_hash)
         with suppress(Exception):
-            await self._client.setex(key, self.EMBEDDING_TTL, json.dumps(vector))
+            await self._require_client().setex(key, self.EMBEDDING_TTL, json.dumps(vector))
 
     # ==================== Search Cache ====================
 
@@ -117,13 +121,16 @@ class RedisCache:
         query_str = f"{query.query}:{query.tier}:{query.project_id}:{query.user_id}:{query.limit}"
         return f"{self.SEARCH_PREFIX}{hash(query_str)}"
 
+    def _project_index_key(self, project_id: str) -> str:
+        return f"{self.SEARCH_PREFIX}proj:{project_id}:idx"
+
     async def get_search_results(self, query: MemoryQuery) -> list[dict[str, Any]] | None:
         """Get cached search results."""
         if not self._check_connection():
             return None
         key = self._search_key(query)
         try:
-            cached = await self._client.get(key)
+            cached = await self._require_client().get(key)
             if cached:
                 return json.loads(cached)
         except Exception:
@@ -136,11 +143,10 @@ class RedisCache:
             return
         key = self._search_key(query)
         with suppress(Exception):
-            await self._client.setex(key, self.SEARCH_TTL, json.dumps(results))
-            # Store a project index key so invalidate_search_cache can scope by project
+            await self._require_client().setex(key, self.SEARCH_TTL, json.dumps(results))
             if query.project_id:
-                index_key = f"{self.SEARCH_PREFIX}proj:{query.project_id}:{key}"
-                await self._client.setex(index_key, self.SEARCH_TTL, key)
+                index_key = self._project_index_key(query.project_id)
+                await self._require_client().setex(index_key, self.SEARCH_TTL, key)
 
     async def invalidate_search_cache(self, project_id: str | None = None) -> None:
         """Invalidate search cache, optionally scoped to a specific project.
@@ -153,7 +159,7 @@ class RedisCache:
             return
         pattern = f"{self.SEARCH_PREFIX}*"
         try:
-            keys = await self._client.keys(pattern)
+            keys = await self._require_client().keys(pattern)
             if not keys:
                 return
             if project_id:
@@ -165,13 +171,13 @@ class RedisCache:
                 # results reference this project. This is still O(n) over keys
                 # but avoids wiping unrelated project caches.
                 project_pattern = f"{self.SEARCH_PREFIX}proj:{project_id}:*"
-                project_keys = await self._client.keys(project_pattern)
+                project_keys = await self._require_client().keys(project_pattern)
                 if project_keys:
-                    await self._client.delete(*project_keys)
+                    await self._require_client().delete(*project_keys)
                 # Also delete any keys from the general pattern that we can
                 # attribute to this project via the index
                 return
-            await self._client.delete(*keys)
+            await self._require_client().delete(*keys)
         except Exception:
             pass
 
@@ -184,7 +190,7 @@ class RedisCache:
     async def get_memory(self, memory_id: str, tier: int) -> dict[str, Any] | None:
         """Get cached memory."""
         key = self._memory_key(memory_id, tier)
-        cached = await self._client.get(key)
+        cached = await self._require_client().get(key)
 
         if cached:
             return json.loads(cached)
@@ -193,12 +199,12 @@ class RedisCache:
     async def set_memory(self, memory_id: str, tier: int, memory: dict[str, Any]) -> None:
         """Cache a memory."""
         key = self._memory_key(memory_id, tier)
-        await self._client.setex(key, self.MEMORY_TTL, json.dumps(memory))
+        await self._require_client().setex(key, self.MEMORY_TTL, json.dumps(memory))
 
     async def delete_memory(self, memory_id: str, tier: int) -> None:
         """Delete cached memory."""
         key = self._memory_key(memory_id, tier)
-        await self._client.delete(key)
+        await self._require_client().delete(key)
 
     # ==================== Session Cache ====================
 
@@ -209,7 +215,7 @@ class RedisCache:
     async def get_session_memories(self, session_id: str) -> list[str] | None:
         """Get memory IDs for a session."""
         key = self._session_key(session_id)
-        cached = await self._client.get(key)
+        cached = await self._require_client().get(key)
 
         if cached:
             return json.loads(cached)
@@ -220,14 +226,14 @@ class RedisCache:
         key = self._session_key(session_id)
         existing = await self.get_session_memories(session_id) or []
         existing.append(memory_id)
-        await self._client.setex(key, self.SESSION_TTL, json.dumps(existing))
+        await self._require_client().setex(key, self.SESSION_TTL, json.dumps(existing))
 
     # ==================== Stats Cache ====================
 
     async def get_stats(self, tenant_id: str) -> dict[str, Any] | None:
         """Get cached stats for a tenant."""
         key = f"{self.STATS_PREFIX}{tenant_id}"
-        cached = await self._client.get(key)
+        cached = await self._require_client().get(key)
 
         if cached:
             return json.loads(cached)
@@ -236,24 +242,24 @@ class RedisCache:
     async def set_stats(self, tenant_id: str, stats: dict[str, Any]) -> None:
         """Cache stats for a tenant."""
         key = f"{self.STATS_PREFIX}{tenant_id}"
-        await self._client.setex(key, self.STATS_TTL, json.dumps(stats))
+        await self._require_client().setex(key, self.STATS_TTL, json.dumps(stats))
 
     async def invalidate_stats(self, tenant_id: str) -> None:
         """Invalidate stats cache for a tenant."""
         key = f"{self.STATS_PREFIX}{tenant_id}"
-        await self._client.delete(key)
+        await self._require_client().delete(key)
 
     # ==================== Utility Methods ====================
 
     async def flush_all(self) -> None:
         """Clear all cached data (use with caution)."""
-        await self._client.flushdb()
+        await self._require_client().flushdb()
         console.print("[yellow]Redis cache cleared[/yellow]")
 
     async def get_cache_info(self) -> dict[str, Any]:
         """Get cache statistics."""
-        info = await self._client.info("memory")
-        db_size = await self._client.dbsize()
+        info = await self._require_client().info("memory")
+        db_size = await self._require_client().dbsize()
 
         return {
             "keys": db_size,

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import uuid
 import hashlib
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from fastapi import Request, APIRouter, HTTPException, BackgroundTasks
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 from app.models.crawl import (

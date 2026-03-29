@@ -202,7 +202,7 @@ class DeepInfraProvider:
     ) -> str:
         response = await self._client.chat.completions.create(
             model=model,
-            messages=messages,  # type: ignore[arg-type]
+            messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
             stream=False,
@@ -247,7 +247,7 @@ class OpenAIProvider:
     ) -> str:
         response = await self._client.chat.completions.create(
             model=model,
-            messages=messages,  # type: ignore[arg-type]
+            messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
             stream=False,
@@ -292,7 +292,7 @@ class LMStudioProvider:
     ) -> str:
         response = await self._client.chat.completions.create(
             model=model,
-            messages=messages,  # type: ignore[arg-type]
+            messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
             stream=False,

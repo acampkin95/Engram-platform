@@ -124,7 +124,7 @@ describe('useCommandPaletteKeyboard', () => {
     it('updates listener when isOpen changes', () => {
       const { rerender } = renderHook(
         ({ isOpen }: { isOpen: boolean }) => useCommandPaletteKeyboard(onOpen, onClose, isOpen),
-        { initialProps: { isOpen: false } }
+        { initialProps: { isOpen: false } },
       );
 
       fireKey('k', { metaKey: true });
@@ -144,7 +144,7 @@ describe('useCommandPaletteKeyboard', () => {
       const { rerender } = renderHook(
         ({ onOpen: open }: { onOpen: () => void }) =>
           useCommandPaletteKeyboard(open, onClose, false),
-        { initialProps: { onOpen } }
+        { initialProps: { onOpen } },
       );
 
       fireKey('k', { metaKey: true });
@@ -163,7 +163,7 @@ describe('useCommandPaletteKeyboard', () => {
       const { rerender } = renderHook(
         ({ onClose: close }: { onClose: () => void }) =>
           useCommandPaletteKeyboard(onOpen, close, true),
-        { initialProps: { onClose } }
+        { initialProps: { onClose } },
       );
 
       fireKey('Escape');

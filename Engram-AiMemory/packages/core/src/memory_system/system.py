@@ -6,7 +6,7 @@ import asyncio
 import contextlib
 import hashlib
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -15,7 +15,6 @@ from rich.console import Console
 from memory_system.analyzer import MemoryAnalyzer
 from memory_system.cache import RedisCache
 from memory_system.client import WeaviateMemoryClient
-from memory_system.compat import UTC
 from memory_system.config import Settings, get_settings
 from memory_system.context import ContextBuilder
 from memory_system.decay import MemoryReranker

@@ -4,7 +4,8 @@ import asyncio
 import logging
 import os
 from typing import Any
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 
 from app.services.lm_studio_bridge import LMStudioBridge, LMStudioError

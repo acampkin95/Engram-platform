@@ -67,10 +67,11 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false  # Enable gradually
 disallow_incomplete_defs = false  # Enable gradually
+disallow_untyped_decorators = false
 check_untyped_defs = true
 ignore_missing_imports = true
 # Phase 2: Remove these suppressions as code is typed
-disable_error_code = ["no-any-return", "type-arg", "assignment", "var-annotated", "misc"]
+disable_error_code = ["no-any-return", "type-arg", "assignment", "var-annotated", "misc", "no-untyped-call"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

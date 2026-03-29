@@ -583,7 +583,7 @@ async def main() -> None:
         return _RESOURCE_TEMPLATES
 
     @app.read_resource()
-    async def read_resource(uri: str) -> str | bytes:  # type: ignore[return]
+    async def read_resource(uri: str) -> str | bytes:
         """Resolve a memory:// URI to JSON content."""
         try:
             return await _handle_resource(uri, client)

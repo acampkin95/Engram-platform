@@ -26,9 +26,10 @@ import json
 import logging
 import os
 import shutil
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 
-from enum import StrEnum
+from app._compat import StrEnum
 
 from pathlib import Path
 from typing import Any

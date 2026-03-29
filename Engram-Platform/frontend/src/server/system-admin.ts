@@ -126,7 +126,10 @@ async function fetchFirstJson(candidates: string[]): Promise<Record<string, unkn
       });
       if (!response.ok) continue;
       return (await response.json()) as Record<string, unknown>;
-    } catch {}
+    } catch {
+      // URL unreachable or response not JSON — try next candidate
+      continue;
+    }
   }
 
   return null;
@@ -326,7 +329,10 @@ export async function runMaintenanceAction(action: MaintenanceAction) {
       if (response.ok) {
         return await response.json().catch(() => ({ ok: true }));
       }
-    } catch {}
+    } catch {
+      // URL unreachable — try next candidate
+      continue;
+    }
   }
 
   throw new Error(`Failed to execute maintenance action: ${action}`);
@@ -428,9 +434,7 @@ async function sendViaNtfy(input: {
       body: input.text,
     });
 
-    return response.ok
-      ? { success: true }
-      : { success: false, error: `ntfy: ${response.status}` };
+    return response.ok ? { success: true } : { success: false, error: `ntfy: ${response.status}` };
   } catch (err) {
     return { success: false, error: `ntfy: ${err instanceof Error ? err.message : 'unknown'}` };
   }

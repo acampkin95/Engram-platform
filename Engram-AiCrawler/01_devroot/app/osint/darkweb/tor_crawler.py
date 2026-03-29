@@ -20,9 +20,10 @@ import re
 import os
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
+from datetime import datetime
+from app._compat import UTC
 
-from enum import StrEnum
+from app._compat import StrEnum
 
 from typing import Any
 from urllib.parse import urlparse

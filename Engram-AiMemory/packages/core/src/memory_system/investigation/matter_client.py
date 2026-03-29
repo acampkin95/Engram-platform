@@ -1,13 +1,13 @@
 """Matter lifecycle client — atomic tenant creation with rollback."""
+
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from rich.console import Console
 from weaviate.classes.tenants import Tenant, TenantActivityStatus
 
-from memory_system.compat import UTC
 from memory_system.config import (
     INVESTIGATION_MATTER,
     INVESTIGATION_TENANT_COLLECTIONS,
@@ -78,7 +78,9 @@ class MatterClient:
                 collection = self._client.collections.get(col_name)
                 existing = {t.name for t in collection.tenants.get().values()}
                 if matter_id not in existing:
-                    collection.tenants.create([Tenant(name=matter_id, activity_status=TenantActivityStatus.HOT)])
+                    collection.tenants.create(
+                        [Tenant(name=matter_id, activity_status=TenantActivityStatus.HOT)]
+                    )
                     created_in.append(col_name)
         except Exception as exc:
             # Rollback all created tenants
@@ -86,7 +88,9 @@ class MatterClient:
                 try:
                     self._client.collections.get(col_name).tenants.remove([matter_id])
                 except Exception as rollback_exc:
-                    console.print(f"[yellow]Rollback warning for {col_name}: {rollback_exc}[/yellow]")
+                    console.print(
+                        f"[yellow]Rollback warning for {col_name}: {rollback_exc}[/yellow]"
+                    )
             raise RuntimeError(
                 f"Tenant creation failed, rolled back {len(created_in)} collections"
             ) from exc
@@ -94,6 +98,7 @@ class MatterClient:
     async def get_matter(self, matter_id: str) -> MatterResponse | None:
         """Retrieve matter by matter_id. Returns None if not found."""
         from weaviate.classes.query import Filter
+
         try:
             collection = self._client.collections.get(INVESTIGATION_MATTER)
             # Check if tenant exists first
@@ -115,6 +120,7 @@ class MatterClient:
     async def list_matters(self, status: MatterStatus | None = None) -> list[MatterResponse]:
         """List all matters, optionally filtered by status."""
         from weaviate.classes.query import Filter
+
         try:
             collection = self._client.collections.get(INVESTIGATION_MATTER)
             all_tenants = list(collection.tenants.get().values())
@@ -131,7 +137,9 @@ class MatterClient:
                     for obj in results.objects:
                         matters.append(self._obj_to_matter_response(obj))
                 except Exception as exc:
-                    console.print(f"[yellow]list_matters warning for tenant {tenant.name}: {exc}[/yellow]")
+                    console.print(
+                        f"[yellow]list_matters warning for tenant {tenant.name}: {exc}[/yellow]"
+                    )
                     continue
             return matters
         except Exception as exc:
@@ -141,6 +149,7 @@ class MatterClient:
     async def update_matter_status(self, matter_id: str, status: MatterStatus) -> MatterResponse:
         """Update matter status. Returns updated MatterResponse."""
         from weaviate.classes.query import Filter
+
         self.ensure_tenant_active(matter_id, INVESTIGATION_MATTER)
         collection = self._client.collections.get(INVESTIGATION_MATTER)
         results = collection.with_tenant(matter_id).query.fetch_objects(
@@ -180,7 +189,9 @@ class MatterClient:
             raise ValueError(f"Matter tenant '{matter_id}' not found in {collection_name}")
         tenant = tenants[matter_id]
         if tenant.activity_status != TenantActivityStatus.HOT:
-            collection.tenants.update([Tenant(name=matter_id, activity_status=TenantActivityStatus.HOT)])
+            collection.tenants.update(
+                [Tenant(name=matter_id, activity_status=TenantActivityStatus.HOT)]
+            )
 
     def _obj_to_matter_response(self, obj) -> MatterResponse:
         """Convert Weaviate object to MatterResponse."""

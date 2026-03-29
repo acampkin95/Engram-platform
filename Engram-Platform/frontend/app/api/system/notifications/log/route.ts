@@ -11,9 +11,11 @@ export async function GET() {
       { error: error instanceof Error ? error.message : 'Failed to fetch log' },
       {
         status:
-          error instanceof Error && error.message === 'Unauthorized' ? 401
-            : error instanceof Error && error.message === 'Forbidden' ? 403
-            : 500,
+          error instanceof Error && error.message === 'Unauthorized'
+            ? 401
+            : error instanceof Error && error.message === 'Forbidden'
+              ? 403
+              : 500,
       },
     );
   }
