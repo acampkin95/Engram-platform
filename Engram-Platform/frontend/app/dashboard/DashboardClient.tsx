@@ -5,11 +5,13 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   Database,
   FileSearch,
   FolderOpen,
   GitBranch,
   Globe,
+  Key,
   Layers,
   LayoutDashboard,
   MessageSquare,
@@ -70,6 +72,8 @@ const intelligenceNav = [
 
 const adminNav = [
   { href: '/dashboard/system/health', icon: Server, label: 'System Health' },
+  { href: '/dashboard/system/keys', icon: Key, label: 'API Keys' },
+  { href: '/dashboard/system/audit', icon: ClipboardList, label: 'Audit Log' },
 ] as const;
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -196,6 +200,8 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/dashboard/intelligence/chat')) return 'RAG Chat';
   if (pathname.startsWith('/dashboard/intelligence/canvas')) return 'OSINT Canvas';
   if (pathname.startsWith('/dashboard/system/health')) return 'System Health';
+  if (pathname.startsWith('/dashboard/system/keys')) return 'API Keys';
+  if (pathname.startsWith('/dashboard/system/audit')) return 'Audit Log';
   return 'Platform';
 }
 

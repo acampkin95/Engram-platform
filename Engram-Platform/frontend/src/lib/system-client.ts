@@ -1,5 +1,52 @@
 type Result<T> = { data: T | null; error: string | null };
 
+export interface ApiKey {
+  id: string;
+  name: string;
+  prefix: string;
+  status: 'active' | 'revoked';
+  created_at: string;
+  last_used?: string | null;
+  request_count?: number;
+}
+
+export interface ApiKeyCreateResponse extends ApiKey {
+  key: string;
+}
+
+export interface AuditLogParams {
+  key_id?: string;
+  path?: string;
+  method?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface AuditLogEntry {
+  timestamp: string;
+  key_id: string;
+  key_name: string;
+  method: string;
+  path: string;
+  status_code: number;
+  latency_ms: number;
+  ip: string;
+}
+
+export interface AuditLogResponse {
+  entries: AuditLogEntry[];
+  total: number;
+  has_more: boolean;
+}
+
+export interface AuditSummary {
+  total_requests: number;
+  error_count: number;
+  error_rate: number;
+  top_endpoints: Array<{ path: string; count: number }>;
+  top_keys: Array<{ key_name: string; count: number }>;
+}
+
 async function request<T>(input: RequestInfo, init?: RequestInit): Promise<Result<T>> {
   try {
     const response = await fetch(input, {
@@ -84,5 +131,43 @@ export const systemClient = {
   },
   triggerHealthAlert() {
     return request('/api/system/health/alert', { method: 'POST' });
+  },
+
+  // ── API Key Management ──────────────────────────────────────────────────────
+  listKeys() {
+    return request<{ keys: ApiKey[]; total: number }>('/api/system/keys');
+  },
+  createKey(name: string) {
+    return request<ApiKeyCreateResponse>('/api/system/keys', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+  },
+  updateKey(id: string, data: { name?: string; status?: string }) {
+    return request<ApiKey>(`/api/system/keys/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+  revokeKey(id: string) {
+    return request<{ status: string; key_id: string }>(
+      `/api/system/keys/${encodeURIComponent(id)}`,
+      { method: 'DELETE' },
+    );
+  },
+
+  // ── Audit Log ───────────────────────────────────────────────────────────────
+  getAuditLog(params?: AuditLogParams) {
+    const search = new URLSearchParams();
+    if (params?.key_id) search.set('key_id', params.key_id);
+    if (params?.path) search.set('path', params.path);
+    if (params?.method) search.set('method', params.method);
+    if (params?.limit != null) search.set('limit', String(params.limit));
+    if (params?.offset != null) search.set('offset', String(params.offset));
+    const qs = search.toString();
+    return request<AuditLogResponse>(`/api/system/audit${qs ? `?${qs}` : ''}`);
+  },
+  getAuditSummary(hours = 24) {
+    return request<AuditSummary>(`/api/system/audit?summary=true&hours=${hours}`);
   },
 };

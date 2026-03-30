@@ -173,8 +173,8 @@ export function loadConfig(): MCPConfig {
 		serverVersion: process.env.MCP_SERVER_VERSION || "1.0.0",
 		transport,
 		port: envInt(process.env.MCP_SERVER_PORT, 3000),
-		apiUrl: process.env.MEMORY_API_URL || "http://localhost:8000",
-		apiKey: process.env.AI_MEMORY_API_KEY,
+		apiUrl: process.env.ENGRAM_API_URL || process.env.MEMORY_API_URL || "http://localhost:8000",
+		apiKey: process.env.ENGRAM_API_KEY || process.env.AI_MEMORY_API_KEY,
 		authToken: process.env.MCP_AUTH_TOKEN,
 		corsOrigins: corsOrigins.length > 0 ? corsOrigins : undefined,
 

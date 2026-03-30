@@ -213,7 +213,7 @@ export default function CanvasContent() {
     const result = await memoryClient.getKnowledgeGraph();
     if (result.data) {
       setEntities(result.data.entities ?? []);
-      setRelationships(result.data.relations || result.data.relationships ?? []);
+      setRelationships((result.data.relations || result.data.relationships) ?? []);
     }
   }, []);
 

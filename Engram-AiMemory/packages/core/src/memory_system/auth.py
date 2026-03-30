@@ -124,6 +124,16 @@ async def require_auth(
 
     # --- Try API key first ---
     if api_key is not None:
+        # Check Redis-managed keys first (if key manager is available)
+        from memory_system.api import _key_manager
+
+        if _key_manager is not None:
+            key_meta = await _key_manager.validate_key(api_key)
+            if key_meta:
+                await _key_manager.record_usage(key_meta["id"])
+                return f"apikey:{key_meta['id']}:{key_meta.get('name', '')}"
+
+        # Fall back to static env var keys
         api_keys = settings.api_keys if isinstance(settings.api_keys, list) else [settings.api_keys]
         if check_api_key(api_key, api_keys):
             return f"apikey:{api_key[:4]}..."

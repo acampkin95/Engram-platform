@@ -28,6 +28,9 @@ from fastapi import (
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+
+from memory_system.audit import AuditLogger
+from memory_system.key_manager import KeyManager
 from pydantic import BaseModel, Field
 from rich.console import Console
 from slowapi import Limiter
@@ -68,6 +71,8 @@ _api_settings = get_settings()
 # Global memory system instance
 _memory_system: MemorySystem | None = None
 _scheduler = None  # MaintenanceScheduler instance (optional)
+_key_manager: KeyManager | None = None
+_audit_logger: AuditLogger | None = None
 
 
 class _ConnectionManager:
@@ -123,6 +128,20 @@ async def lifespan(app: FastAPI):
         console.print(
             "[yellow]API starting in degraded mode (services may be unavailable)[/yellow]"
         )
+
+    # Initialize key manager and audit logger (requires Redis)
+    global _key_manager, _audit_logger
+    try:
+        redis_client = _memory_system._cache._client
+        if redis_client:
+            _key_manager = KeyManager(redis_client)
+            _audit_logger = AuditLogger(redis_client)
+            migrated = await _key_manager.migrate_env_keys()
+            if migrated:
+                console.print(f"[green]✓ Migrated {migrated} env API key(s) to Redis[/green]")
+            console.print("[green]✓ Key manager & audit logger ready[/green]")
+    except Exception as e:
+        console.print(f"[yellow]⚠ Key manager not started: {e}[/yellow]")
 
     # Start background maintenance scheduler (optional — requires Ollama)
     global _scheduler
@@ -220,6 +239,32 @@ async def metrics_middleware(request: Request, call_next):
         _request_metrics["requests_by_path"][path]["count"] += 1
         if response.status_code >= 400:
             _request_metrics["requests_by_path"][path]["errors"] += 1
+
+    # Audit log (non-blocking, skip health/metrics endpoints)
+    if _audit_logger and path not in ("/health", "/metrics", "/openapi.json", "/docs", "/redoc"):
+        identity = ""
+        key_id = ""
+        key_name = ""
+        api_key_header = request.headers.get("x-api-key", "")
+        auth_header = request.headers.get("authorization", "")
+        if api_key_header:
+            identity = f"apikey:{api_key_header[:4]}..."
+        elif auth_header:
+            identity = "jwt"
+        # Extract key info from response state if available
+        try:
+            await _audit_logger.log(
+                key_id=key_id,
+                key_name=key_name,
+                identity=identity,
+                method=request.method,
+                path=path,
+                status_code=response.status_code,
+                ip=request.client.host if request.client else "",
+                latency_ms=latency_ms,
+            )
+        except Exception:
+            pass  # Never let audit logging break requests
 
     return response
 
@@ -1896,3 +1941,88 @@ async def trigger_confidence_maintenance(tenant_id: str | None = None):
             return {"status": "error", "message": str(e)}
 
     return {"status": "error", "message": "Scheduler not available"}
+
+
+# ---------------------------------------------------------------------------
+# Admin: API Key Management
+# ---------------------------------------------------------------------------
+
+
+@app.get("/admin/keys", dependencies=[Depends(require_auth)])
+async def list_api_keys():
+    """List all API keys with metadata (keys are masked)."""
+    if not _key_manager:
+        raise HTTPException(status_code=503, detail="Key manager not available")
+    keys = await _key_manager.list_keys()
+    return {"keys": keys, "total": len(keys)}
+
+
+@app.post("/admin/keys", dependencies=[Depends(require_auth)], status_code=201)
+async def create_api_key(request: Request):
+    """Create a new API key. Returns the full key once."""
+    if not _key_manager:
+        raise HTTPException(status_code=503, detail="Key manager not available")
+    body = await request.json()
+    name = body.get("name", "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Key name is required")
+    if len(name) > 100:
+        raise HTTPException(status_code=400, detail="Key name must be 100 characters or fewer")
+    result = await _key_manager.create_key(name=name, created_by="admin")
+    return result
+
+
+@app.patch("/admin/keys/{key_id}", dependencies=[Depends(require_auth)])
+async def update_api_key(key_id: str, request: Request):
+    """Update key name or status."""
+    if not _key_manager:
+        raise HTTPException(status_code=503, detail="Key manager not available")
+    body = await request.json()
+    result = await _key_manager.update_key(
+        key_id=key_id,
+        name=body.get("name"),
+        status=body.get("status"),
+    )
+    if result is None:
+        raise HTTPException(status_code=404, detail="Key not found")
+    return result
+
+
+@app.delete("/admin/keys/{key_id}", dependencies=[Depends(require_auth)])
+async def revoke_api_key(key_id: str):
+    """Revoke an API key (soft-delete)."""
+    if not _key_manager:
+        raise HTTPException(status_code=503, detail="Key manager not available")
+    success = await _key_manager.revoke_key(key_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Key not found")
+    return {"status": "revoked", "key_id": key_id}
+
+
+# ---------------------------------------------------------------------------
+# Admin: Audit Log
+# ---------------------------------------------------------------------------
+
+
+@app.get("/admin/audit-log", dependencies=[Depends(require_auth)])
+async def get_audit_log(
+    key_id: str | None = Query(default=None),
+    path: str | None = Query(default=None),
+    method: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+):
+    """Query the audit log with optional filters."""
+    if not _audit_logger:
+        raise HTTPException(status_code=503, detail="Audit logger not available")
+    return await _audit_logger.query(
+        key_id=key_id, path=path, method=method, limit=limit, offset=offset
+    )
+
+
+@app.get("/admin/audit-log/summary", dependencies=[Depends(require_auth)])
+async def get_audit_summary(hours: int = Query(default=24, ge=1, le=720)):
+    """Get audit log summary stats."""
+    if not _audit_logger:
+        raise HTTPException(status_code=503, detail="Audit logger not available")
+    return await _audit_logger.summary(hours=hours)
