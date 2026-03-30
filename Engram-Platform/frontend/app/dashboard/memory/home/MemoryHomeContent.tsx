@@ -71,6 +71,7 @@ export default function MemoryHomeContent() {
     data: analyticsRes,
     error: analyticsError,
     isLoading: analyticsLoading,
+    mutate: mutateAnalytics,
   } = useSWR<{ data: AnalyticsResponse | null; error: string | null }>('memory-analytics', () =>
     memoryClient.getAnalytics(),
   );
@@ -280,7 +281,7 @@ export default function MemoryHomeContent() {
     return (
       <ErrorState
         message="Failed to load memory analytics"
-        onRetry={() => globalThis.location.reload()}
+        onRetry={() => void mutateAnalytics()}
       />
     );
   }

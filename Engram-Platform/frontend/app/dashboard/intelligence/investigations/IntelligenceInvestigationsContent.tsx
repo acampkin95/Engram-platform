@@ -20,7 +20,7 @@ import { SectionHeader } from '@/src/design-system/components/SectionHeader';
 import { StatCard } from '@/src/design-system/components/StatCard';
 import { Tabs } from '@/src/design-system/components/Tabs';
 import { crawlerClient, type Investigation } from '@/src/lib/crawler-client';
-import { type Matter, memoryClient } from '@/src/lib/memory-client';
+import { type AnalyticsResponse, type Matter, memoryClient } from '@/src/lib/memory-client';
 import { swrKeys } from '@/src/lib/swr-keys';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -400,6 +400,12 @@ export default function IntelligenceInvestigationsContent() {
     revalidateOnFocus: false,
   });
 
+  const { data: analyticsData } = useSWR<{ data: AnalyticsResponse | null; error: string | null }>(
+    swrKeys.memory.analytics(),
+    () => memoryClient.getAnalytics(),
+    { revalidateOnFocus: false },
+  );
+
   const investigations = crawlerData?.data?.investigations ?? [];
   const matters = memoryData?.data?.matters ?? [];
 
@@ -420,7 +426,7 @@ export default function IntelligenceInvestigationsContent() {
         />
         <StatCard label="Memory Matters" value={memoryData ? matters.length : '—'} accent="teal" />
         <StatCard label="Total Crawl Jobs" value={crawlerData ? totalJobs : '—'} accent="amber" />
-        <StatCard label="Total Memories" value="—" accent="amber" />
+        <StatCard label="Total Memories" value={analyticsData?.data?.total_memories ?? '—'} accent="amber" />
       </div>
 
       {/* Tabs */}

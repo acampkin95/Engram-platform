@@ -68,12 +68,21 @@ function statusToDot(status: string): 'online' | 'loading' | 'offline' | 'degrad
 // ─── Result detail modal (inline) ────────────────────────────────────────────
 
 function ResultDetailPanel({ result, onClose }: { result: OsintResult; onClose: () => void }) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Detail for ${result.title || result.url}`}>
       <button
         type="button"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
+        aria-label="Close detail panel"
       />
       <div className="relative w-full max-w-2xl bg-[#090818] border border-white/[0.08] rounded-xl shadow-2xl max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] flex-shrink-0">
@@ -94,6 +103,7 @@ function ResultDetailPanel({ result, onClose }: { result: OsintResult; onClose: 
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close detail panel"
             className="p-1 rounded hover:bg-white/[0.06] text-[#5c5878] hover:text-[#a09bb8] transition-colors ml-4 flex-shrink-0"
           >
             <X className="w-4 h-4" />
@@ -360,6 +370,8 @@ export default function OsintContent() {
                     key={d}
                     type="button"
                     onClick={() => setDepth(d)}
+                    aria-pressed={depth === d}
+                    aria-label={`Depth ${d}`}
                     className={[
                       'flex-1 py-2 text-sm font-medium rounded-lg border transition-all duration-150',
                       depth === d
@@ -391,6 +403,8 @@ export default function OsintContent() {
                     key={m}
                     type="button"
                     onClick={() => setMode(m)}
+                    aria-pressed={mode === m}
+                    aria-label={`Mode ${m}`}
                     className={[
                       'flex-1 py-2 text-sm font-medium rounded-lg border transition-all duration-150',
                       mode === m
@@ -480,6 +494,8 @@ export default function OsintContent() {
                 key={f.value}
                 type="button"
                 onClick={() => setStatusFilter(f.value)}
+                aria-pressed={statusFilter === f.value}
+                aria-label={`Filter by ${f.label}`}
                 className={[
                   'px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150',
                   statusFilter === f.value
@@ -503,8 +519,9 @@ export default function OsintContent() {
 
         {/* Table */}
         {resultsLoading ? (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
             <Spinner size="md" />
+            <p className="text-sm text-[#5c5878] font-mono">Loading crawl results...</p>
           </div>
         ) : filteredResults.length === 0 ? (
           <EmptyState

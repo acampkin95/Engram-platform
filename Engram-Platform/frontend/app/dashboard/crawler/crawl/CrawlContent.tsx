@@ -43,7 +43,10 @@ export default function CrawlContent() {
         throw new Error(result.error);
       }
 
-      addToast({ type: 'success', message: 'Crawl job started successfully' });
+      addToast({
+        type: 'success',
+        message: 'Crawl job started successfully. View progress on the Crawler home page.',
+      });
       reset();
     } catch (err) {
       addToast({

@@ -1,6 +1,7 @@
 'use client';
 
 import { Activity, AlertCircle, BarChart2, Globe, List } from 'lucide-react';
+import Link from 'next/link';
 import useSWR from 'swr';
 import type { GridItem } from '@/src/components/DraggableGrid';
 import { DraggableGrid, useGridLayout } from '@/src/components/DraggableGrid';
@@ -82,15 +83,11 @@ const columns: Column<JobRow>[] = [
     header: 'Actions',
     render: (row) => (
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            globalThis.location.href = `/dashboard/crawler/jobs/${String(row.job_id)}`;
-          }}
-        >
-          View
-        </Button>
+        <Link href={`/dashboard/crawler/jobs/${String(row.job_id)}`}>
+          <Button variant="ghost" size="sm">
+            View
+          </Button>
+        </Link>
         {row.status === 'running' && (
           <Button
             variant="danger"
@@ -140,7 +137,7 @@ export default function CrawlerHomeContent() {
 
   if (hasError) {
     const msg = statsError?.message ?? jobsError?.message ?? 'Failed to load crawler data';
-    return <ErrorState message={msg} />;
+    return <ErrorState message={msg} onRetry={() => globalThis.location.reload()} />;
   }
 
   const stats = statsRes?.data;
@@ -199,15 +196,11 @@ export default function CrawlerHomeContent() {
             description="Submit your first crawl to see results here."
             context="crawler"
             action={
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => {
-                  globalThis.location.href = '/dashboard/crawler/crawl';
-                }}
-              >
-                Start Crawl
-              </Button>
+              <Link href="/dashboard/crawler/crawl">
+                <Button variant="primary" size="sm">
+                  Start Crawl
+                </Button>
+              </Link>
             }
           />
         ) : (
@@ -229,15 +222,11 @@ export default function CrawlerHomeContent() {
           title="Crawler"
           breadcrumb={['CRAWLER', 'OVERVIEW']}
           action={
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => {
-                globalThis.location.href = '/dashboard/crawler/crawl';
-              }}
-            >
-              New Crawl
-            </Button>
+            <Link href="/dashboard/crawler/crawl">
+              <Button variant="primary" size="sm">
+                New Crawl
+              </Button>
+            </Link>
           }
         />
         <button

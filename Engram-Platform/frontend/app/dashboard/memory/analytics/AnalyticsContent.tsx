@@ -7,6 +7,7 @@ import type { FilterValues } from '@/src/components/FilterBar';
 import { FilterBar } from '@/src/components/FilterBar';
 import { SkeletonAnalytics } from '@/src/components/Skeletons';
 import { Card } from '@/src/design-system/components/Card';
+import { ErrorState } from '@/src/design-system/components/ErrorState';
 import { SectionHeader } from '@/src/design-system/components/SectionHeader';
 import { StatCard } from '@/src/design-system/components/StatCard';
 import { useMounted } from '@/src/hooks/useMounted';
@@ -303,19 +304,19 @@ function formatTimeAgo(date: Date): string {
 export default function AnalyticsContent() {
   const [filters, setFilters] = useState<FilterValues>({});
 
-  const { data: analyticsRes, isLoading: analyticsLoading } = useSWR(
+  const { data: analyticsRes, error: analyticsError, isLoading: analyticsLoading } = useSWR(
     swrKeys.memory.analytics(),
     () => memoryClient.getAnalytics(),
     { revalidateOnFocus: false },
   );
 
-  const { data: mattersRes, isLoading: mattersLoading } = useSWR(
+  const { data: mattersRes, error: mattersError, isLoading: mattersLoading } = useSWR(
     swrKeys.memory.matters(),
     () => memoryClient.getMatters(),
     { revalidateOnFocus: false },
   );
 
-  const { data: memoriesRes, isLoading: memoriesLoading } = useSWR(
+  const { data: memoriesRes, error: memoriesError, isLoading: memoriesLoading } = useSWR(
     swrKeys.memory.memories(),
     () => memoryClient.getMemories({ limit: 200 }),
     { revalidateOnFocus: false },
@@ -389,6 +390,15 @@ export default function AnalyticsContent() {
 
   if (isLoading) {
     return <SkeletonAnalytics />;
+  }
+
+  if (analyticsError || mattersError || memoriesError) {
+    return (
+      <ErrorState
+        message="Failed to load analytics data. Please check that the Memory API is running."
+        onRetry={() => globalThis.location.reload()}
+      />
+    );
   }
 
   return (

@@ -108,7 +108,7 @@ const nextConfig: NextConfig = {
           },
           // Additional performance headers
           {
-            key: 'X-Content-Security-Policy',
+            key: 'Content-Security-Policy',
             value:
               "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://img.clerk.com https://clerk.com; connect-src 'self' https://*.clerk.com https://clerk.com; font-src 'self' data:;",
           },
@@ -143,12 +143,12 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // API routes: stale-while-revalidate for better UX
+        // API routes: private cache with short revalidation (auth-sensitive)
         source: '/api/(.*)',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=60, stale-while-revalidate=300',
+            value: 'private, no-cache, no-store, must-revalidate',
           },
         ],
       },

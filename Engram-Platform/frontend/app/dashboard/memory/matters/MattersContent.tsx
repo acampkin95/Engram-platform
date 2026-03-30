@@ -27,6 +27,7 @@ import {
   SectionHeader,
   Tooltip,
 } from '@/src/design-system/components';
+import { addToast } from '@/src/design-system/components/Toast';
 import { type Matter, memoryClient } from '@/src/lib/memory-client';
 import { swrKeys } from '@/src/lib/swr-keys';
 
@@ -209,30 +210,19 @@ function MatterCard({ matter, isSelected, onSelect, onEdit, onDelete }: MatterCa
     <button
       type="button"
       onClick={() => onSelect(matter)}
-      className={`group relative w-full text-left rounded-xl border p-4 transition-all duration-150 cursor-pointer focus:outline-none ${isSelected ? 'bg-teal/6 border-teal/40' : 'bg-white/2 border-white/6'}`}
-      onMouseEnter={(e) => {
-        if (!isSelected) {
-          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(46,196,196,0.25)';
-          (e.currentTarget as HTMLElement).style.background = 'rgba(46,196,196,0.03)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!isSelected) {
-          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)';
-          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)';
-        }
-      }}
+      className={`group relative w-full text-left rounded-xl border p-4 transition-all duration-150 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2EC4C4]/40 ${isSelected ? 'bg-[rgba(46,196,196,0.06)] border-[rgba(46,196,196,0.4)]' : 'bg-white/[0.02] border-white/[0.06] hover:border-[rgba(46,196,196,0.25)] hover:bg-[rgba(46,196,196,0.03)]'}`}
     >
       {/* Action buttons */}
-      <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onEdit(matter);
           }}
-          className="p-1.5 rounded-lg bg-white/4 border border-white/6 text-[#5c5878] hover:text-[#a09bb8] hover:bg-white/8 transition-colors"
+          className="p-1.5 rounded-lg bg-white/4 border border-white/6 text-[#5c5878] hover:text-[#a09bb8] hover:bg-white/8 transition-colors focus-visible:ring-2 focus-visible:ring-[#2EC4C4]/40 focus-visible:outline-none"
           title="Edit matter"
+          aria-label={`Edit ${matter.title}`}
         >
           <Edit2 className="w-3 h-3" />
         </button>
@@ -242,8 +232,9 @@ function MatterCard({ matter, isSelected, onSelect, onEdit, onDelete }: MatterCa
             e.stopPropagation();
             onDelete(matter);
           }}
-          className="p-1.5 rounded-lg bg-white/4 border border-white/6 text-[#5c5878] hover:text-[#FF6B6B] hover:bg-[rgba(255,107,107,0.08)] transition-colors"
+          className="p-1.5 rounded-lg bg-white/4 border border-white/6 text-[#5c5878] hover:text-[#FF6B6B] hover:bg-[rgba(255,107,107,0.08)] transition-colors focus-visible:ring-2 focus-visible:ring-[#FF6B6B]/40 focus-visible:outline-none"
           title="Delete matter"
+          aria-label={`Delete ${matter.title}`}
         >
           <Trash2 className="w-3 h-3" />
         </button>
@@ -611,7 +602,7 @@ export default function MattersContent() {
                 size="icon"
                 variant="secondary"
                 className="h-8 w-8"
-                onClick={() => alert('Markdown import coming soon')}
+                onClick={() => addToast({ type: 'info', message: 'Markdown import coming soon' })}
               >
                 <Upload className="w-3.5 h-3.5" />
               </Button>
@@ -621,7 +612,7 @@ export default function MattersContent() {
                 size="icon"
                 variant="secondary"
                 className="h-8 w-8"
-                onClick={() => alert('Markdown export coming soon')}
+                onClick={() => addToast({ type: 'info', message: 'Markdown export coming soon' })}
               >
                 <Download className="w-3.5 h-3.5" />
               </Button>

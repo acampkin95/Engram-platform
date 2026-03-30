@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   Trash2,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FadeIn } from '@/src/components/animations/PageTransition';
 import { StaggerContainer, StaggerItem } from '@/src/components/animations/stagger';
@@ -347,12 +348,11 @@ export default function SystemHealthContent() {
                 >
                   <Bell className="h-4 w-4" /> Send Test Notification
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => (window.location.href = '/dashboard/system/settings')}
-                >
-                  <Settings className="h-4 w-4" /> Alert Settings
-                </Button>
+                <Link href="/dashboard/system/settings">
+                  <Button variant="secondary">
+                    <Settings className="h-4 w-4" /> Alert Settings
+                  </Button>
+                </Link>
               </div>
 
               <div className="grid gap-2">

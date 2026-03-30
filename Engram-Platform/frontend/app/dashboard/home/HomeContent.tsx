@@ -1,6 +1,7 @@
 'use client';
 
 import { Activity, BarChart2, Brain, FolderSearch, Globe, Server, Zap } from 'lucide-react';
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FadeIn, SlideIn } from '@/src/components/Animations';
 import type { GridItem } from '@/src/components/DraggableGrid';
@@ -8,7 +9,6 @@ import { DraggableGrid, useGridLayout } from '@/src/components/DraggableGrid';
 import { SkeletonDashboardHome } from '@/src/components/Skeletons';
 import { Button } from '@/src/design-system/components/Button';
 import { ErrorState } from '@/src/design-system/components/ErrorState';
-import { SectionHeader } from '@/src/design-system/components/SectionHeader';
 import { StatCard } from '@/src/design-system/components/StatCard';
 import { StatusDot } from '@/src/design-system/components/StatusDot';
 import {
@@ -187,17 +187,17 @@ function QuickLinksCard() {
   return (
     <div className="grid grid-cols-2 gap-2 h-full content-start">
       {quickLinks.map((item) => (
-        <a
+        <Link
           key={item.href}
           href={item.href}
-          className="flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all hover:scale-[1.02] hover:shadow-lg"
+          className="flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all hover:scale-[1.02] hover:shadow-lg focus-visible:ring-2 focus-visible:ring-[#F2A93B]/40 focus-visible:outline-none"
           style={{ background: item.dim, borderColor: item.border }}
         >
           <item.icon className="w-4 h-4" style={{ color: item.accent }} />
           <span className="text-[10px] font-mono text-[#a09bb8] text-center leading-tight">
             {item.label}
           </span>
-        </a>
+        </Link>
       ))}
     </div>
   );
@@ -423,7 +423,6 @@ export default function HomeContent() {
           </div>
         </div>
       </SlideIn>
-      <SectionHeader title="" />
       <DraggableGrid
         items={gridItems}
         storageKey="engram-home-grid"

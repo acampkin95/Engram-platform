@@ -20,8 +20,12 @@ export function Providers({ children }: ProvidersProps) {
           value={{
             revalidateOnFocus: false,
             revalidateOnReconnect: true,
-            dedupingInterval: 5000,
+            revalidateIfStale: true,
+            dedupingInterval: 10000,
+            focusThrottleInterval: 30000,
             errorRetryCount: 3,
+            errorRetryInterval: 3000,
+            keepPreviousData: true,
             onError: (error) => {
               Sentry.captureException(error, {
                 tags: { area: 'swr' },
