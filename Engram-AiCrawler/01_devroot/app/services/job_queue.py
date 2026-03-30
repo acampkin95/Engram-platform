@@ -386,7 +386,7 @@ class OsintJobQueue:
             except TimeoutError:
                 continue
             except asyncio.CancelledError:
-                break
+                raise
 
             job = await self._store.load(job_id)
             if job is None:
@@ -435,6 +435,7 @@ class OsintJobQueue:
             job.status = JobStatus.CANCELLED
             job.completed_at = datetime.now(UTC).isoformat()
             logger.info("Job %s cancelled", job.job_id)
+            raise
         except Exception as exc:
             job.status = JobStatus.FAILED
             job.error = f"{type(exc).__name__}: {exc}"

@@ -21,7 +21,7 @@ async def create_investigation(request: CreateInvestigationRequest) -> Investiga
     return service.create(request)
 
 
-@router.get("/", response_model=list[InvestigationSummary])
+@router.get("/", response_model=list[InvestigationSummary], status_code=200)
 async def list_investigations(
     status: InvestigationStatus | None = None,
     priority: InvestigationPriority | None = None,
@@ -38,7 +38,7 @@ async def list_investigations(
     return summaries
 
 
-@router.get("/{investigation_id}", response_model=Investigation)
+@router.get("/{investigation_id}", response_model=Investigation, status_code=200)
 async def get_investigation(investigation_id: str) -> Investigation:
     service = get_investigation_service()
     inv = service.get(investigation_id)
@@ -47,7 +47,7 @@ async def get_investigation(investigation_id: str) -> Investigation:
     return inv
 
 
-@router.put("/{investigation_id}", response_model=Investigation)
+@router.put("/{investigation_id}", response_model=Investigation, status_code=200)
 async def update_investigation(
     investigation_id: str, request: UpdateInvestigationRequest
 ) -> Investigation:
@@ -58,7 +58,7 @@ async def update_investigation(
     return inv
 
 
-@router.delete("/{investigation_id}")
+@router.delete("/{investigation_id}", status_code=200)
 async def delete_investigation(investigation_id: str) -> dict:
     service = get_investigation_service()
     if not service.delete(investigation_id):
@@ -66,7 +66,7 @@ async def delete_investigation(investigation_id: str) -> dict:
     return {"message": f"Investigation {investigation_id} deleted"}
 
 
-@router.post("/{investigation_id}/crawls/{crawl_id}", response_model=Investigation)
+@router.post("/{investigation_id}/crawls/{crawl_id}", response_model=Investigation, status_code=201)
 async def link_crawl_to_investigation(investigation_id: str, crawl_id: str) -> Investigation:
     service = get_investigation_service()
     inv = service.add_crawl(investigation_id, crawl_id)
@@ -75,7 +75,7 @@ async def link_crawl_to_investigation(investigation_id: str, crawl_id: str) -> I
     return inv
 
 
-@router.post("/{investigation_id}/scans/{scan_id}", response_model=Investigation)
+@router.post("/{investigation_id}/scans/{scan_id}", response_model=Investigation, status_code=201)
 async def link_scan_to_investigation(investigation_id: str, scan_id: str) -> Investigation:
     service = get_investigation_service()
     inv = service.add_scan(investigation_id, scan_id)

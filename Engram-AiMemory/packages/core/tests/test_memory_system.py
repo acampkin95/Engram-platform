@@ -60,8 +60,8 @@ class TestMemoryModels:
         memory = Memory(content="Test")
         result = MemorySearchResult(memory=memory, score=0.95, distance=0.05)
 
-        assert result.score == 0.95
-        assert result.distance == 0.05
+        assert result.score == pytest.approx(0.95)
+        assert result.distance == pytest.approx(0.05)
         assert result.memory.content == "Test"
 
 
@@ -97,7 +97,7 @@ class TestMemoryQuery:
         assert query.project_id == "proj-123"
         assert query.user_id == "user-456"
         assert query.tags == ["important", "code"]
-        assert query.min_importance == 0.5
+        assert query.min_importance == pytest.approx(0.5)
 
 
 class TestConfiguration:
@@ -720,8 +720,8 @@ class TestClientPropertyExtraction:
         assert props["content"] == "Test content"
         assert props["project_id"] == "proj-1"
         assert props["tenant_id"] == "tenant-1"
-        assert props["importance"] == 0.8
-        assert props["confidence"] == 0.9
+        assert props["importance"] == pytest.approx(0.8)
+        assert props["confidence"] == pytest.approx(0.9)
         assert props["tags"] == ["tag1", "tag2"]
 
     def test_memory_to_properties_optional_fields(self):
@@ -753,7 +753,7 @@ class TestConsolidationConfig:
 
         assert settings.consolidation_min_group_size == 3
         assert settings.consolidation_hours_back == 48
-        assert settings.consolidation_confidence == 0.7
+        assert settings.consolidation_confidence == pytest.approx(0.7)
 
     def test_consolidation_custom_values(self):
         """Test consolidation settings accept custom values."""
@@ -767,7 +767,7 @@ class TestConsolidationConfig:
 
         assert settings.consolidation_min_group_size == 5
         assert settings.consolidation_hours_back == 24
-        assert settings.consolidation_confidence == 0.9
+        assert settings.consolidation_confidence == pytest.approx(0.9)
 
 
 class TestConsolidatedMemoryType:
@@ -1198,7 +1198,7 @@ class TestMemoryDecayScoring:
 
         decay = MemoryDecay(half_life_days=7)
         now = datetime.now(timezone.utc)
-        assert decay.calculate_recency_score(now, now) == 1.0
+        assert decay.calculate_recency_score(now, now) == pytest.approx(1.0)
 
     def test_half_life_gives_half_score(self):
         from memory_system.decay import MemoryDecay
@@ -1227,7 +1227,7 @@ class TestMemoryDecayScoring:
         decay = MemoryDecay(half_life_days=7)
         now = datetime.now(timezone.utc)
         future = now + timedelta(days=1)
-        assert decay.calculate_recency_score(future, now) == 1.0
+        assert decay.calculate_recency_score(future, now) == pytest.approx(1.0)
 
     def test_custom_half_life(self):
         from memory_system.decay import MemoryDecay
@@ -1275,13 +1275,13 @@ class TestSearchScoringWeights:
         from memory_system.config import Settings
 
         s = Settings()
-        assert s.hybrid_alpha == 0.7
+        assert s.hybrid_alpha == pytest.approx(0.7)
 
     def test_decay_half_life_default(self):
         from memory_system.config import Settings
 
         s = Settings()
-        assert s.decay_half_life_days == 30.0  # Updated default: 30 days (was 7)
+        assert s.decay_half_life_days == pytest.approx(30.0)  # Updated default: 30 days (was 7)
 
     def test_custom_weights(self):
         from memory_system.config import Settings
@@ -1291,8 +1291,8 @@ class TestSearchScoringWeights:
             search_recency_weight=0.2,
             search_importance_weight=0.2,
         )
-        assert s.search_similarity_weight == 0.6
-        assert s.search_recency_weight == 0.2
+        assert s.search_similarity_weight == pytest.approx(0.6)
+        assert s.search_recency_weight == pytest.approx(0.2)
 
     def test_hybrid_alpha_bounds(self):
         from memory_system.config import Settings
@@ -1320,20 +1320,20 @@ class TestMemorySearchResultScores:
             importance_score=0.7,
             composite_score=0.85,
         )
-        assert result.similarity_score == 0.9
-        assert result.recency_score == 0.8
-        assert result.importance_score == 0.7
-        assert result.composite_score == 0.85
+        assert result.similarity_score == pytest.approx(0.9)
+        assert result.recency_score == pytest.approx(0.8)
+        assert result.importance_score == pytest.approx(0.7)
+        assert result.composite_score == pytest.approx(0.85)
 
     def test_search_result_default_scores(self):
         from memory_system.memory import Memory, MemorySearchResult
 
         memory = Memory(content="test")
         result = MemorySearchResult(memory=memory, score=0.5)
-        assert result.similarity_score == 0.0
-        assert result.recency_score == 0.0
-        assert result.importance_score == 0.0
-        assert result.composite_score == 0.0
+        assert result.similarity_score == pytest.approx(0.0)
+        assert result.recency_score == pytest.approx(0.0)
+        assert result.importance_score == pytest.approx(0.0)
+        assert result.composite_score == pytest.approx(0.0)
 
     def test_memory_access_count_field(self):
         from memory_system.memory import Memory
@@ -1351,7 +1351,7 @@ class TestMemorySearchResultScores:
         from memory_system.memory import Memory
 
         memory = Memory(content="test", recency_score=0.75)
-        assert memory.recency_score == 0.75
+        assert memory.recency_score == pytest.approx(0.75)
 
 
 class TestRerankerConfig:
@@ -1558,7 +1558,7 @@ class TestKnowledgeGraphModels:
         assert relation.source_entity_id == src_id
         assert relation.target_entity_id == tgt_id
         assert relation.relation_type == "depends_on"
-        assert relation.weight == 1.0
+        assert relation.weight == pytest.approx(1.0)
         assert relation.id is not None
 
     def test_knowledge_relation_weight_bounds(self):
@@ -1665,7 +1665,7 @@ class TestGraphAPIModels:
             relation_type="depends_on",
         )
 
-        assert req.weight == 1.0
+        assert req.weight == pytest.approx(1.0)
         assert req.tenant_id == "default"
         assert req.project_id is None
         assert req.context is None

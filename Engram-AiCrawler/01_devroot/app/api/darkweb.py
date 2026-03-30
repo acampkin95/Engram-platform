@@ -24,8 +24,7 @@ from pydantic import BaseModel, Field
 try:
     from datetime import UTC
 except ImportError:
-    from datetime import timezone
-    UTC = timezone.utc
+    UTC = UTC
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +127,7 @@ def _get_correlator():
 # ---------------------------------------------------------------------------
 
 
-@router.get("/status")
+@router.get("/status", status_code=200)
 async def darkweb_status():
     """
     Check availability of dark web services.
@@ -161,7 +160,7 @@ async def darkweb_status():
     return status
 
 
-@router.get("/sites")
+@router.get("/sites", status_code=200)
 async def list_monitored_sites():
     """List all known dark web sites in the monitoring registry."""
     from app.osint.darkweb.marketplace_monitor import (
@@ -195,7 +194,7 @@ async def list_monitored_sites():
     }
 
 
-@router.post("/scan/marketplace")
+@router.post("/scan/marketplace", status_code=201)
 async def scan_marketplace(req: MarketplaceScanRequest):
     """
     Scan dark web marketplaces and forums for entity mentions.
@@ -230,7 +229,7 @@ async def scan_marketplace(req: MarketplaceScanRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/scan/breach")
+@router.post("/scan/breach", status_code=201)
 async def scan_breach(req: BreachScanRequest):
     """
     Scan breach databases and paste sites for entity PII exposure.
@@ -260,7 +259,7 @@ async def scan_breach(req: BreachScanRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/scan/crypto")
+@router.post("/scan/crypto", status_code=201)
 async def trace_crypto(req: CryptoTraceRequest):
     """
     Trace cryptocurrency addresses via public blockchain APIs.
@@ -281,7 +280,7 @@ async def trace_crypto(req: CryptoTraceRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/crypto/extract")
+@router.post("/crypto/extract", status_code=201)
 async def extract_and_trace_crypto(req: CryptoExtractRequest):
     """
     Extract cryptocurrency addresses from text and trace them all.
@@ -322,7 +321,7 @@ async def extract_and_trace_crypto(req: CryptoExtractRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/correlate")
+@router.post("/correlate", status_code=201)
 async def correlate_entity(req: CorrelateRequest):
     """
     Cross-correlate dark web + surface web data into a unified entity profile.
@@ -362,7 +361,7 @@ async def correlate_entity(req: CorrelateRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/scan/full")
+@router.post("/scan/full", status_code=201)
 async def full_darkweb_scan(req: FullScanRequest):
     """
     Comprehensive dark web investigation scan.

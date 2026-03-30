@@ -73,7 +73,7 @@ class PruneCollectionRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@router.get("/storage/stats")
+@router.get("/storage/stats", status_code=200)
 async def get_storage_stats() -> dict[str, Any]:
     """Return per-tier storage statistics."""
     try:
@@ -85,7 +85,7 @@ async def get_storage_stats() -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.get("/storage/artifacts")
+@router.get("/storage/artifacts", status_code=200)
 async def list_artifacts(
     tier: str | None = Query(None, description="Filter by tier: hot|warm|cold|archive"),
     artifact_type: str | None = Query(None, description="Filter by type"),
@@ -109,7 +109,7 @@ async def list_artifacts(
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/storage/lifecycle")
+@router.post("/storage/lifecycle", status_code=201)
 async def run_lifecycle_cycle() -> LifecycleCycleResponse:
     """Trigger a manual data lifecycle migration cycle."""
     try:
@@ -121,7 +121,7 @@ async def run_lifecycle_cycle() -> LifecycleCycleResponse:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/storage/promote")
+@router.post("/storage/promote", status_code=201)
 async def promote_artifact(request: PromoteArtifactRequest) -> dict[str, Any]:
     """Manually move an artifact to a different storage tier."""
     try:
@@ -144,7 +144,7 @@ async def promote_artifact(request: PromoteArtifactRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.delete("/storage/artifact/{artifact_id}")
+@router.delete("/storage/artifact/{artifact_id}", status_code=200)
 async def delete_artifact(artifact_id: str) -> dict[str, Any]:
     """Delete an artifact from storage."""
     try:
@@ -165,7 +165,7 @@ async def delete_artifact(artifact_id: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/cache/stats")
+@router.get("/cache/stats", status_code=200)
 async def get_cache_stats() -> dict[str, Any]:
     """Return OSINT Redis cache statistics."""
     try:
@@ -177,7 +177,7 @@ async def get_cache_stats() -> dict[str, Any]:
         return {"error": str(exc), "status": "unavailable"}
 
 
-@router.post("/cache/invalidate")
+@router.post("/cache/invalidate", status_code=201)
 async def invalidate_entity_cache(request: InvalidateCacheRequest) -> dict[str, Any]:
     """Invalidate all cached data for an entity."""
     try:
@@ -194,7 +194,7 @@ async def invalidate_entity_cache(request: InvalidateCacheRequest) -> dict[str, 
 # ---------------------------------------------------------------------------
 
 
-@router.get("/jobs")
+@router.get("/jobs", status_code=200)
 async def list_jobs(
     status: str | None = Query(
         None, description="Filter by status: pending|running|completed|failed|cancelled"
@@ -220,7 +220,7 @@ async def list_jobs(
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.get("/jobs/stats")
+@router.get("/jobs/stats", status_code=200)
 async def get_job_stats() -> dict[str, Any]:
     """Return job queue statistics."""
     try:
@@ -231,7 +231,7 @@ async def get_job_stats() -> dict[str, Any]:
         return {"error": str(exc)}
 
 
-@router.get("/jobs/{job_id}")
+@router.get("/jobs/{job_id}", status_code=200)
 async def get_job(job_id: str) -> dict[str, Any]:
     """Get status and result of a specific job."""
     try:
@@ -247,7 +247,7 @@ async def get_job(job_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/jobs")
+@router.post("/jobs", status_code=201)
 async def enqueue_job(request: EnqueueJobRequest) -> dict[str, Any]:
     """Enqueue a new OSINT job. Returns job_id immediately."""
     try:
@@ -271,7 +271,7 @@ async def enqueue_job(request: EnqueueJobRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/jobs/{job_id}/cancel")
+@router.post("/jobs/{job_id}/cancel", status_code=201)
 async def cancel_job(job_id: str) -> dict[str, Any]:
     """Cancel a pending or running job."""
     try:
@@ -295,7 +295,7 @@ async def cancel_job(job_id: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/chroma/stats")
+@router.get("/chroma/stats", status_code=200)
 async def get_chroma_stats(
     collection: str | None = Query(None, description="Specific collection name, or omit for all"),
 ) -> dict[str, Any]:
@@ -308,7 +308,7 @@ async def get_chroma_stats(
         return {"error": str(exc), "status": "unavailable"}
 
 
-@router.get("/chroma/health")
+@router.get("/chroma/health", status_code=200)
 async def chroma_health() -> dict[str, Any]:
     """Return ChromaDB health check."""
     try:
@@ -319,7 +319,7 @@ async def chroma_health() -> dict[str, Any]:
         return {"status": "error", "error": str(exc)}
 
 
-@router.post("/chroma/prune")
+@router.post("/chroma/prune", status_code=201)
 async def prune_collection(request: PruneCollectionRequest) -> dict[str, Any]:
     """Prune a ChromaDB collection that has exceeded its document limit."""
     try:
@@ -338,7 +338,7 @@ async def prune_collection(request: PruneCollectionRequest) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/governor/stats")
+@router.get("/governor/stats", status_code=200)
 async def get_governor_stats() -> dict[str, Any]:
     """Return concurrency governor statistics."""
     try:
@@ -354,7 +354,7 @@ async def get_governor_stats() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/health")
+@router.get("/health", status_code=200)
 async def performance_health() -> dict[str, Any]:
     """Aggregated health summary for all Phase 6 services."""
     health: dict[str, Any] = {}

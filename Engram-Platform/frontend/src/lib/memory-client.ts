@@ -95,7 +95,7 @@ export interface SearchResponse {
 type Result<T> = { data: T | null; error: string | null };
 
 const MEMORY_BASE = process.env.NEXT_PUBLIC_MEMORY_API_URL || '/api/memory';
-const API_KEY = process.env.NEXT_PUBLIC_MEMORY_API_KEY || '';
+const API_KEY = process.env.NEXT_PUBLIC_MEMORY_API_KEY ?? '';
 
 async function request<T>(path: string, init?: RequestInit): Promise<Result<T>> {
   try {

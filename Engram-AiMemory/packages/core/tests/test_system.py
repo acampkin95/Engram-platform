@@ -587,7 +587,7 @@ class TestSearch:
         with patch("memory_system.embeddings.BGEReranker", return_value=mock_bge):
             results = await system.search("query")
             assert len(results) == 2
-            assert results[0].rerank_score == 0.9
+            assert results[0].rerank_score == pytest.approx(0.9)
 
     async def test_search_not_initialized(self, uninit_system):
         with pytest.raises(RuntimeError, match="not initialized"):
@@ -1286,7 +1286,7 @@ class TestUpdateMemory:
 
         assert result is True
         call_fields = system._weaviate.update_memory_fields.call_args.kwargs["fields"]
-        assert call_fields["importance"] == 0.9
+        assert call_fields["importance"] == pytest.approx(0.9)
 
     async def test_update_tracks_modification_history(self, system):
         mem_id = uuid4()

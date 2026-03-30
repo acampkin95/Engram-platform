@@ -43,7 +43,7 @@ function truncate(text: string, max: number): string {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function RecentMemoryCard({ memory }: Readonly<{ memory: SearchResult }>) {
-  const content = memory.content || memory.snippet || '';
+  const content = memory.content ?? memory.snippet ?? '';
   return (
     <Card className="hover:border-[rgba(46,196,196,0.2)] transition-colors">
       <div className="flex items-start justify-between gap-3">

@@ -147,22 +147,14 @@ async function checkWeaviate(client: MemoryAPIClient): Promise<HealthCheck> {
 	}
 }
 
-async function checkRedis(_client: MemoryAPIClient): Promise<HealthCheck> {
-	try {
-		return {
-			name: "redis",
-			status: "healthy",
-			details: {
-				status: "connected_via_memory_api",
-			},
-		};
-	} catch (error) {
-		return {
-			name: "redis",
-			status: "error",
-			error: error instanceof Error ? error.message : String(error),
-		};
-	}
+function checkRedis(_client: MemoryAPIClient): HealthCheck {
+	return {
+		name: "redis",
+		status: "healthy",
+		details: {
+			status: "connected_via_memory_api",
+		},
+	};
 }
 
 // Health tool definitions are in tool-definitions.ts

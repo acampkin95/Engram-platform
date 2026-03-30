@@ -46,8 +46,6 @@ class CrawlOrchestrator:
             viewport_height=1080,
         )
 
-        plan.get("extraction_type", "css")
-
         tasks = []
         for url in urls:
             task = self._execute_single_crawl(url, plan, browser_config)

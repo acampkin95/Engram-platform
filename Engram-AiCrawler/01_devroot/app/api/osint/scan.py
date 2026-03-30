@@ -83,7 +83,7 @@ async def _run_scan_background(request: ScanRequest) -> None:
 # ---------------------------------------------------------------------------
 
 
-@router.post("/scan", response_model=dict[str, Any])
+@router.post("/scan", response_model=dict[str, Any], status_code=201)
 async def start_osint_scan(
     request: FullScanRequest,
     background_tasks: BackgroundTasks,
@@ -126,7 +126,7 @@ async def start_osint_scan(
     }
 
 
-@router.post("/scan/sync", response_model=dict[str, Any])
+@router.post("/scan/sync", response_model=dict[str, Any], status_code=201)
 async def run_osint_scan_sync(request: FullScanRequest) -> dict[str, Any]:
     """Execute a full OSINT scan pipeline synchronously (waits for completion).
 
@@ -158,7 +158,7 @@ async def run_osint_scan_sync(request: FullScanRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Scan failed: {e}")
 
 
-@router.get("/scan/list")
+@router.get("/scan/list", status_code=200)
 async def list_scan_results() -> dict[str, Any]:
     """List all completed scan results."""
     scans_raw = await _scan_store.values()
@@ -178,7 +178,7 @@ async def list_scan_results() -> dict[str, Any]:
     }
 
 
-@router.get("/scan/{scan_id}")
+@router.get("/scan/{scan_id}", status_code=200)
 async def get_scan_result(scan_id: str) -> dict[str, Any]:
     """Get a specific scan result by ID."""
     data = await _scan_store.get(scan_id)
@@ -272,7 +272,7 @@ def _export_as_csv(data: dict[str, Any], include_set: set[str], filename: str) -
     )
 
 
-@router.get("/scan/{scan_id}/export")
+@router.get("/scan/{scan_id}/export", status_code=200)
 async def export_scan_result(
     scan_id: str,
     fmt: str = Query(default="json", alias="format", pattern="^(json|csv)$"),

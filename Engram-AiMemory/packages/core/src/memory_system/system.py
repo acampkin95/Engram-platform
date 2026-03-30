@@ -73,6 +73,7 @@ class MemorySystem:
         self._nomic_embedder: Any = None  # NomicEmbedder (lazy-loaded)
         self._ollama: Any = None  # OllamaClient (lazy-loaded)
         self._bge_reranker: Any = None  # BGEReranker (lazy-loaded)
+        self._background_tasks: set[asyncio.Task[Any]] = set()
 
     async def initialize(self) -> None:
         """Initialize all components."""
@@ -350,11 +351,15 @@ class MemorySystem:
             or self.settings.contradiction_detection_enabled
             or self.settings.deduplication_enabled
         ):
-            asyncio.create_task(self._run_assessment(memory, memory_id))
+            task = asyncio.create_task(self._run_assessment(memory, memory_id))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
 
         # Fire-and-forget: AI scoring + summarization via Ollama
         if self._ollama and len(content) > 200:
-            asyncio.create_task(self._ai_enrich_memory(memory_id, memory))
+            task = asyncio.create_task(self._ai_enrich_memory(memory_id, memory))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
 
         # Invalidate relevant caches
         await self._cache.invalidate_stats(memory.tenant_id)

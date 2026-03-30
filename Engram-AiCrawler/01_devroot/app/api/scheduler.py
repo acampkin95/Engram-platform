@@ -175,13 +175,13 @@ async def create_schedule(body: CreateSchedule) -> Schedule:
     return _schedules[schedule_id]
 
 
-@router.get("/schedules", response_model=list[Schedule])
+@router.get("/schedules", response_model=list[Schedule], status_code=200)
 async def list_schedules() -> list[Schedule]:
     """List all schedules."""
     return list(_schedules.values())
 
 
-@router.get("/schedules/{schedule_id}", response_model=Schedule)
+@router.get("/schedules/{schedule_id}", response_model=Schedule, status_code=200)
 async def get_schedule(schedule_id: str) -> Schedule:
     """Get schedule by ID."""
     schedule = _schedules.get(schedule_id)
@@ -190,7 +190,7 @@ async def get_schedule(schedule_id: str) -> Schedule:
     return schedule
 
 
-@router.put("/schedules/{schedule_id}", response_model=Schedule)
+@router.put("/schedules/{schedule_id}", response_model=Schedule, status_code=200)
 async def update_schedule(schedule_id: str, body: UpdateSchedule) -> Schedule:
     """Update an existing schedule."""
     existing = _schedules.get(schedule_id)
@@ -251,7 +251,7 @@ async def delete_schedule(schedule_id: str) -> None:
     logger.info("Deleted schedule %s", schedule_id)
 
 
-@router.post("/schedules/{schedule_id}/toggle", response_model=Schedule)
+@router.post("/schedules/{schedule_id}/toggle", response_model=Schedule, status_code=201)
 async def toggle_schedule(schedule_id: str) -> Schedule:
     """Enable or disable a schedule."""
     schedule = _schedules.get(schedule_id)
@@ -293,7 +293,7 @@ async def toggle_schedule(schedule_id: str) -> Schedule:
     return _schedules[schedule_id]
 
 
-@router.post("/schedules/{schedule_id}/run", response_model=Schedule)
+@router.post("/schedules/{schedule_id}/run", response_model=Schedule, status_code=201)
 async def run_schedule_now(schedule_id: str) -> Schedule:
     """Trigger a scheduled crawl immediately."""
     schedule = _schedules.get(schedule_id)

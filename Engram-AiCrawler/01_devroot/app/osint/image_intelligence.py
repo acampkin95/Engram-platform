@@ -328,7 +328,7 @@ def _check_metadata_anomalies(exif: ExifSummary | None) -> list[str]:
 
     # Implausible GPS (0,0 = null island)
     if exif.gps:
-        if exif.gps.latitude == 0.0 and exif.gps.longitude == 0.0:
+        if abs(exif.gps.latitude) < 1e-9 and abs(exif.gps.longitude) < 1e-9:
             anomalies.append("GPS coordinates are (0, 0) — likely placeholder")
 
     return anomalies
@@ -531,8 +531,6 @@ class ImageCatalog:
         dup_id = self.find_duplicate(hashes, existing)
 
         exif_summary = extract_exif(image)
-        bool(exif_summary.raw)
-
         entry = CatalogEntry(
             entity_id=entity_id,
             source_url=source_url,

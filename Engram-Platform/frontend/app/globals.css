@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* sonarqube-ignore: css:S4662 — @custom-variant is valid Tailwind CSS v4 syntax */
 @custom-variant dark (&:is(.dark *));
 
 @theme {

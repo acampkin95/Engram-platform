@@ -21,7 +21,7 @@ def utc_now():
     return datetime.now(UTC)
 
 
-@router.post("/completions", response_model=ChatResponse)
+@router.post("/completions", response_model=ChatResponse, status_code=201)
 async def chat_completion(request: ChatRequest, http_request: Request):
     """
     Get chat completion from LM Studio.
@@ -124,7 +124,7 @@ async def chat_completion(request: ChatRequest, http_request: Request):
         raise HTTPException(status_code=500, detail=f"LM Studio error: {str(e)}")
 
 
-@router.get("/history/{message_id}", response_model=ChatResponse)
+@router.get("/history/{message_id}", response_model=ChatResponse, status_code=200)
 async def get_chat_message(message_id: str):
     if not await _chat_store.contains(message_id):
         raise HTTPException(status_code=404, detail="Chat message not found")
@@ -133,7 +133,7 @@ async def get_chat_message(message_id: str):
     return ChatResponse(**session)
 
 
-@router.get("/sessions")
+@router.get("/sessions", status_code=200)
 async def list_sessions(limit: int = 100):
     sessions = await _chat_store.values()
     sessions = sorted(sessions, key=lambda x: x["created_at"], reverse=True)
@@ -142,7 +142,7 @@ async def list_sessions(limit: int = 100):
     return [ChatResponse(**s) for s in sessions]
 
 
-@router.post("/clear")
+@router.post("/clear", status_code=201)
 async def clear_sessions(http_request: Request):
     """
     Clear all chat sessions.

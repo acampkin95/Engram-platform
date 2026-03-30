@@ -205,11 +205,11 @@ class TestMemoryToProperties:
         assert props["project_id"] == "proj-1"
         assert props["user_id"] == "user-1"
         assert props["tenant_id"] == "default"
-        assert props["importance"] == 0.7
-        assert props["confidence"] == 1.0
+        assert props["importance"] == pytest.approx(0.7)
+        assert props["confidence"] == pytest.approx(1.0)
         assert props["tags"] == ["test"]
         assert props["access_count"] == 0
-        assert props["decay_factor"] == 1.0
+        assert props["decay_factor"] == pytest.approx(1.0)
         assert props["is_canonical"] is True
         # expires_at set
         assert props["expires_at"] != ""
@@ -275,7 +275,7 @@ class TestObjToMemory:
         assert str(memory.id) == uid
         assert memory.content == "Test content"
         assert memory.tier == MemoryTier.PROJECT
-        assert memory.importance == 0.7
+        assert memory.importance == pytest.approx(0.7)
         assert memory.tags == ["test"]
 
     def test_uses_defaults_for_missing_props(self):
@@ -292,8 +292,8 @@ class TestObjToMemory:
         memory = client._obj_to_memory(obj, MemoryTier.GENERAL)
 
         assert memory.content == "x"
-        assert memory.importance == 0.5  # default
-        assert memory.confidence == 1.0  # default
+        assert memory.importance == pytest.approx(0.5)  # default
+        assert memory.confidence == pytest.approx(1.0)  # default
         assert memory.tags == []  # default
         assert memory.tier == MemoryTier.GENERAL
 
@@ -345,7 +345,7 @@ class TestObjToRelation:
         assert str(rel.source_entity_id) == src
         assert str(rel.target_entity_id) == tgt
         assert rel.relation_type == "related_to"
-        assert rel.weight == 0.8
+        assert rel.weight == pytest.approx(0.8)
 
     def test_returns_none_on_bad_data(self):
         client = _make_client()
@@ -412,7 +412,7 @@ class TestSearch:
 
         assert len(results) == 1
         assert isinstance(results[0], MemorySearchResult)
-        assert results[0].score == 0.85
+        assert results[0].score == pytest.approx(0.85)
         collection.query.near_vector.assert_called_once()
 
     async def test_search_all_tiers(self):

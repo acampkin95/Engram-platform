@@ -1,3 +1,4 @@
+import pytest
 """
 Unit tests for memory_system.workers — MaintenanceScheduler.
 
@@ -872,7 +873,7 @@ class TestJobUpdateDecayExtended:
         # Decay should default to 1.0 when no reference time
         call_args = system._weaviate.update_memory_fields.call_args
         fields = call_args.kwargs.get("fields") or call_args[1].get("fields")
-        assert fields["decay_factor"] == 1.0
+        assert fields["decay_factor"] == pytest.approx(1.0)
 
     async def test_handles_naive_datetime(self) -> None:
         """Memory with naive datetime (no tzinfo) should still work."""

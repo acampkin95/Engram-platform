@@ -203,7 +203,7 @@ async def start_deep_crawl(
     }
 
 
-@router.get("/deep-crawl/{crawl_id}")
+@router.get("/deep-crawl/{crawl_id}", status_code=200)
 async def get_deep_crawl_status(crawl_id: str) -> DeepCrawlStatusResponse:
     """Get the status and results of a running or completed deep crawl."""
     job = await _deep_crawl_store.get(crawl_id)
@@ -257,7 +257,7 @@ async def get_deep_crawl_status(crawl_id: str) -> DeepCrawlStatusResponse:
     )
 
 
-@router.get("/deep-crawl")
+@router.get("/deep-crawl", status_code=200)
 async def list_deep_crawls() -> list[dict[str, Any]]:
     """List all deep crawl jobs (running and completed)."""
     all_jobs = await _deep_crawl_store.values()
@@ -277,7 +277,7 @@ async def list_deep_crawls() -> list[dict[str, Any]]:
     ]
 
 
-@router.get("/platforms/list")
+@router.get("/platforms/list", status_code=200)
 async def list_registered_platforms() -> list[dict[str, Any]]:
     """List all registered OSINT platforms with metadata."""
     from app.osint.platforms import get_registry

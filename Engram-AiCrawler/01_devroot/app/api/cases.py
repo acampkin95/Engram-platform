@@ -101,7 +101,7 @@ async def create_case(request: CreateCaseRequest, actor: str | None = Query(None
     return svc.create(request, actor=actor)
 
 
-@router.get("/", response_model=list[CaseSummary])
+@router.get("/", response_model=list[CaseSummary], status_code=200)
 async def list_cases(
     status: CaseStatus | None = None,
     priority: CasePriority | None = None,
@@ -124,7 +124,7 @@ async def list_cases(
     )
 
 
-@router.get("/{case_id}", response_model=Case)
+@router.get("/{case_id}", response_model=Case, status_code=200)
 async def get_case(case_id: str) -> Case:
     """Get full case details."""
     svc = get_case_service()
@@ -134,7 +134,7 @@ async def get_case(case_id: str) -> Case:
     return case
 
 
-@router.put("/{case_id}", response_model=Case)
+@router.put("/{case_id}", response_model=Case, status_code=200)
 async def update_case(
     case_id: str,
     request: UpdateCaseRequest,
@@ -148,7 +148,7 @@ async def update_case(
     return case
 
 
-@router.delete("/{case_id}")
+@router.delete("/{case_id}", status_code=200)
 async def delete_case(case_id: str) -> dict[str, Any]:
     """Permanently delete a case and all its data."""
     svc = get_case_service()
@@ -162,7 +162,7 @@ async def delete_case(case_id: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.post("/{case_id}/subjects", response_model=Case)
+@router.post("/{case_id}/subjects", response_model=Case, status_code=201)
 async def add_subject(
     case_id: str,
     request: AddSubjectRequest,
@@ -187,7 +187,7 @@ async def add_subject(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/{case_id}/evidence", response_model=Case)
+@router.post("/{case_id}/evidence", response_model=Case, status_code=201)
 async def add_evidence(
     case_id: str,
     request: AddEvidenceRequest,
@@ -214,7 +214,7 @@ async def add_evidence(
     return case
 
 
-@router.delete("/{case_id}/evidence/{evidence_id}", response_model=Case)
+@router.delete("/{case_id}/evidence/{evidence_id}", response_model=Case, status_code=200)
 async def remove_evidence(
     case_id: str,
     evidence_id: str,
@@ -233,7 +233,7 @@ async def remove_evidence(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/{case_id}/notes", response_model=Case)
+@router.post("/{case_id}/notes", response_model=Case, status_code=201)
 async def add_note(
     case_id: str,
     request: AddNoteRequest,
@@ -265,7 +265,7 @@ async def add_note(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/{case_id}/link/scan", response_model=Case)
+@router.post("/{case_id}/link/scan", response_model=Case, status_code=201)
 async def link_scan(case_id: str, req: LinkRequest) -> Case:
     """Link an OSINT scan result to this case."""
     svc = get_case_service()
@@ -275,7 +275,7 @@ async def link_scan(case_id: str, req: LinkRequest) -> Case:
     return case
 
 
-@router.post("/{case_id}/link/crawl", response_model=Case)
+@router.post("/{case_id}/link/crawl", response_model=Case, status_code=201)
 async def link_crawl(case_id: str, req: LinkRequest) -> Case:
     """Link a deep-crawl job to this case."""
     svc = get_case_service()
@@ -285,7 +285,7 @@ async def link_crawl(case_id: str, req: LinkRequest) -> Case:
     return case
 
 
-@router.post("/{case_id}/link/fraud-graph", response_model=Case)
+@router.post("/{case_id}/link/fraud-graph", response_model=Case, status_code=201)
 async def link_fraud_graph(case_id: str, req: LinkFraudRequest) -> Case:
     """Link a fraud analysis graph (and optional risk level/score) to this case."""
     svc = get_case_service()
@@ -301,7 +301,7 @@ async def link_fraud_graph(case_id: str, req: LinkFraudRequest) -> Case:
     return case
 
 
-@router.post("/{case_id}/link/image-intel", response_model=Case)
+@router.post("/{case_id}/link/image-intel", response_model=Case, status_code=201)
 async def link_image_intel(case_id: str, req: LinkRequest) -> Case:
     """Link an image intelligence entity to this case."""
     svc = get_case_service()
@@ -316,7 +316,7 @@ async def link_image_intel(case_id: str, req: LinkRequest) -> Case:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/{case_id}/timeline", response_model=list[TimelineEvent])
+@router.get("/{case_id}/timeline", response_model=list[TimelineEvent], status_code=200)
 async def get_timeline(
     case_id: str,
     search: str | None = None,
@@ -343,7 +343,7 @@ async def get_timeline(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/{case_id}/export/json")
+@router.get("/{case_id}/export/json", status_code=200)
 async def export_json(case_id: str) -> Response:
     """Export the full case as a JSON bundle."""
     svc = get_case_service()
@@ -359,7 +359,7 @@ async def export_json(case_id: str) -> Response:
     )
 
 
-@router.get("/{case_id}/export/csv/timeline")
+@router.get("/{case_id}/export/csv/timeline", status_code=200)
 async def export_csv_timeline(case_id: str) -> Response:
     """Export the case timeline as a CSV file."""
     svc = get_case_service()
@@ -375,7 +375,7 @@ async def export_csv_timeline(case_id: str) -> Response:
     )
 
 
-@router.get("/{case_id}/export/csv/evidence")
+@router.get("/{case_id}/export/csv/evidence", status_code=200)
 async def export_csv_evidence(case_id: str) -> Response:
     """Export the evidence list as a CSV file."""
     svc = get_case_service()
@@ -391,7 +391,7 @@ async def export_csv_evidence(case_id: str) -> Response:
     )
 
 
-@router.get("/{case_id}/export/html")
+@router.get("/{case_id}/export/html", status_code=200)
 async def export_html(case_id: str) -> Response:
     """Export a formatted HTML case report (print-to-PDF in browser)."""
     svc = get_case_service()
@@ -407,7 +407,7 @@ async def export_html(case_id: str) -> Response:
     )
 
 
-@router.get("/{case_id}/export/text")
+@router.get("/{case_id}/export/text", status_code=200)
 async def export_text(case_id: str) -> Response:
     """Export a plain-text one-page case summary."""
     svc = get_case_service()

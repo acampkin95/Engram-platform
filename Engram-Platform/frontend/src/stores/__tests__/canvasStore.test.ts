@@ -70,7 +70,7 @@ describe('useCanvasStore', () => {
       const id = useCanvasStore.getState().addPanel(panel);
 
       expect(typeof id).toBe('string');
-      expect(id).toMatch(/^panel-\d+-[a-z0-9]+$/);
+      expect(id).toMatch(/^panel-[a-f0-9-]+$/);
 
       const state = useCanvasStore.getState();
       expect(state.panels).toHaveLength(1);

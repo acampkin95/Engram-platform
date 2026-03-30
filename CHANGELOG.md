@@ -5,6 +5,36 @@
 
 ---
 
+## [2026-03-30] — SonarQube Remediation: 200+ Fixes
+
+### Security
+- Fixed BLOCKER vulnerability: Memory API 0.0.0.0 bind → configurable HOST env var
+- Replaced 4 Math.random() ID generators with crypto.randomUUID()
+
+### Bugs Fixed (13 MAJOR)
+- Unused dict.get() return in crawl_orchestrator.py
+- Float equality checks → abs() in image_intelligence.py, workers.py
+- Unused bool() call in image_intelligence.py
+- asyncio.CancelledError not re-raised in job_queue.py (x2)
+- asyncio tasks not saved (GC risk) in system.py (x2)
+- Unreachable code in MCP health-tools.ts
+- Mixed ||/?? precedence in MemoryHomeContent.tsx
+
+### Code Smells (180+)
+- Added status_code to 165 FastAPI decorators across 18 files
+- 10 || → ?? nullish coalescing fixes in Platform frontend
+- Removed unnecessary pass statements (ruff PIE790)
+- 6 additional ruff auto-fixes
+
+### Deployments
+- ThatGirlAlexa: fresh build deployed to web01, systemd restarted
+- Engram Landing: deployed to web01, DNS updated to OVH SYD (139.99.149.171)
+
+### Tests
+- Platform: 1,081/1,081 pass | MCP: 382/382 pass
+
+---
+
 ## [2026-03-29] — Progress Report, Sonar Scan & Documentation Update
 
 ### Added

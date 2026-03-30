@@ -36,12 +36,12 @@ def _save_settings(settings: AppSettings) -> None:
         raise HTTPException(status_code=500, detail="Failed to persist settings")
 
 
-@router.get("", response_model=AppSettings)
+@router.get("", response_model=AppSettings, status_code=200)
 async def get_settings() -> AppSettings:
     return _load_settings()
 
 
-@router.put("", response_model=AppSettings)
+@router.put("", response_model=AppSettings, status_code=200)
 async def update_settings(partial: dict) -> AppSettings:
     current = _load_settings()
     merged = _deep_merge(current.model_dump(), partial)
@@ -63,7 +63,7 @@ def _deep_merge(base: dict, override: dict) -> dict:
     return result
 
 
-@router.post("/test-connection", response_model=ConnectionTestResult)
+@router.post("/test-connection", response_model=ConnectionTestResult, status_code=201)
 async def test_connection(request: ConnectionTestRequest) -> ConnectionTestResult:
     import time
 

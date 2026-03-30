@@ -536,7 +536,7 @@ def _source_from_str(source_str: str) -> MemorySource:
 # ==================== Endpoints ====================
 
 
-@app.get("/health", response_model=HealthResponse)
+@app.get("/health", response_model=HealthResponse, status_code=200)
 async def health_check():
     """Check system health."""
     return HealthResponse(
@@ -548,7 +548,7 @@ async def health_check():
 
 
 @app.get(
-    "/health/detailed", response_model=DetailedHealthResponse, dependencies=[Depends(require_auth)]
+    "/health/detailed", response_model=DetailedHealthResponse, dependencies=[Depends(require_auth, status_code=200)]
 )
 async def health_detailed():
     """Detailed health check with per-service resource usage."""
@@ -629,7 +629,7 @@ async def health_detailed():
     )
 
 
-@app.post("/auth/login", response_model=LoginResponse)
+@app.post("/auth/login", response_model=LoginResponse, status_code=201)
 @limiter.limit("10/minute")
 async def login(request_obj: Request, request: LoginRequest):  # noqa: B008
     """Authenticate with username/password, returns JWT access token.
@@ -662,7 +662,7 @@ async def login(request_obj: Request, request: LoginRequest):  # noqa: B008
     )
 
 
-@app.post("/auth/refresh", response_model=LoginResponse)
+@app.post("/auth/refresh", response_model=LoginResponse, status_code=201)
 async def refresh_token(identity: str = Depends(require_auth)):
     """Refresh a JWT token. Requires a valid existing token or API key."""
     settings = get_settings()
@@ -679,7 +679,7 @@ async def refresh_token(identity: str = Depends(require_auth)):
     )
 
 
-@app.get("/stats", response_model=StatsResponse, dependencies=[Depends(require_auth)])
+@app.get("/stats", response_model=StatsResponse, dependencies=[Depends(require_auth, status_code=200)])
 async def get_stats(tenant_id: str | None = None):
     """Get memory statistics."""
     if not _memory_system:
@@ -706,7 +706,7 @@ async def get_stats(tenant_id: str | None = None):
 
 
 @limiter.limit(f"{_api_settings.rate_limit_per_minute}/minute")
-@app.post("/memories", response_model=AddMemoryResponse, dependencies=[Depends(require_auth)])
+@app.post("/memories", response_model=AddMemoryResponse, dependencies=[Depends(require_auth, status_code=201)])
 async def add_memory(request_obj: Request, request: AddMemoryRequest):
     """Add a new memory."""
     if not _memory_system:
@@ -739,7 +739,7 @@ async def add_memory(request_obj: Request, request: AddMemoryRequest):
 
 
 @limiter.limit(f"{_api_settings.rate_limit_per_minute}/minute")
-@app.post("/memories/batch", response_model=BatchAddResponse, dependencies=[Depends(require_auth)])
+@app.post("/memories/batch", response_model=BatchAddResponse, dependencies=[Depends(require_auth, status_code=201)])
 async def add_memories_batch(request_obj: Request, request: BatchAddRequest):
     """Add multiple memories in a single batch operation."""
     if not _memory_system:
@@ -775,7 +775,7 @@ async def add_memories_batch(request_obj: Request, request: BatchAddRequest):
 
 
 @limiter.limit(f"{_api_settings.rate_limit_per_minute}/minute")
-@app.post("/memories/search", response_model=SearchResponse, dependencies=[Depends(require_auth)])
+@app.post("/memories/search", response_model=SearchResponse, dependencies=[Depends(require_auth, status_code=201)])
 async def search_memories(request_obj: Request, request: SearchRequest):
     """Search memories."""
     if not _memory_system:
@@ -848,7 +848,7 @@ async def search_memories(request_obj: Request, request: SearchRequest):
 
 
 @app.get(
-    "/memories/list", response_model=ListMemoriesResponse, dependencies=[Depends(require_auth)]
+    "/memories/list", response_model=ListMemoriesResponse, dependencies=[Depends(require_auth, status_code=200)]
 )
 async def list_memories(
     tenant_id: str | None = None,
@@ -897,7 +897,7 @@ async def list_memories(
 
 
 @app.get(
-    "/memories/{memory_id}", response_model=MemoryResponse, dependencies=[Depends(require_auth)]
+    "/memories/{memory_id}", response_model=MemoryResponse, dependencies=[Depends(require_auth, status_code=200)]
 )
 async def get_memory(
     memory_id: str,
@@ -938,7 +938,7 @@ async def get_memory(
     )
 
 
-@app.delete("/memories/{memory_id}", dependencies=[Depends(require_auth)])
+@app.delete("/memories/{memory_id}", dependencies=[Depends(require_auth, status_code=200)])
 async def delete_memory(
     memory_id: str,
     tier: int = Query(..., ge=1, le=3, description="Memory tier"),
@@ -961,7 +961,7 @@ async def delete_memory(
     return {"status": "deleted", "memory_id": memory_id}
 
 
-@app.post("/memories/context", response_model=ContextResponse, dependencies=[Depends(require_auth)])
+@app.post("/memories/context", response_model=ContextResponse, dependencies=[Depends(require_auth, status_code=201)])
 async def build_context(request: ContextRequest):
     if not _memory_system:
         raise HTTPException(status_code=503, detail="System not initialized")
@@ -987,7 +987,7 @@ async def build_context(request: ContextRequest):
 
 
 @limiter.limit(f"{_api_settings.rate_limit_per_minute}/minute")
-@app.post("/memories/rag", response_model=RAGResponse, dependencies=[Depends(require_auth)])
+@app.post("/memories/rag", response_model=RAGResponse, dependencies=[Depends(require_auth, status_code=201)])
 async def rag_query(request_obj: Request, request: RAGRequest):
     if not _memory_system:
         raise HTTPException(status_code=503, detail="System not initialized")
@@ -1008,7 +1008,7 @@ async def rag_query(request_obj: Request, request: RAGRequest):
     )
 
 
-@app.post("/memories/consolidate", dependencies=[Depends(require_auth)])
+@app.post("/memories/consolidate", dependencies=[Depends(require_auth, status_code=201)])
 async def consolidate_memories(
     project_id: str | None = None,
     tenant_id: str | None = None,
@@ -1021,7 +1021,7 @@ async def consolidate_memories(
     return {"processed": processed}
 
 
-@app.post("/memories/cleanup", dependencies=[Depends(require_auth)])
+@app.post("/memories/cleanup", dependencies=[Depends(require_auth, status_code=201)])
 async def cleanup_expired(tenant_id: str | None = None):
     """Remove expired memories."""
     if not _memory_system:
@@ -1031,7 +1031,7 @@ async def cleanup_expired(tenant_id: str | None = None):
     return {"removed": removed}
 
 
-@app.post("/memories/decay", dependencies=[Depends(require_auth)])
+@app.post("/memories/decay", dependencies=[Depends(require_auth, status_code=201)])
 async def run_decay(
     tenant_id: str | None = None,
 ):
@@ -1089,7 +1089,7 @@ async def create_tenant(request: CreateTenantRequest):
     return {"tenant_id": request.tenant_id, "status": "created"}
 
 
-@app.delete("/tenants/{tenant_id}", dependencies=[Depends(require_auth)])
+@app.delete("/tenants/{tenant_id}", dependencies=[Depends(require_auth, status_code=200)])
 async def delete_tenant(tenant_id: str):
     if not _memory_system:
         raise HTTPException(status_code=503, detail="System not initialized")
@@ -1101,7 +1101,7 @@ async def delete_tenant(tenant_id: str):
     return {"tenant_id": tenant_id, "status": "deleted"}
 
 
-@app.get("/tenants", response_model=TenantListResponse, dependencies=[Depends(require_auth)])
+@app.get("/tenants", response_model=TenantListResponse, dependencies=[Depends(require_auth, status_code=200)])
 async def list_tenants():
     if not _memory_system:
         raise HTTPException(status_code=503, detail="System not initialized")
@@ -1219,7 +1219,7 @@ async def add_entity(request: AddEntityRequest):
 
 
 @app.get(
-    "/graph/entities", response_model=ListEntitiesResponse, dependencies=[Depends(require_auth)]
+    "/graph/entities", response_model=ListEntitiesResponse, dependencies=[Depends(require_auth, status_code=200)]
 )
 async def list_entities(
     tenant_id: str | None = None,
@@ -1256,7 +1256,7 @@ async def list_entities(
     )
 
 
-@app.get("/graph/entities/by-name", dependencies=[Depends(require_auth)])
+@app.get("/graph/entities/by-name", dependencies=[Depends(require_auth, status_code=200)])
 async def find_entity_by_name(
     name: str = Query(..., description="Entity name to search"),
     project_id: str | None = None,
@@ -1276,7 +1276,7 @@ async def find_entity_by_name(
     return _entity_to_dict(entity)
 
 
-@app.get("/graph/entities/{entity_id}", dependencies=[Depends(require_auth)])
+@app.get("/graph/entities/{entity_id}", dependencies=[Depends(require_auth, status_code=200)])
 async def get_entity(
     entity_id: str,
     tenant_id: str = Query(default="default"),
@@ -1294,7 +1294,7 @@ async def get_entity(
     return _entity_to_dict(entity)
 
 
-@app.delete("/graph/entities/{entity_id}", dependencies=[Depends(require_auth)])
+@app.delete("/graph/entities/{entity_id}", dependencies=[Depends(require_auth, status_code=200)])
 async def delete_entity(
     entity_id: str,
     tenant_id: str = Query(default="default"),
@@ -1328,7 +1328,7 @@ async def add_relation(request: AddRelationRequest):
     return {"relation_id": str(relation_id)}
 
 
-@app.post("/graph/query", dependencies=[Depends(require_auth)])
+@app.post("/graph/query", dependencies=[Depends(require_auth, status_code=201)])
 async def query_graph(request: GraphQueryRequest):
     """Traverse the knowledge graph from an entity (BFS)."""
     if not _memory_system:
@@ -1398,7 +1398,7 @@ class KnowledgeGraphStatsResponse(BaseModel):
 @app.get(
     "/analytics/memory-growth",
     response_model=list[MemoryGrowthPoint],
-    dependencies=[Depends(require_auth)],
+    dependencies=[Depends(require_auth, status_code=200)],
 )
 async def get_memory_growth(
     tenant_id: str | None = None,
@@ -1455,7 +1455,7 @@ async def get_memory_growth(
 @app.get(
     "/analytics/activity-timeline",
     response_model=list[ActivityDay],
-    dependencies=[Depends(require_auth)],
+    dependencies=[Depends(require_auth, status_code=200)],
 )
 async def get_activity_timeline(
     tenant_id: str | None = None,  # noqa: ARG001
@@ -1482,7 +1482,7 @@ async def get_activity_timeline(
 @app.get(
     "/analytics/search-stats",
     response_model=SearchStatsResponse,
-    dependencies=[Depends(require_auth)],
+    dependencies=[Depends(require_auth, status_code=200)],
 )
 async def get_search_stats(tenant_id: str | None = None):  # noqa: ARG001
     """Return search analytics computed from the in-memory search log store."""
@@ -1518,7 +1518,7 @@ async def get_search_stats(tenant_id: str | None = None):  # noqa: ARG001
 @app.get(
     "/analytics/system-metrics",
     response_model=SystemMetricsResponse,
-    dependencies=[Depends(require_auth)],
+    dependencies=[Depends(require_auth, status_code=200)],
 )
 async def get_system_metrics():
     """Return real-time system health metrics from middleware counters."""
@@ -1552,7 +1552,7 @@ async def get_system_metrics():
 @app.get(
     "/analytics/knowledge-graph-stats",
     response_model=KnowledgeGraphStatsResponse,
-    dependencies=[Depends(require_auth)],
+    dependencies=[Depends(require_auth, status_code=200)],
 )
 async def get_knowledge_graph_stats(tenant_id: str | None = None):
     """Return knowledge graph entity/relation counts by type."""
@@ -1589,7 +1589,7 @@ class AnalyticsAggregateResponse(BaseModel):
     timestamp: str
 
 
-@app.get("/analytics", dependencies=[Depends(require_auth)])
+@app.get("/analytics", dependencies=[Depends(require_auth, status_code=200)])
 async def get_analytics_aggregate(tenant_id: str | None = None) -> AnalyticsAggregateResponse:
     """Aggregated analytics endpoint for the frontend dashboard.
 
@@ -1631,7 +1631,7 @@ async def get_analytics_aggregate(tenant_id: str | None = None) -> AnalyticsAggr
 
 
 @limiter.limit(f"{_api_settings.rate_limit_per_minute}/minute")
-@app.get("/analytics/logs", dependencies=[Depends(require_auth)])
+@app.get("/analytics/logs", dependencies=[Depends(require_auth, status_code=200)])
 async def get_analytics_logs(
     request: Request,
     limit: int = Query(default=50, ge=1, le=500),
@@ -1643,7 +1643,7 @@ async def get_analytics_logs(
     return {"logs": list(reversed(sliced)), "total": len(_search_logs)}
 
 
-@app.get("/metrics", include_in_schema=False)
+@app.get("/metrics", include_in_schema=False, status_code=200)
 async def prometheus_metrics() -> PlainTextResponse:
     """Prometheus-format metrics endpoint (no auth — Prometheus scrapes it)."""
     uptime = time.time() - _request_metrics["start_time"]
@@ -1683,7 +1683,7 @@ class BulkDeleteRequest(BaseModel):
 
 
 @limiter.limit(f"{_api_settings.rate_limit_per_minute}/minute")
-@app.get("/memories/export", dependencies=[Depends(require_auth)])
+@app.get("/memories/export", dependencies=[Depends(require_auth, status_code=200)])
 async def export_memories(
     request: Request,
     format: str = Query(default="jsonl", pattern="^(jsonl|csv)$"),
@@ -1782,7 +1782,7 @@ async def export_memories(
 
 
 @limiter.limit("10/minute")  # Stricter limit for destructive operation
-@app.delete("/memories/bulk", dependencies=[Depends(require_auth)])
+@app.delete("/memories/bulk", dependencies=[Depends(require_auth, status_code=200)])
 async def bulk_delete_memories(
     request: Request,
     body: BulkDeleteRequest,
@@ -1873,13 +1873,13 @@ if __name__ == "__main__":
     settings = get_settings()
     uvicorn.run(
         "memory_system.api:app",
-        host="0.0.0.0",
-        port=8000,
+        host=os.environ.get("HOST", "127.0.0.1"),
+        port=int(os.environ.get("PORT", "8000")),
         reload=True,
     )
 
 
-@app.post("/memories/confidence-maintenance", dependencies=[Depends(require_auth)])
+@app.post("/memories/confidence-maintenance", dependencies=[Depends(require_auth, status_code=201)])
 async def trigger_confidence_maintenance(tenant_id: str | None = None):
     """Manually trigger confidence propagation and contradiction detection."""
     if not _memory_system:

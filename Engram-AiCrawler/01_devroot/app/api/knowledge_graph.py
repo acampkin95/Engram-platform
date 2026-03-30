@@ -63,7 +63,7 @@ def _get_tracker() -> SemanticTracker:
 # ---------------------------------------------------------------------------
 
 
-@router.post("/build")
+@router.post("/build", status_code=201)
 async def build_knowledge_graph(request: BuildGraphRequest) -> dict[str, Any]:
     """Build a knowledge graph from crawl results using LM Studio analysis."""
 
@@ -84,7 +84,7 @@ async def build_knowledge_graph(request: BuildGraphRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal error building knowledge graph")
 
 
-@router.post("/search")
+@router.post("/search", status_code=201)
 async def search_knowledge_graph(request: SearchEntitiesRequest) -> dict[str, Any]:
     """Search entities in a knowledge graph by semantic similarity."""
     try:
@@ -175,7 +175,7 @@ def _merge_relationship_list(
     return merged
 
 
-@router.post("/merge-scans")
+@router.post("/merge-scans", status_code=201)
 async def merge_scan_graphs(request: MergeScanGraphsRequest) -> dict[str, Any]:
     try:
         tracker = _get_tracker()
@@ -200,7 +200,7 @@ async def merge_scan_graphs(request: MergeScanGraphsRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal error merging scan graphs")
 
 
-@router.get("/{scan_id}/types")
+@router.get("/{scan_id}/types", status_code=200)
 async def list_entity_types(scan_id: str) -> dict[str, Any]:
     """List all entity types present in the graph with their counts."""
     try:
@@ -225,7 +225,7 @@ async def list_entity_types(scan_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal error listing entity types")
 
 
-@router.get("/{scan_id}/search")
+@router.get("/{scan_id}/search", status_code=200)
 async def search_entities_in_scan(
     scan_id: str,
     query: str = Query(..., min_length=1),
@@ -255,7 +255,7 @@ async def search_entities_in_scan(
         raise HTTPException(status_code=500, detail="Internal error searching entities")
 
 
-@router.get("/{scan_id}/entities/{entity_id}")
+@router.get("/{scan_id}/entities/{entity_id}", status_code=200)
 async def get_entity_detail(scan_id: str, entity_id: str) -> dict[str, Any]:
     """Get an entity together with all its relationships (as source or target)."""
     try:
@@ -282,7 +282,7 @@ async def get_entity_detail(scan_id: str, entity_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal error fetching entity detail")
 
 
-@router.get("/{scan_id}/expand/{entity_id}")
+@router.get("/{scan_id}/expand/{entity_id}", status_code=200)
 async def expand_node(
     scan_id: str,
     entity_id: str,
@@ -318,7 +318,7 @@ async def expand_node(
         raise HTTPException(status_code=500, detail="Internal error expanding node")
 
 
-@router.get("/{scan_id}")
+@router.get("/{scan_id}", status_code=200)
 async def get_knowledge_graph(scan_id: str) -> dict[str, Any]:
     """Retrieve a stored knowledge graph by scan ID."""
     try:
@@ -338,7 +338,7 @@ async def get_knowledge_graph(scan_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal error retrieving knowledge graph")
 
 
-@router.post("/{scan_id}/merge")
+@router.post("/{scan_id}/merge", status_code=201)
 async def merge_entities(scan_id: str, request: MergeEntitiesRequest) -> dict[str, Any]:
     """Merge two entities: move all relationships from source to target, then delete source."""
     if request.source_id == request.target_id:
@@ -376,7 +376,7 @@ async def merge_entities(scan_id: str, request: MergeEntitiesRequest) -> dict[st
         raise HTTPException(status_code=500, detail="Internal error merging entities")
 
 
-@router.get("/{scan_id}/export")
+@router.get("/{scan_id}/export", status_code=200)
 async def export_knowledge_graph(
     scan_id: str,
     format: str = Query("json", pattern="^(json|csv|graphml)$"),

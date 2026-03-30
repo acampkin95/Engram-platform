@@ -190,7 +190,7 @@ async def start_crawl(
     return CrawlResponse(**initial_job)
 
 
-@router.post("/batch", response_model=list[CrawlResponse])
+@router.post("/batch", response_model=list[CrawlResponse], status_code=201)
 async def batch_crawl(
     request: BatchCrawlRequest, background_tasks: BackgroundTasks, http_request: Request
 ):
@@ -224,7 +224,7 @@ async def batch_crawl(
     return results
 
 
-@router.get("/status/{crawl_id}", response_model=CrawlResponse)
+@router.get("/status/{crawl_id}", response_model=CrawlResponse, status_code=200)
 async def get_crawl_status(crawl_id: str):
     if not await _crawl_store.contains(crawl_id):
         raise HTTPException(status_code=404, detail="Crawl job not found")
@@ -233,7 +233,7 @@ async def get_crawl_status(crawl_id: str):
     return CrawlResponse(**job)
 
 
-@router.get("/list", response_model=list[CrawlResponse])
+@router.get("/list", response_model=list[CrawlResponse], status_code=200)
 async def list_crawls(status: CrawlStatus | None = None, limit: int = 100):
     crawls = await _crawl_store.values()
 
@@ -246,7 +246,7 @@ async def list_crawls(status: CrawlStatus | None = None, limit: int = 100):
     return [CrawlResponse(**c) for c in crawls]
 
 
-@router.post("/cancel/{crawl_id}")
+@router.post("/cancel/{crawl_id}", status_code=201)
 async def cancel_crawl(crawl_id: str):
     if not await _crawl_store.contains(crawl_id):
         raise HTTPException(status_code=404, detail="Crawl job not found")
@@ -264,7 +264,7 @@ async def cancel_crawl(crawl_id: str):
     return {"message": f"Crawl job {crawl_id} cancelled"}
 
 
-@router.delete("/{crawl_id}")
+@router.delete("/{crawl_id}", status_code=200)
 async def delete_crawl(crawl_id: str, http_request: Request):
     """
     Delete a crawl job.
@@ -299,7 +299,7 @@ async def delete_crawl(crawl_id: str, http_request: Request):
     return {"message": f"Crawl job {crawl_id} deleted"}
 
 
-@router.post("/deep")
+@router.post("/deep", status_code=201)
 async def deep_crawl(
     request: DeepCrawlRequest, background_tasks: BackgroundTasks, http_request: Request
 ):

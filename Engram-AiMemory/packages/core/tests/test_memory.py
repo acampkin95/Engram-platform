@@ -97,11 +97,11 @@ class TestConfidenceFactors:
     def test_default_values(self):
         """Test default confidence factor values."""
         factors = ConfidenceFactors()
-        assert factors.source_reliability == 0.8
-        assert factors.corroboration_score == 0.0
-        assert factors.temporal_freshness == 1.0
-        assert factors.semantic_coherence == 1.0
-        assert factors.user_feedback_score == 0.5
+        assert factors.source_reliability == pytest.approx(0.8)
+        assert factors.corroboration_score == pytest.approx(0.0)
+        assert factors.temporal_freshness == pytest.approx(1.0)
+        assert factors.semantic_coherence == pytest.approx(1.0)
+        assert factors.user_feedback_score == pytest.approx(0.5)
 
     def test_custom_values(self):
         """Test custom confidence factor values."""
@@ -112,8 +112,8 @@ class TestConfidenceFactors:
             semantic_coherence=0.9,
             user_feedback_score=0.8,
         )
-        assert factors.source_reliability == 0.9
-        assert factors.corroboration_score == 0.7
+        assert factors.source_reliability == pytest.approx(0.9)
+        assert factors.corroboration_score == pytest.approx(0.7)
 
     def test_value_ranges(self):
         """Test that values must be between 0 and 1."""
@@ -151,7 +151,7 @@ class TestMemoryModification:
             reasoning="Updated with new information",
         )
         assert mod.previous_value == "old content"
-        assert mod.confidence_change == 0.1
+        assert mod.confidence_change == pytest.approx(0.1)
         assert mod.reasoning == "Updated with new information"
 
 
@@ -164,7 +164,7 @@ class TestProvenanceRecord:
         assert prov.origin == {}
         assert prov.source_type == SourceType.AI_ASSISTANT
         assert prov.source_identifier == "system"
-        assert prov.confidence_at_origin == 0.5
+        assert prov.confidence_at_origin == pytest.approx(0.5)
         assert prov.raw_input is None
 
     def test_custom_values(self):
@@ -178,7 +178,7 @@ class TestProvenanceRecord:
         )
         assert prov.origin == {"file": "doc.pdf", "page": 1}
         assert prov.source_type == SourceType.DOCUMENT_OCR
-        assert prov.confidence_at_origin == 0.9
+        assert prov.confidence_at_origin == pytest.approx(0.9)
 
 
 class TestTemporalBounds:
@@ -242,8 +242,8 @@ class TestMemory:
         assert memory.tier == MemoryTier.GENERAL
         assert memory.memory_type == MemoryType.INSIGHT
         assert memory.project_id == "proj-123"
-        assert memory.importance == 0.8
-        assert memory.confidence == 0.9
+        assert memory.importance == pytest.approx(0.8)
+        assert memory.confidence == pytest.approx(0.9)
         assert memory.tags == ["test", "memory"]
         assert memory.metadata == {"key": "value"}
 
@@ -296,8 +296,8 @@ class TestMemory:
         """Test default access tracking values."""
         memory = Memory(content="Test")
         assert memory.access_count == 0
-        assert memory.recency_score == 1.0
-        assert memory.decay_factor == 1.0
+        assert memory.recency_score == pytest.approx(1.0)
+        assert memory.decay_factor == pytest.approx(1.0)
         assert memory.is_canonical is True
 
     def test_canonical_id_null_by_default(self):
@@ -380,7 +380,7 @@ class TestMemoryWithComplexData:
         memory = Memory(content="Test")
         # Note: Memory doesn't have confidence_factors field directly
         # This test documents the intended usage pattern
-        assert factors.source_reliability == 0.9
+        assert factors.source_reliability == pytest.approx(0.9)
 
 
 class TestMemoryEqualityAndIdentity:

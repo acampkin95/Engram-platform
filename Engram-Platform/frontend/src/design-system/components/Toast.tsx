@@ -67,7 +67,7 @@ export const Toast = memo(function Toast({ toast, onDismiss }: Readonly<ToastPro
 let toastListeners: Array<(toast: ToastItem) => void> = [];
 
 export function addToast(toast: Omit<ToastItem, 'id'>) {
-  const id = Math.random().toString(36).slice(2);
+  const id = crypto.randomUUID();
   toastListeners.forEach((fn) => {
     fn({ ...toast, id });
   });

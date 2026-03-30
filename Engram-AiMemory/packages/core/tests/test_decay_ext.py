@@ -1,3 +1,4 @@
+import pytest
 """
 Unit tests for memory_system.decay — MemoryReranker class.
 
@@ -107,9 +108,9 @@ class TestRerank:
 
         results = reranker.rerank("test query", [r1, r2, r3])
         # Should be sorted by composite_score descending
-        assert results[0].composite_score == 0.9
-        assert results[1].composite_score == 0.3
-        assert results[2].composite_score == 0.1
+        assert results[0].composite_score == pytest.approx(0.9)
+        assert results[1].composite_score == pytest.approx(0.3)
+        assert results[2].composite_score == pytest.approx(0.1)
 
     def test_rerank_with_top_k(self) -> None:
         """top_k limits number of returned results."""
@@ -160,5 +161,5 @@ class TestRerank:
 
         r = _make_mock_result("content")
         reranker.rerank("query", [r])
-        assert r.score == 0.75
-        assert r.composite_score == 0.75
+        assert r.score == pytest.approx(0.75)
+        assert r.composite_score == pytest.approx(0.75)

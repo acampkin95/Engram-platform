@@ -164,7 +164,7 @@ class TestSettingsDefaults:
         settings = Settings()
         assert settings.consolidation_min_group_size == 3
         assert settings.consolidation_hours_back == 48
-        assert settings.consolidation_confidence == 0.7
+        assert settings.consolidation_confidence == pytest.approx(0.7)
 
     def test_default_rag_settings(self):
         """Test default RAG configuration."""
@@ -184,20 +184,20 @@ class TestSettingsDefaults:
             + settings.search_recency_weight
             + settings.search_importance_weight
         )
-        assert total == 1.0
+        assert total == pytest.approx(1.0)
 
     def test_default_decay_settings(self):
         """Test default decay configuration."""
         settings = Settings()
-        assert settings.decay_half_life_days == 30.0
-        assert settings.decay_access_boost == 0.1
-        assert settings.decay_min_importance == 0.1
+        assert settings.decay_half_life_days == pytest.approx(30.0)
+        assert settings.decay_access_boost == pytest.approx(0.1)
+        assert settings.decay_min_importance == pytest.approx(0.1)
 
     def test_default_hybrid_alpha(self):
         """Test default hybrid search alpha."""
         settings = Settings()
         assert settings.search_retrieval_mode == "vector"
-        assert settings.hybrid_alpha == 0.7
+        assert settings.hybrid_alpha == pytest.approx(0.7)
 
     def test_default_reranker_settings(self):
         """Test default reranker configuration."""

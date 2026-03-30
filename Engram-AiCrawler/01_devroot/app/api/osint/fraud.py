@@ -67,7 +67,7 @@ class MapRelationshipsRequest(BaseModel):
     persist: bool = True
 
 
-@router.post("/fraud/run", response_model=FraudDetectionResult)
+@router.post("/fraud/run", response_model=FraudDetectionResult, status_code=201)
 async def run_fraud_detection(request: FraudRunRequest) -> FraudDetectionResult:
     try:
         pipeline = FraudDetectionPipeline()
@@ -83,7 +83,7 @@ async def run_fraud_detection(request: FraudRunRequest) -> FraudDetectionResult:
         raise HTTPException(status_code=500, detail=f"Pipeline error: {exc}")
 
 
-@router.post("/fraud/single", response_model=FraudDetectionResult)
+@router.post("/fraud/single", response_model=FraudDetectionResult, status_code=201)
 async def run_fraud_detection_single(
     request: SingleProfileFraudRequest,
 ) -> FraudDetectionResult:
@@ -100,7 +100,7 @@ async def run_fraud_detection_single(
         raise HTTPException(status_code=500, detail=f"Analysis error: {exc}")
 
 
-@router.post("/fraud/resolve", response_model=ResolvedIdentity)
+@router.post("/fraud/resolve", response_model=ResolvedIdentity, status_code=201)
 async def resolve_identity(request: ResolveIdentityRequest) -> ResolvedIdentity:
     try:
         resolver = IdentityResolver()
@@ -110,7 +110,7 @@ async def resolve_identity(request: ResolveIdentityRequest) -> ResolvedIdentity:
         raise HTTPException(status_code=500, detail=f"Resolution error: {exc}")
 
 
-@router.post("/fraud/map-relationships", response_model=EntityGraph)
+@router.post("/fraud/map-relationships", response_model=EntityGraph, status_code=201)
 async def map_entity_relationships(request: MapRelationshipsRequest) -> EntityGraph:
     try:
         mapper = RelationshipMapper()
@@ -123,7 +123,7 @@ async def map_entity_relationships(request: MapRelationshipsRequest) -> EntityGr
         raise HTTPException(status_code=500, detail=f"Mapping error: {exc}")
 
 
-@router.get("/fraud/graph/{graph_id}", response_model=EntityGraph)
+@router.get("/fraud/graph/{graph_id}", response_model=EntityGraph, status_code=200)
 async def get_entity_graph(graph_id: str) -> EntityGraph:
     mapper = RelationshipMapper()
     graph = mapper.load(graph_id)
@@ -135,7 +135,7 @@ async def get_entity_graph(graph_id: str) -> EntityGraph:
     return graph
 
 
-@router.post("/fraud/risk-score", response_model=RiskAssessment)
+@router.post("/fraud/risk-score", response_model=RiskAssessment, status_code=201)
 async def compute_risk_score(
     identity: ResolvedIdentity,
     fraud_report: FraudPatternReport,

@@ -1,3 +1,4 @@
+import pytest
 """
 Unit tests for memory_system.analyzer — MemoryAnalyzer.
 
@@ -155,28 +156,28 @@ class TestAnalyzeWithHeuristic:
         analyzer = _make_analyzer()
         memory = _make_memory(content="regular content nothing special")
         result = await analyzer._analyze_with_heuristic(memory, [])
-        assert result["importance"] == 0.5
+        assert result["importance"] == pytest.approx(0.5)
 
     async def test_high_importance_keywords_boost(self) -> None:
         analyzer = _make_analyzer()
         for keyword in ["important", "critical", "bug", "fix", "error", "security"]:
             memory = _make_memory(content=f"This is a {keyword} issue")
             result = await analyzer._analyze_with_heuristic(memory, [])
-            assert result["importance"] == 0.7, f"Keyword '{keyword}' should boost to 0.7"
+            assert result["importance"] == pytest.approx(0.7), f"Keyword '{keyword}' should boost to 0.7"
 
     async def test_todo_fixme_boosts_higher(self) -> None:
         analyzer = _make_analyzer()
         for keyword in ["todo", "fixme"]:
             memory = _make_memory(content=f"{keyword}: refactor this module")
             result = await analyzer._analyze_with_heuristic(memory, [])
-            assert result["importance"] == 0.8, f"'{keyword}' should boost to 0.8"
+            assert result["importance"] == pytest.approx(0.8), f"'{keyword}' should boost to 0.8"
 
     async def test_todo_overrides_other_keywords(self) -> None:
         """todo/fixme importance (0.8) should override generic high keywords (0.7)."""
         analyzer = _make_analyzer()
         memory = _make_memory(content="todo: fix this critical bug")
         result = await analyzer._analyze_with_heuristic(memory, [])
-        assert result["importance"] == 0.8
+        assert result["importance"] == pytest.approx(0.8)
 
     async def test_contradiction_detection_via_negation(self) -> None:
         analyzer = _make_analyzer()
@@ -378,7 +379,7 @@ class TestAnalyze:
         assert (
             analysis.analysis_method == "llm"
         )  # heuristic dict is truthy, so code sets method="llm"
-        assert analysis.importance == 0.7  # "bug" keyword
+        assert analysis.importance == pytest.approx(0.7)  # "bug" keyword
 
     async def test_analyze_with_llm_success(self) -> None:
         """When LLM succeeds, use LLM results."""
@@ -397,7 +398,7 @@ class TestAnalyze:
         analysis = await analyzer.analyze(memory)
 
         assert analysis.analysis_method == "llm"
-        assert analysis.importance == 0.9
+        assert analysis.importance == pytest.approx(0.9)
         assert analysis.importance_reasoning == "Very important finding"
         assert analysis.suggested_tags == ["architecture", "decision"]
 

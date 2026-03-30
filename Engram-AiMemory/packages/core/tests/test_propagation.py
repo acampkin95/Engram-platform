@@ -82,7 +82,7 @@ class TestPropagateConfidenceScores:
         result = await propagator.propagate_confidence_scores("seed-id")
 
         assert result["status"] == "updated"
-        assert result["old_conf"] == 0.3
+        assert result["old_conf"] == pytest.approx(0.3)
         assert "new_conf" in result
         mock_ms.update_memory.assert_called_once()
 

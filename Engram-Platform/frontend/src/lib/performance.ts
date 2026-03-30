@@ -25,13 +25,14 @@ export function useFontLoading(_fontFamily: string): { loaded: boolean; error: b
 
   useEffect(() => {
     const fonts = (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts;
-    if (!fonts?.ready) {
+    const readyPromise = fonts?.ready;
+    if (readyPromise === undefined) {
       setLoaded(true);
       return;
     }
 
     let active = true;
-    fonts.ready
+    readyPromise
       .then(() => {
         if (active) {
           setLoaded(true);

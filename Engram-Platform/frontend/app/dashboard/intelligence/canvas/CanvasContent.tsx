@@ -66,8 +66,8 @@ function jobToStreamItem(job: JobResponse): StreamItem {
     title: job.metadata?.title || job.url || `Job ${job.job_id.slice(0, 8)}`,
     summary: job.error || `Status: ${job.status}`,
     metadata: {
-      url: job.url || '',
-      jobType: job.job_type || '',
+      url: job.url ?? '',
+      jobType: job.job_type ?? '',
     },
   };
 }
@@ -212,15 +212,15 @@ export default function CanvasContent() {
   const fetchEntities = useCallback(async () => {
     const result = await memoryClient.getKnowledgeGraph();
     if (result.data) {
-      setEntities(result.data.entities || []);
-      setRelationships(result.data.relations || result.data.relationships || []);
+      setEntities(result.data.entities ?? []);
+      setRelationships(result.data.relations || result.data.relationships ?? []);
     }
   }, []);
 
   const fetchJobs = useCallback(async () => {
     const result = await crawlerClient.getJobs({ limit: 50 });
     if (result.data) {
-      setJobs(result.data.jobs || []);
+      setJobs(result.data.jobs ?? []);
       for (const job of result.data.jobs) {
         addItem(jobToStreamItem(job));
       }

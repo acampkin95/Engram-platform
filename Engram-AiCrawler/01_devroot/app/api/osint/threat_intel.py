@@ -57,7 +57,7 @@ def _get_email_service():
 # ---------------------------------------------------------------------------
 
 
-@router.post("/whois/domain")
+@router.post("/whois/domain", status_code=201)
 async def whois_lookup_domain(request: WhoisLookupRequest) -> dict[str, Any]:
     """Look up WHOIS registration data for a domain."""
     try:
@@ -71,7 +71,7 @@ async def whois_lookup_domain(request: WhoisLookupRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="WHOIS lookup failed")
 
 
-@router.post("/whois/dns")
+@router.post("/whois/dns", status_code=201)
 async def whois_lookup_dns(request: DnsLookupRequest) -> dict[str, Any]:
     """Look up DNS records for a domain."""
     try:
@@ -85,7 +85,7 @@ async def whois_lookup_dns(request: DnsLookupRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="DNS lookup failed")
 
 
-@router.post("/whois/ip")
+@router.post("/whois/ip", status_code=201)
 async def whois_lookup_ip(request: IpLookupRequest) -> dict[str, Any]:
     """Look up geolocation and ASN data for an IP address."""
     try:
@@ -99,7 +99,7 @@ async def whois_lookup_ip(request: IpLookupRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="IP lookup failed")
 
 
-@router.post("/whois/asn")
+@router.post("/whois/asn", status_code=201)
 async def whois_lookup_asn(asn: str = Query(..., min_length=1)) -> dict[str, Any]:
     """Look up ASN details."""
     try:
@@ -117,7 +117,7 @@ async def whois_lookup_asn(asn: str = Query(..., min_length=1)) -> dict[str, Any
 # ---------------------------------------------------------------------------
 
 
-@router.post("/threat/shodan")
+@router.post("/threat/shodan", status_code=201)
 async def threat_search_shodan(request: ShodanSearchRequest) -> dict[str, Any]:
     """Search Shodan for hosts matching a query."""
     try:
@@ -135,7 +135,7 @@ async def threat_search_shodan(request: ShodanSearchRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Shodan search failed")
 
 
-@router.post("/threat/vt")
+@router.post("/threat/vt", status_code=201)
 async def threat_check_virustotal(request: VirusTotalCheckRequest) -> dict[str, Any]:
     """Check an indicator (URL, domain, IP, or file hash) against VirusTotal."""
     try:
@@ -153,7 +153,7 @@ async def threat_check_virustotal(request: VirusTotalCheckRequest) -> dict[str, 
         raise HTTPException(status_code=500, detail="VirusTotal check failed")
 
 
-@router.post("/threat/ip-rep")
+@router.post("/threat/ip-rep", status_code=201)
 async def threat_check_ip_reputation(request: IpReputationRequest) -> dict[str, Any]:
     """Get aggregated IP reputation from Shodan + VirusTotal."""
     try:
@@ -172,7 +172,7 @@ async def threat_check_ip_reputation(request: IpReputationRequest) -> dict[str, 
 # ---------------------------------------------------------------------------
 
 
-@router.post("/email/breach")
+@router.post("/email/breach", status_code=201)
 async def email_check_breach(request: BreachCheckRequest) -> dict[str, Any]:
     """Check an email address against Have I Been Pwned."""
     try:
@@ -190,7 +190,7 @@ async def email_check_breach(request: BreachCheckRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Breach check failed")
 
 
-@router.post("/email/verify")
+@router.post("/email/verify", status_code=201)
 async def email_verify(request: EmailVerifyRequest) -> dict[str, Any]:
     """Verify email deliverability."""
     try:
@@ -206,7 +206,7 @@ async def email_verify(request: EmailVerifyRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Email verification failed")
 
 
-@router.post("/email/reverse")
+@router.post("/email/reverse", status_code=201)
 async def email_reverse_lookup(request: EmailReverseRequest) -> dict[str, Any]:
     """Reverse-lookup an email to find associated person/company info."""
     try:
@@ -222,7 +222,7 @@ async def email_reverse_lookup(request: EmailReverseRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail="Reverse lookup failed")
 
 
-@router.post("/email/bulk")
+@router.post("/email/bulk", status_code=201)
 async def email_bulk_check(request: BulkEmailCheckRequest) -> dict[str, Any]:
     """Check multiple emails for breaches in batch."""
     try:
@@ -241,7 +241,7 @@ async def email_bulk_check(request: BulkEmailCheckRequest) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/providers/status")
+@router.get("/providers/status", status_code=200)
 async def get_provider_status() -> dict[str, Any]:
     """Return health and availability status for all OSINT providers."""
     settings = get_osint_settings()

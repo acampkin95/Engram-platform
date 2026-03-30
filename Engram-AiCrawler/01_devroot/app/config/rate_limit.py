@@ -8,8 +8,7 @@ from dotenv import load_dotenv
 try:
     from datetime import UTC
 except ImportError:
-    from datetime import timezone
-    UTC = timezone.utc
+    UTC = UTC
 
 load_dotenv()
 

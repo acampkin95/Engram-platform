@@ -55,7 +55,7 @@ class ImageCatalogResponse(BaseModel):
     entries: list[CatalogEntry]
 
 
-@router.post("/image-intel/run", response_model=ImageIntelligenceReport)
+@router.post("/image-intel/run", response_model=ImageIntelligenceReport, status_code=201)
 async def run_image_intelligence(request: ImageIntelRunRequest) -> ImageIntelligenceReport:
     try:
         pipeline = ImageIntelligencePipeline(
@@ -73,7 +73,7 @@ async def run_image_intelligence(request: ImageIntelRunRequest) -> ImageIntellig
         raise HTTPException(status_code=500, detail=f"Pipeline error: {exc}")
 
 
-@router.post("/image-intel/analyze", response_model=ImageIntelligenceReport)
+@router.post("/image-intel/analyze", response_model=ImageIntelligenceReport, status_code=201)
 async def analyze_single_image(request: ImageIntelAnalyzeRequest) -> ImageIntelligenceReport:
     try:
         raw = _base64.b64decode(request.image_base64)
@@ -94,7 +94,7 @@ async def analyze_single_image(request: ImageIntelAnalyzeRequest) -> ImageIntell
         raise HTTPException(status_code=500, detail=f"Analysis error: {exc}")
 
 
-@router.get("/image-intel/catalog/{entity_id}", response_model=ImageCatalogResponse)
+@router.get("/image-intel/catalog/{entity_id}", response_model=ImageCatalogResponse, status_code=200)
 async def get_image_catalog(entity_id: str) -> ImageCatalogResponse:
     from app.osint.image_intelligence import ImageCatalog
 
@@ -111,7 +111,7 @@ async def get_image_catalog(entity_id: str) -> ImageCatalogResponse:
     )
 
 
-@router.post("/image-intel/ingest", response_model=CatalogEntry)
+@router.post("/image-intel/ingest", response_model=CatalogEntry, status_code=201)
 async def ingest_image(
     entity_id: str = Form(...),
     source_url: str | None = Form(None),
@@ -134,7 +134,7 @@ async def ingest_image(
         raise HTTPException(status_code=500, detail=f"Ingest error: {exc}")
 
 
-@router.get("/image-intel/score/{entity_id}", response_model=IdentityVerificationScore)
+@router.get("/image-intel/score/{entity_id}", response_model=IdentityVerificationScore, status_code=200)
 async def get_identity_score(entity_id: str) -> IdentityVerificationScore:
     from app.osint.image_intelligence import ImageCatalog, FaceClusterer, compute_identity_score
 
@@ -151,7 +151,7 @@ async def get_identity_score(entity_id: str) -> IdentityVerificationScore:
     return score
 
 
-@router.delete("/image-intel/catalog/{entity_id}")
+@router.delete("/image-intel/catalog/{entity_id}", status_code=200)
 async def clear_image_catalog(entity_id: str) -> dict[str, Any]:
     import shutil
     from app.osint.image_intelligence import _CATALOG_ROOT

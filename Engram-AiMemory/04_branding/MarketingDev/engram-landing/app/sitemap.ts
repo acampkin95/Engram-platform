@@ -2,8 +2,10 @@ import type { MetadataRoute } from 'next';
 import { kbArticles } from './lib/kb-data';
 import { products } from './lib/platform-data';
 
+export const dynamic = 'force-static';
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://memory.velocitydigi.com/engram';
+  const base = 'https://memory.velocitydigi.com';
 
   return [
     { url: base, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },

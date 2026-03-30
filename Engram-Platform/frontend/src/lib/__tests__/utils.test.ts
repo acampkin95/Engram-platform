@@ -11,7 +11,8 @@ describe('cn', () => {
   });
 
   it('handles conditional classes', () => {
-    expect(cn('base', false && 'hidden', 'flex')).toBe('base flex');
+    const isHidden = false;
+    expect(cn('base', isHidden && 'hidden', 'flex')).toBe('base flex');
   });
 
   it('handles undefined and null', () => {

@@ -79,7 +79,7 @@ export const useCanvasStore = create<CanvasState>()(
       maxPanels: 8,
 
       addPanel: (panel) => {
-        const id = `panel-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+        const id = `panel-${crypto.randomUUID()}`;
         set((state) => ({
           panels: [...state.panels, { ...panel, id }],
         }));

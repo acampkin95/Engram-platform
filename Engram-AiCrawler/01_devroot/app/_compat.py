@@ -17,13 +17,11 @@ else:
     # Just use str directly - this avoids the Enum complexity
     class StrEnum(str):
         """Compatibility shim for StrEnum - just use str for older Python."""
-        pass
 
 # Python 3.11+ UTC timezone compatibility
 if PY311_PLUS:
     from datetime import UTC
 else:
-    from datetime import timezone
-    UTC = timezone.utc
+    UTC = UTC
 
 __all__ = ["StrEnum", "UTC", "PY311_PLUS"]

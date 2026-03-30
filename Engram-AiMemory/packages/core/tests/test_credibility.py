@@ -114,20 +114,20 @@ class TestMemoryQualityScorer:
     def test_assess_completeness_with_all_fields(self, scorer, sample_memory):
         """Test completeness assessment with all required fields."""
         completeness = scorer._assess_completeness(sample_memory)
-        assert completeness == 1.0
+        assert completeness == pytest.approx(1.0)
 
     def test_assess_relevance_no_access(self, scorer, sample_memory):
         """Test relevance assessment with no accesses."""
         relevance = scorer._assess_relevance(sample_memory)
-        assert relevance == 0.0
+        assert relevance == pytest.approx(0.0)
 
     def test_assess_relevance_with_accesses(self, scorer):
         """Test relevance assessment with multiple accesses."""
         memory = Memory(content="Test", access_count=5)
         relevance = scorer._assess_relevance(memory)
-        assert relevance == 0.5
+        assert relevance == pytest.approx(0.5)
 
     def test_assess_evidence_quality_no_evidence(self, scorer, sample_memory):
         """Test evidence quality with no supporting evidence."""
         quality = scorer._assess_evidence_quality(sample_memory)
-        assert quality == 0.0
+        assert quality == pytest.approx(0.0)

@@ -415,7 +415,7 @@ class MaintenanceScheduler:
             try:
                 # Fetch recent memories without AI-scored importance (importance == 0.5 = default)
                 memories, _ = await self._ms.list_memories(limit=self._batch_size)
-                unscored = [m for m in memories if m.importance == 0.5]
+                unscored = [m for m in memories if abs(m.importance - 0.5) < 1e-9]
 
                 # Process memories concurrently with semaphore to limit concurrent AI requests
                 async def score_single_memory(mem):

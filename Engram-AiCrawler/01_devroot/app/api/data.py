@@ -102,7 +102,7 @@ async def create_data_set(
     return DataSetMetadata(**data_sets[data_set_id])
 
 
-@router.get("/sets", response_model=list[DataSetMetadata])
+@router.get("/sets", response_model=list[DataSetMetadata], status_code=200)
 async def list_data_sets(tier: str | None = None, limit: int = 100):
     """
     List all data sets.
@@ -120,7 +120,7 @@ async def list_data_sets(tier: str | None = None, limit: int = 100):
     return [DataSetMetadata(**s) for s in sets]
 
 
-@router.get("/sets/{data_set_id}", response_model=DataSetMetadata)
+@router.get("/sets/{data_set_id}", response_model=DataSetMetadata, status_code=200)
 async def get_data_set(data_set_id: str):
     """
     Get a specific data set by ID.
@@ -133,7 +133,7 @@ async def get_data_set(data_set_id: str):
     return DataSetMetadata(**data_sets[data_set_id])
 
 
-@router.post("/sets/{data_set_id}/migrate", response_model=DataSetMetadata)
+@router.post("/sets/{data_set_id}/migrate", response_model=DataSetMetadata, status_code=201)
 async def migrate_data_set(data_set_id: str, request: MigrateRequest, http_request: Request):
     """
     Migrate a data set to a different storage tier.
@@ -165,7 +165,7 @@ async def migrate_data_set(data_set_id: str, request: MigrateRequest, http_reque
     return DataSetMetadata(**data_sets[data_set_id])
 
 
-@router.put("/sets/{data_set_id}")
+@router.put("/sets/{data_set_id}", status_code=200)
 async def update_data_set(
     http_request: Request,
     data_set_id: str,
@@ -215,7 +215,7 @@ async def update_data_set(
     return DataSetMetadata(**data_sets[data_set_id])
 
 
-@router.delete("/sets/{data_set_id}")
+@router.delete("/sets/{data_set_id}", status_code=200)
 async def delete_data_set(data_set_id: str, http_request: Request):
     """
     Delete a data set.
@@ -253,7 +253,7 @@ async def delete_data_set(data_set_id: str, http_request: Request):
     return {"message": f"Data set {data_set_id} deleted"}
 
 
-@router.post("/export")
+@router.post("/export", status_code=201)
 async def export_data_sets(data_set_ids: list[str] | None = None):
     """
     Export data sets.
@@ -281,7 +281,7 @@ async def export_data_sets(data_set_ids: list[str] | None = None):
     }
 
 
-@router.post("/offload")
+@router.post("/offload", status_code=201)
 async def offload_archive(
     http_request: Request,
     background_tasks: BackgroundTasks,
@@ -337,7 +337,7 @@ async def offload_archive(
     }
 
 
-@router.get("/stats")
+@router.get("/stats", status_code=200)
 async def get_data_stats():
     """
     Get data management statistics.
@@ -383,7 +383,7 @@ async def create_archive_rule(rule: ArchiveRuleCreate) -> ArchiveRule:
     return new_rule
 
 
-@router.get("/archive-rules", response_model=list[ArchiveRule])
+@router.get("/archive-rules", response_model=list[ArchiveRule], status_code=200)
 async def list_archive_rules() -> list[ArchiveRule]:
     ARCHIVE_RULES_DIR.mkdir(parents=True, exist_ok=True)
     rules: list[ArchiveRule] = []
@@ -393,7 +393,7 @@ async def list_archive_rules() -> list[ArchiveRule]:
     return rules
 
 
-@router.put("/archive-rules/{rule_id}", response_model=ArchiveRule)
+@router.put("/archive-rules/{rule_id}", response_model=ArchiveRule, status_code=200)
 async def update_archive_rule(rule_id: str, update: ArchiveRuleUpdate) -> ArchiveRule:
     ARCHIVE_RULES_DIR.mkdir(parents=True, exist_ok=True)
     rule_path = ARCHIVE_RULES_DIR / f"{rule_id}.json"
@@ -405,7 +405,7 @@ async def update_archive_rule(rule_id: str, update: ArchiveRuleUpdate) -> Archiv
     return updated
 
 
-@router.delete("/archive-rules/{rule_id}")
+@router.delete("/archive-rules/{rule_id}", status_code=200)
 async def delete_archive_rule(rule_id: str) -> dict:
     ARCHIVE_RULES_DIR.mkdir(parents=True, exist_ok=True)
     rule_path = ARCHIVE_RULES_DIR / f"{rule_id}.json"

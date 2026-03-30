@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: '/engram',
+  output: 'export',
   reactCompiler: true,
 };
 

@@ -247,7 +247,7 @@ function ActivityFeed({ memories }: Readonly<{ memories: MemoryItem[] }>) {
     .map((m) => ({
       id: m.id,
       type: 'Created' as ActivityType,
-      content: (m.content || '').slice(0, 80) + ((m.content || '').length > 80 ? '…' : ''),
+      content: (m.content ?? '').slice(0, 80) + ((m.content ?? '').length > 80 ? '…' : ''),
       timestamp: m.created_at || new Date().toISOString(),
     }));
 
@@ -333,7 +333,7 @@ export default function AnalyticsContent() {
 
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      result = result.filter((m) => (m.content || '').toLowerCase().includes(q));
+      result = result.filter((m) => (m.content ?? '').toLowerCase().includes(q));
     }
 
     if (filters.status) {

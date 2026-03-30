@@ -81,7 +81,7 @@ class FaceReferenceUploadResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@router.post("/image/analyze")
+@router.post("/image/analyze", status_code=201)
 async def analyze_image(request: ImageAnalyzeRequest) -> dict[str, Any]:
     """Analyze an image — compute perceptual hashes and extract metadata."""
     try:
@@ -98,7 +98,7 @@ async def analyze_image(request: ImageAnalyzeRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Image analysis failed: {e}")
 
 
-@router.post("/image/search")
+@router.post("/image/search", status_code=201)
 async def search_image(request: ImageSearchRequest) -> dict[str, Any]:
     """Generate reverse-image search queries from a description."""
     try:
@@ -140,7 +140,7 @@ async def upload_face_reference(
         raise HTTPException(status_code=500, detail="Failed to save reference photo")
 
 
-@router.get("/face/reference")
+@router.get("/face/reference", status_code=200)
 async def list_face_references() -> dict[str, Any]:
     """List all stored face reference photos."""
     service = _get_face_service()
@@ -148,7 +148,7 @@ async def list_face_references() -> dict[str, Any]:
     return {"references": [r.model_dump() for r in refs], "count": len(refs)}
 
 
-@router.delete("/face/reference/{photo_id}")
+@router.delete("/face/reference/{photo_id}", status_code=200)
 async def delete_face_reference(photo_id: str) -> dict[str, Any]:
     """Delete a stored face reference photo."""
     service = _get_face_service()
@@ -157,7 +157,7 @@ async def delete_face_reference(photo_id: str) -> dict[str, Any]:
     return {"deleted": photo_id}
 
 
-@router.post("/face/detect")
+@router.post("/face/detect", status_code=201)
 async def detect_faces(request: FaceDetectRequest) -> dict[str, Any]:
     """Detect faces in a base64-encoded image."""
     try:
@@ -174,7 +174,7 @@ async def detect_faces(request: FaceDetectRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Face detection failed: {e}")
 
 
-@router.post("/face/match")
+@router.post("/face/match", status_code=201)
 async def match_faces(request: FaceMatchRequest) -> dict[str, Any]:
     """Match faces in a base64-encoded image against stored references."""
     try:

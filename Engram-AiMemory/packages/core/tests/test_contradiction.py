@@ -48,7 +48,7 @@ class TestContradictionResult:
         assert result.memory_id_a == "id-a"
         assert result.memory_id_b == "id-b"
         assert result.contradiction_type == ContradictionType.FACTUAL_CONTRADICTION
-        assert result.confidence == 0.85
+        assert result.confidence == pytest.approx(0.85)
         assert result.details == {"method": "llm_detection"}
 
 
@@ -305,7 +305,7 @@ class TestDetectContradictions:
         assert result[0].memory_id_a == str(memory.id)
         assert result[0].memory_id_b == str(similar.id)
         assert result[0].contradiction_type == ContradictionType.FACTUAL_CONTRADICTION
-        assert result[0].confidence == 0.8
+        assert result[0].confidence == pytest.approx(0.8)
 
     @pytest.mark.asyncio
     async def test_no_contradiction_when_llm_returns_false(self):

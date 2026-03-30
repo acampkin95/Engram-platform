@@ -1,3 +1,4 @@
+import pytest
 """
 Unit tests for memory_system.rag — MemoryRAG pipeline.
 
@@ -116,7 +117,7 @@ class TestGenerateWithContext:
         assert insight["memory_id"] == str(mem.id)
         assert insight["content"] == "FastAPI is a web framework"
         assert "compressed" in insight
-        assert insight["score"] == 0.88
+        assert insight["score"] == pytest.approx(0.88)
         assert insight["tier"] == MemoryTier.PROJECT.value
 
     async def test_empty_results_returns_zero_count(self) -> None:
@@ -266,8 +267,8 @@ class TestMultiTierRag:
         rag = MemoryRAG(memory_system=mock_system, context_builder=mock_context)
 
         result = await rag.multi_tier_rag("test")
-        assert result["results"][0]["score"] == 0.9  # High score first
-        assert result["results"][1]["score"] == 0.5
+        assert result["results"][0]["score"] == pytest.approx(0.9)  # High score first
+        assert result["results"][1]["score"] == pytest.approx(0.5)
 
     async def test_tier_counts_reported(self) -> None:
         mem = _make_memory()

@@ -459,7 +459,7 @@ export async function sendNotification(input: {
   }
 
   notificationLog.push({
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: crypto.randomUUID(),
     timestamp: new Date().toISOString(),
     subject: input.subject,
     channels,

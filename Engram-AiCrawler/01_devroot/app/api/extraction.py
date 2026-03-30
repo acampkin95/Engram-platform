@@ -75,7 +75,7 @@ async def create_template(body: CreateExtractionTemplate) -> ExtractionTemplate:
     return template
 
 
-@router.get("/templates", response_model=list[ExtractionTemplate])
+@router.get("/templates", response_model=list[ExtractionTemplate], status_code=200)
 async def list_templates() -> list[ExtractionTemplate]:
     _ensure_dir()
     templates: list[ExtractionTemplate] = []
@@ -88,12 +88,12 @@ async def list_templates() -> list[ExtractionTemplate]:
     return templates
 
 
-@router.get("/templates/{template_id}", response_model=ExtractionTemplate)
+@router.get("/templates/{template_id}", response_model=ExtractionTemplate, status_code=200)
 async def get_template(template_id: str) -> ExtractionTemplate:
     return _read_template(template_id)
 
 
-@router.put("/templates/{template_id}", response_model=ExtractionTemplate)
+@router.put("/templates/{template_id}", response_model=ExtractionTemplate, status_code=200)
 async def update_template(template_id: str, body: UpdateExtractionTemplate) -> ExtractionTemplate:
     existing = _read_template(template_id)
     updates = body.model_dump(exclude_unset=True)
@@ -229,7 +229,7 @@ def _parse_html_tree(html: str, max_depth: int = 4) -> list[HtmlTreeNode]:
     return _build(fragment, 0, "")
 
 
-@router.post("/fetch-page", response_model=FetchPageResponse)
+@router.post("/fetch-page", response_model=FetchPageResponse, status_code=201)
 async def fetch_page(body: FetchPageRequest) -> FetchPageResponse:
     """Fetch a URL with a headless browser and return a screenshot + HTML element tree.
 
@@ -270,7 +270,7 @@ async def fetch_page(body: FetchPageRequest) -> FetchPageResponse:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.post("/preview", response_model=PreviewResponse)
+@router.post("/preview", response_model=PreviewResponse, status_code=201)
 async def preview_extraction(body: PreviewRequest) -> PreviewResponse:
     """Run an extraction strategy against a live URL and return sample results.
 

@@ -253,7 +253,7 @@ export function InspectorPanel({
             <div className="space-y-1.5">
               {entity.sources.map((source) => (
                 <div
-                  key={`${source.type}-${source.url || source.timestamp?.toISOString() || Math.random()}`}
+                  key={`${source.type}-${source.url || source.timestamp?.toISOString() || crypto.randomUUID()}`}
                   className="flex items-center gap-3 p-2 rounded bg-[var(--color-void)] border border-white/5"
                 >
                   <Globe className="w-3 h-3 text-[var(--color-neutral)] shrink-0" />
