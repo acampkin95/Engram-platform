@@ -23,7 +23,8 @@ export const SidebarGroup = memo(function SidebarGroup({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between w-full px-3 py-1.5 text-[10px] text-[#5c5878] uppercase tracking-widest font-mono hover:text-[#a09bb8] transition-colors"
+        aria-expanded={open}
+        className="flex items-center justify-between w-full px-3 py-1.5 text-[10px] text-[#8580a0] uppercase tracking-widest font-mono hover:text-[#a09bb8] transition-colors"
       >
         {label}
         <ChevronDown

@@ -50,7 +50,7 @@ export const SearchInput = memo(function SearchInput({
         <button
           type="button"
           onClick={() => handleChange('')}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#5c5878] hover:text-[#f0eef8] transition-colors p-1 rounded-md hover:bg-[#1e1e3a]/50"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8580a0] hover:text-[#f0eef8] transition-colors p-1 rounded-md hover:bg-[#1e1e3a]/50"
           aria-label="Clear search"
         >
           <X className="w-3.5 h-3.5" />

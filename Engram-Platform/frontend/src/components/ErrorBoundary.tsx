@@ -89,10 +89,10 @@ export class ErrorBoundary extends Component<Props, State> {
                 </p>
                 {isDev && this.state.errorInfo && (
                   <details className="mt-4">
-                    <summary className="text-[#5c5878] cursor-pointer hover:text-[#f0eef8] text-sm select-none">
+                    <summary className="text-[#8580a0] cursor-pointer hover:text-[#f0eef8] text-sm select-none">
                       Stack trace (development only)
                     </summary>
-                    <pre className="text-xs text-[#5c5878] mt-2 overflow-auto max-h-64 whitespace-pre-wrap">
+                    <pre className="text-xs text-[#8580a0] mt-2 overflow-auto max-h-64 whitespace-pre-wrap">
                       {this.state.errorInfo.componentStack}
                     </pre>
                   </details>

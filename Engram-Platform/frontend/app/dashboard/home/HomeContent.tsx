@@ -405,6 +405,7 @@ export default function HomeContent() {
 
   return (
     <FadeIn className="space-y-6">
+      <h1 className="sr-only">Dashboard Overview</h1>
       <SlideIn direction="down" delay={0.05}>
         <div className="flex items-end justify-between">
           <div>

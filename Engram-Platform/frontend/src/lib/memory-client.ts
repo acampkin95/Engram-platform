@@ -95,13 +95,11 @@ export interface SearchResponse {
 type Result<T> = { data: T | null; error: string | null };
 
 const MEMORY_BASE = process.env.NEXT_PUBLIC_MEMORY_API_URL || '/api/memory';
-const API_KEY = process.env.NEXT_PUBLIC_MEMORY_API_KEY ?? '';
 
 async function request<T>(path: string, init?: RequestInit): Promise<Result<T>> {
   try {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
       ...((init?.headers as Record<string, string>) ?? {}),
     };
     const response = await fetch(`${MEMORY_BASE}${path}`, { ...init, headers });

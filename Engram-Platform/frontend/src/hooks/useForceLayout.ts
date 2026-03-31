@@ -30,10 +30,10 @@ export function useForceLayout({ strength = -300, distance = 100 }: UseForceLayo
     // Filter out nodes that don't need layout (like parents/children if using groups)
     const nodesToLayout = nodes.filter((n) => !n.parentId);
 
-    const simulationNodes: SimNode[] = nodesToLayout.map((node) => ({
+    const simulationNodes: SimNode[] = nodesToLayout.map((node, i) => ({
       ...node,
-      x: node.position.x || Math.random() * 500,
-      y: node.position.y || Math.random() * 500,
+      x: node.position.x || ((i % 10) * 50 + 50),
+      y: node.position.y || (Math.floor(i / 10) * 50 + 50),
     }));
 
     const simulationLinks: SimulationLinkDatum<SimNode>[] = edges

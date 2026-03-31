@@ -2,24 +2,24 @@ import { SignIn } from '@clerk/nextjs';
 
 const clerkAppearance = {
   variables: {
-    colorBackground: '#0a0914',
+    colorBackground: '#03020A',
     colorPrimary: '#f2a93b',
     colorText: '#f0eef8',
     colorInputBackground: 'rgba(255, 255, 255, 0.06)',
     colorInputText: '#f0eef8',
     borderRadius: '0.75rem',
-    fontFamily: '"IBM Plex Mono", monospace',
+    fontFamily: '"DM Sans", system-ui, sans-serif',
   },
   elements: {
     rootBox: 'w-full max-w-md',
-    card: 'bg-[#0a0914] border border-white/[0.06] shadow-2xl shadow-amber-500/5',
+    card: 'bg-[#03020A] border border-white/[0.06] shadow-2xl shadow-amber-500/5',
     headerTitle: 'font-[Syne] text-[#f0eef8]',
     headerSubtitle: 'text-[#a09bb8]',
     socialButtonsBlockButton:
       'border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-[#f0eef8] transition-all',
     socialButtonsBlockButtonText: 'text-[#f0eef8] font-medium',
     dividerLine: 'bg-white/[0.06]',
-    dividerText: 'text-[#5c5878]',
+    dividerText: 'text-[#8580a0]',
     formFieldLabel: 'text-[#a09bb8] text-xs uppercase tracking-wider',
     formFieldInput:
       'bg-white/[0.04] border-white/[0.08] text-[#f0eef8] focus:border-[#f2a93b] focus:ring-[#f2a93b]/20',
@@ -59,16 +59,14 @@ export default function SignInPage() {
           <h1 className="font-[Syne] text-2xl font-bold tracking-tight text-[#f0eef8]">
             Welcome back
           </h1>
-          <p className="mt-1 font-mono text-sm text-[#5c5878]">
-            Sign in to your Engram workspace
-          </p>
+          <p className="mt-1 font-mono text-sm text-[#8580a0]">Sign in to your Engram workspace</p>
         </div>
 
         {/* Clerk sign-in widget */}
         <SignIn appearance={clerkAppearance} />
 
         {/* Footer */}
-        <p className="mt-8 text-center font-mono text-xs text-[#3a3555]">
+        <p className="mt-8 text-center font-mono text-xs text-[#8580a0]">
           Engram Intelligence Platform
         </p>
       </div>

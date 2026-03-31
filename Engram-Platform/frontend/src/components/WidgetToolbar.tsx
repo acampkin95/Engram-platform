@@ -31,7 +31,7 @@ export function WidgetToolbar({
       )}
     >
       <GripVertical className="w-3.5 h-3.5 text-[#3a3850] shrink-0" />
-      {icon && <span className="text-[#5c5878] shrink-0">{icon}</span>}
+      {icon && <span className="text-[#8580a0] shrink-0">{icon}</span>}
       {title && (
         <span className="text-xs font-semibold text-[#a09bb8] tracking-wide truncate flex-1 font-display">
           {title}
@@ -48,7 +48,7 @@ export function WidgetToolbar({
               e.stopPropagation();
               onToggleExpand();
             }}
-            className="p-1 text-[#3a3850] hover:text-[#5c5878] transition-colors rounded hover:bg-white/4"
+            className="p-1 text-[#3a3850] hover:text-[#8580a0] transition-colors rounded hover:bg-white/4"
             aria-label={isExpanded ? 'Minimize' : 'Maximize'}
           >
             {isExpanded ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}

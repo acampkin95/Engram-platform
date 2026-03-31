@@ -12,12 +12,15 @@ from pathlib import Path
 
 def run(cmd, check=True, capture=True):
     """Run command safely."""
+    import shlex
+    args = shlex.split(cmd) if isinstance(cmd, str) else cmd
     try:
         if capture:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=check)
+            result = subprocess.run(args, capture_output=True, text=True, check=check)
             return result.stdout.strip(), result.returncode == 0
         else:
-            return "", os.system(cmd) == 0
+            result = subprocess.run(args, check=False)
+            return "", result.returncode == 0
     except Exception as e:
         return str(e), False
 

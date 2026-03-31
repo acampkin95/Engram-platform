@@ -20,7 +20,7 @@ export const BRAND_COLORS: BrandColor[] = [
   { name: 'Panel', hex: '#0d0d1a', role: 'Surface', group: 'neutral' },
   { name: 'Text Primary', hex: '#f0eef8', role: 'Foreground', group: 'neutral' },
   { name: 'Text Secondary', hex: '#a09bb8', role: 'Secondary', group: 'neutral' },
-  { name: 'Text Muted', hex: '#5c5878', role: 'Muted', group: 'neutral' },
+  { name: 'Text Muted', hex: '#8580a0', role: 'Muted', group: 'neutral' },
   { name: 'Error', hex: '#FF6B6B', role: 'Destructive', group: 'semantic' },
 ];
 
@@ -62,7 +62,7 @@ export function BrandPalette({ className }: BrandPaletteProps) {
               />
               <div className="text-left flex-1 min-w-0">
                 <p className="text-xs font-semibold text-[#f0eef8] truncate">{color.name}</p>
-                <p className="text-[10px] font-mono text-[#5c5878] truncate">{color.role}</p>
+                <p className="text-[10px] font-mono text-[#8580a0] truncate">{color.role}</p>
               </div>
               <span
                 className="text-[10px] font-mono text-[#a09bb8] flex-shrink-0"

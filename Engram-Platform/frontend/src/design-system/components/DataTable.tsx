@@ -76,7 +76,7 @@ function DataTableComponent<T extends Record<string, unknown>>({
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
-                  className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-[#5c5878]"
+                  className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-[#8580a0]"
                 >
                   {col.sortable ? (
                     <button
@@ -106,7 +106,7 @@ function DataTableComponent<T extends Record<string, unknown>>({
             {paged.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="px-4 py-12 text-center">
-                  <div className="flex flex-col items-center justify-center text-[#5c5878]">
+                  <div className="flex flex-col items-center justify-center text-[#8580a0]">
                     <div className="w-12 h-12 rounded-full bg-[#1e1e3a]/30 flex items-center justify-center mb-3">
                       <svg
                         width="24"
@@ -165,7 +165,7 @@ function DataTableComponent<T extends Record<string, unknown>>({
       </div>
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-[#1e1e3a] bg-black/10">
-          <span className="text-xs text-[#5c5878]">
+          <span className="text-xs text-[#8580a0]">
             Page {page + 1} of {totalPages}
           </span>
           <div className="flex gap-2">

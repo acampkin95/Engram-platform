@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { DM_Sans, JetBrains_Mono, Playfair_Display } from 'next/font/google';
+import { DM_Sans, IBM_Plex_Mono, Syne } from 'next/font/google';
 import { ThemeProvider } from '@/src/components/ThemeProvider';
 import { Providers } from '@/src/providers/Providers';
 import './globals.css';
@@ -23,18 +23,17 @@ const dmSans = DM_Sans({
   adjustFontFallback: true,
 });
 
-const playfairDisplay = Playfair_Display({
-  variable: '--font-playfair',
+const syne = Syne({
+  variable: '--font-syne',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  style: ['normal', 'italic'],
+  weight: ['400', '600', '700', '800'],
   display: 'swap',
   preload: true,
   adjustFontFallback: true,
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-jetbrains',
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: '--font-ibm-plex-mono',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
@@ -176,7 +175,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${dmSans.variable} ${playfairDisplay.variable} ${jetbrainsMono.variable}`}
+      className={`${dmSans.variable} ${syne.variable} ${ibmPlexMono.variable}`}
     >
       <head>
         {/* =================================================================
@@ -268,7 +267,7 @@ export default function RootLayout({
         className="antialiased bg-void text-text-primary"
         // Prevent layout shift during font loading
         style={{
-          fontFamily: 'var(--font-dm-sans), var(--font-playfair), system-ui, sans-serif',
+          fontFamily: 'var(--font-dm-sans), var(--font-syne), system-ui, sans-serif',
         }}
       >
         <Providers>

@@ -45,10 +45,17 @@ export async function POST(request: Request) {
   try {
     await requireAdminAccess();
     const body = await request.json();
+    const name = typeof body?.name === 'string' ? body.name.trim() : '';
+    if (!name || name.length > 128) {
+      return NextResponse.json(
+        { error: 'Key name is required and must be 128 characters or fewer' },
+        { status: 400 },
+      );
+    }
     const res = await fetch(`${MEMORY_API_URL}/admin/keys`, {
       method: 'POST',
       headers: apiHeaders(),
-      body: JSON.stringify(body),
+      body: JSON.stringify({ name }),
     });
     const data = await res.json();
     if (!res.ok) {

@@ -255,4 +255,13 @@ export function loadConfig(): MCPConfig {
 	};
 }
 
-export const config = loadConfig();
+function validateConfig(cfg: MCPConfig): MCPConfig {
+	if (cfg.oauth.enabled && cfg.oauth.secret.length < 32) {
+		throw new Error(
+			"OAUTH_SECRET must be at least 32 characters when OAUTH_ENABLED=true",
+		);
+	}
+	return cfg;
+}
+
+export const config = validateConfig(loadConfig());

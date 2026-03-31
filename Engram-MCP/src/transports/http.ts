@@ -48,13 +48,16 @@ const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
 // ---------------------------------------------------------------------------
 
 function buildAllowedOrigins(config: MCPConfig): Set<string> {
-	return new Set<string>([
-		"http://localhost",
-		"http://localhost:3000",
-		"http://localhost:3001",
-		"http://127.0.0.1",
-		...(config.corsOrigins ?? []),
-	]);
+	const devOrigins =
+		process.env.NODE_ENV !== "production"
+			? [
+					"http://localhost",
+					"http://localhost:3000",
+					"http://localhost:3001",
+					"http://127.0.0.1",
+				]
+			: [];
+	return new Set<string>([...devOrigins, ...(config.corsOrigins ?? [])]);
 }
 
 function corsHeaders(

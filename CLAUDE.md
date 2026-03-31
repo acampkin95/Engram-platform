@@ -163,7 +163,15 @@ Core Python package lives at `packages/core/src/memory_system/`. Key modules:
 - `rag.py` — RAG query pipeline
 - `auth.py` — JWT + API key authentication
 - `decay.py` — memory decay/retention logic
+- `key_manager.py` — API key CRUD lifecycle (create, list, revoke, validate) with scoped permissions
+- `audit.py` — structured audit logging for admin actions, key operations, and auth events
 - `investigation/` — document ingestion (crawling, PDF, DOCX, email parsing)
+
+Admin API endpoints (in `api.py`):
+- `POST /admin/keys` — create API key with scoped permissions
+- `GET /admin/keys` — list all API keys
+- `DELETE /admin/keys/{key_id}` — revoke an API key
+- `GET /admin/audit` — query audit log entries
 
 npm workspaces: `packages/cli`, `packages/mcp-server`, `packages/dashboard`
 
@@ -225,9 +233,15 @@ Each subproject has its own `.env.example`. Key variables:
 - `JWT_SECRET` — required for Memory API auth
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` — Platform auth
 - `MCP_AUTH_TOKEN` — MCP server bearer token
+- `ENGRAM_API_URL` — Memory API base URL (used by MCP in Claude Code, e.g. `http://100.78.187.5:8000`)
+- `ENGRAM_API_KEY` — API key for Memory API authentication (used by MCP in Claude Code)
 
 ## Testing Thresholds
 
 - **AiMemory Python**: 79.8% coverage minimum (`--cov-fail-under=79.8`)
 - **Platform frontend**: 85% statements, 75% branches, 80% functions, 85% lines
 - **AiMemory pytest**: uses `asyncio_mode = "auto"` — async tests run automatically
+
+### engram-test Skill (Live API Validation)
+
+The `engram-test` skill is a 55-test Python suite that validates the live Memory API end-to-end. It covers health, CRUD, search, RAG, knowledge graph, tenants, key management, audit logging, maintenance, export, and auth edge cases. Run via Claude Code skill invocation or directly against a running Memory API instance.

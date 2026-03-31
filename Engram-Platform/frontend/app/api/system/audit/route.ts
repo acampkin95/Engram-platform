@@ -33,17 +33,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(data);
     }
 
-    // Log entries endpoint
+    // Log entries endpoint — validate and constrain parameters
+    const VALID_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
     const params = new URLSearchParams();
-    for (const key of ['key_id', 'path', 'method', 'limit', 'offset']) {
-      const val = searchParams.get(key);
-      if (val) params.set(key, val);
-    }
+    const keyId = searchParams.get('key_id');
+    if (keyId) params.set('key_id', keyId.slice(0, 64));
+    const pathFilter = searchParams.get('path');
+    if (pathFilter) params.set('path', pathFilter.slice(0, 256));
+    const method = searchParams.get('method');
+    if (method && VALID_METHODS.has(method.toUpperCase())) params.set('method', method.toUpperCase());
+    const limit = Number(searchParams.get('limit') ?? '50');
+    params.set('limit', String(Math.max(1, Math.min(100, Number.isFinite(limit) ? limit : 50))));
+    const offset = Number(searchParams.get('offset') ?? '0');
+    params.set('offset', String(Math.max(0, Math.min(10000, Number.isFinite(offset) ? offset : 0))));
     const qs = params.toString();
-    const res = await fetch(
-      `${MEMORY_API_URL}/admin/audit-log${qs ? `?${qs}` : ''}`,
-      { headers: apiHeaders(), cache: 'no-store' },
-    );
+    const res = await fetch(`${MEMORY_API_URL}/admin/audit-log${qs ? `?${qs}` : ''}`, {
+      headers: apiHeaders(),
+      cache: 'no-store',
+    });
     const data = await res.json();
     if (!res.ok) {
       return NextResponse.json(

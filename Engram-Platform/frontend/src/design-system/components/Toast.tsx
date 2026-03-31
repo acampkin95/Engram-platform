@@ -56,7 +56,7 @@ export const Toast = memo(function Toast({ toast, onDismiss }: Readonly<ToastPro
           </ToastPrimitive.Description>
         </div>
       </div>
-      <ToastPrimitive.Close className="absolute right-2 top-2 rounded-md p-1 text-[#5c5878] opacity-0 transition-opacity hover:text-[#f0eef8] focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100">
+      <ToastPrimitive.Close className="absolute right-2 top-2 rounded-md p-1 text-[#8580a0] opacity-0 transition-opacity hover:text-[#f0eef8] focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </ToastPrimitive.Close>

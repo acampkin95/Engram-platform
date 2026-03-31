@@ -689,10 +689,9 @@ async def login(request_obj: Request, request: LoginRequest):  # noqa: B008
             detail="Dashboard login is not configured (set ADMIN_PASSWORD_HASH in .env)",
         )
 
-    if request.username != settings.admin_username:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-
-    if not verify_password(request.password, settings.admin_password_hash):
+    # Always run bcrypt to prevent username enumeration via timing
+    password_valid = verify_password(request.password, settings.admin_password_hash)
+    if request.username != settings.admin_username or not password_valid:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     token = create_access_token(

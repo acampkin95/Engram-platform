@@ -38,7 +38,7 @@ export const Modal = memo(function Modal({
                 <DialogPrimitive.Title className="text-sm font-semibold text-[#f0eef8] font-display">
                   {title}
                 </DialogPrimitive.Title>
-                <DialogPrimitive.Close className="p-1 rounded hover:bg-[#1e1e3a]/50 text-[#5c5878] hover:text-[#f0eef8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#F2A93B]/50">
+                <DialogPrimitive.Close className="p-1 rounded hover:bg-[#1e1e3a]/50 text-[#8580a0] hover:text-[#f0eef8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#F2A93B]/50">
                   <X className="w-4 h-4" />
                   <span className="sr-only">Close</span>
                 </DialogPrimitive.Close>

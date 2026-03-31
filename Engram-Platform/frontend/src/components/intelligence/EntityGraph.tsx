@@ -50,7 +50,7 @@ const entityTypeHexColors: Record<EntityType, string> = {
   unknown: '#6B7280',
 };
 
-const FILTERED_COLOR = 'rgba(107, 114, 128, 0.2)';
+const FILTERED_COLOR = 'rgba(107, 114, 128, 0.5)';
 const _SELECTED_GLOW = 'rgba(0, 212, 255, 0.6)';
 
 const statusStyles: Record<StatusColor, { glow: string; border: string }> = {
@@ -152,10 +152,10 @@ interface EntityGraphProps {
 }
 
 function transformToFlow(entities: Entity[], relationships: Relationship[]) {
-  const nodes: Node<EntityNodeData>[] = entities.map((entity) => ({
+  const nodes: Node<EntityNodeData>[] = entities.map((entity, i) => ({
     id: entity.id,
     type: 'entity',
-    position: { x: Math.random() * 800, y: Math.random() * 600 },
+    position: { x: (i % 10) * 80 + 40, y: Math.floor(i / 10) * 80 + 40 },
     data: {
       label: entity.name,
       entityType: entity.type,
@@ -256,6 +256,8 @@ function MiniMapLegend({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-label={isExpanded ? 'Collapse legend' : 'Expand legend'}
+        aria-expanded={isExpanded}
         className={cn(
           'flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] font-mono',
           'bg-[var(--color-panel)] border border-white/10',
@@ -441,7 +443,14 @@ export function EntityGraph({
   }, [deselectEntity]);
 
   return (
-    <div className={cn('h-full w-full flex flex-col', className)}>
+    <div
+      className={cn('h-full w-full flex flex-col', className)}
+      role="application"
+      aria-label="Knowledge graph visualization"
+    >
+      <span className="sr-only">
+        Interactive knowledge graph. Use mouse to pan and zoom, click nodes to view details.
+      </span>
       <EntityTypeFilter
         activeFilters={entityTypeFilter}
         onToggle={handleToggleFilter}

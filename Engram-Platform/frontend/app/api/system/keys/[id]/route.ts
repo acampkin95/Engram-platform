@@ -11,10 +11,7 @@ function apiHeaders() {
   return headers;
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireAdminAccess();
     const { id } = await params;

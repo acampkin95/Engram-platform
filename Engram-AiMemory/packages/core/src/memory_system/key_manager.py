@@ -6,6 +6,7 @@ Supports CRUD operations, migration from env vars, and usage tracking.
 """
 
 import hashlib
+import hmac
 import json
 import secrets
 import string
@@ -184,7 +185,7 @@ class KeyManager:
             if stored_hash is None:
                 continue
             sh = stored_hash if isinstance(stored_hash, str) else stored_hash.decode()
-            if sh == key_hash:
+            if hmac.compare_digest(sh, key_hash):
                 status = await self._redis.hget(f"{KEY_PREFIX}{kid}", "status")
                 st = status.decode() if isinstance(status, bytes) else status
                 if st == "revoked":

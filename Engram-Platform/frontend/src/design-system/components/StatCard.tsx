@@ -108,7 +108,7 @@ export const StatCard = memo(function StatCard({
               </div>
             )}
           </div>
-          {trendLabel && <p className="text-[11px] text-[#5c5878] mt-1">{trendLabel}</p>}
+          {trendLabel && <p className="text-[11px] text-[#8580a0] mt-1">{trendLabel}</p>}
         </div>
 
         {icon && (

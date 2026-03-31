@@ -255,7 +255,7 @@ function GridCard({
             )}
           >
             <GripVertical className="w-3.5 h-3.5 text-[#3a3850] shrink-0" />
-            {item.icon && <span className="text-[#5c5878] shrink-0">{item.icon}</span>}
+            {item.icon && <span className="text-[#8580a0] shrink-0">{item.icon}</span>}
             {item.title && (
               <span className="text-xs font-semibold text-[#a09bb8] tracking-wide truncate flex-1 font-display">
                 {item.title}
@@ -275,7 +275,7 @@ function GridCard({
 
                 setExpanded((value) => !value);
               }}
-              className="ml-auto text-[#3a3850] hover:text-[#5c5878] transition-colors shrink-0"
+              className="ml-auto text-[#3a3850] hover:text-[#8580a0] transition-colors shrink-0"
               aria-label={expanded ? 'Minimize' : 'Maximize'}
             >
               {expanded ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}

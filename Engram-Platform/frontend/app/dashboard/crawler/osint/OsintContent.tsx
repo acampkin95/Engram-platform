@@ -77,7 +77,12 @@ function ResultDetailPanel({ result, onClose }: { result: OsintResult; onClose: 
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Detail for ${result.title || result.url}`}>
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Detail for ${result.title || result.url}`}
+    >
       <button
         type="button"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -333,6 +338,7 @@ export default function OsintContent() {
 
   return (
     <div className="space-y-6 animate-page-enter">
+      <h1 className="sr-only">OSINT Scanner</h1>
       {/* Header */}
       <SectionHeader title="OSINT" breadcrumb={['CRAWLER', 'OSINT']} />
 

@@ -9,7 +9,7 @@ const statusDotVariants = cva('relative w-2 h-2 rounded-full z-10', {
     variant: {
       online: 'bg-[#2EC4C4] text-[#2EC4C4] shadow-[0_0_8px_currentColor]',
       degraded: 'bg-[#F2A93B] text-[#F2A93B] shadow-[0_0_8px_currentColor]',
-      offline: 'bg-[#5c5878] text-[#5c5878] shadow-[0_0_8px_currentColor]',
+      offline: 'bg-[#8580a0] text-[#8580a0] shadow-[0_0_8px_currentColor]',
       loading: 'bg-[#9B7DE0] text-[#9B7DE0] shadow-[0_0_8px_currentColor]',
     },
   },
@@ -23,7 +23,7 @@ const statusTextVariants = cva('text-xs font-medium tracking-wide', {
     variant: {
       online: 'text-[#2EC4C4]',
       degraded: 'text-[#F2A93B]',
-      offline: 'text-[#5c5878]',
+      offline: 'text-[#8580a0]',
       loading: 'text-[#9B7DE0]',
     },
   },
@@ -40,7 +40,7 @@ export interface StatusDotProps extends VariantProps<typeof statusDotVariants> {
 const pulseColors = {
   online: '#2EC4C4',
   degraded: '#F2A93B',
-  offline: '#5c5878',
+  offline: '#8580a0',
   loading: '#9B7DE0',
 };
 

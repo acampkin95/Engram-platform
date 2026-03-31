@@ -1,6 +1,6 @@
 # Engram Platform — Progress Report
 
-**Date**: 2026-03-29
+**Date**: 2026-03-31
 **Version**: 1.1.0
 **Status**: ✅ Production Ready — All Blockers Resolved
 
@@ -10,7 +10,7 @@
 
 The Engram Platform is a multi-layer AI memory and intelligence system comprising 4 subprojects. A comprehensive 5-loop validation program has been completed, all security blockers resolved, and the codebase is certified for production deployment.
 
-**Key milestone**: 4,841 tests passing across all services, 0 security vulnerabilities, 8/12 defects fixed (remaining 4 are low-severity).
+**Key milestone**: 4,841 tests passing across all services, 0 security vulnerabilities, 8/12 defects fixed (remaining 4 are low-severity). Additional 55-test engram-test skill validates live API end-to-end.
 
 ---
 
@@ -89,6 +89,14 @@ The Engram Platform is a multi-layer AI memory and intelligence system comprisin
 
 | Hash | Description |
 |---|---|
+| `356ba15` | fix(memory): allow decay_factor > 1.0 for access-boosted memories |
+| `7cab72e` | fix(memory): remove invalid status_code kwarg from Depends() calls |
+| `608a738` | feat(platform): API key management and audit logging |
+| `1b89750` | fix(platform): UX audit, cache control, and session management improvements |
+| `8cefb0c` | fix: sonarqube remediation — 200+ fixes across platform |
+| `41c265d` | chore: sonar scan, progress report, and documentation update |
+| `c1825dc` | Create codeql.yml |
+| `468abe8` | Create SECURITY.md |
 | `cec0ee6` | fix(docs): correct production server to acdev-devnode |
 | `d79c236` | design(platform): polish platform pages with glassmorphism |
 | `e2ae064` | docs: deployment reports, brand assets, audit docs |
@@ -192,11 +200,39 @@ SonarQube reports 44.7% because coverage XML reports are stale (not regenerated 
 
 ---
 
+## Recent Additions (2026-03-31)
+
+### New Features
+- **API Key Management** (`key_manager.py`): Full CRUD lifecycle with scoped permissions
+- **Audit Logging** (`audit.py`): Structured audit trail for admin actions and auth events
+- **Admin API Endpoints**: Key management and audit log query routes in Memory API
+- **Frontend Key Pages**: Dashboard UI for creating, viewing, and revoking API keys
+- **Branded Auth**: Clerk-themed sign-in/sign-up pages matching Engram design system
+- **Memory Hooks**: `UserPromptSubmit` (recall) and `Stop` (store) hooks in Claude Code settings
+
+### Integrations
+- **Engram MCP in Claude Code**: Configured with `ENGRAM_API_URL` and `ENGRAM_API_KEY` env vars
+- **engram-test skill**: 55-test Python suite covering health, CRUD, search, RAG, graph, tenants, key management, audit, maintenance, export, and auth edge cases
+
+### SonarQube Remediation (2026-03-30)
+- 200+ fixes applied: 77 float equality fixes, 165 missing `status_code` decorators, 13 major bugs resolved
+- 30 invalid `Depends()` kwargs removed
+- `decay_factor` validation raised to `le=2.0`
+- DeepInfra embedding model fixed (`bge-base-en-v1.5`, 768-dim)
+
+### UX Improvements (2026-03-31)
+- 18 fixes: navigation, error handling, accessibility, user feedback
+- Cache control: `private, no-store` on API routes, CSP header fix, SWR improvements
+
+---
+
 ## Next Steps
 
-1. **Commit & push** current changes (doc updates, Sentry migration, sonar config)
-2. **Review SonarQube results** when scan completes
+1. ~~Commit & push current changes~~ ✅ Done
+2. ~~Review SonarQube results~~ ✅ Done — 200+ fixes applied
 3. **Configure Cloudflare DNS** for `app.velocitydigi.com` A record
 4. **Replace Turnstile test key** with production site key from Cloudflare dashboard
 5. **Address remaining 4 low-severity issues** as time permits
 6. **Fix 87 mypy errors** in AiMemory incrementally
+7. **Review SonarQube security hotspots** (66 remaining)
+8. **Increase SonarQube coverage** — regenerate coverage XML reports

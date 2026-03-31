@@ -1,10 +1,9 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { requireAdminAccess } from '@/src/server/admin-access';
 import { getSystemHealthSnapshot } from '@/src/server/system-admin';
 
 export async function GET() {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  await requireAdminAccess();
 
   try {
     const snapshot = await getSystemHealthSnapshot();

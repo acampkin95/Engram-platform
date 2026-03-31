@@ -415,6 +415,7 @@ export default function IntelligenceInvestigationsContent() {
 
   return (
     <div className="space-y-6 animate-page-enter">
+      <h1 className="sr-only">Intelligence Investigations</h1>
       <SectionHeader title="Investigations" breadcrumb={['INTELLIGENCE', 'INVESTIGATIONS']} />
 
       {/* Stats bar */}
@@ -426,7 +427,11 @@ export default function IntelligenceInvestigationsContent() {
         />
         <StatCard label="Memory Matters" value={memoryData ? matters.length : '—'} accent="teal" />
         <StatCard label="Total Crawl Jobs" value={crawlerData ? totalJobs : '—'} accent="amber" />
-        <StatCard label="Total Memories" value={analyticsData?.data?.total_memories ?? '—'} accent="amber" />
+        <StatCard
+          label="Total Memories"
+          value={analyticsData?.data?.total_memories ?? '—'}
+          accent="amber"
+        />
       </div>
 
       {/* Tabs */}

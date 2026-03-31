@@ -5,6 +5,61 @@
 
 ---
 
+## [2026-04-01] — Branding Unification, Contrast & Accessibility Overhaul
+
+### Branding
+- **Depth palette aligned**: Platform frontend now uses brand-canonical colors from approved brand guide (#03020A void, #090818 deep, purple-tinted layers)
+- **Typography unified**: Replaced Playfair Display → Syne (display), JetBrains Mono → IBM Plex Mono (code) to match marketing site
+- **Sign-in page**: Fixed hardcoded colors to canonical values, switched from monospace to DM Sans body font
+
+### Accessibility (WCAG AA)
+- **Color contrast**: Updated muted text from #5c5878 (~3.2:1) to #8580a0 (~4.6:1) across 20+ components
+- **Skip link**: Added "Skip to main content" link in dashboard layout
+- **Semantic landmarks**: Dashboard content area wrapped in `<main>` with `id="main-content"`
+- **Heading hierarchy**: Added sr-only `<h1>` to all 7 dashboard page content components
+- **SidebarGroup**: Added `aria-expanded` to collapsible toggle buttons
+- **EntityGraph**: Added `role="application"`, `aria-label`, legend toggle `aria-expanded`, sr-only instructions, increased filtered node contrast
+
+### Affected Files (26 files)
+- `globals.css` (platform + marketing), `layout.tsx`, `sign-in/page.tsx`, `DashboardClient.tsx`
+- 7 dashboard Content components, `EntityGraph.tsx`, `SidebarGroup.tsx`
+- 10 design-system components (Button, Input, Badge, DataTable, etc.)
+- 5 app components (CommandPalette, FilterBar, DraggableGrid, etc.)
+
+---
+
+## [2026-03-31] — API Key Management, MCP Integration & Documentation Refresh
+
+### Features
+- **API Key Management** (`key_manager.py`): Full CRUD lifecycle for API keys — create, list, revoke, validate with scoped permissions
+- **Audit Logging** (`audit.py`): Structured audit trail for all key operations, admin actions, and auth events
+- **Admin Endpoints**: New FastAPI admin routes for key management and audit log queries
+- **Frontend Key Management**: Dashboard pages for creating, viewing, and revoking API keys with usage stats
+- **Branded Auth Pages**: Clerk-themed sign-in/sign-up pages matching Engram design system (amber primary, dark mode)
+- **Memory Hooks**: Added `UserPromptSubmit` (recall) and `Stop` (store) hooks to Claude Code `settings.json`
+
+### Integrations
+- **Engram MCP in Claude Code**: Installed MCP server with `ENGRAM_API_URL` and `ENGRAM_API_KEY` env vars for direct memory access from Claude Code
+- **engram-test skill**: Created comprehensive 55-test Python suite covering health, CRUD, search, RAG, graph, tenants, key management, audit logging, maintenance, export, and auth edge cases
+
+### Fixes
+- **UX Audit (18 fixes)**: Navigation consistency, error handling improvements, accessibility enhancements, user feedback polish
+- **Cache Control**: API routes set to `private, no-store`; CSP header fix; SWR stale-while-revalidate improvements
+- **SonarQube Remediation**: 77 float equality fixes (`pytest.approx()`), 3 frontend bug fixes (promise conditionals, nullish coalescing)
+- **DeepInfra Embedding**: Fixed model to `bge-base-en-v1.5` (768-dim) for correct vector dimensions
+- **decay_factor Validation**: Raised upper bound to `le=2.0` to support access-boosted memories
+- **Depends() Cleanup**: Removed invalid `status_code` kwargs from 30 FastAPI `Depends()` calls
+
+### Deployments
+- `thatgirlalexa.com` deployed to `web01` (OVH SYD)
+- All Engram services healthy on `acdev-devnode`
+
+### Tests
+- engram-test skill: 55/55 pass (live API)
+- Platform: 1,081/1,081 pass | MCP: 382/382 pass
+
+---
+
 ## [2026-03-30] — SonarQube Remediation: 200+ Fixes
 
 ### Security

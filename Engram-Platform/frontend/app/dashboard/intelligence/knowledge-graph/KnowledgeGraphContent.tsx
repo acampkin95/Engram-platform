@@ -128,10 +128,10 @@ function CrawlerPanelFlow({ data }: { data: CrawlerKGResponse }) {
   useEffect(() => {
     if (!data) return;
 
-    const initialNodes: Node[] = data.entities.map((entity) => ({
+    const initialNodes: Node[] = data.entities.map((entity, i) => ({
       id: entity.id,
       type: 'crawlerNode',
-      position: { x: Math.random() * 800, y: Math.random() * 600 },
+      position: { x: (i % 10) * 80 + 40, y: Math.floor(i / 10) * 80 + 40 },
       data: { label: entity.name, type: entity.type },
     }));
 
@@ -259,13 +259,13 @@ function transformMemoryToFlow(
   entities: Entity[],
   relations: Relation[],
 ): { nodes: Node[]; edges: Edge[] } {
-  const nodes: Node[] = entities.map((entity) => {
+  const nodes: Node[] = entities.map((entity, i) => {
     return {
       id: entity.entity_id,
       type: 'entity',
       position: {
-        x: Math.random() * 800,
-        y: Math.random() * 600,
+        x: (i % 10) * 80 + 40,
+        y: Math.floor(i / 10) * 80 + 40,
       },
       data: {
         label: entity.name,
@@ -412,6 +412,7 @@ export default function KnowledgeGraphContent() {
 
   return (
     <div className="flex flex-col h-full p-6 gap-4">
+      <h1 className="sr-only">Intelligence Knowledge Graph</h1>
       {/* Header */}
       <SectionHeader
         title="Knowledge Graph"

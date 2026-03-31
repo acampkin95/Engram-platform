@@ -27,7 +27,7 @@ const dotColors = {
   warning: 'bg-[#F2A93B]',
   error: 'bg-[#FF6B6B]',
   info: 'bg-[#9B7DE0]',
-  neutral: 'bg-[#5c5878]',
+  neutral: 'bg-[#8580a0]',
   crawler: 'bg-[#9B7DE0]',
   memory: 'bg-[#2EC4C4]',
 };
@@ -37,7 +37,7 @@ const dotPingColors = {
   warning: 'bg-[#F2A93B]/50',
   error: 'bg-[#FF6B6B]/50',
   info: 'bg-[#9B7DE0]/50',
-  neutral: 'bg-[#5c5878]/50',
+  neutral: 'bg-[#8580a0]/50',
   crawler: 'bg-[#9B7DE0]/50',
   memory: 'bg-[#2EC4C4]/50',
 };

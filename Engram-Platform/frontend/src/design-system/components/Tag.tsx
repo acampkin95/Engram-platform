@@ -32,7 +32,7 @@ export const Tag = memo(function Tag({ label, variant, onRemove, className }: Re
         <button
           type="button"
           onClick={onRemove}
-          className="text-[#5c5878] hover:text-[#f0eef8] transition-colors ml-0.5"
+          className="text-[#8580a0] hover:text-[#f0eef8] transition-colors ml-0.5"
           aria-label={`Remove ${label} tag`}
         >
           <X className="w-3 h-3" />

@@ -97,12 +97,12 @@ function transformToFlow(
   const filteredIds = new Set(filteredEntities.map((e) => e.id));
 
   // Initialize positions randomly for the force layout
-  const nodes: Node[] = filteredEntities.map((entity) => ({
+  const nodes: Node[] = filteredEntities.map((entity, i) => ({
     id: entity.id,
     type: 'crawlerNode',
     position: {
-      x: Math.random() * 800,
-      y: Math.random() * 600,
+      x: (i % 10) * 80 + 40,
+      y: Math.floor(i / 10) * 80 + 40,
     },
     data: {
       label: entity.name,
@@ -234,6 +234,7 @@ export default function CrawlerKnowledgeGraphContent() {
 
   return (
     <div className="flex flex-col h-full gap-4">
+      <h1 className="sr-only">Crawler Knowledge Graph</h1>
       <SectionHeader title="Knowledge Graph" breadcrumb={['CRAWLER', 'KNOWLEDGE GRAPH']} />
 
       <div className="flex items-center gap-3">

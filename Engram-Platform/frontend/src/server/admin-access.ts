@@ -29,6 +29,9 @@ function hasAdminOrgRole(orgRole: unknown) {
 
 export async function requireAdminAccess(): Promise<AdminAccess> {
   if (!isClerkEnabled()) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Forbidden');
+    }
     return { userId: null, mode: 'disabled' };
   }
 

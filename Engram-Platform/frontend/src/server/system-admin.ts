@@ -117,12 +117,15 @@ async function runCommand(command: string, args: string[]): Promise<ExecResult> 
   };
 }
 
-async function fetchFirstJson(candidates: string[]): Promise<Record<string, unknown> | null> {
+async function fetchFirstJson(
+  candidates: string[],
+  extraHeaders?: Record<string, string>,
+): Promise<Record<string, unknown> | null> {
   for (const url of candidates) {
     try {
       const response = await fetch(url, {
         cache: 'no-store',
-        headers: { Accept: 'application/json' },
+        headers: { Accept: 'application/json', ...extraHeaders },
       });
       if (!response.ok) continue;
       return (await response.json()) as Record<string, unknown>;
@@ -254,7 +257,12 @@ export async function getSystemHealthSnapshot(): Promise<SystemSnapshot> {
     fetchFirstJson(memoryCandidates('/health/detailed')),
     fetchFirstJson(crawlerCandidates('/health')),
     fetchFirstJson(crawlerCandidates('/api/stats/dashboard')),
-    fetchFirstJson(mcpCandidates('/health')),
+    fetchFirstJson(
+      mcpCandidates('/health'),
+      process.env.MCP_AUTH_TOKEN
+        ? { Authorization: `Bearer ${process.env.MCP_AUTH_TOKEN}` }
+        : undefined,
+    ),
   ]);
 
   const [{ stdout: psRaw }, { stdout: statsRaw }] = await Promise.all([

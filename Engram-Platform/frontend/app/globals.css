@@ -10,15 +10,15 @@
      Tactical OSINT Interface v2.0
   ═══════════════════════════════════════ */
 
-  /* Core depth palette — TRUE BLACK foundation */
-  --color-void: #0a0b10;
-  --color-deep: #0f1117;
-  --color-layer-0: #13151c;
-  --color-layer-1: #1a1d28;
-  --color-layer-2: #222633;
-  --color-layer-3: #2a2f3e;
-  --color-layer-4: #343a4d;
-  --color-panel: #0d0b1a;
+  /* Core depth palette — TRUE BLACK foundation (aligned with brand guide) */
+  --color-void: #03020A;
+  --color-deep: #090818;
+  --color-layer-0: #0C0B1C;
+  --color-layer-1: #120F2B;
+  --color-layer-2: #1A1638;
+  --color-layer-3: #221D45;
+  --color-layer-4: #2C2658;
+  --color-panel: #0C0B1C;
 
   /* ─── FUNCTIONAL COLOR CHANNELS ─────────────────────────
      Colors are FUNCTIONAL, not decorative.
@@ -69,7 +69,7 @@
   /* Text */
   --color-text-primary: #f0eef8;
   --color-text-secondary: #a09bb8;
-  --color-text-muted: #5c5878;
+  --color-text-muted: #8580a0;
 
   /* Memory tier colours (mapped to Engram layers) */
   --color-memory-tier1: #f2a93b;
@@ -93,10 +93,10 @@
   --color-accent-500: #7c5cbf;
   --color-accent-600: #503980;
 
-  /* Font families (updated) ─────────────────────────── */
+  /* Font families (aligned with brand guide) ─────────────────────────── */
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-playfair), ui-serif, Georgia, serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-display: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 
   /* ─── Fluid Type Scale ─────────────────────────── */
   --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
@@ -134,18 +134,18 @@
   --color-sidebar-border: oklch(0.3 0.01 285);
   --color-sidebar-ring: oklch(0.65 0.18 65);
   /* ─── ShadCN/UI bridge tokens (Engram-mapped) ─────────────────────────── */
-  --color-background: #03020a;
+  --color-background: #03020A;
   --color-foreground: #f0eef8;
   --color-card: #090818;
   --color-card-foreground: #f0eef8;
-  --color-popover: #0c0b1c;
+  --color-popover: #0C0B1C;
   --color-popover-foreground: #f0eef8;
   --color-primary: #f2a93b;
-  --color-primary-foreground: #03020a;
-  --color-secondary: #120f2b;
+  --color-primary-foreground: #03020A;
+  --color-secondary: #120F2B;
   --color-secondary-foreground: #a09bb8;
-  --color-muted: #0c0b1c;
-  --color-muted-foreground: #5c5878;
+  --color-muted: #0C0B1C;
+  --color-muted-foreground: #8580a0;
   --color-accent: #9b7de0;
   --color-accent-foreground: #f0eef8;
   --color-destructive: #ff6b6b;

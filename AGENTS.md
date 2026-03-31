@@ -2,7 +2,7 @@
 
 # AGENTS.md — Engram Platform Monorepo
 
-**Updated:** 2026-03-22
+**Updated:** 2026-03-31
 
 ## OVERVIEW
 
@@ -72,9 +72,10 @@ cd Engram-Platform/frontend && npm install && npm run dev
 | Component | Language | Port | Status | Tests | Coverage |
 |-----------|----------|------|--------|-------|----------|
 | **AiMemory** | Python 3.11+ | 8000 | Stable | 985 pass | ~80% |
-| **AiCrawler** | Python 3.11 | 11235 | Stable | 2393 pass | ~70% |
+| **AiCrawler** | Python 3.11 | 11235 | Stable | 2,393 pass | ~70% |
 | **MCP** | TypeScript | 3000 | Stable | 382 pass | ~90% |
-| **Platform** | Next.js 15 | 3002 | Stable | 1081 pass | ~93% |
+| **Platform** | Next.js 15 | 3002 | Stable | 1,081 pass | ~93% |
+| **engram-test** | Python (skill) | — | Stable | 55 pass | — |
 | **Weaviate** | Go | 8080 | Stable | — | — |
 | **Redis** | C | 6379, 6380 | Stable | — | — |
 
@@ -111,10 +112,10 @@ cd Engram-Platform/frontend && npm install && npm run dev
 ./scripts/release-smoke-test.sh        # Post-deploy verification
 
 # Per-component
-cd Engram-AiMemory && make test        # 901 tests, 78% coverage
-cd Engram-AiCrawler/01_devroot && pytest tests/  # 2393 tests, 81% coverage
+cd Engram-AiMemory && make test        # 985 tests, ~80% coverage
+cd Engram-AiCrawler/01_devroot && pytest tests/  # 2,393 tests, ~70% coverage
 cd Engram-MCP && npm run test          # 382 tests
-cd Engram-Platform/frontend && npm run test:run  # 794 tests
+cd Engram-Platform/frontend && npm run test:run  # 1,081 tests
 ```
 
 ## KEY DIRECTORIES
@@ -190,23 +191,27 @@ See `docs/01-deployment-manual.md` for complete setup guide.
 
 ## CURRENT PROJECT STATE
 
-**Status:** 75% complete (as of 2026-03-22, post Operation Takeover)
+**Status:** Production Ready (as of 2026-03-31, 5-loop certification complete)
 
 ### Component Health
 
 | Component | Tests | Lint | Type | Performance | Overall |
 |-----------|-------|------|------|-------------|---------|
-| **AiMemory** | 901✓, 0✗ | ✓ | ⚠ (87 mypy errors) | 80% | 85% |
-| **AiCrawler** | 2393✓, 0✗ | ✓ | ✓ | 85% | 90% |
+| **AiMemory** | 985✓, 0✗ | ✓ | ⚠ (87 mypy errors) | 80% | 90% |
+| **AiCrawler** | 2,393✓, 0✗ | ✓ | ✓ | 85% | 90% |
 | **MCP** | 382✓, 0✗ | ✓ | ✓ | 90% | 90% |
-| **Platform** | 794✓, 0✗ | ✓ | ✓ | 75% | 85% |
+| **Platform** | 1,081✓, 0✗ | ✓ | ✓ | 85% | 90% |
+| **engram-test** | 55✓, 0✗ | — | — | — | ✓ |
 
 ### Recent Completions
 
+- 2026-03-31: API key management, audit logging, MCP integration, branded auth pages
+- 2026-03-31: UX audit (18 fixes), cache control, memory hooks in Claude Code
+- 2026-03-30: SonarQube remediation — 200+ fixes, 77 float equality, 30 Depends() cleanups
+- 2026-03-29: 5-loop certification complete — 4,841 tests, 0 security vulnerabilities
+- 2026-03-29: Sentry v8 → v10 migration, L004 blocker resolved
 - 2026-03-22: Operation Takeover — fixed 65+ biome errors, all linters passing
-- 2026-03-22: Test consolidation — 4,470 tests passing across all components
 - 2026-03-20: Webpack optimization — isolated echarts, visualization, framer-motion chunks
-- 2026-03-17: Monorepo cleanup — removed dead deps, unused components, legacy scripts
 
 ### Known Issues
 
@@ -215,21 +220,23 @@ See `docs/01-deployment-manual.md` for complete setup guide.
 | **Security** | No encryption at rest | Open | TBD |
 | **Observability** | No centralized logging | Open | TBD |
 | **Type Safety** | 87 mypy errors in AiMemory | Open | Team |
-| **Documentation** | Platform API docs incomplete | Open | TBD |
+| **SonarQube** | 66 security hotspots to review | Open | Team |
+| **DNS** | `app.velocitydigi.com` A record pending | Open | Admin |
 
 ## NEXT STEPS
 
 ### Immediate (This Week)
 
-1. Verify all services healthy on production
-2. Set up Sentry error tracking
-3. Enable structured logging aggregation
-4. Complete memory API documentation
+1. ~~Verify all services healthy on production~~ ✅ Done
+2. ~~Set up Sentry error tracking~~ ✅ Done (v10)
+3. Configure Cloudflare DNS for `app.velocitydigi.com`
+4. Replace Turnstile test key with production site key
+5. Review 66 SonarQube security hotspots
 
 ### Short-term (2-4 Weeks)
 
 1. Encryption at rest for Weaviate + Redis
-2. Centralized audit logging
+2. ~~Centralized audit logging~~ ✅ Done (`audit.py`)
 3. WebSocket authentication hardening
 4. MFA for admin users
 

@@ -59,7 +59,7 @@ export interface FilterConfig {
 
 const inputBase =
   'h-9 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-[#f0eef8] ' +
-  'placeholder-[#5c5878] focus:outline-none focus:border-[rgba(242,169,59,0.4)] ' +
+  'placeholder-[#8580a0] focus:outline-none focus:border-[rgba(242,169,59,0.4)] ' +
   'focus:ring-1 focus:ring-[rgba(242,169,59,0.2)] transition-all duration-150 font-mono';
 
 // ─── FilterBar ────────────────────────────────────────────────────────────────
@@ -141,7 +141,7 @@ export function FilterBar({
       )}
     >
       {/* Filter icon label */}
-      <div className="flex items-center gap-1.5 text-[#5c5878] shrink-0">
+      <div className="flex items-center gap-1.5 text-[#8580a0] shrink-0">
         <Filter className="w-3.5 h-3.5" aria-hidden="true" />
         <span className="text-[10px] font-mono uppercase tracking-widest">Filters</span>
       </div>
@@ -152,7 +152,7 @@ export function FilterBar({
       {showSearch && (
         <div className="relative flex-1 min-w-[180px] max-w-xs">
           <Search
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5c5878]"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8580a0]"
             aria-hidden="true"
           />
           <input
@@ -186,13 +186,13 @@ export function FilterBar({
               }}
             >
               <SelectTrigger
-                className={cn(inputBase, 'w-[140px] px-3 [&>svg]:text-[#5c5878]')}
+                className={cn(inputBase, 'w-[140px] px-3 [&>svg]:text-[#8580a0]')}
                 aria-label="Status filter"
               >
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-[#0c0b1c] border-white/[0.08] text-[#f0eef8]">
-                <SelectItem value="" className="text-[#5c5878] focus:bg-white/[0.06]">
+                <SelectItem value="" className="text-[#8580a0] focus:bg-white/[0.06]">
                   All statuses
                 </SelectItem>
                 {statusOptions.map((opt) => (
@@ -224,13 +224,13 @@ export function FilterBar({
               }}
             >
               <SelectTrigger
-                className={cn(inputBase, 'w-[140px] px-3 [&>svg]:text-[#5c5878]')}
+                className={cn(inputBase, 'w-[140px] px-3 [&>svg]:text-[#8580a0]')}
                 aria-label={`${sectionLabel} filter`}
               >
                 <SelectValue placeholder={sectionLabel} />
               </SelectTrigger>
               <SelectContent className="bg-[#0c0b1c] border-white/[0.08] text-[#f0eef8]">
-                <SelectItem value="" className="text-[#5c5878] focus:bg-white/[0.06]">
+                <SelectItem value="" className="text-[#8580a0] focus:bg-white/[0.06]">
                   All {sectionLabel.toLowerCase()}s
                 </SelectItem>
                 {sectionOptions.map((opt) => (
@@ -270,7 +270,7 @@ export function FilterBar({
                     : format(dateRange.from, 'MMM d, yyyy')
                   : 'Date range'}
               </span>
-              <ChevronDown className="w-3 h-3 ml-auto text-[#5c5878]" aria-hidden="true" />
+              <ChevronDown className="w-3 h-3 ml-auto text-[#8580a0]" aria-hidden="true" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 bg-[#0c0b1c] border-white/[0.08]" align="start">
@@ -298,8 +298,8 @@ export function FilterBar({
           aria-label="Score range filter"
         >
           <div className="flex items-center gap-1.5 shrink-0">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#5c5878]" aria-hidden="true" />
-            <span className="text-[10px] font-mono text-[#5c5878] uppercase tracking-wider whitespace-nowrap">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#8580a0]" aria-hidden="true" />
+            <span className="text-[10px] font-mono text-[#8580a0] uppercase tracking-wider whitespace-nowrap">
               Score {scoreRange[0]}–{scoreRange[1]}%
             </span>
           </div>
@@ -329,7 +329,7 @@ export function FilterBar({
           onClick={handleClear}
           className={cn(
             'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono',
-            'text-[#5c5878] hover:text-[#FF6B6B] hover:bg-[rgba(255,107,107,0.08)]',
+            'text-[#8580a0] hover:text-[#FF6B6B] hover:bg-[rgba(255,107,107,0.08)]',
             'border border-transparent hover:border-[rgba(255,107,107,0.2)]',
             'transition-all duration-150',
           )}

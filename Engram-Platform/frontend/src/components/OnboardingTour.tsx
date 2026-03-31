@@ -179,7 +179,7 @@ export function OnboardingTour({ steps = DEFAULT_STEPS, onComplete }: Onboarding
             <button
               type="button"
               onClick={handleSkip}
-              className="text-[#5c5878] hover:text-[#f0eef8] transition-colors text-xs"
+              className="text-[#8580a0] hover:text-[#f0eef8] transition-colors text-xs"
               aria-label="Skip tour"
             >
               Skip

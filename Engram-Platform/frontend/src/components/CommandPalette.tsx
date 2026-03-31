@@ -253,14 +253,14 @@ export function CommandPalette({ onClose, onShowShortcuts }: CommandPaletteProps
         onKeyDown={handleKeyDown}
       >
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
-          <Search className="w-4 h-4 text-[#5c5878] shrink-0" />
+          <Search className="w-4 h-4 text-[#8580a0] shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search commands, pages, or actions…"
-            className="flex-1 bg-transparent text-sm text-[#f0eef8] placeholder-[#5c5878] outline-none"
+            className="flex-1 bg-transparent text-sm text-[#f0eef8] placeholder-[#8580a0] outline-none"
             aria-label="Search commands"
             role="combobox"
             aria-expanded="true"
@@ -268,13 +268,13 @@ export function CommandPalette({ onClose, onShowShortcuts }: CommandPaletteProps
             aria-autocomplete="list"
           />
           <div className="flex items-center gap-1">
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-mono text-[#5c5878]">
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-mono text-[#8580a0]">
               <span>esc</span>
             </kbd>
             <button
               type="button"
               onClick={onClose}
-              className="ml-2 rounded-md p-1 text-[#5c5878] hover:text-[#f0eef8] hover:bg-white/[0.06] transition-colors"
+              className="ml-2 rounded-md p-1 text-[#8580a0] hover:text-[#f0eef8] hover:bg-white/[0.06] transition-colors"
               aria-label="Close command palette"
             >
               <X className="w-4 h-4" />
@@ -289,7 +289,7 @@ export function CommandPalette({ onClose, onShowShortcuts }: CommandPaletteProps
           className="max-h-80 overflow-y-auto py-2"
         >
           {flatFiltered.length === 0 && (
-            <div className="py-12 text-center text-sm text-[#5c5878]">
+            <div className="py-12 text-center text-sm text-[#8580a0]">
               No results for &ldquo;{query}&rdquo;
             </div>
           )}
@@ -320,12 +320,12 @@ export function CommandPalette({ onClose, onShowShortcuts }: CommandPaletteProps
                     <Icon
                       className={cn(
                         'w-4 h-4 shrink-0',
-                        isSelected ? 'text-[#2EC4C4]' : 'text-[#5c5878]',
+                        isSelected ? 'text-[#2EC4C4]' : 'text-[#8580a0]',
                       )}
                     />
                     <span className="flex-1 text-sm">{item.label}</span>
                     {item.shortcut && (
-                      <kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-mono text-[#5c5878]">
+                      <kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-mono text-[#8580a0]">
                         {item.shortcut}
                       </kbd>
                     )}
@@ -380,7 +380,7 @@ export function CommandPaletteHint() {
         <button
           type="button"
           onClick={() => setVisible(false)}
-          className="ml-2 rounded-md p-0.5 text-[#5c5878] hover:text-[#f0eef8] transition-colors"
+          className="ml-2 rounded-md p-0.5 text-[#8580a0] hover:text-[#f0eef8] transition-colors"
           aria-label="Dismiss hint"
         >
           <X className="w-3.5 h-3.5" />
@@ -454,7 +454,7 @@ export function KeyboardShortcutsModal({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-[#5c5878] hover:text-[#f0eef8] hover:bg-white/[0.06] transition-colors"
+            className="rounded-md p-1 text-[#8580a0] hover:text-[#f0eef8] hover:bg-white/[0.06] transition-colors"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -510,7 +510,7 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="relative rounded-lg p-2 text-[#5c5878] hover:text-[#f0eef8] hover:bg-white/[0.06] transition-colors"
+        className="relative rounded-lg p-2 text-[#8580a0] hover:text-[#f0eef8] hover:bg-white/[0.06] transition-colors"
         aria-label={`Notifications${unread > 0 ? `, ${unread} unread` : ''}`}
         aria-expanded={open}
         aria-haspopup="true"
@@ -542,7 +542,7 @@ export function NotificationBell() {
               <button
                 type="button"
                 onClick={() => setNotifications([])}
-                className="text-xs text-[#5c5878] hover:text-[#f0eef8] transition-colors"
+                className="text-xs text-[#8580a0] hover:text-[#f0eef8] transition-colors"
               >
                 Clear all
               </button>
@@ -550,7 +550,7 @@ export function NotificationBell() {
           </div>
           <div className="max-h-64 overflow-y-auto py-1">
             {notifications.length === 0 ? (
-              <div className="py-8 text-center text-sm text-[#5c5878]">No notifications</div>
+              <div className="py-8 text-center text-sm text-[#8580a0]">No notifications</div>
             ) : (
               notifications.map((n) => (
                 <div
@@ -563,7 +563,7 @@ export function NotificationBell() {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-[#f0eef8]">{n.message}</p>
-                    <p className="text-[10px] text-[#5c5878] font-mono mt-0.5">
+                    <p className="text-[10px] text-[#8580a0] font-mono mt-0.5">
                       {n.time.toLocaleTimeString()}
                     </p>
                   </div>

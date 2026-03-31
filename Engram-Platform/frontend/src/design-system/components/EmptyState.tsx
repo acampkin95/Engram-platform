@@ -63,7 +63,7 @@ export const EmptyState = memo(function EmptyState({
         className,
       )}
     >
-      <div className="w-14 h-14 rounded-2xl bg-[#1e1e3a]/30 flex items-center justify-center mb-5 text-[#5c5878] shadow-inner">
+      <div className="w-14 h-14 rounded-2xl bg-[#1e1e3a]/30 flex items-center justify-center mb-5 text-[#8580a0] shadow-inner">
         {icon ?? <Inbox className="w-6 h-6 opacity-60" />}
       </div>
       <h3 className="text-sm font-medium text-[#f0eef8] mb-1.5">{title}</h3>

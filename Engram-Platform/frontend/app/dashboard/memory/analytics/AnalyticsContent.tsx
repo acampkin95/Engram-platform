@@ -304,23 +304,29 @@ function formatTimeAgo(date: Date): string {
 export default function AnalyticsContent() {
   const [filters, setFilters] = useState<FilterValues>({});
 
-  const { data: analyticsRes, error: analyticsError, isLoading: analyticsLoading } = useSWR(
-    swrKeys.memory.analytics(),
-    () => memoryClient.getAnalytics(),
-    { revalidateOnFocus: false },
-  );
+  const {
+    data: analyticsRes,
+    error: analyticsError,
+    isLoading: analyticsLoading,
+  } = useSWR(swrKeys.memory.analytics(), () => memoryClient.getAnalytics(), {
+    revalidateOnFocus: false,
+  });
 
-  const { data: mattersRes, error: mattersError, isLoading: mattersLoading } = useSWR(
-    swrKeys.memory.matters(),
-    () => memoryClient.getMatters(),
-    { revalidateOnFocus: false },
-  );
+  const {
+    data: mattersRes,
+    error: mattersError,
+    isLoading: mattersLoading,
+  } = useSWR(swrKeys.memory.matters(), () => memoryClient.getMatters(), {
+    revalidateOnFocus: false,
+  });
 
-  const { data: memoriesRes, error: memoriesError, isLoading: memoriesLoading } = useSWR(
-    swrKeys.memory.memories(),
-    () => memoryClient.getMemories({ limit: 200 }),
-    { revalidateOnFocus: false },
-  );
+  const {
+    data: memoriesRes,
+    error: memoriesError,
+    isLoading: memoriesLoading,
+  } = useSWR(swrKeys.memory.memories(), () => memoryClient.getMemories({ limit: 200 }), {
+    revalidateOnFocus: false,
+  });
 
   const isLoading = analyticsLoading || mattersLoading || memoriesLoading;
 
@@ -403,6 +409,7 @@ export default function AnalyticsContent() {
 
   return (
     <div className="space-y-6 animate-page-enter">
+      <h1 className="sr-only">Memory Analytics</h1>
       {/* Header */}
       <SectionHeader title="Analytics" breadcrumb={['MEMORY', 'ANALYTICS']} />
 

@@ -68,12 +68,12 @@ function transformToFlow(
   entities: Entity[],
   relations: Relation[],
 ): { nodes: Node[]; edges: Edge[] } {
-  const nodes: Node[] = entities.map((entity) => ({
+  const nodes: Node[] = entities.map((entity, i) => ({
     id: entity.entity_id,
     type: 'entity',
     position: {
-      x: Math.random() * 800,
-      y: Math.random() * 600,
+      x: (i % 10) * 80 + 40,
+      y: Math.floor(i / 10) * 80 + 40,
     },
     data: {
       label: entity.name,
@@ -291,6 +291,7 @@ function GraphContent({ matters }: GraphContentProps) {
 
   return (
     <div className="flex flex-col h-full">
+      <h1 className="sr-only">Memory Graph</h1>
       <SectionHeader title="Knowledge Graph" />
 
       <div className="flex items-center gap-4 mb-4">
