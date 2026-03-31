@@ -143,7 +143,7 @@ class Memory(BaseModel):
     embedding_model: str | None = Field(default=None, description="Model that generated the vector")
     embedding_dimension: int | None = Field(default=None, description="Vector dimension")
     last_accessed_at: datetime | None = Field(default=None, description="Last retrieval timestamp")
-    decay_factor: float = Field(default=1.0, ge=0.0, le=1.0, description="Computed decay factor")
+    decay_factor: float = Field(default=1.0, ge=0.0, le=2.0, description="Computed decay factor (may exceed 1.0 via access boost)")
     canonical_id: str | None = Field(
         default=None, description="Points to canonical if this is a duplicate"
     )
