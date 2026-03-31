@@ -1,4 +1,21 @@
 import Link from 'next/link';
+import {
+  Brain,
+  ScanSearch,
+  Network,
+  LayoutDashboard,
+  Globe,
+  Bot,
+  BookOpen,
+  Shield,
+  FlaskConical,
+  Wrench,
+  Monitor,
+  Terminal,
+  Database,
+  Zap,
+  Container,
+} from 'lucide-react';
 import { Hero, Feature, Button, PlatformArchitecture } from './components';
 
 const platformPillars = [
@@ -6,11 +23,14 @@ const platformPillars = [
     title: 'AiMemory',
     subtitle: '3-Tier Vector Memory',
     description:
-      'Weaviate-powered persistent memory system with episodic, semantic, and procedural tiers. RAG pipeline, memory decay, and multi-tenancy support.',
+      'Three-tier vector memory with semantic search, automatic decay, RAG queries, and knowledge graph. Memories persist across sessions, projects, and AI clients.',
     color: 'amber' as const,
     icon: (
-      <div className="w-12 h-12 rounded-full bg-[var(--engram-amber)]/20 flex items-center justify-center">
-        <div className="text-2xl">🧠</div>
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, rgba(242,169,59,0.3) 0%, rgba(242,169,59,0.12) 100%)', border: '1px solid rgba(242,169,59,0.25)' }}
+      >
+        <Brain size={20} color="var(--engram-amber)" strokeWidth={1.5} />
       </div>
     ),
   },
@@ -18,11 +38,14 @@ const platformPillars = [
     title: 'AiCrawler',
     subtitle: 'OSINT Intelligence Engine',
     description:
-      '5-stage pipeline for automated intelligence gathering: discover, crawl, analyze, store, and graph. Dark web monitoring and threat intelligence.',
+      'OSINT-grade web crawler with AI-powered content analysis, dark web capability, entity extraction, and ChromaDB vector storage. Scrape, analyse, and retain intelligence.',
     color: 'violet' as const,
     icon: (
-      <div className="w-12 h-12 rounded-full bg-[var(--engram-violet)]/20 flex items-center justify-center">
-        <div className="text-2xl">🔍</div>
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, rgba(124,92,191,0.3) 0%, rgba(124,92,191,0.12) 100%)', border: '1px solid rgba(124,92,191,0.25)' }}
+      >
+        <ScanSearch size={20} color="var(--engram-violet)" strokeWidth={1.5} />
       </div>
     ),
   },
@@ -30,11 +53,14 @@ const platformPillars = [
     title: 'MCP Server',
     subtitle: 'Universal AI Bridge',
     description:
-      'Dual transport MCP server (stdio + HTTP) with OAuth 2.1, PKCE authentication. Expose tools, prompts, and resources to any AI client.',
+      '25 tools over stdio and HTTP. Connects Claude Code, Claude Desktop, or any MCP client to your memory layer in minutes. OAuth 2.1 + circuit breaker resilience.',
     color: 'teal' as const,
     icon: (
-      <div className="w-12 h-12 rounded-full bg-[var(--engram-teal)]/20 flex items-center justify-center">
-        <div className="text-2xl">🌉</div>
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, rgba(46,196,196,0.25) 0%, rgba(46,196,196,0.08) 100%)', border: '1px solid rgba(46,196,196,0.2)' }}
+      >
+        <Network size={20} color="var(--engram-teal)" strokeWidth={1.5} />
       </div>
     ),
   },
@@ -42,11 +68,14 @@ const platformPillars = [
     title: 'Platform Dashboard',
     subtitle: 'Operations Command Center',
     description:
-      'Real-time system monitoring, knowledge graph visualization, memory browser, and health dashboards built with Next.js 15 and React 19.',
+      'Unified Next.js 15 dashboard for memory browsing, crawler jobs, knowledge graph visualisation, investigation case management, and system health monitoring.',
     color: 'rose' as const,
     icon: (
-      <div className="w-12 h-12 rounded-full bg-[var(--engram-rose)]/20 flex items-center justify-center">
-        <div className="text-2xl">📊</div>
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, rgba(224,92,127,0.3) 0%, rgba(224,92,127,0.1) 100%)', border: '1px solid rgba(224,92,127,0.22)' }}
+      >
+        <LayoutDashboard size={20} color="var(--engram-rose)" strokeWidth={1.5} />
       </div>
     ),
   },
@@ -57,41 +86,77 @@ const useCases = [
     title: 'OSINT Investigation',
     description: 'Automated intelligence gathering with dark web monitoring, breach scanning, and entity correlation.',
     color: 'violet' as const,
+    icon: <Globe size={18} color="var(--engram-violet)" strokeWidth={1.5} />,
   },
   {
     title: 'AI Agent Memory',
     description: 'Persistent context for conversational AI and autonomous agents with semantic understanding.',
     color: 'amber' as const,
+    icon: <Brain size={18} color="var(--engram-amber)" strokeWidth={1.5} />,
   },
   {
     title: 'Knowledge Management',
     description: 'Enterprise knowledge graphs with semantic search and relationship extraction.',
     color: 'teal' as const,
+    icon: <BookOpen size={18} color="var(--engram-teal)" strokeWidth={1.5} />,
   },
   {
     title: 'Threat Intelligence',
     description: 'Real-time breach scanning, crypto tracing, and threat pattern analysis.',
     color: 'rose' as const,
+    icon: <Shield size={18} color="var(--engram-rose)" strokeWidth={1.5} />,
   },
   {
     title: 'Research Automation',
     description: 'Web crawling with AI-powered analysis, extraction, and knowledge synthesis.',
     color: 'amber' as const,
+    icon: <FlaskConical size={18} color="var(--engram-amber)" strokeWidth={1.5} />,
   },
   {
     title: 'MCP Tool Server',
     description: 'Expose any capability as tools for Claude Desktop, Claude Code, and AI assistants.',
     color: 'violet' as const,
+    icon: <Wrench size={18} color="var(--engram-violet)" strokeWidth={1.5} />,
   },
 ];
 
 const integrations = [
-  { name: 'Claude Desktop', icon: '💬', description: 'MCP stdio transport' },
-  { name: 'Claude Code', icon: '💻', description: 'Native integration' },
-  { name: 'Any AI Client', icon: '🤖', description: 'HTTP streaming' },
-  { name: 'Docker Compose', icon: '🐳', description: 'One-command deploy' },
-  { name: 'Weaviate', icon: '🔍', description: 'Vector storage' },
-  { name: 'Redis', icon: '⚡', description: 'Caching layer' },
+  {
+    name: 'Claude Desktop',
+    icon: <Monitor size={28} color="var(--engram-amber)" strokeWidth={1.5} />,
+    description: 'MCP stdio transport',
+    detail: 'Connect your local Claude instance to full memory and tool access over stdio.',
+  },
+  {
+    name: 'Claude Code',
+    icon: <Terminal size={28} color="var(--engram-violet)" strokeWidth={1.5} />,
+    description: 'Native integration',
+    detail: 'Drop-in MCP config gives Claude Code persistent project and cross-session memory.',
+  },
+  {
+    name: 'Any AI Client',
+    icon: <Bot size={28} color="var(--engram-teal)" strokeWidth={1.5} />,
+    description: 'HTTP streaming',
+    detail: 'Standard MCP over HTTP — works with any client that speaks the protocol.',
+  },
+  {
+    name: 'Docker Compose',
+    icon: <Container size={28} color="var(--engram-rose)" strokeWidth={1.5} />,
+    description: 'One-command deploy',
+    detail: 'Full stack up in under 60 seconds. All services wired and ready.',
+  },
+  {
+    name: 'Weaviate',
+    icon: <Database size={28} color="var(--engram-amber)" strokeWidth={1.5} />,
+    description: 'Vector storage',
+    detail: 'Multi-tenant vector DB backing all three memory tiers with HNSW indexing.',
+  },
+  {
+    name: 'Redis',
+    icon: <Zap size={28} color="var(--engram-violet)" strokeWidth={1.5} />,
+    description: 'Caching layer',
+    detail: 'Sub-millisecond hot cache for embeddings, sessions, and rate limiting.',
+  },
 ];
 
 const stats = [
@@ -109,18 +174,19 @@ export default function Home() {
         {/* Platform Overview - 4 Pillars */}
         <section
           id="platform"
+          aria-labelledby="platform-heading"
           className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300"
         >
           {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-amber)]/30 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-amber)]/30 to-transparent" aria-hidden="true" />
 
           <div className="max-w-6xl mx-auto">
             <div className="mb-16 md:mb-20">
-              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
+              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3" aria-hidden="true">
                 <div className="w-10 h-px bg-[var(--engram-amber)]" />
                 The Engram Ecosystem
               </div>
-              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-6">
+              <h2 id="platform-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-6">
                 Four Integrated Services
               </h2>
               <p className="font-[var(--font-body)] italic text-lg sm:text-xl text-[var(--text-secondary)] max-w-3xl leading-relaxed">
@@ -146,17 +212,17 @@ export default function Home() {
         </section>
 
         {/* Architecture Section */}
-        <section id="architecture" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-1)] transition-all duration-300">
+        <section id="architecture" aria-labelledby="architecture-heading" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-1)] transition-all duration-300">
           {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-violet)]/30 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-violet)]/30 to-transparent" aria-hidden="true" />
 
           <div className="max-w-6xl mx-auto">
             <div className="mb-16 md:mb-20">
-              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
+              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3" aria-hidden="true">
                 <div className="w-10 h-px bg-[var(--engram-amber)]" />
                 Technical Architecture
               </div>
-              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
+              <h2 id="architecture-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
                 Engineered for Scale
               </h2>
             </div>
@@ -263,24 +329,24 @@ export default function Home() {
         </section>
 
         {/* Integration Section */}
-        <section className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300">
+        <section id="integrations" aria-labelledby="integrations-heading" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300">
           {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-teal)]/30 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-teal)]/30 to-transparent" aria-hidden="true" />
 
           <div className="max-w-6xl mx-auto">
             <div className="mb-16 md:mb-20">
-              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
+              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3" aria-hidden="true">
                 <div className="w-10 h-px bg-[var(--engram-amber)]" />
                 Seamless Integration
               </div>
-              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
-                Connect Everywhere
+              <h2 id="integrations-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
+                Connects to Everything
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {integrations.map((integration, idx) => {
-                const colorMap = ['amber', 'violet', 'teal', 'rose', 'amber', 'violet'];
+                const colorMap = ['amber', 'violet', 'teal', 'rose', 'amber', 'violet'] as const;
                 const color = colorMap[idx % colorMap.length];
                 const colorVars = {
                   amber: 'var(--engram-amber)',
@@ -302,20 +368,23 @@ export default function Home() {
                     <div
                       className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                       style={{
-                        border: `2px solid ${colorVars[color as keyof typeof colorVars]}`,
-                        boxShadow: `0 0 24px ${colorVars[color as keyof typeof colorVars]}20`,
+                        border: `2px solid ${colorVars[color]}`,
+                        boxShadow: `0 0 24px ${colorVars[color]}20`,
                       }}
                     />
 
                     <div className="relative">
-                      <div className="text-4xl mb-4 group-hover:scale-125 transition-transform duration-300 inline-block">
+                      <div className="mb-4 group-hover:scale-110 transition-transform duration-300 inline-block">
                         {integration.icon}
                       </div>
-                      <h3 className="font-[var(--font-display)] font-bold text-xl mb-2">
+                      <h3 className="font-[var(--font-display)] font-bold text-xl mb-1">
                         {integration.name}
                       </h3>
-                      <p className="font-[var(--font-mono)] text-sm text-[var(--text-muted)]">
+                      <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.1em] mb-3">
                         {integration.description}
+                      </p>
+                      <p className="font-[var(--font-body)] text-sm text-[var(--text-secondary)] leading-relaxed">
+                        {integration.detail}
                       </p>
                     </div>
                   </div>
@@ -326,50 +395,79 @@ export default function Home() {
         </section>
 
         {/* Use Cases Section */}
-        <section className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-1)] transition-all duration-300">
+        <section id="use-cases" aria-labelledby="use-cases-heading" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-1)] transition-all duration-300">
           {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-rose)]/30 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-rose)]/30 to-transparent" aria-hidden="true" />
 
           <div className="max-w-6xl mx-auto">
             <div className="mb-16 md:mb-20">
-              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3">
+              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3" aria-hidden="true">
                 <div className="w-10 h-px bg-[var(--engram-amber)]" />
                 Real-World Applications
               </div>
-              <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
-                Built for Real-World Intelligence
+              <h2 id="use-cases-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
+                Built for Real Work
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {useCases.map((useCase) => (
-                <Feature
-                  key={useCase.title}
-                  title={useCase.title}
-                  description={useCase.description}
-                  color={useCase.color}
-                  className="h-full group"
-                />
-              ))}
+              {useCases.map((useCase) => {
+                const colorVars = {
+                  amber: 'rgba(242,169,59,0.4)',
+                  violet: 'rgba(124,92,191,0.4)',
+                  teal: 'rgba(46,196,196,0.35)',
+                  rose: 'rgba(224,92,127,0.4)',
+                };
+                return (
+                  <div
+                    key={useCase.title}
+                    className="group relative rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                    }}
+                  >
+                    {/* Amber gradient border on hover */}
+                    <div
+                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                      style={{
+                        border: `1px solid ${colorVars[useCase.color]}`,
+                        boxShadow: `0 0 20px ${colorVars[useCase.color]}18`,
+                      }}
+                    />
+                    <div className="relative">
+                      <div className="mb-4 inline-flex items-center justify-center w-9 h-9 rounded-lg"
+                        style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        {useCase.icon}
+                      </div>
+                      <h3 className="font-[var(--font-display)] font-bold text-xl mb-3">
+                        {useCase.title}
+                      </h3>
+                      <p className="font-[var(--font-body)] text-[var(--text-secondary)] leading-relaxed">
+                        {useCase.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300">
+        <section id="get-started" aria-labelledby="cta-heading" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300">
           {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-amber)]/30 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-amber)]/30 to-transparent" aria-hidden="true" />
 
           <div className="max-w-4xl mx-auto text-center">
-            <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-6">
+            <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-6" aria-hidden="true">
               Ready to Get Started?
             </div>
-            <h2 className="font-[var(--font-display)] font-bold text-[clamp(2rem,6vw,3.5rem)] leading-[1.1] mb-6 sm:mb-8">
-              Deploy the Full Platform in Minutes
+            <h2 id="cta-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,6vw,3.5rem)] leading-[1.1] mb-6 sm:mb-8">
+              Start in 60 Seconds
             </h2>
             <p className="font-[var(--font-body)] italic text-lg sm:text-xl text-[var(--text-secondary)] mb-10 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
-              One Docker Compose file orchestrates all four integrated services with proper networking,
-              environment variables, and persistence.
+              One Docker Compose command. Full stack memory, OSINT, and MCP — ready in under a minute.
             </p>
 
             <div
@@ -387,13 +485,13 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/getting-started">
-                <Button size="lg">Getting Started Guide</Button>
+                <Button size="lg">View Full Docs</Button>
               </Link>
-              <Link href="/knowledge-base">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
                 <Button variant="secondary" size="lg">
-                  View Knowledge Base
+                  Browse GitHub
                 </Button>
-              </Link>
+              </a>
             </div>
 
             {/* Scroll indicator hint */}

@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Brain, ScanSearch, Network, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { Button } from './ui/Button';
-import { ChevronDown } from 'lucide-react';
 
 interface Service {
   name: string;
   description: string;
   color: 'amber' | 'violet' | 'teal' | 'rose';
-  icon: string;
+  icon: React.ReactNode;
   port?: string;
   tech?: string;
 }
@@ -19,7 +19,7 @@ const services: Service[] = [
     name: 'AiMemory',
     description: '3-Tier Vector Memory',
     color: 'amber',
-    icon: '🧠',
+    icon: <Brain size={28} strokeWidth={1.5} />,
     port: ':8000',
     tech: 'FastAPI • Weaviate • Redis',
   },
@@ -27,7 +27,7 @@ const services: Service[] = [
     name: 'AiCrawler',
     description: 'OSINT Intelligence',
     color: 'violet',
-    icon: '🔍',
+    icon: <ScanSearch size={28} strokeWidth={1.5} />,
     port: ':11235',
     tech: 'Crawl4AI • ChromaDB • LM Studio',
   },
@@ -35,7 +35,7 @@ const services: Service[] = [
     name: 'MCP Server',
     description: 'Universal AI Bridge',
     color: 'teal',
-    icon: '🌉',
+    icon: <Network size={28} strokeWidth={1.5} />,
     port: ':3000',
     tech: 'Node.js • TypeScript • Hono',
   },
@@ -43,7 +43,7 @@ const services: Service[] = [
     name: 'Platform',
     description: 'Operations Dashboard',
     color: 'rose',
-    icon: '📊',
+    icon: <LayoutDashboard size={28} strokeWidth={1.5} />,
     port: ':3002',
     tech: 'Next.js • React 19 • Tailwind',
   },
@@ -369,6 +369,7 @@ export function Hero() {
           </div>
 
           <h1
+            aria-label="Engram"
             className="font-[var(--font-display)] font-black text-[clamp(3rem,8vw,6rem)] leading-[0.9] tracking-[0.15em] mb-4"
             style={{
               color: 'transparent',
@@ -378,7 +379,7 @@ export function Hero() {
               animation: prefersReducedMotion ? 'none' : 'fadeUp 0.8s ease 0.2s both',
             }}
           >
-            ENGRAM
+            <span aria-hidden="true">ENGRAM</span>
           </h1>
 
           {/* Animated subtitle words */}
@@ -409,8 +410,8 @@ export function Hero() {
             className="font-[var(--font-body)] text-lg text-[var(--text-secondary)] leading-relaxed mb-12 max-w-lg"
             style={{ animation: prefersReducedMotion ? 'none' : 'fadeUp 0.8s ease 0.7s both' }}
           >
-            Four integrated services that give AI systems persistent memory, intelligent web
-            crawling, unified tool access, and a powerful operations dashboard.
+            A self-hosted AI memory platform — semantic search, OSINT crawling, and MCP tooling
+            for agents that need to remember.
           </p>
 
           {/* Meta Badges with Staggered Animation */}
@@ -501,7 +502,9 @@ export function Hero() {
 
                 <button
                   type="button"
-                  className="service-card w-full group"
+                  className="service-card w-full group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--engram-amber)] focus-visible:ring-2 focus-visible:ring-[var(--engram-amber)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--void)]"
+                  onFocus={() => setHoveredService(index)}
+                  onBlur={() => setHoveredService(null)}
                   style={{
                     background: getColorBg(service.color),
                     border: `1px solid ${
@@ -554,8 +557,9 @@ export function Hero() {
 
                   <div style={{ position: 'relative', paddingLeft: '12px', width: '100%' }}>
                     <div
-                      className="text-3xl mb-2 block"
+                      className="mb-2 inline-flex items-center justify-center"
                       style={{
+                        color: getColorVar(service.color),
                         animation:
                           hoveredService === index && !prefersReducedMotion
                             ? 'synapseFlare 0.6s ease-in-out'
@@ -617,20 +621,22 @@ export function Hero() {
 
       {/* Scroll Indicator Chevron */}
       {scrollY < 100 && (
-        <div
-          className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2"
+        <button
+          type="button"
+          aria-label="Scroll to explore"
+          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 bg-transparent border-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--engram-amber)]"
           style={{
             animation: prefersReducedMotion
               ? 'none'
               : `${scrollY > 50 ? 'fadeOutChevron' : 'bounceChevron'} 2s ease infinite`,
-            pointerEvents: 'none',
           }}
         >
           <span className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] uppercase tracking-[0.1em]">
             Explore
           </span>
-          <ChevronDown size={20} color="var(--engram-amber)" strokeWidth={1.5} />
-        </div>
+          <ChevronDown size={20} color="var(--engram-amber)" strokeWidth={1.5} aria-hidden="true" />
+        </button>
       )}
     </section>
   );

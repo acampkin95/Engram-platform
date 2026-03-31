@@ -29,13 +29,13 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://memory.velocitydigi.com/engram"),
   title: "ENGRAM — Unified AI Intelligence Platform",
-  description: "A comprehensive AI intelligence platform combining persistent memory, intelligent crawling, unified protocol servers, and visual analytics. Memory + Crawler + MCP + Dashboard.",
+  description: "Engram is a self-hosted AI memory platform — semantic search, OSINT crawling, and 25 MCP tools for AI agents that need to remember.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "ENGRAM — Unified AI Intelligence Platform",
-    description: "A comprehensive AI intelligence platform combining persistent memory, intelligent crawling, unified protocol servers, and visual analytics.",
+    description: "Engram is a self-hosted AI memory platform — semantic search, OSINT crawling, and 25 MCP tools for AI agents that need to remember.",
     url: "https://memory.velocitydigi.com/engram",
     siteName: "Engram Platform",
     type: "website",
@@ -51,9 +51,15 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ENGRAM — Unified AI Intelligence Platform",
-    description: "A comprehensive AI intelligence platform combining persistent memory, intelligent crawling, unified protocol servers, and visual analytics.",
+    description: "Engram is a self-hosted AI memory platform — semantic search, OSINT crawling, and 25 MCP tools for AI agents that need to remember.",
     images: ["https://memory.velocitydigi.com/engram/og-image.png"],
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

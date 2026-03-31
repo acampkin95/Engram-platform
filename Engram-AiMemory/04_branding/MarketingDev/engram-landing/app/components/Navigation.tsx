@@ -155,15 +155,23 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape' && isOpen) {
+      setIsOpen(false);
+    }
+  };
+
   return (
     <>
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden p-2 hover:bg-[var(--surface-1)] rounded-lg transition-colors"
-        aria-label="Toggle navigation"
+        aria-expanded={isOpen}
+        aria-controls="main-nav"
+        aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        className="fixed top-4 left-4 z-50 md:hidden p-2 hover:bg-[var(--surface-1)] rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-[var(--engram-amber)] focus-visible:outline-offset-2"
       >
-        <div className="w-5 h-5 flex flex-col justify-center gap-1">
+        <div className="w-5 h-5 flex flex-col justify-center gap-1" aria-hidden="true">
           <div
             className={`h-0.5 w-full bg-[var(--text-primary)] transition-transform ${
               isOpen ? 'rotate-45 translate-y-1.5' : ''
@@ -184,6 +192,9 @@ export function Navigation() {
 
       {/* Navigation Sidebar */}
       <nav
+        id="main-nav"
+        aria-label="Main navigation"
+        onKeyDown={handleKeyDown}
         className={`
           fixed left-0 top-0 h-screen bg-[var(--deep)] border-r border-[var(--border)] z-40
           transition-transform duration-300 ease-in-out
@@ -249,6 +260,7 @@ export function Navigation() {
       {/* Overlay for mobile */}
       {isOpen && (
         <div
+          role="presentation"
           className="fixed inset-0 bg-[var(--void)]/80 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setIsOpen(false)}
         />
