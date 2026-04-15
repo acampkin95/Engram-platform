@@ -9,6 +9,7 @@ from uuid import uuid4
 import pytest
 
 from memory_system import MemorySystem, MemoryTier, MemoryType
+from datetime import UTC
 
 
 @pytest.fixture
@@ -1194,47 +1195,47 @@ class TestMemoryDecayScoring:
 
     def test_brand_new_memory_score_is_one(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         decay = MemoryDecay(half_life_days=7)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         assert decay.calculate_recency_score(now, now) == pytest.approx(1.0)
 
     def test_half_life_gives_half_score(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         decay = MemoryDecay(half_life_days=7)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         created = now - timedelta(days=7)
         score = decay.calculate_recency_score(created, now)
         assert abs(score - 0.5) < 0.01
 
     def test_very_old_memory_near_zero(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         decay = MemoryDecay(half_life_days=7)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         created = now - timedelta(days=365)
         score = decay.calculate_recency_score(created, now)
         assert score < 0.01
 
     def test_future_memory_clamped_to_one(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         decay = MemoryDecay(half_life_days=7)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         future = now + timedelta(days=1)
         assert decay.calculate_recency_score(future, now) == pytest.approx(1.0)
 
     def test_custom_half_life(self):
         from memory_system.decay import MemoryDecay
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         decay = MemoryDecay(half_life_days=30)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         created = now - timedelta(days=30)
         score = decay.calculate_recency_score(created, now)
         assert abs(score - 0.5) < 0.01
@@ -1785,7 +1786,7 @@ class TestListMemoriesPagination:
         This validates that the model supports true pagination where total > page size.
         """
         from memory_system.api import ListMemoriesResponse, SearchResult
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         # Simulate: 200 total memories in the DB, but only 10 returned on this page
         page_items = [
@@ -1802,7 +1803,7 @@ class TestListMemoriesPagination:
                 importance=0.5,
                 confidence=1.0,
                 tags=[],
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
                 score=0.0,
                 distance=None,
             )
@@ -1834,7 +1835,7 @@ class TestListMemoriesPagination:
     def test_list_memories_response_last_page(self):
         """ListMemoriesResponse works when fewer items returned than limit (last page)."""
         from memory_system.api import ListMemoriesResponse, SearchResult
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         # Last page: only 3 items remain out of 53 total
         three_items = [
@@ -1851,7 +1852,7 @@ class TestListMemoriesPagination:
                 importance=0.7,
                 confidence=0.9,
                 tags=["tag"],
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
                 score=0.0,
                 distance=None,
             )
@@ -1989,9 +1990,9 @@ class TestAuthModule:
 
         # expire_hours=0 is invalid but we can create a token with past expiry manually
         from jose import jwt
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
-        payload = {"sub": "admin", "exp": datetime.now(timezone.utc) - timedelta(hours=1)}
+        payload = {"sub": "admin", "exp": datetime.now(UTC) - timedelta(hours=1)}
         expired_token = jwt.encode(payload, "test-secret", algorithm="HS256")
         with pytest.raises(ValueError, match="expired"):
             decode_access_token(expired_token, secret="test-secret")

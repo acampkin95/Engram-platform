@@ -1,17 +1,29 @@
 'use client';
 
-import { Check, Copy, Edit3, Key, Plus, Trash2 } from 'lucide-react';
+import { Check, Copy, Edit3, Key, Plus, Shield, Trash2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import useSWR from 'swr';
 import { Badge } from '@/src/design-system/components/Badge';
 import { Modal } from '@/src/design-system/components/Modal';
 import { addToast } from '@/src/design-system/components/Toast';
-import type { ApiKey, ApiKeyCreateResponse } from '@/src/lib/system-client';
-import { systemClient } from '@/src/lib/system-client';
+import { authClient } from '@/src/lib/auth-client';
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+// Use a loose type that matches BetterAuth's api-key shape
+// biome-ignore lint: flexible shape for BetterAuth compatibility
+type ApiKeyRecord = Record<string, any> & {
+  id: string;
+  name: string | null;
+  prefix: string | null;
+  enabled: boolean;
+  createdAt: Date | string;
+  requestCount: number;
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function formatDate(iso: string | null | undefined): string {
+function formatDate(iso: Date | string | null | undefined): string {
   if (!iso) return '--';
   return new Date(iso).toLocaleDateString('en-AU', {
     day: '2-digit',
@@ -22,10 +34,12 @@ function formatDate(iso: string | null | undefined): string {
   });
 }
 
-async function fetcher() {
-  const result = await systemClient.listKeys();
-  if (result.error) throw new Error(result.error);
-  return result.data!;
+async function fetcher(): Promise<ApiKeyRecord[]> {
+  const result = await authClient.apiKey.list();
+  if ('error' in result && result.error) throw new Error(String(result.error));
+  // biome-ignore lint: BetterAuth returns { apiKeys: [...] }
+  const data = result.data as any;
+  return data?.apiKeys ?? [];
 }
 
 // ── Create Key Modal ──────────────────────────────────────────────────────────
@@ -41,26 +55,31 @@ function CreateKeyModal({
 }>) {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [createdKey, setCreatedKey] = useState<ApiKeyCreateResponse | null>(null);
+  const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleCreate = async () => {
     if (!name.trim()) return;
     setLoading(true);
-    const result = await systemClient.createKey(name.trim());
-    setLoading(false);
-    if (result.error) {
-      addToast({ type: 'error', message: result.error });
-      return;
+    try {
+      const result = await authClient.apiKey.create({ name: name.trim() });
+      if ('error' in result && result.error) {
+        addToast({ type: 'error', message: String(result.error) });
+        return;
+      }
+      setCreatedKey((result.data as { key?: string })?.key ?? null);
+      onCreated();
+      addToast({ type: 'success', message: `API key "${name}" created` });
+    } catch (err) {
+      addToast({ type: 'error', message: err instanceof Error ? err.message : 'Failed to create key' });
+    } finally {
+      setLoading(false);
     }
-    setCreatedKey(result.data);
-    onCreated();
-    addToast({ type: 'success', message: `API key "${name}" created` });
   };
 
   const handleCopy = async () => {
-    if (!createdKey?.key) return;
-    await navigator.clipboard.writeText(createdKey.key);
+    if (!createdKey) return;
+    await navigator.clipboard.writeText(createdKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -82,7 +101,7 @@ function CreateKeyModal({
             </p>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-sm font-mono text-[#f0eef8] bg-black/30 rounded px-3 py-2 break-all select-all">
-                {createdKey.key}
+                {createdKey}
               </code>
               <button
                 type="button"
@@ -90,7 +109,11 @@ function CreateKeyModal({
                 className="shrink-0 p-2 rounded-lg hover:bg-white/5 text-[#a09bb8] hover:text-[#f0eef8] transition-colors"
                 aria-label="Copy key"
               >
-                {copied ? <Check className="w-4 h-4 text-[#2EC4C4]" /> : <Copy className="w-4 h-4" />}
+                {copied ? (
+                  <Check className="w-4 h-4 text-[#2EC4C4]" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -116,7 +139,6 @@ function CreateKeyModal({
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               placeholder="e.g. production-crawler"
               className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/10 text-sm text-[#f0eef8] placeholder-[#5c5878] focus:outline-none focus:ring-2 focus:ring-[#F2A93B]/50 focus:border-[#F2A93B]/50"
-              autoFocus
             />
           </div>
           <div className="flex gap-2 justify-end">
@@ -142,39 +164,40 @@ function CreateKeyModal({
   );
 }
 
-// ── Revoke Confirmation Modal ─────────────────────────────────────────────────
+// ── Delete Confirmation Modal ────────────────────────────────────────────────
 
-function RevokeModal({
-  keyToRevoke,
+function DeleteModal({
+  keyToDelete,
   onClose,
-  onRevoked,
+  onDeleted,
 }: Readonly<{
-  keyToRevoke: ApiKey | null;
+  keyToDelete: ApiKeyRecord | null;
   onClose: () => void;
-  onRevoked: () => void;
+  onDeleted: () => void;
 }>) {
   const [loading, setLoading] = useState(false);
 
-  const handleRevoke = async () => {
-    if (!keyToRevoke) return;
+  const handleDelete = async () => {
+    if (!keyToDelete) return;
     setLoading(true);
-    const result = await systemClient.revokeKey(keyToRevoke.id);
-    setLoading(false);
-    if (result.error) {
-      addToast({ type: 'error', message: result.error });
-      return;
+    try {
+      await authClient.apiKey.delete({ keyId: keyToDelete.id });
+      addToast({ type: 'success', message: `Key "${keyToDelete.name}" deleted` });
+      onDeleted();
+      onClose();
+    } catch (err) {
+      addToast({ type: 'error', message: err instanceof Error ? err.message : 'Failed to delete key' });
+    } finally {
+      setLoading(false);
     }
-    addToast({ type: 'success', message: `Key "${keyToRevoke.name}" revoked` });
-    onRevoked();
-    onClose();
   };
 
   return (
-    <Modal isOpen={!!keyToRevoke} onClose={onClose} title="Revoke API Key" size="sm">
+    <Modal isOpen={!!keyToDelete} onClose={onClose} title="Delete API Key" size="sm">
       <div className="space-y-4">
         <p className="text-sm text-[#a09bb8]">
-          Are you sure you want to revoke{' '}
-          <span className="text-[#f0eef8] font-medium">{keyToRevoke?.name}</span>? This action
+          Are you sure you want to delete{' '}
+          <span className="text-[#f0eef8] font-medium">{keyToDelete?.name}</span>? This action
           cannot be undone. Any services using this key will lose access immediately.
         </p>
         <div className="flex gap-2 justify-end">
@@ -187,11 +210,11 @@ function RevokeModal({
           </button>
           <button
             type="button"
-            onClick={handleRevoke}
+            onClick={handleDelete}
             disabled={loading}
             className="px-4 py-2 rounded-lg text-sm font-medium bg-[#FF6B6B]/10 text-[#FF6B6B] border border-[#FF6B6B]/20 hover:bg-[#FF6B6B]/20 disabled:opacity-40 transition-colors"
           >
-            {loading ? 'Revoking...' : 'Revoke Key'}
+            {loading ? 'Deleting...' : 'Delete Key'}
           </button>
         </div>
       </div>
@@ -205,26 +228,26 @@ function EditableName({
   apiKey,
   onRenamed,
 }: Readonly<{
-  apiKey: ApiKey;
+  apiKey: ApiKeyRecord;
   onRenamed: () => void;
 }>) {
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(apiKey.name);
+  const [value, setValue] = useState(apiKey.name ?? '');
 
   const commit = async () => {
     const trimmed = value.trim();
     if (!trimmed || trimmed === apiKey.name) {
-      setValue(apiKey.name);
+      setValue(apiKey.name ?? '');
       setEditing(false);
       return;
     }
-    const result = await systemClient.updateKey(apiKey.id, { name: trimmed });
-    if (result.error) {
-      addToast({ type: 'error', message: result.error });
-      setValue(apiKey.name);
-    } else {
+    try {
+      await authClient.apiKey.update({ keyId: apiKey.id, name: trimmed });
       addToast({ type: 'success', message: 'Key renamed' });
       onRenamed();
+    } catch {
+      addToast({ type: 'error', message: 'Failed to rename key' });
+      setValue(apiKey.name ?? '');
     }
     setEditing(false);
   };
@@ -239,12 +262,11 @@ function EditableName({
         onKeyDown={(e) => {
           if (e.key === 'Enter') commit();
           if (e.key === 'Escape') {
-            setValue(apiKey.name);
+            setValue(apiKey.name ?? '');
             setEditing(false);
           }
         }}
         className="px-2 py-0.5 rounded bg-black/30 border border-white/10 text-sm text-[#f0eef8] focus:outline-none focus:ring-1 focus:ring-[#F2A93B]/50 w-48"
-        autoFocus
       />
     );
   }
@@ -252,27 +274,107 @@ function EditableName({
   return (
     <button
       type="button"
-      onDoubleClick={() => apiKey.status === 'active' && setEditing(true)}
+      onDoubleClick={() => apiKey.enabled && setEditing(true)}
       onClick={() => {}}
       className="flex items-center gap-1.5 group text-left"
-      title={apiKey.status === 'active' ? 'Double-click to rename' : undefined}
+      title={apiKey.enabled ? 'Double-click to rename' : undefined}
     >
-      <span className="text-sm text-[#f0eef8]">{apiKey.name}</span>
-      {apiKey.status === 'active' && (
+      <span className="text-sm text-[#f0eef8]">{apiKey.name ?? 'Unnamed'}</span>
+      {apiKey.enabled && (
         <Edit3 className="w-3 h-3 text-[#5c5878] opacity-0 group-hover:opacity-100 transition-opacity" />
       )}
     </button>
   );
 }
 
+// ── Claude Code Config Helper ────────────────────────────────────────────────
+
+function ClaudeCodeConfigSection() {
+  const [copied, setCopied] = useState(false);
+
+  const configSnippet = JSON.stringify(
+    {
+      'engram-memory': {
+        command: 'node',
+        args: [
+          '/path/to/Engram-MCP/dist/index.js',
+          '--transport',
+          'stdio',
+        ],
+        env: {
+          ENGRAM_API_URL: 'http://acdev-devnode.icefish-discus.ts.net:8000',
+          ENGRAM_API_KEY: '<paste-your-api-key-here>',
+        },
+      },
+    },
+    null,
+    2,
+  );
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(configSnippet);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-[#7C5CBF]/10 border border-[#7C5CBF]/20">
+          <Shield className="w-5 h-5 text-[#7C5CBF]" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-[#f0eef8] font-display">Claude Code Setup</h2>
+          <p className="text-xs text-[#5c5878]">
+            Add to ~/.claude/settings.json under &quot;mcpServers&quot;
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-white/[0.06] bg-[#0d0d1a] p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-mono uppercase tracking-widest text-[#5c5878]">
+            MCP Config
+          </span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-[#a09bb8] hover:text-[#f0eef8] hover:bg-white/5 transition-colors"
+            aria-label="Copy config"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3 h-3 text-[#2EC4C4]" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3" />
+                Copy
+              </>
+            )}
+          </button>
+        </div>
+        <pre className="text-xs font-mono text-[#a09bb8] bg-black/30 rounded-lg p-3 overflow-x-auto whitespace-pre">
+          {configSnippet}
+        </pre>
+        <p className="text-xs text-[#5c5878]">
+          Replace <code className="text-[#a09bb8]">&lt;paste-your-api-key-here&gt;</code> with an
+          API key from the table above.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Keys Table ────────────────────────────────────────────────────────────────
 
 export default function KeysContent() {
-  const { data, error, isLoading, mutate } = useSWR('admin-keys', fetcher, {
+  const { data, error, isLoading, mutate } = useSWR('betterauth-keys', fetcher, {
     refreshInterval: 30000,
   });
   const [showCreate, setShowCreate] = useState(false);
-  const [revokeTarget, setRevokeTarget] = useState<ApiKey | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ApiKeyRecord | null>(null);
 
   const handleMutate = useCallback(() => {
     mutate();
@@ -294,7 +396,7 @@ export default function KeysContent() {
     );
   }
 
-  const keys = data?.keys ?? [];
+  const keys = data ?? [];
 
   return (
     <div className="space-y-6">
@@ -307,7 +409,8 @@ export default function KeysContent() {
           <div>
             <h1 className="text-lg font-semibold text-[#f0eef8] font-display">API Keys</h1>
             <p className="text-xs text-[#5c5878]">
-              {keys.length} key{keys.length !== 1 ? 's' : ''} total
+              {keys.length} key{keys.length !== 1 ? 's' : ''} total — used for MCP, Memory API,
+              and all service authentication
             </p>
           </div>
         </div>
@@ -358,7 +461,7 @@ export default function KeysContent() {
                   </td>
                 </tr>
               ) : (
-                keys.map((k: ApiKey) => (
+                keys.map((k: ApiKeyRecord) => (
                   <tr
                     key={k.id}
                     className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
@@ -368,34 +471,31 @@ export default function KeysContent() {
                     </td>
                     <td className="px-4 py-3">
                       <code className="text-xs font-mono text-[#a09bb8] bg-black/20 px-2 py-0.5 rounded">
-                        {k.prefix}...
+                        {k.prefix ?? '--'}
                       </code>
                     </td>
                     <td className="px-4 py-3">
-                      <Badge
-                        variant={k.status === 'active' ? 'success' : 'error'}
-                        dot
-                      >
-                        {k.status}
+                      <Badge variant={k.enabled ? 'success' : 'error'} dot>
+                        {k.enabled ? 'active' : 'disabled'}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-xs text-[#a09bb8]">
-                      {formatDate(k.created_at)}
+                      {formatDate(k.createdAt)}
                     </td>
                     <td className="px-4 py-3 text-xs text-[#a09bb8]">
-                      {formatDate(k.last_used)}
+                      {formatDate(k.lastUsedAt)}
                     </td>
                     <td className="px-4 py-3 text-xs text-[#a09bb8] font-mono">
-                      {k.request_count?.toLocaleString() ?? '--'}
+                      {k.requestCount?.toLocaleString() ?? '--'}
                     </td>
                     <td className="px-4 py-3">
-                      {k.status === 'active' && (
+                      {k.enabled && (
                         <button
                           type="button"
-                          onClick={() => setRevokeTarget(k)}
+                          onClick={() => setDeleteTarget(k)}
                           className="p-1.5 rounded-lg text-[#5c5878] hover:text-[#FF6B6B] hover:bg-[#FF6B6B]/10 transition-colors"
-                          aria-label={`Revoke key ${k.name}`}
-                          title="Revoke key"
+                          aria-label={`Delete key ${k.name}`}
+                          title="Delete key"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -409,16 +509,19 @@ export default function KeysContent() {
         </div>
       </div>
 
+      {/* Claude Code Integration */}
+      <ClaudeCodeConfigSection />
+
       {/* Modals */}
       <CreateKeyModal
         isOpen={showCreate}
         onClose={() => setShowCreate(false)}
         onCreated={handleMutate}
       />
-      <RevokeModal
-        keyToRevoke={revokeTarget}
-        onClose={() => setRevokeTarget(null)}
-        onRevoked={handleMutate}
+      <DeleteModal
+        keyToDelete={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onDeleted={handleMutate}
       />
     </div>
   );

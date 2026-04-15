@@ -9,7 +9,7 @@ import pytest
 import asyncio
 import time
 from datetime import datetime, UTC
-from typing import List, Dict, Any
+from typing import Any
 from statistics import mean, stdev
 from uuid import uuid4
 
@@ -33,7 +33,7 @@ class TestDataIntegrity:
             user_id="test-user",
         )
 
-        versions: List[Dict[str, Any]] = []
+        versions: list[dict[str, Any]] = []
         for i in range(5):
             memory.content = f"Updated content version {i}"
             memory.updated_at = datetime.now(UTC)
@@ -167,7 +167,7 @@ class TestFailureRecovery:
             try:
                 await asyncio.wait_for(asyncio.sleep(0.1), timeout=timeout)
                 return "success"
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 return "timeout"
 
         result = await operation_with_timeout(0.01)

@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
-import { Syne, Instrument_Serif, IBM_Plex_Mono } from "next/font/google";
-import { Navigation } from "./components/Navigation";
-import "./globals.css";
-import "./components.css";
+import type { Metadata } from 'next';
+import { Syne, Instrument_Serif, IBM_Plex_Mono } from 'next/font/google';
+import { Footer } from './components/Footer';
+import { Navigation } from './components/Navigation';
+import './globals.css';
+import './components.css';
 
 const syne = Syne({
   subsets: ["latin"],
@@ -27,39 +28,33 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://memory.velocitydigi.com/engram"),
-  title: "ENGRAM — Unified AI Intelligence Platform",
-  description: "Engram is a self-hosted AI memory platform — semantic search, OSINT crawling, and 25 MCP tools for AI agents that need to remember.",
+  metadataBase: new URL('https://memory.velocitydigi.com'),
+  title: 'ENGRAM — Unified AI Intelligence Platform',
+  description:
+    'Engram is a self-hosted AI intelligence platform for memory operations, OSINT pipelines, and MCP-powered agent workflows.',
   alternates: {
-    canonical: "/",
+    canonical: '/',
   },
   openGraph: {
-    title: "ENGRAM — Unified AI Intelligence Platform",
-    description: "Engram is a self-hosted AI memory platform — semantic search, OSINT crawling, and 25 MCP tools for AI agents that need to remember.",
-    url: "https://memory.velocitydigi.com/engram",
-    siteName: "Engram Platform",
-    type: "website",
-    images: [
-      {
-        url: "https://memory.velocitydigi.com/engram/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Engram Platform",
-      },
-    ],
+    title: 'ENGRAM — Unified AI Intelligence Platform',
+    description:
+      'Self-hosted memory, crawler, MCP, and dashboard surfaces designed to work as one operational loop.',
+    url: 'https://memory.velocitydigi.com',
+    siteName: 'Engram Platform',
+    type: 'website',
   },
   twitter: {
-    card: "summary_large_image",
-    title: "ENGRAM — Unified AI Intelligence Platform",
-    description: "Engram is a self-hosted AI memory platform — semantic search, OSINT crawling, and 25 MCP tools for AI agents that need to remember.",
-    images: ["https://memory.velocitydigi.com/engram/og-image.png"],
+    card: 'summary_large_image',
+    title: 'ENGRAM — Unified AI Intelligence Platform',
+    description:
+      'Memory operations, OSINT workflows, and MCP tooling for teams that need durable context.',
   },
 };
 
 export const viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
-  viewportFit: "cover",
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -77,9 +72,10 @@ export default function RootLayout({
           Skip to content
         </a>
         <Navigation />
-        <div id="main-content" className="md:ml-[280px]">
+        <div id="main-content">
           {children}
         </div>
+        <Footer />
       </body>
     </html>
   );

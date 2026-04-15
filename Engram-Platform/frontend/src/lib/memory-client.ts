@@ -65,7 +65,9 @@ export interface AnalyticsResponse {
 export interface HealthResponse {
   status: string;
   version?: string;
-  redis?: Record<string, unknown>;
+  weaviate?: boolean;
+  redis?: boolean | Record<string, unknown>;
+  initialized?: boolean;
   database?: Record<string, unknown>;
   cache?: Record<string, unknown>;
 }

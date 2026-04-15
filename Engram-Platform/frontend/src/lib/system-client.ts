@@ -156,6 +156,18 @@ export const systemClient = {
     );
   },
 
+  // ── System Tokens (MCP Auth) ──────────────────────────────────────────────
+  getTokens() {
+    return request<{
+      mcp: { configured: boolean; masked: string; length: number };
+    }>('/api/system/tokens');
+  },
+  generateMcpToken() {
+    return request<{ token: string; message: string }>('/api/system/tokens', {
+      method: 'POST',
+    });
+  },
+
   // ── Audit Log ───────────────────────────────────────────────────────────────
   getAuditLog(params?: AuditLogParams) {
     const search = new URLSearchParams();

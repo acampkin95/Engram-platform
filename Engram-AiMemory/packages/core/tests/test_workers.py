@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import pytest
+
 """
 Unit tests for memory_system.workers — MaintenanceScheduler.
 
@@ -6,9 +9,7 @@ Mocks MemorySystem, OllamaClient, APScheduler (external services).
 Tests real scheduling logic, stats tracking, and job routing.
 """
 
-from __future__ import annotations
-
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -58,8 +59,8 @@ def _make_memory(
         canonical_id=canonical_id,
         access_count=access_count,
         last_accessed_at=last_accessed_at,
-        created_at=created_at or datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=created_at or datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
 
@@ -393,8 +394,8 @@ class TestJobUpdateDecay:
         system = _make_mock_system()
         mem = _make_memory(
             access_count=2,
-            last_accessed_at=datetime.now(timezone.utc),
-            created_at=datetime.now(timezone.utc),
+            last_accessed_at=datetime.now(UTC),
+            created_at=datetime.now(UTC),
         )
         system.list_memories = AsyncMock(side_effect=[([mem], 1), ([], 0)])
 
@@ -881,7 +882,7 @@ class TestJobUpdateDecayExtended:
 
         system = _make_mock_system()
         naive_dt = dt(2025, 1, 1, 12, 0, 0)  # No timezone
-        mem = _make_memory(last_accessed_at=naive_dt, created_at=datetime.now(timezone.utc))
+        mem = _make_memory(last_accessed_at=naive_dt, created_at=datetime.now(UTC))
         # Force last_accessed_at to naive via object.__setattr__
         object.__setattr__(mem, "last_accessed_at", naive_dt)
         system.list_memories = AsyncMock(side_effect=[([mem], 1), ([], 0)])
@@ -893,7 +894,7 @@ class TestJobUpdateDecayExtended:
 
     async def test_handles_individual_update_error(self) -> None:
         system = _make_mock_system()
-        mem = _make_memory(last_accessed_at=datetime.now(timezone.utc))
+        mem = _make_memory(last_accessed_at=datetime.now(UTC))
         system.list_memories = AsyncMock(side_effect=[([mem], 1), ([], 0)])
         system._weaviate.update_memory_fields = AsyncMock(side_effect=RuntimeError("Update failed"))
 

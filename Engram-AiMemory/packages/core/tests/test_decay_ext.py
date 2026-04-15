@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import pytest
+
 """
 Unit tests for memory_system.decay — MemoryReranker class.
 
 The MemoryDecay class is already tested in test_memory_system.py.
 This file covers MemoryReranker (lines 58-104 of decay.py).
 """
-
-from __future__ import annotations
 
 import sys
 from types import ModuleType

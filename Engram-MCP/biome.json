@@ -1,12 +1,9 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true
 		}
-	},
-	"files": {
-		"ignore": ["node_modules", "dist", "coverage", "*.config.js"]
 	}
 }

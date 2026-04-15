@@ -186,14 +186,8 @@ export default function RootLayout({
         {/* Preconnect to backend APIs (if cross-origin) */}
         <link rel="preconnect" href={APP_URL} />
 
-        {/* Preconnect to Clerk authentication domain */}
-        <link rel="preconnect" href="https://clerk.velocitydigi.com" />
-        <link rel="preconnect" href="https://accounts.velocitydigi.com" />
-        <link rel="preconnect" href="https://clerk.com" />
-
-        {/* DNS prefetch for less critical domains */}
-        <link rel="dns-prefetch" href="https://api.clerk.com" />
-        <link rel="dns-prefetch" href="https://img.clerk.com" />
+        {/* Preconnect to Google OAuth (if enabled) */}
+        <link rel="preconnect" href="https://accounts.google.com" />
 
         {/* =================================================================
             CRITICAL RESOURCE PRELOADING

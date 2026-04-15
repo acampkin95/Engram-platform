@@ -5,7 +5,7 @@ Shared pytest fixtures for AI Memory System integration tests.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -223,12 +223,12 @@ async def auth_client(mock_memory_system: MagicMock) -> AsyncGenerator[AsyncClie
     """
     AsyncClient with:
       - require_auth dependency overridden to return "test-user"
-      - memory_system.api._memory_system patched with mock_memory_system
+      - routers._state.memory_system patched with mock_memory_system
     """
-    import memory_system.api as api_module
+    from memory_system.routers import _state
 
-    original_memory_system = api_module._memory_system
-    api_module._memory_system = mock_memory_system
+    original_memory_system = _state.memory_system
+    _state.memory_system = mock_memory_system
     app.dependency_overrides[require_auth] = _override_auth
 
     try:
@@ -237,14 +237,14 @@ async def auth_client(mock_memory_system: MagicMock) -> AsyncGenerator[AsyncClie
             yield client
     finally:
         app.dependency_overrides.clear()
-        api_module._memory_system = original_memory_system
+        _state.memory_system = original_memory_system
 
 
 @pytest.fixture
 async def unauth_client() -> AsyncGenerator[AsyncClient, None]:
     """
     AsyncClient with NO auth override — tests 401 behaviour.
-    _memory_system is left as-is (may be None in test env, which is fine for auth tests).
+    _state.memory_system is left as-is (may be None in test env, which is fine for auth tests).
     """
     app.dependency_overrides.clear()
     transport = ASGITransport(app=app)
@@ -255,13 +255,13 @@ async def unauth_client() -> AsyncGenerator[AsyncClient, None]:
 @pytest.fixture
 async def no_system_client() -> AsyncGenerator[AsyncClient, None]:
     """
-    AsyncClient with auth overridden but _memory_system set to None.
+    AsyncClient with auth overridden but _state.memory_system set to None.
     Used to test 503 responses when the system is not initialised.
     """
-    import memory_system.api as api_module
+    from memory_system.routers import _state
 
-    original_memory_system = api_module._memory_system
-    api_module._memory_system = None
+    original_memory_system = _state.memory_system
+    _state.memory_system = None
     app.dependency_overrides[require_auth] = _override_auth
 
     try:
@@ -270,4 +270,4 @@ async def no_system_client() -> AsyncGenerator[AsyncClient, None]:
             yield client
     finally:
         app.dependency_overrides.clear()
-        api_module._memory_system = original_memory_system
+        _state.memory_system = original_memory_system

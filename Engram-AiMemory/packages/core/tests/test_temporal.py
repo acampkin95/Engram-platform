@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from memory_system.memory import Memory, TemporalBounds, TemporalResolution
+from memory_system.memory import Memory, TemporalResolution
 from memory_system.temporal import TemporalExtractor
 
 

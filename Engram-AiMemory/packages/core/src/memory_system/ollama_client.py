@@ -119,7 +119,8 @@ class OllamaClient:
             client = await self._get_client()
             r = await client.get(f"{self.host}/api/tags")
             return r.status_code == 200
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"Ollama availability check failed: {exc}")
             return False
 
     async def list_models(self) -> list[str]:
@@ -129,7 +130,8 @@ class OllamaClient:
             r = await client.get(f"{self.host}/api/tags")
             data = r.json()
             return [m["name"] for m in data.get("models", [])]
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"Ollama list_models failed: {exc}")
             return []
 
     async def score_importance(self, content: str) -> tuple[float, str]:

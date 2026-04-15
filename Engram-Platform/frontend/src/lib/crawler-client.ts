@@ -11,18 +11,22 @@ export interface HealthResponse {
 
 // Stats response from crawler API (/api/stats/dashboard)
 export interface StatsResponse {
+  crawls?: {
+    total: number;
+    active: number;
+    completed: number;
+    failed: number;
+    cancelled: number;
+  };
+  data_sets?: { total: number; total_size_bytes: number; total_files: number };
+  storage?: { collections: number; total_documents: number };
+  investigations?: { total: number; active: number };
+  cache_hit_rate?: number | null;
+  average_crawl_time_ms?: number | null;
+  // Legacy flat fields (some crawler versions return these)
   total_jobs?: number;
   total_crawls?: number;
   active_crawls?: number;
-  total?: number;
-  active?: number;
-  completed?: number;
-  failed?: number;
-  cancelled?: number;
-  data_sets?: { total: number; total_size_bytes: number; total_files: number };
-  storage?: { collections: number; total_documents: number };
-  cache_hit_rate?: number | null;
-  average_crawl_time_ms?: number | null;
 }
 
 // Job metadata and response type

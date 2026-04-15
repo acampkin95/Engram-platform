@@ -21,6 +21,7 @@ import {
   Server,
   Share2,
 } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -36,10 +37,12 @@ import { OnboardingTour } from '@/src/components/OnboardingTour';
 import { PreferencesManager } from '@/src/components/PreferencesManager';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
 import { NavItem } from '@/src/design-system/components/NavItem';
+import { SearchInput } from '@/src/design-system/components/SearchInput';
 import { SidebarGroup } from '@/src/design-system/components/SidebarGroup';
 import { StatusDot } from '@/src/design-system/components/StatusDot';
 import { EngramLogo } from '@/src/design-system/EngramLogo';
 import { useCommandPaletteKeyboard, usePowerUserShortcuts } from '@/src/hooks/useKeyboardShortcuts';
+import { cn } from '@/src/lib/utils';
 import { MotionProvider } from '@/src/providers/MotionProvider';
 import { useUIStore } from '@/src/stores/uiStore';
 
@@ -80,6 +83,26 @@ const adminNav = [
 
 function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed: boolean }>) {
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isNavScrolled, setIsNavScrolled] = useState(false);
+
+  const filterNav = <T extends { href: string; icon: typeof LayoutDashboard; label: string }>(
+    items: readonly T[],
+  ): T[] => {
+    if (!searchQuery.trim()) return [...items];
+    return items.filter((item) => item.label.toLowerCase().includes(searchQuery.toLowerCase()));
+  };
+
+  const filteredCrawlerNav = filterNav(crawlerNav);
+  const filteredMemoryNav = filterNav(memoryNav);
+  const filteredIntelligenceNav = filterNav(intelligenceNav);
+  const filteredAdminNav = filterNav(adminNav);
+
+  const hasResults =
+    filteredCrawlerNav.length > 0 ||
+    filteredMemoryNav.length > 0 ||
+    filteredIntelligenceNav.length > 0 ||
+    filteredAdminNav.length > 0;
 
   return (
     <aside
@@ -105,63 +128,98 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
         </div>
       </div>
 
+      {/* Search */}
+      {!collapsed && (
+        <div className="px-2 pb-3">
+          <SearchInput
+            placeholder="Search pages..."
+            value={searchQuery}
+            onChange={(value) => setSearchQuery(value)}
+            className="h-8"
+          />
+        </div>
+      )}
+
       {/* Navigation */}
-      <nav aria-label="Main navigation" className="flex-1 px-2 py-3 overflow-y-auto space-y-1">
-        <SidebarGroup label="CRAWLER" defaultOpen>
-          {crawlerNav.map((item) => (
-            <NavItem
-              key={item.href}
-              href={item.href}
-              label={item.label}
-              icon={item.icon}
-              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
-              section="crawler"
-              collapsed={collapsed}
-            />
-          ))}
-        </SidebarGroup>
+      <nav
+        aria-label="Main navigation"
+        onScroll={(e) => setIsNavScrolled((e.target as HTMLElement).scrollTop > 0)}
+        className={cn(
+          'flex-1 px-2 py-3 overflow-y-auto space-y-1 transition-shadow',
+          isNavScrolled && 'shadow-[inset_0_20px_20px_-20px_rgba(0,0,0,0.4)]',
+        )}
+      >
+        {hasResults ? (
+          <>
+            {filteredCrawlerNav.length > 0 && (
+              <SidebarGroup label="CRAWLER" defaultOpen>
+                {filteredCrawlerNav.map((item) => (
+                  <NavItem
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+                    section="crawler"
+                    collapsed={collapsed}
+                  />
+                ))}
+              </SidebarGroup>
+            )}
 
-        <SidebarGroup label="MEMORY" defaultOpen>
-          {memoryNav.map((item) => (
-            <NavItem
-              key={item.href}
-              href={item.href}
-              label={item.label}
-              icon={item.icon}
-              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
-              section="memory"
-              collapsed={collapsed}
-            />
-          ))}
-        </SidebarGroup>
+            {filteredMemoryNav.length > 0 && (
+              <SidebarGroup label="MEMORY" defaultOpen>
+                {filteredMemoryNav.map((item) => (
+                  <NavItem
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+                    section="memory"
+                    collapsed={collapsed}
+                  />
+                ))}
+              </SidebarGroup>
+            )}
 
-        <SidebarGroup label="INTELLIGENCE" defaultOpen>
-          {intelligenceNav.map((item) => (
-            <NavItem
-              key={item.href}
-              href={item.href}
-              label={item.label}
-              icon={item.icon}
-              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
-              section="intelligence"
-              collapsed={collapsed}
-            />
-          ))}
-        </SidebarGroup>
+            {filteredIntelligenceNav.length > 0 && (
+              <SidebarGroup label="INTELLIGENCE" defaultOpen>
+                {filteredIntelligenceNav.map((item) => (
+                  <NavItem
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+                    section="intelligence"
+                    collapsed={collapsed}
+                  />
+                ))}
+              </SidebarGroup>
+            )}
 
-        <SidebarGroup label="ADMIN" defaultOpen>
-          {adminNav.map((item) => (
-            <NavItem
-              key={item.href}
-              href={item.href}
-              label={item.label}
-              icon={item.icon}
-              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
-              section="admin"
-              collapsed={collapsed}
-            />
-          ))}
-        </SidebarGroup>
+            {filteredAdminNav.length > 0 && (
+              <SidebarGroup label="ADMIN" defaultOpen>
+                {filteredAdminNav.map((item) => (
+                  <NavItem
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+                    section="admin"
+                    collapsed={collapsed}
+                  />
+                ))}
+              </SidebarGroup>
+            )}
+          </>
+        ) : (
+          <div className="px-3 py-6 text-center text-xs text-[var(--color-text-muted)]">
+            No pages found
+          </div>
+        )}
       </nav>
 
       {/* Collapse toggle */}
@@ -181,43 +239,103 @@ function Sidebar({ pathname, collapsed }: Readonly<{ pathname: string; collapsed
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-function getPageTitle(pathname: string): string {
-  if (pathname === '/dashboard' || pathname === '/dashboard/home') return 'Dashboard';
-  if (pathname.startsWith('/dashboard/crawler/home')) return 'Crawler Overview';
-  if (pathname.startsWith('/dashboard/crawler/crawl')) return 'Crawl';
-  if (pathname.startsWith('/dashboard/crawler/osint')) return 'OSINT';
-  if (pathname.startsWith('/dashboard/crawler/investigations')) return 'Investigations';
-  if (pathname.startsWith('/dashboard/crawler/knowledge-graph')) return 'Knowledge Graph';
-  if (pathname.startsWith('/dashboard/memory/home')) return 'Memory Overview';
-  if (pathname.startsWith('/dashboard/memory/memories')) return 'Memories';
-  if (pathname.startsWith('/dashboard/memory/timeline')) return 'Timeline';
-  if (pathname.startsWith('/dashboard/memory/matters')) return 'Matters';
-  if (pathname.startsWith('/dashboard/memory/graph')) return 'Memory Graph';
-  if (pathname.startsWith('/dashboard/memory/analytics')) return 'Analytics';
-  if (pathname.startsWith('/dashboard/intelligence/search')) return 'Unified Search';
-  if (pathname.startsWith('/dashboard/intelligence/investigations')) return 'Investigations';
-  if (pathname.startsWith('/dashboard/intelligence/knowledge-graph')) return 'Knowledge Graph';
-  if (pathname.startsWith('/dashboard/intelligence/chat')) return 'RAG Chat';
-  if (pathname.startsWith('/dashboard/intelligence/canvas')) return 'OSINT Canvas';
-  if (pathname.startsWith('/dashboard/system/health')) return 'System Health';
-  if (pathname.startsWith('/dashboard/system/keys')) return 'API Keys';
-  if (pathname.startsWith('/dashboard/system/audit')) return 'Audit Log';
-  return 'Platform';
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
+  const segments = pathname.split('/').filter(Boolean);
+  const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', href: '/dashboard/home' }];
+
+  if (segments.length <= 1) return breadcrumbs;
+
+  if (segments.includes('crawler')) {
+    breadcrumbs.push({ label: 'Crawler' });
+    if (segments.includes('crawl'))
+      breadcrumbs.push({ label: 'Crawl', href: '/dashboard/crawler/crawl' });
+    else if (segments.includes('osint'))
+      breadcrumbs.push({ label: 'OSINT', href: '/dashboard/crawler/osint' });
+    else if (segments.includes('investigations'))
+      breadcrumbs.push({ label: 'Investigations', href: '/dashboard/crawler/investigations' });
+    else if (segments.includes('knowledge-graph'))
+      breadcrumbs.push({ label: 'Knowledge Graph', href: '/dashboard/crawler/knowledge-graph' });
+    else if (segments.includes('home'))
+      breadcrumbs.push({ label: 'Overview', href: '/dashboard/crawler/home' });
+  } else if (segments.includes('memory')) {
+    breadcrumbs.push({ label: 'Memory' });
+    if (segments.includes('memories'))
+      breadcrumbs.push({ label: 'Memories', href: '/dashboard/memory/memories' });
+    else if (segments.includes('timeline'))
+      breadcrumbs.push({ label: 'Timeline', href: '/dashboard/memory/timeline' });
+    else if (segments.includes('matters'))
+      breadcrumbs.push({ label: 'Matters', href: '/dashboard/memory/matters' });
+    else if (segments.includes('graph'))
+      breadcrumbs.push({ label: 'Graph', href: '/dashboard/memory/graph' });
+    else if (segments.includes('analytics'))
+      breadcrumbs.push({ label: 'Analytics', href: '/dashboard/memory/analytics' });
+    else if (segments.includes('home'))
+      breadcrumbs.push({ label: 'Overview', href: '/dashboard/memory/home' });
+  } else if (segments.includes('intelligence')) {
+    breadcrumbs.push({ label: 'Intelligence' });
+    if (segments.includes('search'))
+      breadcrumbs.push({ label: 'Unified Search', href: '/dashboard/intelligence/search' });
+    else if (segments.includes('investigations'))
+      breadcrumbs.push({ label: 'Investigations', href: '/dashboard/intelligence/investigations' });
+    else if (segments.includes('knowledge-graph'))
+      breadcrumbs.push({
+        label: 'Knowledge Graph',
+        href: '/dashboard/intelligence/knowledge-graph',
+      });
+    else if (segments.includes('chat'))
+      breadcrumbs.push({ label: 'RAG Chat', href: '/dashboard/intelligence/chat' });
+    else if (segments.includes('canvas'))
+      breadcrumbs.push({ label: 'OSINT Canvas', href: '/dashboard/intelligence/canvas' });
+  } else if (segments.includes('system')) {
+    breadcrumbs.push({ label: 'System' });
+    if (segments.includes('health'))
+      breadcrumbs.push({ label: 'System Health', href: '/dashboard/system/health' });
+    else if (segments.includes('keys'))
+      breadcrumbs.push({ label: 'API Keys', href: '/dashboard/system/keys' });
+    else if (segments.includes('audit'))
+      breadcrumbs.push({ label: 'Audit Log', href: '/dashboard/system/audit' });
+  }
+
+  return breadcrumbs;
+}
+
+function BreadcrumbNav({ pathname }: { pathname: string }) {
+  const segments = getBreadcrumbs(pathname);
+  return (
+    <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm">
+      {segments.map((seg) => (
+        <span key={seg.href ?? seg.label} className="flex items-center gap-2">
+          {segments.indexOf(seg) > 0 && (
+            <ChevronRight className="w-3 h-3 text-[var(--color-text-muted)]" />
+          )}
+          {seg.href && segments.indexOf(seg) < segments.length - 1 ? (
+            <Link
+              href={seg.href}
+              className="text-[var(--color-text-muted)] hover:text-[var(--color-amber)] transition-colors"
+            >
+              {seg.label}
+            </Link>
+          ) : (
+            <span className="text-[var(--color-text-primary)] font-medium">{seg.label}</span>
+          )}
+        </span>
+      ))}
+    </nav>
+  );
 }
 
 function Header({ pathname }: Readonly<{ pathname: string }>) {
   const serviceStatus = useUIStore((s) => s.serviceStatus);
-  const title = getPageTitle(pathname);
 
   return (
     <header className="h-14 bg-[var(--color-void)]/80 backdrop-blur-xl border-b border-white/[0.06] px-5 flex items-center justify-between flex-shrink-0 z-10">
-      {/* Breadcrumb / page title */}
-      <div className="flex items-center gap-3">
-        <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-amber)] shadow-[0_0_8px_rgba(242,169,59,0.8)]" />
-        <h2 className="text-sm font-medium text-[var(--color-text-primary)] tracking-wide font-display">
-          {title}
-        </h2>
-      </div>
+      {/* Breadcrumb */}
+      <BreadcrumbNav pathname={pathname} />
 
       <div className="flex items-center gap-4">
         <NotificationBell />

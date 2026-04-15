@@ -44,37 +44,37 @@ class TestSourceCredibilityManager:
     def test_calculate_source_confidence_decay_over_time(self, manager):
         """Test that confidence decays over time."""
         old_timestamp = datetime.now(UTC) - timedelta(days=30)
-        
+
         old_confidence = manager.calculate_source_confidence(
             source_type=SourceType.AI_ASSISTANT,
             source_id="test-source",
             timestamp=old_timestamp,
         )
-        
+
         new_confidence = manager.calculate_source_confidence(
             source_type=SourceType.AI_ASSISTANT,
             source_id="test-source",
             timestamp=datetime.now(UTC),
         )
-        
+
         assert new_confidence >= old_confidence
 
     def test_update_source_performance_creates_new_metrics(self, manager):
         """Test that updating performance creates new metrics entry."""
         assert "new-source" not in manager.source_metrics
-        
+
         manager.update_source_performance("new-source", was_correct=True)
-        
+
         assert "new-source" in manager.source_metrics
 
     def test_update_source_performance_updates_accuracy(self, manager):
         """Test that performance update adjusts accuracy score."""
         manager.update_source_performance("test-source", was_correct=True)
         initial_accuracy = manager.source_metrics["test-source"]["accuracy_score"]
-        
+
         for _ in range(5):
             manager.update_source_performance("test-source", was_correct=True)
-        
+
         new_accuracy = manager.source_metrics["test-source"]["accuracy_score"]
         assert new_accuracy > initial_accuracy
 
@@ -100,7 +100,7 @@ class TestMemoryQualityScorer:
     async def test_calculate_quality_score_without_ollama(self, scorer, sample_memory):
         """Test quality score calculation without ollama client."""
         result = await scorer.calculate_quality_score(sample_memory)
-        
+
         assert "memory_id" in result
         assert "quality_scores" in result
         assert "overall_quality" in result

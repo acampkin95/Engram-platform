@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import {
 	DEFAULT_CIRCUIT_BREAKER_CONFIG,
 	DEFAULT_LOGGING_CONFIG,
-	DEFAULT_OAUTH_CONFIG,
 	DEFAULT_RETRY_CONFIG,
 	DEFAULT_TIMEOUT_CONFIG,
 	type MCPConfig,
@@ -66,7 +65,7 @@ describe("loadConfig", () => {
 		it("uses default server name and version", () => {
 			const cfg = loadConfig();
 			assert.equal(cfg.serverName, "engram-mcp");
-			assert.equal(cfg.serverVersion, "1.0.0");
+			assert.equal(cfg.serverVersion, "1.2.0");
 		});
 
 		it("defaults transport to http", () => {
@@ -104,15 +103,10 @@ describe("loadConfig", () => {
 			assert.deepEqual(cfg.logging, DEFAULT_LOGGING_CONFIG);
 		});
 
-		it("uses default oauth config (disabled)", () => {
-			const cfg = loadConfig();
-			assert.equal(cfg.oauth.enabled, false);
-		});
-
-		it("apiKey and authToken are undefined by default", () => {
+		it("apiKey and platformUrl are undefined by default", () => {
 			const cfg = loadConfig();
 			assert.equal(cfg.apiKey, undefined);
-			assert.equal(cfg.authToken, undefined);
+			assert.equal(cfg.platformUrl, undefined);
 		});
 
 		it("corsOrigins is undefined when no env set", () => {
@@ -158,17 +152,9 @@ describe("loadConfig", () => {
 			assert.deepEqual(cfg.corsOrigins, ["http://a.com", "http://b.com"]);
 		});
 
-		it("reads OAUTH_ENABLED", () => {
-			process.env.OAUTH_ENABLED = "true";
-			assert.equal(loadConfig().oauth.enabled, true);
-		});
-
-		it("reads OAuth Redis config from env", () => {
-			process.env.OAUTH_REDIS_URL = "redis://localhost:6380";
-			process.env.OAUTH_REDIS_KEY_PREFIX = "custom:oauth:";
-			const cfg = loadConfig();
-			assert.equal(cfg.oauth.redisUrl, "redis://localhost:6380");
-			assert.equal(cfg.oauth.redisKeyPrefix, "custom:oauth:");
+		it("reads PLATFORM_URL", () => {
+			process.env.PLATFORM_URL = "http://platform:3000";
+			assert.equal(loadConfig().platformUrl, "http://platform:3000");
 		});
 
 		it("reads retry config from env", () => {
@@ -243,10 +229,4 @@ describe("default config constants", () => {
 		assert.equal(typeof DEFAULT_TIMEOUT_CONFIG.readMs, "number");
 	});
 
-	it("DEFAULT_OAUTH_CONFIG has expected shape", () => {
-		assert.equal(DEFAULT_OAUTH_CONFIG.enabled, false);
-		assert.equal(typeof DEFAULT_OAUTH_CONFIG.issuer, "string");
-		assert.equal(typeof DEFAULT_OAUTH_CONFIG.accessTokenTtl, "number");
-		assert.equal(typeof DEFAULT_OAUTH_CONFIG.refreshTokenTtl, "number");
-	});
 });

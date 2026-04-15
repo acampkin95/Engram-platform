@@ -109,7 +109,9 @@ class MultiFactorResolver:
                             details={"method": "llm_detection"},
                         )
                     )
-            except Exception:
-                pass
+            except Exception as exc:
+                import logging as _logging
+
+                _logging.getLogger(__name__).debug(f"LLM contradiction detection failed: {exc}")
 
         return contradictions

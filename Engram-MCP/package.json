@@ -1,12 +1,19 @@
 {
-	"name": "@engram/mcp",
-	"version": "1.1.0",
-	"description": "Engram Unified MCP Server — dual transport (stdio + HTTP streaming), OAuth 2.1, hookify memory hooks, and streamlined installer",
+	"name": "engram-mcp",
+	"version": "1.2.0",
+	"description": "Engram MCP Server — AI memory persistence via Model Context Protocol. Dual transport (stdio + HTTP streaming), OAuth 2.1, automatic memory hooks, and guided installer for any MCP-compatible client.",
 	"type": "module",
 	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
 	"bin": {
 		"engram-mcp": "./dist/index.js",
-		"engram-mcp-install": "./dist/installer/cli.js"
+		"engram-mcp-init": "./dist/installer/cli.js"
 	},
 	"scripts": {
 		"build": "tsc",
@@ -25,7 +32,6 @@
 		"@hono/node-server": "^1.13.7",
 		"@modelcontextprotocol/sdk": "^1.27.1",
 		"hono": "^4.7.5",
-		"redis": "^4.7.1",
 		"zod": "^3.23.0"
 	},
 	"devDependencies": {
@@ -37,14 +43,32 @@
 	"engines": {
 		"node": ">=20.0.0"
 	},
-	"files": ["dist", "hookify", "templates", "install.sh", "README.md"],
+	"files": [
+		"dist",
+		"hookify",
+		"templates",
+		"install.sh",
+		"README.md"
+	],
 	"keywords": [
 		"mcp",
 		"model-context-protocol",
 		"ai-memory",
 		"engram",
 		"oauth",
-		"hookify"
+		"hookify",
+		"memory",
+		"knowledge-graph",
+		"vector-search",
+		"rag"
 	],
-	"license": "MIT"
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/acampkin/engram-mcp.git"
+	},
+	"homepage": "https://github.com/acampkin/engram-mcp#readme",
+	"bugs": {
+		"url": "https://github.com/acampkin/engram-mcp/issues"
+	}
 }

@@ -32,8 +32,8 @@ export function useForceLayout({ strength = -300, distance = 100 }: UseForceLayo
 
     const simulationNodes: SimNode[] = nodesToLayout.map((node, i) => ({
       ...node,
-      x: node.position.x || ((i % 10) * 50 + 50),
-      y: node.position.y || (Math.floor(i / 10) * 50 + 50),
+      x: node.position.x || (i % 10) * 50 + 50,
+      y: node.position.y || Math.floor(i / 10) * 50 + 50,
     }));
 
     const simulationLinks: SimulationLinkDatum<SimNode>[] = edges

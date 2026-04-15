@@ -4,6 +4,22 @@
  * Extends the original config with transport selection, OAuth, and hook settings.
  */
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Read version from package.json at module load time
+let _pkgVersion = "1.0.0";
+try {
+	const __dirname = dirname(fileURLToPath(import.meta.url));
+	const pkg = JSON.parse(
+		readFileSync(join(__dirname, "..", "package.json"), "utf-8"),
+	);
+	_pkgVersion = pkg.version ?? "1.0.0";
+} catch {
+	// Fallback when package.json is not accessible (e.g. bundled)
+}
+
 // ---------------------------------------------------------------------------
 // Resilience configs (unchanged from original)
 // ---------------------------------------------------------------------------
@@ -37,21 +53,7 @@ export interface LoggingConfig {
 }
 
 // ---------------------------------------------------------------------------
-// OAuth config (NEW)
-// ---------------------------------------------------------------------------
-
-export interface OAuthConfig {
-	enabled: boolean;
-	issuer: string;
-	secret: string;
-	accessTokenTtl: number;
-	refreshTokenTtl: number;
-	redisUrl?: string;
-	redisKeyPrefix: string;
-}
-
-// ---------------------------------------------------------------------------
-// Transport config (NEW)
+// Transport config
 // ---------------------------------------------------------------------------
 
 export type TransportType = "stdio" | "http";
@@ -67,9 +69,8 @@ export interface MCPConfig {
 	port: number;
 	apiUrl: string;
 	apiKey?: string;
-	authToken?: string;
+	platformUrl?: string;
 	corsOrigins?: string[];
-	oauth: OAuthConfig;
 	retry: RetryConfig;
 	circuitBreaker: CircuitBreakerConfig;
 	timeout: TimeoutConfig;
@@ -106,16 +107,6 @@ export const DEFAULT_LOGGING_CONFIG: LoggingConfig = {
 	timestamps: true,
 	requestIds: true,
 	stderr: true,
-};
-
-export const DEFAULT_OAUTH_CONFIG: OAuthConfig = {
-	enabled: false,
-	issuer: "http://localhost:3000",
-	secret: "",
-	accessTokenTtl: 3600,
-	refreshTokenTtl: 86400,
-	redisUrl: undefined,
-	redisKeyPrefix: "mcp:oauth:",
 };
 
 // ---------------------------------------------------------------------------
@@ -170,24 +161,17 @@ export function loadConfig(): MCPConfig {
 
 	return {
 		serverName: process.env.MCP_SERVER_NAME || "engram-mcp",
-		serverVersion: process.env.MCP_SERVER_VERSION || "1.0.0",
+		serverVersion: process.env.MCP_SERVER_VERSION || _pkgVersion,
 		transport,
 		port: envInt(process.env.MCP_SERVER_PORT, 3000),
-		apiUrl: process.env.ENGRAM_API_URL || process.env.MEMORY_API_URL || "http://localhost:8000",
+		apiUrl:
+			process.env.ENGRAM_API_URL ||
+			process.env.MEMORY_API_URL ||
+			"http://localhost:8000",
 		apiKey: process.env.ENGRAM_API_KEY || process.env.AI_MEMORY_API_KEY,
-		authToken: process.env.MCP_AUTH_TOKEN,
+		platformUrl:
+			process.env.PLATFORM_URL || process.env.BETTER_AUTH_URL || undefined,
 		corsOrigins: corsOrigins.length > 0 ? corsOrigins : undefined,
-
-		oauth: {
-			enabled: process.env.OAUTH_ENABLED === "true",
-			issuer: process.env.OAUTH_ISSUER || "http://localhost:3000",
-			secret: process.env.OAUTH_SECRET || "",
-			accessTokenTtl: envInt(process.env.OAUTH_ACCESS_TOKEN_TTL, 3600),
-			refreshTokenTtl: envInt(process.env.OAUTH_REFRESH_TOKEN_TTL, 86400),
-			redisUrl:
-				process.env.OAUTH_REDIS_URL || process.env.REDIS_URL || undefined,
-			redisKeyPrefix: process.env.OAUTH_REDIS_KEY_PREFIX || "mcp:oauth:",
-		},
 
 		retry: {
 			maxRetries: envInt(
@@ -256,9 +240,9 @@ export function loadConfig(): MCPConfig {
 }
 
 function validateConfig(cfg: MCPConfig): MCPConfig {
-	if (cfg.oauth.enabled && cfg.oauth.secret.length < 32) {
-		throw new Error(
-			"OAUTH_SECRET must be at least 32 characters when OAUTH_ENABLED=true",
+	if (cfg.transport === "http" && !cfg.platformUrl) {
+		console.error(
+			"[engram-mcp] PLATFORM_URL not set — HTTP transport requires Platform URL for API key validation",
 		);
 	}
 	return cfg;

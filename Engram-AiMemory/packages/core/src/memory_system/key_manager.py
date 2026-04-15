@@ -7,7 +7,6 @@ Supports CRUD operations, migration from env vars, and usage tracking.
 
 import hashlib
 import hmac
-import json
 import secrets
 import string
 from datetime import UTC, datetime
@@ -162,6 +161,17 @@ class KeyManager:
             return False
         await self._redis.hset(redis_key, "status", "revoked")
         return True
+
+    async def create_bootstrap_key(self) -> dict[str, Any] | None:
+        """Create a bootstrap API key if no keys exist. Returns key info or None if keys already exist."""
+        key_ids = await self._redis.smembers(KEY_INDEX)
+        if key_ids:
+            return None  # Keys already exist, skip bootstrap
+
+        result = await self.create_key("System Bootstrap Key", created_by="system (bootstrap)")
+        # Store bootstrap key ID for Platform to discover
+        await self._redis.set("engram:bootstrap_key_id", result["id"])
+        return result
 
     async def validate_key(self, raw_key: str) -> dict[str, Any] | None:
         """Validate an API key against Redis store. Returns key metadata if valid."""

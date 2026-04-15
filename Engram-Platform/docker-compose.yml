@@ -125,23 +125,19 @@ services:
       WEAVIATE_URL: http://weaviate:8080
       WEAVIATE_GRPC_URL: http://weaviate:50051
       REDIS_URL: redis://memory-redis:6379
-      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      PLATFORM_URL: http://platform-frontend:3000
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-deepinfra}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       DEEPINFRA_API_KEY: ${DEEPINFRA_API_KEY:-}
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
-      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1536}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-}
       MULTI_TENANCY_ENABLED: "true"
       DEFAULT_TENANT_ID: default
-      LOG_LEVEL: INFO
-      # CORS: Include Tailscale origins for direct access
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://memory.velocitydigi.com,https://engram.velocitydigi.com,http://localhost:3002,http://localhost:3001,http://localhost,http://100.100.42.6:3002,http://dv-syd-host01.icefish-discus.ts.net:3002,https://dv-syd-host01.icefish-discus.ts.net}
-      JWT_SECRET: ${JWT_SECRET}
-      MEMORY_API_KEY: ${MEMORY_API_KEY:-}
-      API_KEYS: ${API_KEYS:-}
-      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      LOG_LEVEL: ${MCP_LOG_LEVEL:-INFO}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://memory.velocitydigi.com,http://localhost:3002}
+      JWT_SECRET: ${BETTER_AUTH_SECRET}
       CLEAN_SCHEMA_MIGRATION: ${CLEAN_SCHEMA_MIGRATION:-false}
-      # Performance optimizations
       UVICORN_WORKERS: "2"
       UVICORN_LIMIT_CONN: "100"
       UVICORN_KEEPALIVE: "5"
@@ -298,16 +294,11 @@ services:
     restart: unless-stopped
     environment:
       MEMORY_API_URL: http://memory-api:8000
+      PLATFORM_URL: http://platform-frontend:3000
       MCP_SERVER_NAME: engram-mcp
-      MCP_SERVER_VERSION: "1.1.0"
       MCP_SERVER_PORT: "3000"
-      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
-      OAUTH_ENABLED: ${OAUTH_ENABLED:-false}
-      OAUTH_ISSUER: ${OAUTH_ISSUER:-https://dv-syd-host01.icefish-discus.ts.net}
-      OAUTH_SECRET: ${OAUTH_SECRET:-}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://memory.velocitydigi.com,https://engram.velocitydigi.com,http://localhost:3002,http://localhost:3001,http://localhost:3000}
-      AI_MEMORY_API_KEY: ${MEMORY_API_KEY:-}
-      OAUTH_REDIS_URL: redis://memory-redis:6379
+      MCP_LOG_LEVEL: ${MCP_LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://memory.velocitydigi.com,http://localhost:3002}
     logging:
       driver: "json-file"
       options:
@@ -346,34 +337,33 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-}
         # MEMORY_API_KEY injected at nginx proxy level, not in client JS
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://memory.velocitydigi.com}
-        NEXT_PUBLIC_CLERK_DOMAIN: ${NEXT_PUBLIC_CLERK_DOMAIN:-clerk.velocitydigi.com}
-        NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
-        NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
-        NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /dashboard
-        NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /dashboard
+        NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: ${NEXT_PUBLIC_GOOGLE_AUTH_ENABLED:-}
         CRAWLER_API_URL: http://crawler-api:11235
         MEMORY_API_URL: http://memory-api:8000
     container_name: engram-platform-frontend
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    read_only: true
     tmpfs:
       - /tmp:size=64m
       - /app/.next/cache:size=32m
+    volumes:
+      - auth_db:/data
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://memory.velocitydigi.com}
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-}
-      NEXT_PUBLIC_CLERK_DOMAIN: ${NEXT_PUBLIC_CLERK_DOMAIN:-clerk.velocitydigi.com}
-      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
-      NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
-      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /dashboard
-      NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /dashboard
-      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:-}
+      NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: ${NEXT_PUBLIC_GOOGLE_AUTH_ENABLED:-}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-https://memory.velocitydigi.com}
+      BETTER_AUTH_DOMAIN: ${BETTER_AUTH_DOMAIN:-memory.velocitydigi.com}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      ENGRAM_ADMIN_EMAILS: ${ENGRAM_ADMIN_EMAILS:-}
+      ENGRAM_ADMIN_EMAIL: ${ENGRAM_ADMIN_EMAIL:-admin@engram.local}
+      ENGRAM_ADMIN_PASSWORD: ${ENGRAM_ADMIN_PASSWORD:-EngramAdmin2026!}
+      AUTH_DB_PATH: /data/auth.db
       CRAWLER_API_URL: http://crawler-api:11235
       MEMORY_API_URL: http://memory-api:8000
     logging:
@@ -397,6 +387,30 @@ services:
       - engram-platform-network
 
   # ==========================================
+  # ENGRAM LANDING - Static marketing frontend
+  # ==========================================
+  engram-landing:
+    build:
+      context: ..
+      dockerfile: Engram-AiMemory/04_branding/MarketingDev/engram-landing/Dockerfile
+    container_name: engram-landing
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3099/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 48M
+    networks:
+      - engram-platform-network
+
+  # ==========================================
   # NGINX - Reverse Proxy & Load Balancer
   # ==========================================
   nginx:
@@ -406,8 +420,6 @@ services:
     ports:
       - "${BIND_ADDRESS:-127.0.0.1}:80:80"
       - "${BIND_ADDRESS:-127.0.0.1}:443:443"
-    environment:
-      MEMORY_API_KEY: ${MEMORY_API_KEY:-}
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/templates/default.conf.template:ro
       - ./certs:/etc/nginx/certs:ro
@@ -429,6 +441,7 @@ services:
       - crawler-api
       - memory-api
       - platform-frontend
+      - engram-landing
     networks:
       engram-platform-network:
         aliases:
@@ -464,6 +477,10 @@ volumes:
   memory_redis_data:
     driver: local
   weaviate_data:
+    driver: local
+
+  # Auth DB volume for BetterAuth SQLite
+  auth_db:
     driver: local
 
 # ==========================================

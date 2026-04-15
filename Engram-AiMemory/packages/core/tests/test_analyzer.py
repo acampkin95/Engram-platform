@@ -1,15 +1,16 @@
+from __future__ import annotations
+
 import pytest
+
 """
 Unit tests for memory_system.analyzer — MemoryAnalyzer.
 
 Mocks MemorySystem (external service). Tests real analysis logic:
 heuristic scoring, similarity detection, deduplication, LLM fallback.
 """
-
-from __future__ import annotations
 import sys
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -51,8 +52,8 @@ def _make_memory(
         tags=[],
         metadata={},
         vector=vector,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
 
@@ -163,7 +164,9 @@ class TestAnalyzeWithHeuristic:
         for keyword in ["important", "critical", "bug", "fix", "error", "security"]:
             memory = _make_memory(content=f"This is a {keyword} issue")
             result = await analyzer._analyze_with_heuristic(memory, [])
-            assert result["importance"] == pytest.approx(0.7), f"Keyword '{keyword}' should boost to 0.7"
+            assert result["importance"] == pytest.approx(0.7), (
+                f"Keyword '{keyword}' should boost to 0.7"
+            )
 
     async def test_todo_fixme_boosts_higher(self) -> None:
         analyzer = _make_analyzer()

@@ -1,9 +1,9 @@
 import type { MemoryAPIClient } from "../client.js";
 import { config } from "../config.js";
 import {
+	parseResourceUri,
 	STATIC_RESOURCES,
 	TIER_DOCUMENTATION,
-	parseResourceUri,
 } from "./enhanced-resources.js";
 
 export { STATIC_RESOURCES as MEMORY_RESOURCES };

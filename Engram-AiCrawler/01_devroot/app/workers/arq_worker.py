@@ -13,7 +13,6 @@ Enqueue from FastAPI:
     job_id = await enqueue_crawl("https://example.com")
 """
 
-
 from __future__ import annotations
 import logging
 import os
@@ -97,25 +96,29 @@ async def extract_task(
     scan_id: str,
     source_url: str,
 ) -> dict:
-    """Extract entities from crawled content (placeholder for Phase 3+).
-
-    Args:
-        ctx: ARQ context dict.
-        content: Markdown content to extract entities from.
-        scan_id: Scan identifier for grouping results.
-        source_url: Source URL the content was crawled from.
-
-    Returns:
-        Dict with extraction results.
-    """
     logger.info(f"Entity extraction for scan {scan_id} from {source_url}")
-    # Phase 3+: SpaCy NER + LLM extraction
-    return {
-        "scan_id": scan_id,
-        "source_url": source_url,
-        "entities": [],
-        "status": "placeholder",
-    }
+    try:
+        from app.services.lm_studio_bridge import LMStudioBridge
+        from app.pipelines.entity_enrichment import EntityEnrichmentPipeline
+
+        bridge = LMStudioBridge()
+        pipeline = EntityEnrichmentPipeline(bridge)
+        pii = await pipeline.extract_pii(source_url, content)
+        return {
+            "scan_id": scan_id,
+            "source_url": source_url,
+            "entities": pii.model_dump(),
+            "status": "completed",
+        }
+    except Exception as e:
+        logger.exception(f"Entity extraction failed for scan {scan_id}: {e}")
+        return {
+            "scan_id": scan_id,
+            "source_url": source_url,
+            "entities": [],
+            "status": "failed",
+            "error": str(e),
+        }
 
 
 # ---------------------------------------------------------------------------

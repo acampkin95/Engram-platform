@@ -135,8 +135,8 @@ class JobStore:
             finally:
                 try:
                     await client.aclose()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug("Error closing Redis client after set: %s", exc)
 
         async with self._lock:
             self._fallback[job_id] = data
@@ -156,8 +156,8 @@ class JobStore:
             finally:
                 try:
                     await client.aclose()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug("Error closing Redis client after get: %s", exc)
 
         async with self._lock:
             return self._fallback.get(job_id)
@@ -191,8 +191,8 @@ class JobStore:
             finally:
                 try:
                     await client.aclose()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug("Error closing Redis client after delete: %s", exc)
 
         async with self._lock:
             self._fallback.pop(job_id, None)
@@ -201,9 +201,7 @@ class JobStore:
         """Return ``True`` if *job_id* exists in the store."""
         return await self.get(job_id) is not None
 
-    async def _process_raw_values(
-        self, ids: list, raws: list
-    ) -> tuple[list[Any], list[str]]:
+    async def _process_raw_values(self, ids: list, raws: list) -> tuple[list[Any], list[str]]:
         results = []
         stale_ids = []
         for job_id, raw in zip(ids, raws):
@@ -212,7 +210,8 @@ class JobStore:
             else:
                 try:
                     results.append(self._decode(raw))
-                except Exception:
+                except Exception as exc:
+                    logger.debug("Skipping stale raw value: %s", exc)
                     stale_ids.append(job_id)
         return results, stale_ids
 
@@ -224,8 +223,8 @@ class JobStore:
             if clean_client:
                 await clean_client.srem(self._index_key(), *stale_ids)
                 await clean_client.aclose()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("Failed to clean stale IDs from Redis: %s", exc)
 
     async def values(self) -> list[Any]:
         """Return all stored dicts in this namespace."""
@@ -249,8 +248,8 @@ class JobStore:
             finally:
                 try:
                     await client.aclose()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug("Error closing Redis client after values: %s", exc)
 
         async with self._lock:
             return list(self._fallback.values())
@@ -275,8 +274,8 @@ class JobStore:
             finally:
                 try:
                     await client.aclose()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug("Error closing Redis client after clear: %s", exc)
 
         async with self._lock:
             count = len(self._fallback)

@@ -1,29 +1,50 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
-const isClerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+const isAuthEnabled = Boolean(process.env.BETTER_AUTH_SECRET);
 
-const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)']);
+function isPublicPath(pathname: string): boolean {
+  return (
+    pathname === '/' ||
+    pathname.startsWith('/sign-in') ||
+    pathname.startsWith('/setup') ||
+    pathname.startsWith('/api/setup') ||
+    pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    /\.(html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)$/.test(
+      pathname,
+    )
+  );
+}
 
-// Middleware that conditionally enables Clerk auth
-// If Clerk is not configured, all routes are accessible without auth
-// Clerk v6: clerkMiddleware now receives (auth, req) and auth.protect() is async
-export default clerkMiddleware(async (auth, req) => {
-  // Skip auth entirely if Clerk is not configured
-  if (!isClerkEnabled) {
-    return;
+export async function middleware(req: NextRequest) {
+  if (!isAuthEnabled) return NextResponse.next();
+
+  const { pathname } = req.nextUrl;
+  if (isPublicPath(pathname)) return NextResponse.next();
+
+  // Verify session via internal auth API
+  const sessionCookie =
+    req.cookies.get('better-auth.session_token') ??
+    req.cookies.get('__Secure-better-auth.session_token');
+
+  if (!sessionCookie) {
+    const redirectUrl = new URL('/sign-in', req.url);
+    if (pathname !== '/dashboard') {
+      redirectUrl.searchParams.set('redirect', pathname);
+    }
+    return NextResponse.redirect(redirectUrl);
   }
 
-  // Protect all non-public routes
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
-});
+  // Session cookie exists — let the request through.
+  // Invalid/expired sessions are caught at the API route level via auth.api.getSession().
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and static files
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };

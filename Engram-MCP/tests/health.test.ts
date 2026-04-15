@@ -75,7 +75,6 @@ describe("Health endpoint (integration)", () => {
 		assert.equal(typeof body.service, "string");
 		assert.equal(typeof body.version, "string");
 		assert.equal(body.transport, "streamable-http");
-		assert.equal(typeof body.oauthEnabled, "boolean");
 		assert.equal(typeof body.activeSessions, "number");
 		assert.equal(typeof body.timestamp, "string");
 	});

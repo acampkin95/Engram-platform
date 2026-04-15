@@ -6,7 +6,7 @@ Mocks MemorySystem for ContextBuilder. ConversationMemoryManager is standalone.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -49,8 +49,8 @@ def _make_memory(
         confidence=1.0,
         tags=tags or [],
         metadata={},
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
 

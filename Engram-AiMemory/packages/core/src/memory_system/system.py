@@ -141,9 +141,13 @@ class MemorySystem:
             console.print(f"[cyan]Using DeepInfra embeddings: {model}[/cyan]")
 
         elif provider == "local":
-            # For local embeddings, could use sentence-transformers
-            console.print("[yellow]Local embeddings not yet implemented, using mock[/yellow]")
-            self._embedding_client = None
+            from memory_system.embeddings import NomicEmbedder
+
+            self._nomic_embedder = NomicEmbedder(dimension=self.settings.embedding_dimensions)
+            console.print(
+                f"[cyan]Using local sentence-transformers embeddings "
+                f"({self.settings.embedding_dimensions}-dim)[/cyan]"
+            )
 
         elif provider == "ollama":
             from memory_system.embeddings import OllamaEmbedder
@@ -172,10 +176,10 @@ class MemorySystem:
         if self._nomic_embedder is not None:
             embedding = await asyncio.to_thread(self._nomic_embedder.embed_query, text)
         elif self._embedding_client is None:
-            # Return mock embedding for development
-            import random
-
-            embedding = [random.uniform(-1, 1) for _ in range(self.settings.embedding_dimensions)]
+            raise RuntimeError(
+                "No embedding provider configured. Set EMBEDDING_PROVIDER to "
+                "openai, deepinfra, local, nomic, or ollama."
+            )
         else:
             response = await self._embedding_client.embeddings.create(
                 model=self.settings.embedding_model,
@@ -207,13 +211,10 @@ class MemorySystem:
             )
 
         if self._embedding_client is None:
-            # Return mock embeddings for development
-            import random
-
-            return [
-                [random.uniform(-1, 1) for _ in range(self.settings.embedding_dimensions)]
-                for _ in texts
-            ]
+            raise RuntimeError(
+                "No embedding provider configured. Set EMBEDDING_PROVIDER to "
+                "openai, deepinfra, local, nomic, or ollama."
+            )
 
         # OpenAI supports batch embedding in a single API call
         response = await self._embedding_client.embeddings.create(
@@ -1193,7 +1194,9 @@ class MemorySystem:
             "provider": self.settings.embedding_provider,
             "model": self.settings.embedding_model,
             "dimensions": self.settings.embedding_dimensions,
-            "status": "active" if (self._nomic_embedder or self._embedding_client) else "mock",
+            "status": "active"
+            if (self._nomic_embedder or self._embedding_client)
+            else "not_configured",
         }
 
         ollama_status = "not_configured"

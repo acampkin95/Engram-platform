@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import pytest
+
 """
 Unit tests for memory_system.rag — MemoryRAG pipeline.
 
@@ -6,9 +9,7 @@ Mocks MemorySystem.search and ContextBuilder (external services).
 Tests the real RAG assembly/formatting logic.
 """
 
-from __future__ import annotations
-
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -48,8 +49,8 @@ def _make_memory(
         confidence=0.9,
         tags=["test"],
         metadata={},
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
 

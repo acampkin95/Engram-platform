@@ -8,7 +8,7 @@ and knowledge graph operations WITHOUT requiring a live Weaviate instance.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -103,8 +103,8 @@ def _make_weaviate_obj(
         "importance": 0.7,
         "confidence": 1.0,
         "tags": ["test"],
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
+        "updated_at": datetime.now(UTC),
         "access_count": 0,
         "decay_factor": 1.0,
         "is_canonical": True,
@@ -133,8 +133,8 @@ def _make_entity_obj(uuid: str | None = None, props: dict | None = None) -> Magi
         "tenant_id": "default",
         "aliases": [],
         "metadata": "{}",
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
+        "updated_at": datetime.now(UTC),
     }
     if props:
         default_props.update(props)
@@ -159,7 +159,7 @@ def _make_relation_obj(
         "project_id": "proj-1",
         "tenant_id": "default",
         "context": "test context",
-        "created_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
     }
     if props:
         default_props.update(props)
@@ -286,8 +286,8 @@ class TestObjToMemory:
         # Provide only the fields Memory absolutely requires (content min_length=1, datetimes)
         obj.properties = {
             "content": "x",
-            "created_at": datetime.now(timezone.utc),
-            "updated_at": datetime.now(timezone.utc),
+            "created_at": datetime.now(UTC),
+            "updated_at": datetime.now(UTC),
         }
         memory = client._obj_to_memory(obj, MemoryTier.GENERAL)
 

@@ -119,7 +119,7 @@ class TestConfidenceFactors:
         """Test that values must be between 0 and 1."""
         with pytest.raises(ValueError):
             ConfidenceFactors(source_reliability=1.5)
-        
+
         with pytest.raises(ValueError):
             ConfidenceFactors(source_reliability=-0.1)
 
@@ -264,7 +264,7 @@ class TestMemory:
         """Test importance must be between 0 and 1."""
         with pytest.raises(ValueError):
             Memory(content="Test", importance=1.5)
-        
+
         with pytest.raises(ValueError):
             Memory(content="Test", importance=-0.1)
 
@@ -272,7 +272,7 @@ class TestMemory:
         """Test confidence must be between 0 and 1."""
         with pytest.raises(ValueError):
             Memory(content="Test", confidence=1.5)
-        
+
         with pytest.raises(ValueError):
             Memory(content="Test", confidence=-0.1)
 

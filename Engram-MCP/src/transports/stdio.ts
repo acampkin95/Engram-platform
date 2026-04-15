@@ -1,8 +1,8 @@
 /**
  * stdio Transport — for local process-spawned MCP connections
  *
- * Used when Claude Code (or any MCP client) spawns the server as a child process
- * and communicates via stdin/stdout JSON-RPC.
+ * Used when an MCP client (Claude Code, Cursor, Windsurf, etc.) spawns the
+ * server as a child process and communicates via stdin/stdout JSON-RPC.
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -27,8 +27,18 @@ export async function startStdioTransport(config: MCPConfig): Promise<void> {
 	const server = createMCPServer({ config, hookManager });
 
 	// Connect via stdio
-	const transport = new StdioServerTransport();
-	await server.connect(transport);
-
-	logger.info("Engram MCP Server running on stdio");
+	try {
+		const transport = new StdioServerTransport();
+		await server.connect(transport);
+		logger.info("Engram MCP Server running on stdio");
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		logger.error("Failed to start stdio transport", {
+			error: {
+				message,
+				stack: error instanceof Error ? error.stack : undefined,
+			},
+		});
+		throw error;
+	}
 }

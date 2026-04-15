@@ -214,6 +214,12 @@ class Settings(BaseSettings):
     # Union with str so pydantic-settings skips JSON-decode; validator handles both
     api_keys: list[str] | str = Field(default_factory=list, description="Allowed API keys")
 
+    # Platform URL — BetterAuth API key verification endpoint
+    platform_url: str = Field(
+        default="http://platform-frontend:3000",
+        description="Platform frontend URL for API key verification (PLATFORM_URL env var)",
+    )
+
     # Security — Admin credentials for dashboard login
     admin_username: str = Field(default="admin", description="Dashboard admin username")
     admin_password_hash: str | None = Field(

@@ -233,7 +233,8 @@ class MaintenanceScheduler:
                     if result:
                         available = True
                         break
-                except Exception:
+                except Exception as exc:
+                    logger.debug(f"AI provider unavailable: {exc}")
                     continue
         elif self._ollama:
             try:
@@ -241,7 +242,8 @@ class MaintenanceScheduler:
                 if asyncio.iscoroutine(result) or asyncio.isfuture(result):
                     result = await result
                 available = bool(result)
-            except Exception:
+            except Exception as exc:
+                logger.debug(f"Ollama availability check failed: {exc}")
                 available = False
 
         if (
@@ -290,7 +292,8 @@ class MaintenanceScheduler:
             importance = float(data.get("importance", 0.5))
             reason = data.get("reason", "")
             return max(0.0, min(1.0, importance)), reason
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"Router importance scoring failed: {exc}")
             return 0.5, "scoring unavailable"
 
     async def _router_summarize(self, content: str) -> str | None:
@@ -310,7 +313,8 @@ class MaintenanceScheduler:
                 complexity=TaskComplexity.STANDARD,
             )
             return summary if summary else None
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"Router summarization failed: {exc}")
             return None
 
     async def _router_detect_contradiction(self, content_a: str, content_b: str) -> dict:
@@ -336,7 +340,8 @@ class MaintenanceScheduler:
                 "more_likely_correct": data.get("more_likely_correct", "neither"),
                 "reason": data.get("reason", ""),
             }
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"Router contradiction detection failed: {exc}")
             return {
                 "contradicts": False,
                 "confidence": 0.0,
@@ -373,7 +378,8 @@ class MaintenanceScheduler:
                         }
                     )
             return valid
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"Router entity extraction failed: {exc}")
             return []
 
     async def _router_consolidate_memories(self, memory_contents: list[str]) -> str | None:
@@ -394,7 +400,8 @@ class MaintenanceScheduler:
                 complexity=TaskComplexity.COMPLEX,
             )
             return result if result else None
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"Router consolidation failed: {exc}")
             return None
 
     # -------------------------------------------------------------------------

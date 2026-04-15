@@ -168,14 +168,36 @@ class MemoryQualityScorer:
         return min(1.0, ev_count * 0.2)
 
     async def _assess_clarity(self, memory: Memory) -> float:
-        # Simplified placeholder for clarity assessment via LLM
         if not self.ollama:
             return 0.5
-        # Would typically prompt LLM here: "Rate clarity of this text from 1-10"
-        return 0.8  # Stubbed
+        try:
+            prompt = (
+                "Rate the clarity and readability of the following text on a scale of 0 to 10. "
+                "Respond with ONLY a single number.\n\n"
+                f"Text: {memory.content[:500]}"
+            )
+            raw = await self.ollama._generate(
+                self.ollama._classifier_model, prompt, temperature=0.1
+            )
+            score = float("".join(c for c in raw.strip() if c.isdigit() or c == "."))
+            return max(0.0, min(1.0, score / 10.0))
+        except Exception:
+            return 0.5
 
     async def _assess_actionability(self, memory: Memory) -> float:
         if not self.ollama:
             return 0.5
-        # Would prompt LLM: "Rate actionability of this text from 1-10"
-        return 0.7  # Stubbed
+        try:
+            prompt = (
+                "Rate how actionable the following text is on a scale of 0 to 10. "
+                "Actionable means it contains specific steps, commands, or concrete guidance. "
+                "Respond with ONLY a single number.\n\n"
+                f"Text: {memory.content[:500]}"
+            )
+            raw = await self.ollama._generate(
+                self.ollama._classifier_model, prompt, temperature=0.1
+            )
+            score = float("".join(c for c in raw.strip() if c.isdigit() or c == "."))
+            return max(0.0, min(1.0, score / 10.0))
+        except Exception:
+            return 0.5

@@ -124,19 +124,24 @@ async def require_auth(
 
     # --- Try API key first ---
     if api_key is not None:
-        # Check Redis-managed keys first (if key manager is available)
-        from memory_system.api import _key_manager
+        # Validate against Platform's BetterAuth api-key/verify endpoint
+        import httpx
 
-        if _key_manager is not None:
-            key_meta = await _key_manager.validate_key(api_key)
-            if key_meta:
-                await _key_manager.record_usage(key_meta["id"])
-                return f"apikey:{key_meta['id']}:{key_meta.get('name', '')}"
+        platform_url = settings.platform_url or "http://platform-frontend:3000"
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                resp = await client.post(
+                    f"{platform_url}/api/auth/api-key/verify",
+                    json={"key": api_key},
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("valid"):
+                        key_info = data.get("key", {})
+                        return f"apikey:{key_info.get('id', 'unknown')}:{key_info.get('name', '')}"
+        except Exception:
+            pass  # Fall through to 401
 
-        # Fall back to static env var keys
-        api_keys = settings.api_keys if isinstance(settings.api_keys, list) else [settings.api_keys]
-        if check_api_key(api_key, api_keys):
-            return f"apikey:{api_key[:4]}..."
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API key",
@@ -156,17 +161,9 @@ async def require_auth(
             ) from e
 
     # --- No credentials provided ---
-    # If no API keys are configured AND no admin password hash set, allow through
-    # (backwards-compatible: unauthenticated mode when API_KEYS is empty)
-    if not settings.api_keys and settings.admin_password_hash is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication not configured. Set API_KEYS or ADMIN_PASSWORD_HASH in environment.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Authentication required: provide X-API-Key header or Authorization: Bearer token",
+        detail="Authentication required: provide X-API-Key header or Authorization: Bearer token. "
+        "Create API keys at https://memory.velocitydigi.com/dashboard/system/keys",
         headers={"WWW-Authenticate": "Bearer"},
     )

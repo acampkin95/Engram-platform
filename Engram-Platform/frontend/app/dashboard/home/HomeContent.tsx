@@ -58,6 +58,22 @@ function getServiceStatusLabel(status: ServiceStatusVariant): 'Online' | 'Degrad
   return 'Offline';
 }
 
+// ─── Helpers for nested crawler stats ──────────────────────────────────────────
+
+function crawlerActiveCrawls(stats: StatsResponse | null): number | string {
+  if (!stats) return '—';
+  if (stats.crawls?.active != null) return stats.crawls.active;
+  if (stats.active_crawls != null) return stats.active_crawls;
+  return '—';
+}
+
+function crawlerTotalJobs(stats: StatsResponse | null): number | string {
+  if (!stats) return '—';
+  if (stats.crawls?.total != null) return stats.crawls.total;
+  if (stats.total_jobs != null) return stats.total_jobs;
+  return '—';
+}
+
 // ─── Service health card content ───────────────────────────────────────────────────────
 
 function CrawlerHealthCard({
@@ -71,7 +87,7 @@ function CrawlerHealthCard({
   const serviceStatus = getServiceStatusVariant(online, Boolean(health));
   const rows = [
     { label: 'Version', value: health?.version ?? '—' },
-    { label: 'Active crawls', value: stats?.active_crawls ?? '—' },
+    { label: 'Active crawls', value: crawlerActiveCrawls(stats) },
     {
       label: 'Cache hit rate',
       value:
@@ -86,7 +102,10 @@ function CrawlerHealthCard({
           ? '—'
           : `${stats.average_crawl_time_ms.toFixed(0)} ms`,
     },
-    { label: 'Redis', value: health?.redis ?? '—' },
+    {
+      label: 'Redis',
+      value: typeof health?.redis === 'string' ? health.redis : health?.redis ? 'connected' : '—',
+    },
   ];
   return (
     <div className="h-full flex flex-col gap-3">
@@ -120,8 +139,30 @@ function MemoryHealthCard({
   const serviceStatus = getServiceStatusVariant(online, Boolean(health));
   const rows = [
     { label: 'Version', value: health?.version ?? '—' },
-    { label: 'Database', value: health?.database ?? '—' },
-    { label: 'Cache', value: health?.cache ?? '—' },
+    {
+      label: 'Database',
+      value:
+        health?.weaviate != null
+          ? health.weaviate
+            ? 'connected'
+            : 'disconnected'
+          : health?.database
+            ? 'connected'
+            : '—',
+    },
+    {
+      label: 'Cache',
+      value:
+        health?.redis != null
+          ? typeof health.redis === 'boolean'
+            ? health.redis
+              ? 'connected'
+              : 'disconnected'
+            : 'connected'
+          : health?.cache
+            ? 'connected'
+            : '—',
+    },
     { label: 'Total memories', value: analytics?.total_memories ?? '—' },
     { label: 'Total entities', value: analytics?.total_entities ?? '—' },
   ];
@@ -209,7 +250,7 @@ function StatsSummaryCard({ data }: Readonly<{ data: DashboardData | null }>) {
   const stats = [
     {
       label: 'Crawl Jobs',
-      value: data?.crawlerStats?.total_jobs ?? '—',
+      value: crawlerTotalJobs(data?.crawlerStats ?? null),
       accent: 'purple' as const,
     },
     {
@@ -219,7 +260,7 @@ function StatsSummaryCard({ data }: Readonly<{ data: DashboardData | null }>) {
     },
     {
       label: 'Active Crawls',
-      value: data?.crawlerStats?.active_crawls ?? '—',
+      value: crawlerActiveCrawls(data?.crawlerStats ?? null),
       accent: 'amber' as const,
     },
     {

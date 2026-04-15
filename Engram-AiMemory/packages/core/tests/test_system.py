@@ -8,7 +8,7 @@ No live services required.
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -433,7 +433,7 @@ class TestAdd:
         call_args = system._weaviate.add_memory.call_args
         memory_arg = call_args[0][0]
         assert memory_arg.expires_at is not None
-        assert memory_arg.expires_at > datetime.now(timezone.utc)
+        assert memory_arg.expires_at > datetime.now(UTC)
 
     async def test_add_default_expiration_from_settings(self, system):
         system._cache.get_embedding = AsyncMock(return_value=None)

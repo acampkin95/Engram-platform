@@ -1,7 +1,9 @@
 export type { CanvasPanel } from '@/src/stores/canvasStore';
+export { ApiEndpointsCard } from './ApiEndpointsCard';
 export type { AgentTask } from './agents/AgentConsole';
 export { AgentConsole } from './agents/AgentConsole';
 export { Canvas } from './canvas/Canvas';
+export { DeployWidget } from './DeployWidget';
 export type { EntityData } from './inspector/InspectorPanel';
 export { InspectorPanel } from './inspector/InspectorPanel';
 export type { StreamItem } from './intelligence/CrawlStream';
@@ -11,3 +13,4 @@ export { EntityGraph, EntityGraphWrapper } from './intelligence/EntityGraph';
 export { IntelligenceLayerToggle } from './investigation/IntelligenceLayerToggle';
 export type { InvestigationModeProps } from './investigation/InvestigationMode';
 export { InvestigationMode } from './investigation/InvestigationMode';
+export { MetricsBar } from './MetricsBar';

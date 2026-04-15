@@ -37,7 +37,103 @@ const SKIP_RECALL_TOOLS = new Set([
 	"list_memories",
 	"rag_query",
 	"build_context",
+	"get_analytics",
+	"get_system_metrics",
+	"health_check",
+	"get_search_stats",
+	"get_kg_stats",
 ]);
+
+// ---------------------------------------------------------------------------
+// Importance scores per tool — higher for richer / more durable content
+// ---------------------------------------------------------------------------
+
+const TOOL_IMPORTANCE: Partial<Record<string, number>> = {
+	ingest_document: 0.8,
+	add_entity: 0.7,
+	add_relation: 0.7,
+	create_matter: 0.7,
+	add_memory: 0.6,
+	batch_add_memories: 0.6,
+	consolidate_memories: 0.5,
+	cleanup_expired: 0.3,
+};
+
+// Minimum relevance score for recalled memories to appear in debug logs
+const MIN_RECALL_SCORE = 0.6;
+
+// Semantic text fields to extract from args — tried in order, first match wins
+const SEMANTIC_FIELDS = [
+	"content",
+	"query",
+	"text",
+	"description",
+	"topic",
+	"entity_name",
+	"name",
+	"subject",
+	"url",
+] as const;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a semantic search query from tool arguments.
+ *
+ * Prefers human-readable text fields (content, query, description…) over
+ * raw JSON serialisation so the vector search receives meaningful input.
+ */
+function buildSearchQuery(
+	toolName: string,
+	args: Record<string, unknown>,
+): string {
+	for (const field of SEMANTIC_FIELDS) {
+		const val = args[field];
+		if (typeof val === "string" && val.length > 8) {
+			return val.slice(0, 250);
+		}
+	}
+
+	// Fallback: tool name + compact scalar-only JSON (skip large nested objects)
+	const compactArgs = Object.fromEntries(
+		Object.entries(args).filter(([, v]) => typeof v !== "object" || v === null),
+	);
+	return `${toolName} ${JSON.stringify(compactArgs)}`.slice(0, 200);
+}
+
+/**
+ * Extract the most meaningful content to store for a tool call.
+ *
+ * Prefers the input args (intent) over the result text (confirmation noise).
+ * For relation tools, synthesises a human-readable triple.
+ */
+function extractStorageContent(
+	toolName: string,
+	args: Record<string, unknown>,
+	resultText: string,
+): string {
+	// Special-case: relation triple is the primary fact worth storing
+	if (toolName === "add_relation") {
+		const from = args.from_entity;
+		const to = args.to_entity;
+		const rel = args.relation_type ?? "relates_to";
+		if (typeof from === "string" && typeof to === "string") {
+			return `[add_relation] ${from} -[${rel}]-> ${to}`.slice(0, 500);
+		}
+	}
+
+	for (const field of SEMANTIC_FIELDS) {
+		const val = args[field];
+		if (typeof val === "string" && val.length > 5) {
+			return `[${toolName}] ${val.slice(0, 460)}`.slice(0, 500);
+		}
+	}
+
+	// Fallback to result text
+	return `[${toolName}] ${resultText.slice(0, 460)}`.slice(0, 500);
+}
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -65,23 +161,24 @@ export function registerMemoryHooks(
 		enabled: true,
 		handler: async (ctx: ToolCallContext): Promise<void> => {
 			// Skip recall for read-only memory tools — they fetch their own context
-			if (SKIP_RECALL_TOOLS.has(ctx.toolName)) {
-				return;
-			}
-			try {
-				// Build a compact search query (toolName + truncated args JSON)
-				const argsStr = JSON.stringify(ctx.args).slice(0, 150);
-				const query = `${ctx.toolName} ${argsStr}`.slice(0, 200);
+			if (SKIP_RECALL_TOOLS.has(ctx.toolName)) return;
 
+			try {
+				const query = buildSearchQuery(ctx.toolName, ctx.args);
 				const searchResult = await client.searchMemories({ query, limit: 5 });
 
-				if (searchResult.results.length > 0) {
+				const relevant = searchResult.results.filter(
+					(m) => (m.score ?? 0) >= MIN_RECALL_SCORE,
+				);
+
+				if (relevant.length > 0) {
 					logger.debug("Memory recall", {
 						tool: ctx.toolName,
-						count: searchResult.results.length,
-						memories: searchResult.results.map((m) => ({
+						query: query.slice(0, 80),
+						count: relevant.length,
+						memories: relevant.map((m) => ({
 							memory_id: m.memory_id,
-							content: m.content,
+							content: m.content?.slice(0, 120),
 							score: m.score,
 						})),
 					});
@@ -105,22 +202,29 @@ export function registerMemoryHooks(
 		enabled: true,
 		handler: async (ctx: ToolResultContext): Promise<void> => {
 			// Only store memories for tools that mutate state
-			if (!WRITE_TOOLS.has(ctx.toolName)) {
-				return;
-			}
+			if (!WRITE_TOOLS.has(ctx.toolName)) return;
 
 			try {
-				// Extract the first text block from the result content array
 				const firstTextBlock = ctx.result.content.find(
-					(block) => block.type === "text",
+					(b) => b.type === "text",
 				);
-				const resultText = (firstTextBlock?.text ?? "").slice(0, 450);
+				const resultText = firstTextBlock?.text ?? "";
 
-				// Compose the memory entry and cap at 500 chars
-				const content = `[Tool: ${ctx.toolName}] ${resultText}`.slice(0, 500);
+				const content = extractStorageContent(
+					ctx.toolName,
+					ctx.args,
+					resultText,
+				);
+
+				// Skip if the composed content is too thin to be useful
+				if (content.length < 20) return;
+
+				const importance = TOOL_IMPORTANCE[ctx.toolName] ?? 0.5;
 
 				await client.addMemory({
 					content,
+					memory_type: "fact",
+					importance,
 					tags: ["auto-hook", ctx.toolName],
 				});
 			} catch (error) {

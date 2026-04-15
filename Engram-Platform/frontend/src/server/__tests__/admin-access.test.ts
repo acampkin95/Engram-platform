@@ -1,78 +1,102 @@
 // @vitest-environment node
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { authMock } = vi.hoisted(() => ({
-  authMock: vi.fn(),
+const { getSessionMock } = vi.hoisted(() => ({
+  getSessionMock: vi.fn(),
 }));
 
-vi.mock('@clerk/nextjs/server', () => ({
-  auth: authMock,
+vi.mock('@/src/lib/auth', () => ({
+  auth: {
+    api: {
+      getSession: getSessionMock,
+    },
+  },
+}));
+
+vi.mock('next/headers', () => ({
+  headers: vi.fn().mockResolvedValue(new Headers()),
 }));
 
 describe('admin-access', () => {
-  const originalPublishable = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const originalAdmins = process.env.ENGRAM_ADMIN_USER_IDS;
+  const originalSecret = process.env.BETTER_AUTH_SECRET;
+  const originalAdmins = process.env.ENGRAM_ADMIN_EMAILS;
+  const _originalNodeEnv = process.env.NODE_ENV;
 
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_123';
-    delete process.env.ENGRAM_ADMIN_USER_IDS;
+    process.env.BETTER_AUTH_SECRET = 'test-secret';
+    delete process.env.ENGRAM_ADMIN_EMAILS;
+    // NODE_ENV stays as-is (test) unless overridden per-test
   });
 
   afterAll(() => {
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = originalPublishable;
-    process.env.ENGRAM_ADMIN_USER_IDS = originalAdmins;
+    process.env.BETTER_AUTH_SECRET = originalSecret;
+    process.env.ENGRAM_ADMIN_EMAILS = originalAdmins;
+    vi.unstubAllEnvs();
   });
 
-  it('allows access when Clerk is disabled', async () => {
-    delete process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  it('returns disabled mode when auth is not configured outside production', async () => {
+    delete process.env.BETTER_AUTH_SECRET;
     const { requireAdminAccess } = await import('../admin-access');
-
-    await expect(requireAdminAccess()).resolves.toEqual({ userId: null, mode: 'disabled' });
+    await expect(requireAdminAccess()).resolves.toEqual({
+      userId: null,
+      email: null,
+      mode: 'disabled',
+    });
   });
 
-  it('rejects unauthenticated access when Clerk is enabled', async () => {
-    authMock.mockResolvedValue({ userId: null, sessionClaims: null, orgRole: null });
+  it('throws Forbidden when auth is not configured in production', async () => {
+    delete process.env.BETTER_AUTH_SECRET;
+    vi.stubEnv('NODE_ENV', 'production');
     const { requireAdminAccess } = await import('../admin-access');
+    await expect(requireAdminAccess()).rejects.toThrow('Forbidden');
+  });
 
+  it('throws Unauthorized when there is no active session', async () => {
+    getSessionMock.mockResolvedValue(null);
+    const { requireAdminAccess } = await import('../admin-access');
     await expect(requireAdminAccess()).rejects.toThrow('Unauthorized');
   });
 
-  it('allows an explicitly allowlisted admin user id', async () => {
-    process.env.ENGRAM_ADMIN_USER_IDS = 'user_admin,user_ops';
-    authMock.mockResolvedValue({ userId: 'user_ops', sessionClaims: null, orgRole: null });
+  it('allows any authenticated user when no allowlist is configured', async () => {
+    getSessionMock.mockResolvedValue({ user: { id: 'user_123', email: 'anyone@example.com' } });
     const { requireAdminAccess } = await import('../admin-access');
-
     await expect(requireAdminAccess()).resolves.toMatchObject({
-      userId: 'user_ops',
+      userId: 'user_123',
+      email: 'anyone@example.com',
       mode: 'allowlist',
     });
   });
 
-  it('allows admin role from session claims metadata', async () => {
-    authMock.mockResolvedValue({
-      userId: 'user_meta_admin',
-      orgRole: null,
-      sessionClaims: { metadata: { role: 'admin' } },
-    });
+  it('allows an explicitly allowlisted admin email', async () => {
+    process.env.ENGRAM_ADMIN_EMAILS = 'admin@example.com,ops@example.com';
+    getSessionMock.mockResolvedValue({ user: { id: 'user_ops', email: 'ops@example.com' } });
     const { requireAdminAccess } = await import('../admin-access');
-
     await expect(requireAdminAccess()).resolves.toMatchObject({
-      userId: 'user_meta_admin',
-      mode: 'metadata',
+      userId: 'user_ops',
+      email: 'ops@example.com',
+      mode: 'allowlist',
     });
   });
 
-  it('rejects authenticated non-admin users', async () => {
-    authMock.mockResolvedValue({
-      userId: 'user_regular',
-      orgRole: 'org:member',
-      sessionClaims: { metadata: { role: 'user' } },
+  it('rejects authenticated users not in the allowlist', async () => {
+    process.env.ENGRAM_ADMIN_EMAILS = 'admin@example.com';
+    getSessionMock.mockResolvedValue({
+      user: { id: 'user_regular', email: 'regular@example.com' },
     });
     const { requireAdminAccess } = await import('../admin-access');
-
     await expect(requireAdminAccess()).rejects.toThrow('Forbidden');
+  });
+
+  it('allowlist check is case-insensitive', async () => {
+    process.env.ENGRAM_ADMIN_EMAILS = 'Admin@Example.com';
+    getSessionMock.mockResolvedValue({ user: { id: 'user_admin', email: 'ADMIN@EXAMPLE.COM' } });
+    const { requireAdminAccess } = await import('../admin-access');
+    await expect(requireAdminAccess()).resolves.toMatchObject({
+      userId: 'user_admin',
+      mode: 'allowlist',
+    });
   });
 });

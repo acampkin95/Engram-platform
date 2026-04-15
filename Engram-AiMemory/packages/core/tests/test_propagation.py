@@ -1,6 +1,6 @@
 """Tests for propagation.py - ConfidencePropagator."""
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 

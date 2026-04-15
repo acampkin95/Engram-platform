@@ -41,11 +41,15 @@ export async function GET(request: NextRequest) {
     const pathFilter = searchParams.get('path');
     if (pathFilter) params.set('path', pathFilter.slice(0, 256));
     const method = searchParams.get('method');
-    if (method && VALID_METHODS.has(method.toUpperCase())) params.set('method', method.toUpperCase());
+    if (method && VALID_METHODS.has(method.toUpperCase()))
+      params.set('method', method.toUpperCase());
     const limit = Number(searchParams.get('limit') ?? '50');
     params.set('limit', String(Math.max(1, Math.min(100, Number.isFinite(limit) ? limit : 50))));
     const offset = Number(searchParams.get('offset') ?? '0');
-    params.set('offset', String(Math.max(0, Math.min(10000, Number.isFinite(offset) ? offset : 0))));
+    params.set(
+      'offset',
+      String(Math.max(0, Math.min(10000, Number.isFinite(offset) ? offset : 0))),
+    );
     const qs = params.toString();
     const res = await fetch(`${MEMORY_API_URL}/admin/audit-log${qs ? `?${qs}` : ''}`, {
       headers: apiHeaders(),

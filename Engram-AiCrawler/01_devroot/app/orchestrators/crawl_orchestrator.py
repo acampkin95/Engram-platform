@@ -156,5 +156,14 @@ class CrawlOrchestrator:
         }
 
     async def _send_progress(self, status: str, data: dict[str, Any]):
-        """Send progress update (placeholder for WebSocket integration)"""
         logger.info(f"Progress [{status}]: {data}")
+        try:
+            from app.services.event_bus import get_event_bus
+
+            bus = get_event_bus()
+            await bus.publish(
+                "crawl_progress",
+                {"status": status, **data},
+            )
+        except Exception as exc:
+            logger.debug(f"Event bus publish failed: {exc}")

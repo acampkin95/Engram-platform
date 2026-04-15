@@ -5,7 +5,7 @@ import process from "node:process";
 import { createInterface } from "node:readline";
 
 import { createHookifyRules } from "./create-hookify-rules.js";
-import { type MCPClient, detectClient } from "./detect-client.js";
+import { detectClient, type MCPClient } from "./detect-client.js";
 import { injectClaudeMd } from "./inject-claude-md.js";
 import { injectMCPConfig } from "./inject-config.js";
 import { validateInstall } from "./validate.js";

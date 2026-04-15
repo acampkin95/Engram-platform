@@ -2,10 +2,6 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { authMock } = vi.hoisted(() => ({
-  authMock: vi.fn(),
-}));
-
 const { requireAdminAccessMock } = vi.hoisted(() => ({
   requireAdminAccessMock: vi.fn(),
 }));
@@ -28,10 +24,6 @@ const {
   sendAdminNotificationMock: vi.fn(),
   sendNotificationMock: vi.fn(),
   getNotificationChannelStatusMock: vi.fn(),
-}));
-
-vi.mock('@clerk/nextjs/server', () => ({
-  auth: authMock,
 }));
 
 vi.mock('@/src/server/admin-access', () => ({
@@ -192,7 +184,7 @@ describe('System API Routes', () => {
 
   describe('GET /api/system/health', () => {
     it('should return system health snapshot when authenticated', async () => {
-      authMock.mockResolvedValue({ userId: 'user_123', sessionClaims: null });
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_123', mode: 'allowlist' });
       const mockSnapshot = {
         summary: { status: 'healthy', healthyServices: 8, totalServices: 8, incidentCount: 0 },
         services: [],
@@ -211,7 +203,7 @@ describe('System API Routes', () => {
     });
 
     it('should return 401 when user is not authenticated', async () => {
-      authMock.mockResolvedValue({ userId: null, sessionClaims: null });
+      requireAdminAccessMock.mockRejectedValue(new Error('Unauthorized'));
 
       const { GET } = await import('../health/route');
       const response = await GET();
@@ -222,7 +214,7 @@ describe('System API Routes', () => {
     });
 
     it('should return 500 when health snapshot fails', async () => {
-      authMock.mockResolvedValue({ userId: 'user_123', sessionClaims: null });
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_123', mode: 'allowlist' });
       getSystemHealthSnapshotMock.mockRejectedValue(new Error('Service unavailable'));
 
       const { GET } = await import('../health/route');
@@ -236,7 +228,7 @@ describe('System API Routes', () => {
 
   describe('GET /api/system/history', () => {
     it('should return seven day history when authenticated', async () => {
-      authMock.mockResolvedValue({ userId: 'user_123', sessionClaims: null });
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_123', mode: 'allowlist' });
       const mockHistory = [
         { day: 'Mar 10', incidents: 2, maintenanceRuns: 1 },
         { day: 'Mar 11', incidents: 0, maintenanceRuns: 0 },
@@ -253,7 +245,7 @@ describe('System API Routes', () => {
     });
 
     it('should return 401 when user is not authenticated', async () => {
-      authMock.mockResolvedValue({ userId: null, sessionClaims: null });
+      requireAdminAccessMock.mockRejectedValue(new Error('Unauthorized'));
 
       const { GET } = await import('../history/route');
       const response = await GET();
@@ -264,7 +256,7 @@ describe('System API Routes', () => {
     });
 
     it('should return 500 when history retrieval fails', async () => {
-      authMock.mockResolvedValue({ userId: 'user_123', sessionClaims: null });
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_123', mode: 'allowlist' });
       getSevenDayHistoryMock.mockRejectedValue(new Error('File read error'));
 
       const { GET } = await import('../history/route');
@@ -278,7 +270,7 @@ describe('System API Routes', () => {
 
   describe('GET /api/system/logs', () => {
     it('should return recent logs for all services when authenticated', async () => {
-      authMock.mockResolvedValue({ userId: 'user_123', sessionClaims: null });
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_123', mode: 'allowlist' });
       const mockLogs = [
         { id: '1', line: 'Service started', level: 'info' },
         { id: '2', line: 'Error occurred', level: 'error' },
@@ -296,7 +288,7 @@ describe('System API Routes', () => {
     });
 
     it('should return logs for specific service with custom line count', async () => {
-      authMock.mockResolvedValue({ userId: 'user_123', sessionClaims: null });
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_123', mode: 'allowlist' });
       const mockLogs = [{ id: '1', line: 'Memory API started', level: 'info' }];
       getRecentLogsMock.mockResolvedValue(mockLogs);
 
@@ -311,7 +303,7 @@ describe('System API Routes', () => {
     });
 
     it('should return 401 when user is not authenticated', async () => {
-      authMock.mockResolvedValue({ userId: null, sessionClaims: null });
+      requireAdminAccessMock.mockRejectedValue(new Error('Unauthorized'));
 
       const { GET } = await import('../logs/route');
       const request = new Request('http://localhost/api/system/logs');
@@ -323,7 +315,7 @@ describe('System API Routes', () => {
     });
 
     it('should use default line count for invalid number', async () => {
-      authMock.mockResolvedValue({ userId: 'user_123', sessionClaims: null });
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_123', mode: 'allowlist' });
       getRecentLogsMock.mockResolvedValue([]);
 
       const { GET } = await import('../logs/route');
@@ -335,7 +327,7 @@ describe('System API Routes', () => {
     });
 
     it('should return 500 when log retrieval fails', async () => {
-      authMock.mockResolvedValue({ userId: 'user_123', sessionClaims: null });
+      requireAdminAccessMock.mockResolvedValue({ userId: 'user_123', mode: 'allowlist' });
       getRecentLogsMock.mockRejectedValue(new Error('Docker command failed'));
 
       const { GET } = await import('../logs/route');

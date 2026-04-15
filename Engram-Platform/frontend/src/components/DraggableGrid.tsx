@@ -3,27 +3,17 @@
 import { GripVertical, Maximize2, Minimize2 } from 'lucide-react';
 import type * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { cn } from '@/src/lib/utils';
+import type { ResponsiveLayouts } from 'react-grid-layout';
 
+import {
+  type Layout,
+  type LayoutItem,
+  ResponsiveGridLayout,
+  useContainerWidth,
+} from 'react-grid-layout';
+import { cn } from '@/src/lib/utils';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-const { ResponsiveGridLayout } = require('react-grid-layout') as {
-  ResponsiveGridLayout: React.ComponentType<Record<string, unknown>>;
-};
-
-// Local layout type (mirrors react-grid-layout's Layout)
-interface Layout {
-  i: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  minW?: number;
-  minH?: number;
-  maxW?: number;
-  maxH?: number;
-  [key: string]: unknown;
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -51,7 +41,7 @@ interface DraggableGridProps {
   rowHeight?: number;
   isDraggable?: boolean;
   isResizable?: boolean;
-  onLayoutChange?: (layout: Layout[], layouts: Record<string, Layout[]>) => void;
+  onLayoutChange?: (layout: Layout, layouts: ResponsiveLayouts) => void;
   className?: string;
 }
 
@@ -60,8 +50,8 @@ interface DraggableGridProps {
 function buildDefaultLayouts(
   items: GridItem[],
   cols: { lg: number; md: number; sm: number; xs: number; xxs: number },
-): Record<string, Layout[]> {
-  const makeLayout = (colCount: number): Layout[] =>
+): ResponsiveLayouts {
+  const makeLayout = (colCount: number): Layout =>
     items.map((item, i) => {
       const d = item.defaultLayout ?? { x: 0, y: i * 4, w: 6, h: 4 };
       return {
@@ -74,7 +64,7 @@ function buildDefaultLayouts(
         minH: d.minH ?? 2,
         maxW: d.maxW,
         maxH: d.maxH,
-      };
+      } satisfies LayoutItem;
     });
 
   return {
@@ -111,9 +101,10 @@ export function DraggableGrid({
   onLayoutChange,
   className,
 }: Readonly<DraggableGridProps>) {
+  const { width, containerRef } = useContainerWidth();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const defaultLayouts = buildDefaultLayouts(items, cols);
-  const [layouts, setLayouts] = useState<Record<string, Layout[]>>(defaultLayouts);
+  const [layouts, setLayouts] = useState<ResponsiveLayouts>(defaultLayouts);
   const [mounted, setMounted] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const hasExpandedWidget = expandedIds.size > 0;
@@ -125,7 +116,7 @@ export function DraggableGrid({
       try {
         const saved = localStorage.getItem(storageKey);
         if (saved) {
-          const parsed = JSON.parse(saved) as Record<string, Layout[]>;
+          const parsed = JSON.parse(saved) as ResponsiveLayouts;
           setLayouts(parsed);
         }
       } catch {
@@ -135,7 +126,7 @@ export function DraggableGrid({
   }, [storageKey]);
 
   const handleLayoutChange = useCallback(
-    (layout: Layout[], allLayouts: Record<string, Layout[]>) => {
+    (layout: Layout, allLayouts: ResponsiveLayouts) => {
       setLayouts(allLayouts);
       if (globalThis.window !== undefined) {
         try {
@@ -172,20 +163,25 @@ export function DraggableGrid({
   }
 
   return (
-    <div className={cn('w-full', className)}>
+    <div ref={containerRef} className={cn('w-full', className)}>
       <ResponsiveGridLayout
         className="layout"
+        width={width}
         layouts={layouts}
         cols={cols}
         rowHeight={rowHeight}
-        isDraggable={isDraggable && !hasExpandedWidget}
-        isResizable={isResizable && !hasExpandedWidget}
-        draggableHandle=".drag-handle"
+        dragConfig={{
+          enabled: isDraggable && !hasExpandedWidget,
+          handle: '.drag-handle',
+        }}
+        resizeConfig={{
+          enabled: isResizable && !hasExpandedWidget,
+        }}
         onLayoutChange={handleLayoutChange}
-        onDragStart={(_layout: Layout[], _old: Layout, item: Layout) => setDraggingId(item.i)}
+        onDragStart={(_layout, _oldItem, newItem) => setDraggingId(newItem?.i ?? null)}
         onDragStop={() => setDraggingId(null)}
-        margin={[12, 12]}
-        containerPadding={[0, 0]}
+        margin={[12, 12] as const}
+        containerPadding={[0, 0] as const}
       >
         {items.map((item) => (
           <div key={item.id}>

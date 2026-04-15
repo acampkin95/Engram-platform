@@ -39,16 +39,30 @@ function methodColor(method: string): string {
 
 const PAGE_SIZE = 50;
 
-async function fetchLog(params: { key_id?: string; path?: string; method?: string; offset: number }) {
+async function fetchLog(params: {
+  key_id?: string;
+  path?: string;
+  method?: string;
+  offset: number;
+}) {
   const result = await systemClient.getAuditLog({ ...params, limit: PAGE_SIZE });
   if (result.error) throw new Error(result.error);
-  return result.data!;
+  return result.data ?? ({ entries: [], total: 0, has_more: false } as AuditLogResponse);
 }
 
 async function fetchSummary() {
   const result = await systemClient.getAuditSummary(24);
   if (result.error) throw new Error(result.error);
-  return result.data!;
+  return (
+    result.data ??
+    ({
+      total_requests: 0,
+      error_count: 0,
+      error_rate: 0,
+      top_endpoints: [],
+      top_keys: [],
+    } satisfies AuditSummary)
+  );
 }
 
 // ── Summary Cards ─────────────────────────────────────────────────────────────
@@ -94,20 +108,14 @@ function SummaryCards({ summary }: Readonly<{ summary: AuditSummary | undefined 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {cards.map((card) => (
-        <div
-          key={card.label}
-          className="rounded-xl border border-white/[0.06] bg-[#0d0d1a] p-4"
-        >
+        <div key={card.label} className="rounded-xl border border-white/[0.06] bg-[#0d0d1a] p-4">
           <div className="flex items-center gap-2 mb-2">
             <card.icon className="w-4 h-4" style={{ color: card.accent }} />
             <span className="text-[10px] font-mono text-[#5c5878] uppercase tracking-widest">
               {card.label}
             </span>
           </div>
-          <p
-            className="text-lg font-semibold font-display truncate"
-            style={{ color: card.accent }}
-          >
+          <p className="text-lg font-semibold font-display truncate" style={{ color: card.accent }}>
             {card.value}
           </p>
         </div>
@@ -173,7 +181,11 @@ export default function AuditContent() {
   const [offset, setOffset] = useState(0);
 
   const swrKey = `audit-log-${filters.method}-${filters.path}-${offset}`;
-  const { data: logData, error: logError, isLoading: logLoading } = useSWR<AuditLogResponse>(
+  const {
+    data: logData,
+    error: logError,
+    isLoading: logLoading,
+  } = useSWR<AuditLogResponse>(
     swrKey,
     () =>
       fetchLog({
@@ -222,16 +234,14 @@ export default function AuditContent() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/[0.06]">
-                {['Timestamp', 'Key', 'Method', 'Path', 'Status', 'Latency', 'IP'].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-[10px] font-mono font-medium text-[#5c5878] uppercase tracking-widest"
-                    >
-                      {h}
-                    </th>
-                  ),
-                )}
+                {['Timestamp', 'Key', 'Method', 'Path', 'Status', 'Latency', 'IP'].map((h) => (
+                  <th
+                    key={h}
+                    className="px-4 py-3 text-[10px] font-mono font-medium text-[#5c5878] uppercase tracking-widest"
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -254,17 +264,15 @@ export default function AuditContent() {
                   </td>
                 </tr>
               ) : (
-                entries.map((entry: AuditLogEntry, idx: number) => (
+                entries.map((entry: AuditLogEntry) => (
                   <tr
-                    key={`${entry.timestamp}-${idx}`}
+                    key={`${entry.timestamp}-${entry.method}-${entry.path}-${entry.ip}`}
                     className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
                   >
                     <td className="px-4 py-2.5 text-xs text-[#a09bb8] font-mono whitespace-nowrap">
                       {formatTimestamp(entry.timestamp)}
                     </td>
-                    <td className="px-4 py-2.5 text-xs text-[#f0eef8]">
-                      {entry.key_name}
-                    </td>
+                    <td className="px-4 py-2.5 text-xs text-[#f0eef8]">{entry.key_name}</td>
                     <td className="px-4 py-2.5">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded text-[10px] font-mono font-medium border ${methodColor(entry.method)}`}
@@ -276,16 +284,12 @@ export default function AuditContent() {
                       {entry.path}
                     </td>
                     <td className="px-4 py-2.5">
-                      <Badge variant={statusVariant(entry.status_code)}>
-                        {entry.status_code}
-                      </Badge>
+                      <Badge variant={statusVariant(entry.status_code)}>{entry.status_code}</Badge>
                     </td>
                     <td className="px-4 py-2.5 text-xs text-[#a09bb8] font-mono">
                       {entry.latency_ms}ms
                     </td>
-                    <td className="px-4 py-2.5 text-xs text-[#5c5878] font-mono">
-                      {entry.ip}
-                    </td>
+                    <td className="px-4 py-2.5 text-xs text-[#5c5878] font-mono">{entry.ip}</td>
                   </tr>
                 ))
               )}

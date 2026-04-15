@@ -5,6 +5,145 @@
 
 ---
 
+## [2026-04-03] — MCP & Auth Unification Overhaul
+
+### Architecture
+- **Unified auth via BetterAuth `@better-auth/api-key` plugin** — Platform is the single auth authority; API keys stored in BetterAuth's SQLite DB, validated by Memory API and MCP server via Platform's `/api/auth/api-key/verify` endpoint
+- **Removed OAuth 2.1 from MCP** — deleted 5 OAuth files (oauth-server, pkce, token-store, redis-token-store, oauth-middleware), replaced with `ApiKeyValidator` that calls Platform's BetterAuth verify endpoint
+- **Removed `redis` dependency from MCP** — no longer needed for auth (Redis stays for Memory API caching only)
+- **Simplified .env** — eliminated `API_KEYS`, `MEMORY_API_KEY`, `MCP_AUTH_TOKEN`, `AI_MEMORY_API_KEY`, all `OAUTH_*` vars; JWT secret derived from `BETTER_AUTH_SECRET`
+
+### MCP Server
+- New `src/auth/redis-key-validator.ts` → `ApiKeyValidator` — validates API keys via Platform's BetterAuth verify endpoint, 60s in-memory cache
+- New `src/auth/middleware.ts` — accepts both `Authorization: Bearer` and `X-API-Key` headers
+- Simplified `config.ts` — removed OAuthConfig interface, added `platformUrl` field
+- HTTP transport cleaned up — no OAuth endpoints, BetterAuth key validation on `/mcp`
+- Stdio transport unchanged — auto-uses `ENGRAM_API_KEY` from env
+- Removed `redis` npm dependency
+- **345 tests passing**, 0 failures
+
+### Memory API
+- `auth.py` — validates API keys by calling Platform's BetterAuth `/api/auth/api-key/verify` endpoint via `httpx`
+- `config.py` — added `platform_url` setting (default: `http://platform-frontend:3000`)
+- `key_manager.py` — added `create_bootstrap_key()` for first-run provisioning
+
+### Platform Frontend
+- `@better-auth/api-key` plugin added to server and client auth configs
+- `enableSessionForAPIKeys: true` — API keys create mock sessions for protected endpoints
+- Keys UI — rewritten to use BetterAuth's `authClient.apiKey` client SDK (create, list, update, delete)
+- Claude Code config helper section added to keys page
+- Simplified `.env.local.example`
+- **1,090 tests passing**, 0 failures
+
+### Infrastructure
+- Docker compose — simplified env vars, added `PLATFORM_URL` for cross-service auth, removed nginx MEMORY_API_KEY envsubst
+- Nginx — removed OAuth well-known endpoints, removed API key header injection
+- New `.env.example` — minimal required config (BETTER_AUTH_SECRET, embedding provider, admin user)
+
+---
+
+## [2026-04-03] — 10-Loop Certification + Quality Gates + Admin Guide
+
+### Code Quality
+- **DraggableGrid rewrite**: migrated from deprecated `WidthProvider(Responsive)` to new `ResponsiveGridLayout` + `useContainerWidth` API (react-grid-layout v2)
+- **Biome lint**: resolved all 14 errors — non-null assertions replaced with null-coalescing, a11y labels added, unused vars removed, formatting normalized
+- **TypeScript**: 0 errors across Platform frontend and MCP server
+- **MCP config test**: version assertion updated to match 1.2.0
+- **admin-access test**: NODE_ENV stubbing fixed with `vi.stubEnv`
+- **routing-config test**: nginx regex updated for current server block structure
+
+### Certification
+- **1,472 tests passing** (1,090 Platform + 382 MCP), 0 failures
+- **Coverage**: 90.02% statements, 81.60% branches, 83.14% functions, 90.99% lines
+- **Production build**: SUCCESS (Next.js + MCP)
+- **Docker compose**: VALID (9 services)
+- **3 quality gates** (30-step checklist each) — all passed
+- Certification report: `plans/CERTIFICATION_REPORT_2026-04-03.md`
+
+### Documentation
+- **Admin Guide** (`ENGRAM_ADMIN_GUIDE.md`): 2-page guide with credentials, MCP setup, dashboard usage, API reference, troubleshooting
+
+---
+
+## [2026-04-02] — Default Admin Seed + MCP Token Management
+
+### Auth
+- **Setup page** (`/setup`): one-click admin account creation for first-time deployment; auto-detects if users exist, shows credentials after creation
+- **Seed API** (`/api/setup/seed`): GET returns seed status, POST creates default admin from `ENGRAM_ADMIN_EMAIL`/`ENGRAM_ADMIN_PASSWORD` env vars; creates BetterAuth tables if missing
+- **Default credentials**: `admin@engram.local` / `EngramAdmin2026!` (configurable via env vars)
+- **Sign-in page**: added "First time? Set up admin" link to footer
+- **Middleware**: `/setup` and `/api/setup` added to public paths (no auth required)
+- **Auth config**: `http://localhost:PORT` added to `trustedOrigins` for internal API calls
+- **docker-compose.yml**: `ENGRAM_ADMIN_EMAIL` and `ENGRAM_ADMIN_PASSWORD` env vars added to platform-frontend service
+
+### Dashboard
+- **API Keys page** (`System > API Keys`): added MCP Auth Token section with status display, masked token, and token generator (64-char hex)
+- **System tokens API** (`/api/system/tokens`): GET returns MCP token status, POST generates new token
+
+### Infrastructure
+- **nginx**: `/setup` and `/api/setup` location blocks added for routing
+- **Cloudflare WAF**: skip rule added for `memory.velocitydigi.com/api/*` paths; "Challenge non-Tailscale API access" rule updated to exclude Engram domain
+
+---
+
+## [2026-04-01] — BetterAuth Migration (Clerk Removed)
+
+### Auth
+- **Replaced Clerk with BetterAuth**: self-hosted auth with SQLite backend (`better-sqlite3@^12.0.0`, `better-auth@^1.2.7`)
+- **Email/password sign-in**: react-hook-form + zod validation, show/hide toggle, animated error reveal
+- **Google OAuth**: conditional on `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED` / `GOOGLE_CLIENT_ID` env vars
+- **Custom sign-in page** (`app/sign-in/page.tsx`): animated floating orbs background, Framer Motion card entrance, smooth landing → login → dashboard flow; old Clerk catch-all `[[...sign-in]]` removed
+- **BetterAuth server** (`src/lib/auth.ts`): 30-day sessions, cookie cache, trusted origins, SQLite persistence
+- **BetterAuth client** (`src/lib/auth-client.ts`): `createAuthClient` with `signIn`, `signOut`, `signUp`, `useSession` exports
+- **Auth API route** (`app/api/auth/[...all]/route.ts`): `toNextJsHandler` bridge
+- **Middleware** (`middleware.ts`): cookie-based session check (`better-auth.session_token`), redirects to `/sign-in?redirect=<path>`
+- **Admin access** (`src/server/admin-access.ts`): `ENGRAM_ADMIN_EMAILS` allowlist (replaces `ENGRAM_ADMIN_USER_IDS`); single-user mode when unset; `BETTER_AUTH_SECRET` gates auth
+- **Providers cleanup**: `ClerkProvider` removed from `Providers.tsx`
+- **Docker**: `platform-frontend` build args/env vars updated (Clerk → BetterAuth); `auth_db` named volume added; `read_only` removed to allow SQLite writes
+- **nginx CSP**: Clerk domains removed; `https://accounts.google.com` added to script-src and connect-src
+- **next.config.ts CSP**: Clerk img/connect domains removed
+- **Dockerfile**: Clerk `ARG`/`ENV` replaced with BetterAuth equivalents
+- **`.npmrc`**: `legacy-peer-deps=true` added for `npm ci` compatibility in Docker builds
+
+### Routes fixed
+- `health`, `history`, `logs` routes: `requireAdminAccess()` moved inside try/catch for proper 401/403 responses
+
+### Tests
+- Rewrote `admin-access.test.ts`: mocks `better-auth` + `next/headers`, tests email allowlist, single-user mode, disabled mode
+- Rewrote `Providers.test.tsx`: removed Clerk mock
+- Rewrote `routes.test.ts`: removed `@clerk/nextjs/server` mock, all auth gates use `requireAdminAccessMock`
+- **All 1083 tests passing** (97 test files)
+
+---
+
+## [2026-04-01] — Landing Site Overhaul & nginx Routing Fix
+
+### Landing Site (memory.velocitydigi.com)
+- **Full UI/UX overhaul**: Replaced all emoji with lucide-react SVG icons (Brain, ScanSearch, Network, etc.)
+- **Architecture diagram**: Rebuilt as stratified 4-layer CSS diagram (Clients → MCP → Platform → Data) with inline SVG arrows, protocol labels, staggered reveal animation
+- **Typography**: Fluid type scale via CSS `clamp()` (9 steps), line-height/letter-spacing tokens
+- **Accessibility (WCAG AA)**: `aria-labelledby` on all 5 sections, keyboard-navigable nav (Escape closes mobile menu), `aria-expanded` on toggle, scroll button proper `<button>` element
+- **Contrast fix**: `--text-muted` raised from `#5c5878` → `#8580a0` (~4.6:1 on void background)
+- **Dockerized**: Added multi-stage `Dockerfile` (node:20-alpine builder + runner) — image rebuilt and deployed
+- **nginx routing**: Added `engram_landing` upstream (port 3099), split `memory.velocitydigi.com` into dedicated server block — landing site now properly served at https://memory.velocitydigi.com/
+
+---
+
+## [2026-04-01] — Deploy Process, SSL Cert Fix & Skills Overhaul
+
+### Deployment
+- **Established rsync deploy process**: backup memories → rsync changed dirs → selective service rebuild → health check
+- **SSL cert fix**: nginx was failing to start due to missing `velocitydigi.crt` — copied Let's Encrypt cert from `/etc/letsencrypt/live/velocitydigi.com/` into `/opt/engram/Engram-Platform/certs/`
+- **Certbot renewal hook**: installed `/etc/letsencrypt/renewal-hooks/deploy/engram-nginx.sh` to auto-copy certs on renewal and reload nginx
+- **Deployed**: memory-api, mcp-server, platform-frontend rebuilt; nginx reloaded — all services healthy
+
+### Documentation
+- Created `engram-deploy` skill: full deploy runbook, memory protection, SSL cert management, one-time git setup
+- Updated master `engram` skill navigator with `engram-deploy` entry
+- Committed 70-file changeset (branding overhaul + a11y + system docs)
+
+---
+
 ## [2026-04-01] — Branding Unification, Contrast & Accessibility Overhaul
 
 ### Branding

@@ -59,16 +59,7 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     // Remote patterns for external images (if needed)
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.clerk.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img.clerk.com',
-      },
-    ],
+    remotePatterns: [],
   },
 
   // =============================================================================
@@ -110,7 +101,7 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://img.clerk.com https://clerk.com; connect-src 'self' https://*.clerk.com https://clerk.com; font-src 'self' data:;",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://accounts.google.com; font-src 'self' data:;",
           },
         ],
       },
@@ -183,22 +174,7 @@ const nextConfig: NextConfig = {
   // REDIRECTS
   // =============================================================================
   async redirects() {
-    return [
-      // Redirect HTTP to HTTPS handled by nginx
-      // These are fallback redirects for standalone mode
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'header',
-            key: 'x-forwarded-proto',
-            value: 'http',
-          },
-        ],
-        permanent: true,
-        destination: 'https://:path*',
-      },
-    ];
+    return [];
   },
 
   // =============================================================================
@@ -226,13 +202,6 @@ const nextConfig: NextConfig = {
               chunks: 'all',
               enforce: true,
               priority: 5,
-            },
-            // Clerk chunk (large auth library)
-            clerk: {
-              test: /[\\\\/]node_modules[\\\\/]@clerk[\\\\/]/,
-              name: 'clerk',
-              chunks: 'all',
-              priority: 15,
             },
             // Radix UI chunk (component library)
             radix: {

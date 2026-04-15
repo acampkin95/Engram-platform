@@ -1,679 +1,282 @@
 import Link from 'next/link';
 import {
+  ArrowRight,
   Brain,
-  ScanSearch,
   Network,
-  LayoutDashboard,
-  Globe,
-  Bot,
-  BookOpen,
-  Shield,
-  FlaskConical,
-  Wrench,
-  Monitor,
-  Terminal,
-  Database,
-  Zap,
-  Container,
+  Radar,
+  Sparkles,
+  Workflow,
 } from 'lucide-react';
-import { Hero, Feature, Button, PlatformArchitecture } from './components';
+import { Hero } from './components';
+import { Button } from './components/ui/Button';
+import { products } from './lib/platform-data';
 
-const platformPillars = [
+const productIcons = {
+  Brain,
+  Globe: Radar,
+  Server: Network,
+  LayoutDashboard: Workflow,
+} as const;
+
+const operatingLoop = [
   {
-    title: 'AiMemory',
-    subtitle: '3-Tier Vector Memory',
-    description:
-      'Three-tier vector memory with semantic search, automatic decay, RAG queries, and knowledge graph. Memories persist across sessions, projects, and AI clients.',
-    color: 'amber' as const,
-    icon: (
-      <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, rgba(242,169,59,0.3) 0%, rgba(242,169,59,0.12) 100%)', border: '1px solid rgba(242,169,59,0.25)' }}
-      >
-        <Brain size={20} color="var(--engram-amber)" strokeWidth={1.5} />
-      </div>
-    ),
+    step: '01',
+    title: 'Collect',
+    body: 'Capture web, entity, and operator inputs through crawler and platform ingestion flows.',
   },
   {
-    title: 'AiCrawler',
-    subtitle: 'OSINT Intelligence Engine',
-    description:
-      'OSINT-grade web crawler with AI-powered content analysis, dark web capability, entity extraction, and ChromaDB vector storage. Scrape, analyse, and retain intelligence.',
-    color: 'violet' as const,
-    icon: (
-      <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, rgba(124,92,191,0.3) 0%, rgba(124,92,191,0.12) 100%)', border: '1px solid rgba(124,92,191,0.25)' }}
-      >
-        <ScanSearch size={20} color="var(--engram-violet)" strokeWidth={1.5} />
-      </div>
-    ),
+    step: '02',
+    title: 'Store',
+    body: 'Persist high-signal context into tiered memory with tenant-aware retrieval semantics.',
   },
   {
-    title: 'MCP Server',
-    subtitle: 'Universal AI Bridge',
-    description:
-      '25 tools over stdio and HTTP. Connects Claude Code, Claude Desktop, or any MCP client to your memory layer in minutes. OAuth 2.1 + circuit breaker resilience.',
-    color: 'teal' as const,
-    icon: (
-      <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, rgba(46,196,196,0.25) 0%, rgba(46,196,196,0.08) 100%)', border: '1px solid rgba(46,196,196,0.2)' }}
-      >
-        <Network size={20} color="var(--engram-teal)" strokeWidth={1.5} />
-      </div>
-    ),
+    step: '03',
+    title: 'Expose',
+    body: 'Publish the same intelligence surfaces through MCP for agents and through the dashboard for operators.',
   },
   {
-    title: 'Platform Dashboard',
-    subtitle: 'Operations Command Center',
-    description:
-      'Unified Next.js 15 dashboard for memory browsing, crawler jobs, knowledge graph visualisation, investigation case management, and system health monitoring.',
-    color: 'rose' as const,
-    icon: (
-      <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, rgba(224,92,127,0.3) 0%, rgba(224,92,127,0.1) 100%)', border: '1px solid rgba(224,92,127,0.22)' }}
-      >
-        <LayoutDashboard size={20} color="var(--engram-rose)" strokeWidth={1.5} />
-      </div>
-    ),
+    step: '04',
+    title: 'Operate',
+    body: 'Monitor system health, investigations, and retrieval quality from the unified dashboard.',
   },
 ];
 
-const useCases = [
+const solutionCards = [
   {
-    title: 'OSINT Investigation',
-    description: 'Automated intelligence gathering with dark web monitoring, breach scanning, and entity correlation.',
-    color: 'violet' as const,
-    icon: <Globe size={18} color="var(--engram-violet)" strokeWidth={1.5} />,
+    title: 'Agent Memory',
+    body: 'Give internal agents durable project and operator context instead of forcing them to rediscover state.',
   },
   {
-    title: 'AI Agent Memory',
-    description: 'Persistent context for conversational AI and autonomous agents with semantic understanding.',
-    color: 'amber' as const,
-    icon: <Brain size={18} color="var(--engram-amber)" strokeWidth={1.5} />,
+    title: 'Investigation Ops',
+    body: 'Run crawler, memory, and intelligence work from one surface when cases move faster than tabs can keep up.',
   },
   {
-    title: 'Knowledge Management',
-    description: 'Enterprise knowledge graphs with semantic search and relationship extraction.',
-    color: 'teal' as const,
-    icon: <BookOpen size={18} color="var(--engram-teal)" strokeWidth={1.5} />,
+    title: 'Knowledge Operations',
+    body: 'Keep documents, extracted entities, and learned patterns in one retrievable operational layer.',
   },
   {
-    title: 'Threat Intelligence',
-    description: 'Real-time breach scanning, crypto tracing, and threat pattern analysis.',
-    color: 'rose' as const,
-    icon: <Shield size={18} color="var(--engram-rose)" strokeWidth={1.5} />,
-  },
-  {
-    title: 'Research Automation',
-    description: 'Web crawling with AI-powered analysis, extraction, and knowledge synthesis.',
-    color: 'amber' as const,
-    icon: <FlaskConical size={18} color="var(--engram-amber)" strokeWidth={1.5} />,
-  },
-  {
-    title: 'MCP Tool Server',
-    description: 'Expose any capability as tools for Claude Desktop, Claude Code, and AI assistants.',
-    color: 'violet' as const,
-    icon: <Wrench size={18} color="var(--engram-violet)" strokeWidth={1.5} />,
+    title: 'Self-Hosted AI Control',
+    body: 'Keep the stack on infrastructure you control while exposing the useful pieces through MCP and the dashboard.',
   },
 ];
 
-const integrations = [
+const trustSignals = [
   {
-    name: 'Claude Desktop',
-    icon: <Monitor size={28} color="var(--engram-amber)" strokeWidth={1.5} />,
-    description: 'MCP stdio transport',
-    detail: 'Connect your local Claude instance to full memory and tool access over stdio.',
+    title: 'Network-first deployment model',
+    body: 'The intended operating posture is private networking and controlled service exposure instead of public-by-default tooling.',
+    href: '/security',
   },
   {
-    name: 'Claude Code',
-    icon: <Terminal size={28} color="var(--engram-violet)" strokeWidth={1.5} />,
-    description: 'Native integration',
-    detail: 'Drop-in MCP config gives Claude Code persistent project and cross-session memory.',
-  },
-  {
-    name: 'Any AI Client',
-    icon: <Bot size={28} color="var(--engram-teal)" strokeWidth={1.5} />,
-    description: 'HTTP streaming',
-    detail: 'Standard MCP over HTTP — works with any client that speaks the protocol.',
-  },
-  {
-    name: 'Docker Compose',
-    icon: <Container size={28} color="var(--engram-rose)" strokeWidth={1.5} />,
-    description: 'One-command deploy',
-    detail: 'Full stack up in under 60 seconds. All services wired and ready.',
-  },
-  {
-    name: 'Weaviate',
-    icon: <Database size={28} color="var(--engram-amber)" strokeWidth={1.5} />,
-    description: 'Vector storage',
-    detail: 'Multi-tenant vector DB backing all three memory tiers with HNSW indexing.',
-  },
-  {
-    name: 'Redis',
-    icon: <Zap size={28} color="var(--engram-violet)" strokeWidth={1.5} />,
-    description: 'Caching layer',
-    detail: 'Sub-millisecond hot cache for embeddings, sessions, and rate limiting.',
+    title: 'Explicit rollout path',
+    body: 'Marketing, documentation, security posture, and dashboard entry are now separate surfaces with a clear order.',
+    href: '/contact',
   },
 ];
 
-const stats = [
-  { value: '10M+', label: 'Vectors/sec', color: 'amber' as const },
-  { value: '<10ms', label: 'Query Latency', color: 'violet' as const },
-  { value: '4', label: 'Integrated Services', color: 'teal' as const },
-  { value: '99.9%', label: 'Uptime', color: 'rose' as const },
-];
+function SectionIntro({
+  eyebrow,
+  title,
+  body,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="max-w-3xl space-y-4">
+      <p className="font-[var(--font-mono)] text-xs uppercase tracking-[0.28em] text-[var(--engram-amber)]">
+        {eyebrow}
+      </p>
+      <h2 className="font-[var(--font-display)] text-3xl font-bold tracking-[var(--tracking-tight)] text-[var(--text-primary)] sm:text-4xl">
+        {title}
+      </h2>
+      <p className="text-base leading-8 text-[var(--text-secondary)] sm:text-lg">{body}</p>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
     <>
-        <Hero />
+      <Hero />
 
-        {/* Platform Overview - 4 Pillars */}
-        <section
-          id="platform"
-          aria-labelledby="platform-heading"
-          className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300"
-        >
-          {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-amber)]/30 to-transparent" aria-hidden="true" />
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+        <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+          <SectionIntro
+            eyebrow="Connected Surfaces"
+            title="One operating model across memory, crawling, MCP, and the dashboard."
+            body="The services stay independent, but the experience no longer forces people to guess where to begin. The landing site frames the system, and /dashboard is where live work begins."
+          />
 
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-16 md:mb-20">
-              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3" aria-hidden="true">
-                <div className="w-10 h-px bg-[var(--engram-amber)]" />
-                The Engram Ecosystem
-              </div>
-              <h2 id="platform-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-6">
-                Four Integrated Services
-              </h2>
-              <p className="font-[var(--font-body)] italic text-lg sm:text-xl text-[var(--text-secondary)] max-w-3xl leading-relaxed">
-                A unified platform where each service complements the others, creating a
-                cohesive ecosystem for AI intelligence.
-              </p>
-            </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {products.map((product) => {
+              const Icon = productIcons[product.icon as keyof typeof productIcons] ?? Sparkles;
+              const href = product.slug === 'dashboard' ? '/dashboard' : `/platform/${product.slug}`;
+              const accent = `var(--engram-${product.color})`;
+              const summary = product.features[0]?.description ?? product.description;
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
-              {platformPillars.map((pillar) => (
-                <Feature
-                  key={pillar.title}
-                  title={pillar.title}
-                  description={`${pillar.subtitle} — ${pillar.description}`}
-                  icon={pillar.icon}
-                  color={pillar.color}
-                  size="large"
-                  className="h-full group"
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Architecture Section */}
-        <section id="architecture" aria-labelledby="architecture-heading" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-1)] transition-all duration-300">
-          {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-violet)]/30 to-transparent" aria-hidden="true" />
-
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-16 md:mb-20">
-              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3" aria-hidden="true">
-                <div className="w-10 h-px bg-[var(--engram-amber)]" />
-                Technical Architecture
-              </div>
-              <h2 id="architecture-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
-                Engineered for Scale
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
-              <div>
-                <h3 className="font-[var(--font-display)] font-semibold text-2xl md:text-3xl mb-8 text-[var(--engram-violet-bright)]">
-                  Performance Metrics
-                </h3>
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4 group">
-                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2.5 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <div>
-                      <h4 className="font-[var(--font-display)] font-semibold mb-2">
-                        Sub-10ms Latency
-                      </h4>
-                      <p className="font-[var(--font-body)] text-[var(--text-secondary)] leading-relaxed">
-                        Vector queries optimized for real-time AI interactions and responsive
-                        dashboards.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4 group">
-                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2.5 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <div>
-                      <h4 className="font-[var(--font-display)] font-semibold mb-2">
-                        Horizontal Scaling
-                      </h4>
-                      <p className="font-[var(--font-body)] text-[var(--text-secondary)] leading-relaxed">
-                        Docker Compose orchestration with built-in sharding for multi-tenant
-                        deployments.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4 group">
-                    <div className="w-2 h-2 rounded-full bg-[var(--engram-amber)] mt-2.5 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
-                    <div>
-                      <h4 className="font-[var(--font-display)] font-semibold mb-2">
-                        99.9% Uptime SLA
-                      </h4>
-                      <p className="font-[var(--font-body)] text-[var(--text-secondary)] leading-relaxed">
-                        Redundant services with automatic failover and health monitoring.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <PlatformArchitecture />
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-              {stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="group relative rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    backdropFilter: 'blur(8px)',
-                  }}
+              return (
+                <Link
+                  key={product.slug}
+                  href={href}
+                  className="group rounded-[1.8rem] border border-[var(--border)] bg-[rgba(255,255,255,0.03)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(255,193,94,0.5)] hover:bg-[rgba(255,255,255,0.05)]"
                 >
-                  {/* Subtle glow on hover */}
-                  <div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{
-                      background: `radial-gradient(circle, ${
-                        stat.color === 'amber'
-                          ? 'rgba(242,169,59,0.1)'
-                          : stat.color === 'violet'
-                            ? 'rgba(124,92,191,0.1)'
-                            : stat.color === 'teal'
-                              ? 'rgba(46,196,196,0.08)'
-                              : 'rgba(224,92,127,0.08)'
-                      } 0%, transparent 70%)`,
-                    }}
-                  />
-
-                  <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.24em] text-[var(--text-muted)]">
+                        {product.tagline}
+                      </p>
+                      <h3 className="mt-3 font-[var(--font-display)] text-2xl font-bold text-[var(--text-primary)]">
+                        {product.name}
+                      </h3>
+                    </div>
                     <div
-                      className="font-[var(--font-display)] font-bold text-3xl md:text-4xl mb-2 transition-transform duration-300 group-hover:scale-105"
-                      style={{
-                        color:
-                          stat.color === 'amber'
-                            ? 'var(--engram-amber)'
-                            : stat.color === 'violet'
-                              ? 'var(--engram-violet)'
-                              : stat.color === 'teal'
-                                ? 'var(--engram-teal)'
-                                : 'var(--engram-rose)',
-                      }}
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl"
+                      style={{ backgroundColor: `${accent}22` }}
                     >
-                      {stat.value}
-                    </div>
-                    <div className="font-[var(--font-mono)] text-xs sm:text-sm text-[var(--text-muted)]">
-                      {stat.label}
+                      <Icon size={20} style={{ color: accent }} />
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Integration Section */}
-        <section id="integrations" aria-labelledby="integrations-heading" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300">
-          {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-teal)]/30 to-transparent" aria-hidden="true" />
-
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-16 md:mb-20">
-              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3" aria-hidden="true">
-                <div className="w-10 h-px bg-[var(--engram-amber)]" />
-                Seamless Integration
-              </div>
-              <h2 id="integrations-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
-                Connects to Everything
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {integrations.map((integration, idx) => {
-                const colorMap = ['amber', 'violet', 'teal', 'rose', 'amber', 'violet'] as const;
-                const color = colorMap[idx % colorMap.length];
-                const colorVars = {
-                  amber: 'var(--engram-amber)',
-                  violet: 'var(--engram-violet)',
-                  teal: 'var(--engram-teal)',
-                  rose: 'var(--engram-rose)',
-                };
-
-                return (
-                  <div
-                    key={integration.name}
-                    className="group relative rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-2 overflow-hidden"
-                    style={{
-                      background: 'rgba(255,255,255,0.03)',
-                      border: `1px solid rgba(255,255,255,0.06)`,
-                    }}
-                  >
-                    {/* Colored border glow on hover */}
-                    <div
-                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                      style={{
-                        border: `2px solid ${colorVars[color]}`,
-                        boxShadow: `0 0 24px ${colorVars[color]}20`,
-                      }}
-                    />
-
-                    <div className="relative">
-                      <div className="mb-4 group-hover:scale-110 transition-transform duration-300 inline-block">
-                        {integration.icon}
-                      </div>
-                      <h3 className="font-[var(--font-display)] font-bold text-xl mb-1">
-                        {integration.name}
-                      </h3>
-                      <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.1em] mb-3">
-                        {integration.description}
-                      </p>
-                      <p className="font-[var(--font-body)] text-sm text-[var(--text-secondary)] leading-relaxed">
-                        {integration.detail}
-                      </p>
-                    </div>
+                  <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">{summary}</p>
+                  <div className="mt-6 flex items-center justify-between border-t border-[var(--border)] pt-4">
+                    <span className="font-[var(--font-mono)] text-[11px] uppercase tracking-[0.22em] text-[var(--text-muted)]">
+                      Port {product.port}
+                    </span>
+                    <span className="inline-flex items-center gap-2 text-sm text-[var(--engram-amber)]">
+                      Open
+                      <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+                </Link>
+              );
+            })}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Use Cases Section */}
-        <section id="use-cases" aria-labelledby="use-cases-heading" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-1)] transition-all duration-300">
-          {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-rose)]/30 to-transparent" aria-hidden="true" />
+      <section className="border-y border-[var(--border)] bg-[rgba(255,255,255,0.02)]">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+          <SectionIntro
+            eyebrow="Operating Loop"
+            title="Move from collection to retrieval without breaking context."
+            body="This is the actual product story: collect signal, persist it, expose it to tools, then operate it from a shared dashboard. The IA now reflects that loop instead of scattering it."
+          />
 
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-16 md:mb-20">
-              <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-4 flex items-center gap-3" aria-hidden="true">
-                <div className="w-10 h-px bg-[var(--engram-amber)]" />
-                Real-World Applications
-              </div>
-              <h2 id="use-cases-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] mb-4">
-                Built for Real Work
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {useCases.map((useCase) => {
-                const colorVars = {
-                  amber: 'rgba(242,169,59,0.4)',
-                  violet: 'rgba(124,92,191,0.4)',
-                  teal: 'rgba(46,196,196,0.35)',
-                  rose: 'rgba(224,92,127,0.4)',
-                };
-                return (
-                  <div
-                    key={useCase.title}
-                    className="group relative rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-                    style={{
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.06)',
-                    }}
-                  >
-                    {/* Amber gradient border on hover */}
-                    <div
-                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                      style={{
-                        border: `1px solid ${colorVars[useCase.color]}`,
-                        boxShadow: `0 0 20px ${colorVars[useCase.color]}18`,
-                      }}
-                    />
-                    <div className="relative">
-                      <div className="mb-4 inline-flex items-center justify-center w-9 h-9 rounded-lg"
-                        style={{ background: 'rgba(255,255,255,0.05)' }}>
-                        {useCase.icon}
-                      </div>
-                      <h3 className="font-[var(--font-display)] font-bold text-xl mb-3">
-                        {useCase.title}
-                      </h3>
-                      <p className="font-[var(--font-body)] text-[var(--text-secondary)] leading-relaxed">
-                        {useCase.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section id="get-started" aria-labelledby="cta-heading" className="relative py-32 md:py-40 px-4 sm:px-6 lg:px-8 bg-[var(--layer-0)] transition-all duration-300">
-          {/* Gradient divider overlay */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--engram-amber)]/30 to-transparent" aria-hidden="true" />
-
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="font-[var(--font-mono)] text-xs text-[var(--engram-amber)] tracking-[0.2em] uppercase mb-6" aria-hidden="true">
-              Ready to Get Started?
-            </div>
-            <h2 id="cta-heading" className="font-[var(--font-display)] font-bold text-[clamp(2rem,6vw,3.5rem)] leading-[1.1] mb-6 sm:mb-8">
-              Start in 60 Seconds
-            </h2>
-            <p className="font-[var(--font-body)] italic text-lg sm:text-xl text-[var(--text-secondary)] mb-10 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
-              One Docker Compose command. Full stack memory, OSINT, and MCP — ready in under a minute.
-            </p>
-
-            <div
-              className="inline-block rounded-xl p-6 sm:p-8 mb-12 sm:mb-14 transition-all duration-300 group hover:shadow-lg"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(242,169,59,0.3)',
-                boxShadow: '0 0 0 1px rgba(242,169,59,0.1) inset',
-              }}
-            >
-              <code className="font-[var(--font-mono)] text-sm sm:text-base text-[var(--engram-amber)] tracking-widest block whitespace-nowrap">
-                docker compose up -d
-              </code>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/getting-started">
-                <Button size="lg">View Full Docs</Button>
-              </Link>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" size="lg">
-                  Browse GitHub
-                </Button>
-              </a>
-            </div>
-
-            {/* Scroll indicator hint */}
-            <div className="mt-16 flex justify-center opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="animate-bounce">
-                <svg
-                  className="w-5 h-5 text-[var(--engram-amber)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-[var(--deep)] border-t border-[var(--border)] transition-all duration-300">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-6 h-6 bg-[var(--engram-amber)] rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-[var(--void)] rounded-full" />
-                  </div>
-                  <span className="font-[var(--font-display)] font-bold tracking-[0.2em] text-[var(--engram-amber)]">
-                    ENGRAM
-                  </span>
-                </div>
-                <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
-                  Unified AI Intelligence Platform
+          <div className="mt-12 grid gap-4 lg:grid-cols-4">
+            {operatingLoop.map((item) => (
+              <div
+                key={item.step}
+                className="rounded-[1.8rem] border border-[var(--border)] bg-[linear-gradient(180deg,rgba(124,92,191,0.14),rgba(8,6,22,0.9))] p-6"
+              >
+                <p className="font-[var(--font-mono)] text-xs uppercase tracking-[0.3em] text-[var(--engram-amber)]">
+                  {item.step}
                 </p>
+                <h3 className="mt-5 font-[var(--font-display)] text-2xl font-bold text-[var(--text-primary)]">
+                  {item.title}
+                </h3>
+                <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">{item.body}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              <div>
-                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-4">
-                  Platform
-                </h4>
-                <ul className="space-y-3">
-                  <li>
-                    <Link
-                      href="/platform/memory"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      AiMemory
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/platform/crawler"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      AiCrawler
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/platform/mcp"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      MCP Server
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </Link>
-                  </li>
-                  <li>
-                    <a
-                      href="https://memory.velocitydigi.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Dashboard (opens in new tab)"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      Dashboard ↗
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1fr]">
+          <div className="space-y-8 rounded-[2rem] border border-[var(--border)] bg-[rgba(255,255,255,0.03)] p-8">
+            <SectionIntro
+              eyebrow="Deployment Tracks"
+              title="Choose the track that matches the pressure you are under."
+              body="Some teams need persistent agent memory first. Others need investigator tooling or a consolidated operations surface. The solutions page now makes those entry points explicit."
+            />
 
-              <div>
-                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-4">
-                  Resources
-                </h4>
-                <ul className="space-y-3">
-                  <li>
-                    <Link
-                      href="/knowledge-base"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      Knowledge Base
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/getting-started"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      Getting Started
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/knowledge-base/api-reference"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      API Docs
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </Link>
-                  </li>
-                  <li>
-                    <a
-                      href="#architecture"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      Architecture
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-[var(--font-mono)] text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] mb-4">
-                  Community
-                </h4>
-                <ul className="space-y-3">
-                  <li>
-                    <a
-                      href="https://github.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="GitHub (opens in new tab)"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                      title="Placeholder — will be updated with official Engram GitHub"
-                    >
-                      GitHub ↗
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://memory.velocitydigi.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Dashboard (opens in new tab)"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      Dashboard ↗
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </a>
-                  </li>
-                  <li>
-                    <Link
-                      href="/knowledge-base"
-                      className="font-[var(--font-mono)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300 relative group"
-                    >
-                      Knowledge Base
-                      <span className="absolute bottom-0 left-0 w-0 h-px bg-[var(--engram-amber)] group-hover:w-full transition-all duration-300" />
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+            <div className="grid gap-4">
+              {solutionCards.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-[1.4rem] border border-[rgba(255,255,255,0.06)] bg-[rgba(8,6,22,0.84)] p-5"
+                >
+                  <h3 className="font-[var(--font-display)] text-xl font-semibold text-[var(--text-primary)]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{item.body}</p>
+                </div>
+              ))}
             </div>
 
-            <div className="pt-8 border-t border-[var(--border)] text-center">
-              <p className="font-[var(--font-mono)] text-xs text-[var(--text-muted)]">
-                © 2026 ENGRAM Platform. Licensed under Apache 2.0.
-              </p>
+            <Link href="/solutions">
+              <Button variant="ghost" size="md" className="border border-[var(--border)]">
+                Explore Solutions
+              </Button>
+            </Link>
+          </div>
+
+          <div className="space-y-6 rounded-[2rem] border border-[var(--border)] bg-[linear-gradient(145deg,rgba(46,196,196,0.12),rgba(8,6,22,0.92),rgba(224,92,127,0.12))] p-8">
+            <SectionIntro
+              eyebrow="Trust Layer"
+              title="Security and rollout guidance now live in dedicated pages."
+              body="The previous landing page buried critical deployment information. Security posture, rollout sequencing, and the next operator action now have their own destinations."
+            />
+
+            <div className="grid gap-4">
+              {trustSignals.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="group rounded-[1.6rem] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-5 transition-all duration-300 hover:border-[var(--engram-amber)]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="font-[var(--font-display)] text-xl font-semibold text-[var(--text-primary)]">
+                        {item.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
+                        {item.body}
+                      </p>
+                    </div>
+                    <ArrowRight
+                      size={18}
+                      className="mt-1 shrink-0 text-[var(--engram-amber)] transition-transform duration-300 group-hover:translate-x-1"
+                    />
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
-        </footer>
+        </div>
+      </section>
+
+      <section className="border-t border-[var(--border)] bg-[rgba(255,255,255,0.02)]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-20 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8 lg:py-24">
+          <div className="max-w-3xl space-y-4">
+            <p className="font-[var(--font-mono)] text-xs uppercase tracking-[0.28em] text-[var(--engram-amber)]">
+              Start Here
+            </p>
+            <h2 className="font-[var(--font-display)] text-3xl font-bold tracking-[var(--tracking-tight)] text-[var(--text-primary)] sm:text-4xl">
+              Use the landing site to orient. Use <span className="text-[var(--engram-amber)]">/dashboard</span> to operate.
+            </h2>
+            <p className="text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
+              That split is now intentional in the routing, in the IA, and in the design. If the
+              services are up, go straight to the dashboard. If you need architecture, security, or
+              rollout context first, the marketing site now gives it to you without the clutter.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <Link href="/dashboard">
+              <Button size="lg" className="w-full gap-2 sm:w-auto">
+                Open /dashboard
+                <ArrowRight size={18} />
+              </Button>
+            </Link>
+            <Link href="/contact">
+              <Button variant="ghost" size="lg" className="w-full border border-[var(--border)] sm:w-auto">
+                Plan A Rollout
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

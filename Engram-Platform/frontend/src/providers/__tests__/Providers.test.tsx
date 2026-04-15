@@ -1,18 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Providers } from '../Providers';
 
 const swrConfigSpy = vi.fn();
 const captureExceptionSpy = vi.fn();
 
-// Mock Clerk
-vi.mock('@clerk/nextjs', () => ({
-  ClerkProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="clerk-provider">{children}</div>
-  ),
-}));
-
-// Mock SWR
 vi.mock('swr', () => ({
   SWRConfig: ({ children, value }: { children: React.ReactNode; value: unknown }) => {
     swrConfigSpy(value);
@@ -30,26 +22,17 @@ vi.mock('@sentry/nextjs', () => ({
   captureException: (...args: unknown[]) => captureExceptionSpy(...args),
 }));
 
-// Mock Toast
 vi.mock('@/src/design-system/components/Toast', () => ({
   ToastContainer: () => <div data-testid="toast-container" />,
 }));
 
 describe('Providers', () => {
-  const originalEnv = process.env;
-
   beforeEach(() => {
-    process.env = { ...originalEnv };
     swrConfigSpy.mockReset();
     captureExceptionSpy.mockReset();
   });
 
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
   it('renders children', () => {
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_123';
     render(
       <Providers>
         <div>App Content</div>
@@ -59,7 +42,6 @@ describe('Providers', () => {
   });
 
   it('renders ToastContainer', () => {
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_123';
     render(
       <Providers>
         <div>Content</div>

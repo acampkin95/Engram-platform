@@ -18,8 +18,7 @@ import { createServer } from "node:http";
 
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 
-import { validateAuth } from "../auth/oauth-middleware.js";
-import { createOAuthRouter } from "../auth/oauth-server.js";
+import { initKeyValidator, validateAuth } from "../auth/middleware.js";
 import type { MCPConfig } from "../config.js";
 import { HookManager } from "../hooks/hook-manager.js";
 import { registerMemoryHooks } from "../hooks/memory-hooks.js";
@@ -96,14 +95,15 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 	const hookManager = new HookManager();
 	registerMemoryHooks(hookManager, config);
 
-	// OAuth router (handles /oauth/* and /.well-known/* if enabled)
-	const oauthRouter = createOAuthRouter(config);
+	// Initialize API key validator (validates against Platform's BetterAuth)
+	if (config.platformUrl) {
+		initKeyValidator(config.platformUrl);
+	}
 
 	logger.info("Starting Engram MCP Server (HTTP streaming transport)", {
 		serverVersion: config.serverVersion,
 		apiUrl: config.apiUrl,
 		port: PORT,
-		oauthEnabled: config.oauth.enabled,
 	});
 
 	const httpServer = createServer(async (req, res) => {
@@ -159,7 +159,6 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 					service: config.serverName,
 					version: config.serverVersion,
 					transport: "streamable-http",
-					oauthEnabled: config.oauth.enabled,
 					activeSessions: sessions.size,
 					timestamp: new Date().toISOString(),
 				});
@@ -179,24 +178,10 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 				return;
 			}
 
-			// ----- OAuth endpoints (if enabled) -----
-			if (
-				url.pathname.startsWith("/oauth/") ||
-				url.pathname === "/.well-known/oauth-authorization-server"
-			) {
-				await oauthRouter(req, res, url, baseHeaders);
-				logger.debug("OAuth route handled", {
-					requestId,
-					method,
-					path: url.pathname,
-				});
-				return;
-			}
-
 			// ----- MCP endpoint -----
 			if (url.pathname === "/mcp") {
-				// Auth validation (OAuth or Bearer token)
-				const authResult = await validateAuth(req, config);
+				// Auth validation (API key via Redis)
+				const authResult = await validateAuth(req);
 				if (!authResult.valid) {
 					logger.warn("Authentication failed", {
 						requestId,
@@ -206,9 +191,7 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 					if (!res.headersSent) {
 						res.writeHead(401, {
 							"Content-Type": "application/json",
-							"WWW-Authenticate": config.oauth.enabled
-								? `Bearer realm="${config.oauth.issuer}"`
-								: "Bearer",
+							"WWW-Authenticate": "Bearer",
 							...baseHeaders,
 						});
 						res.end(
@@ -480,18 +463,9 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 		logger.info("Engram MCP Server ready", {
 			serverVersion: config.serverVersion,
 			port: PORT,
-			oauthEnabled: config.oauth.enabled,
 			endpoints: {
 				mcp: `http://0.0.0.0:${PORT}/mcp`,
 				health: `http://0.0.0.0:${PORT}/health`,
-				...(config.oauth.enabled
-					? {
-							oauthMetadata: `http://0.0.0.0:${PORT}/.well-known/oauth-authorization-server`,
-							oauthAuthorize: `http://0.0.0.0:${PORT}/oauth/authorize`,
-							oauthToken: `http://0.0.0.0:${PORT}/oauth/token`,
-							oauthRegister: `http://0.0.0.0:${PORT}/oauth/register`,
-						}
-					: {}),
 			},
 		});
 	});

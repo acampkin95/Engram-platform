@@ -29,6 +29,7 @@ export const SERVICE_ALLOWLIST = [
   'crawler-redis',
   'memory-redis',
   'platform-frontend',
+  'engram-landing',
   'nginx',
 ] as const;
 
@@ -129,10 +130,7 @@ async function fetchFirstJson(
       });
       if (!response.ok) continue;
       return (await response.json()) as Record<string, unknown>;
-    } catch {
-      // URL unreachable or response not JSON — try next candidate
-      continue;
-    }
+    } catch {}
   }
 
   return null;
@@ -337,10 +335,7 @@ export async function runMaintenanceAction(action: MaintenanceAction) {
       if (response.ok) {
         return await response.json().catch(() => ({ ok: true }));
       }
-    } catch {
-      // URL unreachable — try next candidate
-      continue;
-    }
+    } catch {}
   }
 
   throw new Error(`Failed to execute maintenance action: ${action}`);

@@ -41,11 +41,13 @@ logger = logging.getLogger(__name__)
 # Tier definitions
 # ---------------------------------------------------------------------------
 
+
 class StorageTier(StrEnum):
     HOT = "hot"
     WARM = "warm"
     COLD = "cold"
     ARCHIVE = "archive"
+
 
 # Seconds before promotion to next tier
 _TIER_AGE_SECONDS: dict[StorageTier, int] = {
@@ -68,6 +70,7 @@ _TIER_ORDER = [StorageTier.HOT, StorageTier.WARM, StorageTier.COLD, StorageTier.
 # Artifact types
 # ---------------------------------------------------------------------------
 
+
 class ArtifactType(StrEnum):
     SCAN_RESULT = "scan_result"
     ENTITY_PROFILE = "entity_profile"
@@ -77,9 +80,11 @@ class ArtifactType(StrEnum):
     FRAUD_GRAPH = "fraud_graph"
     DEEP_CRAWL = "deep_crawl"
 
+
 # ---------------------------------------------------------------------------
 # 6.1  StorageOptimizer
 # ---------------------------------------------------------------------------
+
 
 class StorageOptimizer:
     """OSINT-aware tiered storage manager.
@@ -112,7 +117,8 @@ class StorageOptimizer:
             return {}
         try:
             return json.loads(p.read_text(encoding="utf-8"))
-        except Exception:
+        except Exception as exc:
+            logger.debug("Failed to load %s index: %s", tier.value, exc)
             return {}
 
     def _save_index(self, tier: StorageTier, index: dict[str, dict[str, Any]]) -> None:
@@ -337,9 +343,7 @@ class StorageOptimizer:
         )
         return True
 
-    def _find_aged_artifacts(
-        self, src_tier: StorageTier, max_age: int, now: datetime
-    ) -> list[str]:
+    def _find_aged_artifacts(self, src_tier: StorageTier, max_age: int, now: datetime) -> list[str]:
         to_migrate = []
         index = self._load_index(src_tier)
         for artifact_id, entry in index.items():
@@ -347,13 +351,12 @@ class StorageOptimizer:
                 created = datetime.fromisoformat(entry["created_at"])
                 if (now - created).total_seconds() > max_age:
                     to_migrate.append(artifact_id)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Skipping malformed index entry %s: %s", artifact_id, exc)
         return to_migrate
 
     def _migrate_artifacts(
-        self, to_migrate: list[str], dst_tier: StorageTier, label: str,
-        counts: dict[str, int]
+        self, to_migrate: list[str], dst_tier: StorageTier, label: str, counts: dict[str, int]
     ) -> None:
         for artifact_id in to_migrate:
             if self.promote(artifact_id, dst_tier):
@@ -457,8 +460,8 @@ class StorageOptimizer:
                         try:
                             total_bytes += p.stat().st_size
                             file_count += 1
-                        except OSError:
-                            pass
+                        except OSError as exc:
+                            logger.debug("Cannot stat %s: %s", p, exc)
                         break
 
                 # Age bucket
@@ -473,10 +476,8 @@ class StorageOptimizer:
                         age_buckets["1d-7d"] += 1
                     else:
                         age_buckets[">7d"] += 1
-                except Exception:
-                    pass
-
-                # Type count
+                except Exception as exc:
+                    logger.debug("Skipping age bucket for %s: %s", artifact_id, exc)
                 atype = entry.get("artifact_type", "unknown")
                 type_counts[atype] = type_counts.get(atype, 0) + 1
 
@@ -525,11 +526,13 @@ class StorageOptimizer:
         results.sort(key=lambda e: e.get("created_at", ""), reverse=True)
         return results[offset : offset + limit]
 
+
 # ---------------------------------------------------------------------------
 # Singleton
 # ---------------------------------------------------------------------------
 
 _optimizer_instance: StorageOptimizer | None = None
+
 
 def get_storage_optimizer() -> StorageOptimizer:
     global _optimizer_instance
@@ -537,9 +540,11 @@ def get_storage_optimizer() -> StorageOptimizer:
         _optimizer_instance = StorageOptimizer()
     return _optimizer_instance
 
+
 # ---------------------------------------------------------------------------
 # 6.2  OSINT Redis Cache Layer
 # ---------------------------------------------------------------------------
+
 
 class OsintCacheKeys:
     """Canonical Redis key builders for OSINT pipeline caching."""
@@ -579,6 +584,7 @@ class OsintCacheKeys:
     def dedup_check(cls, fingerprint: str) -> str:
         return f"{cls.PREFIX}dedup:{cls._hash(fingerprint)}"
 
+
 # TTL constants (seconds)
 class OsintCacheTTL:
     SCAN_RESULT = 3600 * 6  # 6 hours — scans are expensive
@@ -588,6 +594,7 @@ class OsintCacheTTL:
     IMAGE_HASH = 3600 * 24  # 24 hours — hashes are stable
     ALIAS_SET = 3600 * 6  # 6 hours
     DEDUP_CHECK = 3600 * 1  # 1 hour
+
 
 class OsintCache:
     """OSINT-domain cache layer on top of Redis.
@@ -730,6 +737,7 @@ class OsintCache:
         except Exception as exc:
             return {"error": str(exc)}
 
+
 class _NullRedis:
     """No-op Redis stub for when Redis is unavailable."""
 
@@ -748,11 +756,13 @@ class _NullRedis:
     async def info(self, *a, **kw):
         return {}
 
+
 # ---------------------------------------------------------------------------
 # Singleton
 # ---------------------------------------------------------------------------
 
 _osint_cache_instance: OsintCache | None = None
+
 
 def get_osint_cache() -> OsintCache:
     global _osint_cache_instance

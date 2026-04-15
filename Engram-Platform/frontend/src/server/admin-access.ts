@@ -1,56 +1,51 @@
-import { auth } from '@clerk/nextjs/server';
+import { headers } from 'next/headers';
+import { auth } from '@/src/lib/auth';
 
 type AdminAccess = {
   userId: string | null;
-  mode: 'disabled' | 'allowlist' | 'metadata' | 'org-role';
+  email: string | null;
+  mode: 'disabled' | 'allowlist';
 };
 
-function isClerkEnabled() {
-  return Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+function isAuthEnabled() {
+  return Boolean(process.env.BETTER_AUTH_SECRET);
 }
 
-function parseAllowlist(value: string | undefined) {
+function parseAllowlist(value: string | undefined): string[] {
   return (value ?? '')
     .split(',')
-    .map((item) => item.trim())
+    .map((item) => item.trim().toLowerCase())
     .filter(Boolean);
 }
 
-function hasAdminMetadata(sessionClaims: Record<string, unknown> | null | undefined) {
-  if (!sessionClaims || typeof sessionClaims !== 'object') return false;
-  const metadata = (sessionClaims as { metadata?: Record<string, unknown> }).metadata;
-  if (!metadata || typeof metadata !== 'object') return false;
-  return metadata.role === 'admin';
-}
-
-function hasAdminOrgRole(orgRole: unknown) {
-  return orgRole === 'org:admin' || orgRole === 'org:owner';
-}
-
 export async function requireAdminAccess(): Promise<AdminAccess> {
-  if (!isClerkEnabled()) {
+  if (!isAuthEnabled()) {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('Forbidden');
     }
-    return { userId: null, mode: 'disabled' };
+    return { userId: null, email: null, mode: 'disabled' };
   }
 
-  const { userId, sessionClaims, orgRole } = await auth();
-  if (!userId) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
     throw new Error('Unauthorized');
   }
 
-  const allowlist = parseAllowlist(process.env.ENGRAM_ADMIN_USER_IDS);
-  if (allowlist.includes(userId)) {
-    return { userId, mode: 'allowlist' };
+  const { id: userId, email } = session.user;
+
+  // Allowlist check — ENGRAM_ADMIN_EMAILS replaces ENGRAM_ADMIN_USER_IDS
+  const allowlist = parseAllowlist(process.env.ENGRAM_ADMIN_EMAILS);
+
+  // If no allowlist configured, any authenticated user is admin (single-user mode)
+  if (allowlist.length === 0) {
+    return { userId, email: email ?? null, mode: 'allowlist' };
   }
 
-  if (hasAdminMetadata(sessionClaims as Record<string, unknown> | null | undefined)) {
-    return { userId, mode: 'metadata' };
-  }
-
-  if (hasAdminOrgRole(orgRole)) {
-    return { userId, mode: 'org-role' };
+  if (email && allowlist.includes(email.toLowerCase())) {
+    return { userId, email, mode: 'allowlist' };
   }
 
   throw new Error('Forbidden');

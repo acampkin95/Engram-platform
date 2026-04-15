@@ -1,12 +1,10 @@
 """Tests for evidence_client.py - EvidenceClient."""
 
 import hashlib
-from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from memory_system.compat import UTC
 from memory_system.investigation.evidence_client import EvidenceClient
 from memory_system.investigation.models import EvidenceIngest, SearchRequest, SourceType
 

@@ -10,8 +10,8 @@ import {
 	CallToolRequestSchema,
 	GetPromptRequestSchema,
 	ListPromptsRequestSchema,
-	ListResourceTemplatesRequestSchema,
 	ListResourcesRequestSchema,
+	ListResourceTemplatesRequestSchema,
 	ListToolsRequestSchema,
 	ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
@@ -21,8 +21,8 @@ import type { MCPConfig } from "./config.js";
 import {
 	InternalServerError,
 	InvalidInputError,
-	NotFoundError,
 	isMemoryError,
+	NotFoundError,
 } from "./errors.js";
 import type { HookManager } from "./hooks/hook-manager.js";
 import { generateRequestId, logger } from "./logger.js";

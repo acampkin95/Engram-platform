@@ -5,8 +5,6 @@ Logs API requests with key identity, method, path, status, and latency.
 Supports paginated queries with filtering by key_id, path, and time range.
 """
 
-import json
-import time
 from datetime import UTC, datetime
 from typing import Any
 

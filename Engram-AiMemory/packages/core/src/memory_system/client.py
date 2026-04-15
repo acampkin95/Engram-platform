@@ -1293,8 +1293,31 @@ class WeaviateMemoryClient:
             return []
 
     async def add_analysis(self, analysis: object) -> None:
-        """Store a memory analysis result (stub — schema not yet defined)."""
-        return
+        """Store a memory analysis result as metadata on the memory object."""
+        memory_id = getattr(analysis, "memory_id", None)
+        if not memory_id:
+            return
+        tier_name = getattr(analysis, "tier", "tier1")
+        tier = tier_name if isinstance(tier_name, str) else "tier1"
+        tenant_id = getattr(analysis, "tenant_id", None)
+        collection_name = TIER_MAP.get(tier, TIER1_COLLECTION)
+        try:
+            coll = self.client.collections.get(collection_name)
+            metadata = {
+                "analysis_quality_score": getattr(analysis, "quality_score", None),
+                "analysis_importance": getattr(analysis, "importance", None),
+                "analysis_reasoning": getattr(analysis, "importance_reasoning", None),
+                "analyzed_at": datetime.now(UTC).isoformat(),
+            }
+            metadata = {k: v for k, v in metadata.items() if v is not None}
+            if metadata:
+                coll.data.update(
+                    uuid=str(memory_id),
+                    properties=metadata,
+                    tenant=tenant_id,
+                )
+        except Exception as exc:
+            console.print(f"[yellow]add_analysis failed for {memory_id}: {exc}[/yellow]")
 
     async def delete_tenant(self, tenant_id: str) -> bool:
         """Delete a tenant from all collections."""
