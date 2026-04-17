@@ -9,6 +9,7 @@ import asyncio
 import logging
 import time
 from contextlib import asynccontextmanager, suppress
+from typing import TYPE_CHECKING
 
 from fastapi import (
     FastAPI,
@@ -24,6 +25,9 @@ from rich.console import Console
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+
+if TYPE_CHECKING:
+    from memory_system.workers import MaintenanceScheduler
 
 from memory_system import MemorySystem
 from memory_system.audit import AuditLogger
@@ -41,6 +45,11 @@ logger = logging.getLogger(__name__)
 limiter = Limiter(key_func=get_remote_address)
 
 _api_settings = get_settings()
+
+_memory_system: MemorySystem | None = None
+_key_manager: KeyManager | None = None
+_audit_logger: AuditLogger | None = None
+_scheduler: "MaintenanceScheduler | None" = None
 
 
 async def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:

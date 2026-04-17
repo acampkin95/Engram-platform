@@ -609,7 +609,9 @@ async def run_decay(
                     )
                     processed += 1
             except Exception as e:
-                _state.console.print(f"[yellow]⚠ Decay calculation failed for {mem.id}: {e}[/yellow]")
+                _state.console.print(
+                    f"[yellow]⚠ Decay calculation failed for {mem.id}: {e}[/yellow]"
+                )
 
         return {"processed": processed, "total_checked": len(mems)}
     except Exception as e:
@@ -732,7 +734,7 @@ async def bulk_delete_memories(
             try:
                 mem = await _state.memory_system.get(
                     memory_id,
-                    tier=MemoryTier.WORKING,
+                    tier=MemoryTier.PROJECT,
                     tenant_id=body.tenant_id or _api_settings.default_tenant_id,
                 )
                 if mem is None:

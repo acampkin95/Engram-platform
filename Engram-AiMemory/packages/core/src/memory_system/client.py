@@ -1300,7 +1300,8 @@ class WeaviateMemoryClient:
         tier_name = getattr(analysis, "tier", "tier1")
         tier = tier_name if isinstance(tier_name, str) else "tier1"
         tenant_id = getattr(analysis, "tenant_id", None)
-        collection_name = TIER_MAP.get(tier, TIER1_COLLECTION)
+        tier_key = tier if isinstance(tier, MemoryTier) else MemoryTier(tier)
+        collection_name = self.TIER_COLLECTIONS.get(tier_key, TIER1_COLLECTION)
         try:
             coll = self.client.collections.get(collection_name)
             metadata = {

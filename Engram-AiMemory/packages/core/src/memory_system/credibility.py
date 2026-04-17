@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from memory_system.memory import Memory, SourceType
 
@@ -51,9 +51,8 @@ class SourceCredibilityManager:
     ) -> float:
         """Calculate confidence score for a specific source."""
         # Fallback to AI_ASSISTANT if source_type isn't in profiles
-        profile = self.source_profiles.get(
-            source_type, self.source_profiles[SourceType.AI_ASSISTANT]
-        )
+        st_key = cast(SourceType, source_type) if isinstance(source_type, str) else source_type
+        profile = self.source_profiles.get(st_key) or self.source_profiles[SourceType.AI_ASSISTANT]
 
         default_metrics: dict[str, Any] = {
             "accuracy_score": 0.5,
