@@ -424,8 +424,7 @@ services:
     container_name: engram-nginx
     restart: unless-stopped
     ports:
-      - "${BIND_ADDRESS:-127.0.0.1}:80:80"
-      - "${BIND_ADDRESS:-127.0.0.1}:443:443"
+      - "0.0.0.0:80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/templates/default.conf.template:ro
       - ./certs:/etc/nginx/certs:ro
