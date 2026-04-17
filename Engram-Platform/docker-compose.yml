@@ -448,6 +448,7 @@ services:
       - memory-api
       - platform-frontend
       - engram-landing
+    dns_search: ""
     networks:
       engram-platform-network:
         aliases:
