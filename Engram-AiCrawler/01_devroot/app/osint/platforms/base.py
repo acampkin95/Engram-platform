@@ -160,6 +160,7 @@ class PlatformCrawlerBase(ABC):
             )
 
             run_cfg = CrawlerRunConfig(
+                check_robots_txt=True,
                 cache_mode=CacheMode.ENABLED,
                 word_count_threshold=30,
                 page_timeout=self.platform.page_timeout_ms,

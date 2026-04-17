@@ -126,6 +126,7 @@ class OnionExtractionStrategy:
 
             # Build run config
             config = CrawlerRunConfig(
+                check_robots_txt=True,
                 word_count_threshold=self.crawler_config.word_count_threshold,
                 excluded_tags=self.crawler_config.excluded_tags,
                 exclude_external_links=self.crawler_config.exclude_external_links,

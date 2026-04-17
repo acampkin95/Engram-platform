@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 # Models
 # ---------------------------------------------------------------------------
 
+
 class ScanStage(StrEnum):
     PENDING = "pending"
     ALIAS_DISCOVERY = "alias_discovery"
@@ -50,6 +51,7 @@ class ScanStage(StrEnum):
     BUILDING_GRAPH = "building_graph"
     COMPLETED = "completed"
     FAILED = "failed"
+
 
 class ScanRequest(BaseModel):
     username: str
@@ -68,6 +70,7 @@ class ScanRequest(BaseModel):
     # Pre-generated scan_id from API layer (ensures WS topic matches)
     scan_id: str | None = None
 
+
 class CrawlResultItem(BaseModel):
     crawl_id: str
     url: str
@@ -75,6 +78,7 @@ class CrawlResultItem(BaseModel):
     markdown: str | None = None
     error: str | None = None
     word_count: int = 0
+
 
 class ScanResult(BaseModel):
     scan_id: str
@@ -94,12 +98,14 @@ class ScanResult(BaseModel):
     completed_at: str = ""
     summary: dict[str, Any] = Field(default_factory=dict)
 
+
 # Type alias for the progress callback
 ProgressCallback = Callable[[str, ScanStage, dict[str, Any]], Coroutine[Any, Any, None]]
 
 # ---------------------------------------------------------------------------
 # Orchestrator
 # ---------------------------------------------------------------------------
+
 
 class OSINTScanOrchestrator:
     """Coordinates the full OSINT scan pipeline.
@@ -330,9 +336,7 @@ class OSINTScanOrchestrator:
                 {"urls_scanned": len(face_results), "total_matches": total_face_matches},
             )
         except ImportError:
-            logger.warning(
-                f"Scan {scan_id}: face_recognition_service not available — skipping"
-            )
+            logger.warning(f"Scan {scan_id}: face_recognition_service not available — skipping")
 
     async def _run_parallel_osint_stages(
         self,
@@ -391,6 +395,7 @@ class OSINTScanOrchestrator:
 
                     browser_config = BrowserConfig(headless=True)
                     run_config = CrawlerRunConfig(
+                        check_robots_txt=True,
                         cache_mode=CacheMode.ENABLED,
                         word_count_threshold=50,
                         page_timeout=30000,

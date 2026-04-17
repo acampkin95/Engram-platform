@@ -240,6 +240,7 @@ async def fetch_page(body: FetchPageRequest) -> FetchPageResponse:
 
         browser_config = BrowserConfig(headless=True, viewport_width=1280, viewport_height=800)
         run_config = CrawlerRunConfig(
+            check_robots_txt=True,
             cache_mode=CacheMode.BYPASS,
             screenshot=True,
             word_count_threshold=0,
@@ -289,6 +290,7 @@ async def preview_extraction(body: PreviewRequest) -> PreviewResponse:
 
         browser_config = BrowserConfig(headless=True, viewport_width=1280, viewport_height=800)
         run_config = CrawlerRunConfig(
+            check_robots_txt=True,
             cache_mode=CacheMode.BYPASS,
             extraction_strategy=extraction_strategy,
             word_count_threshold=0,

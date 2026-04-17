@@ -52,6 +52,11 @@ export interface LoggingConfig {
 	stderr: boolean;
 }
 
+export interface RateLimitConfig {
+	requestsPerMinute: number;
+	windowMs: number;
+}
+
 // ---------------------------------------------------------------------------
 // Transport config
 // ---------------------------------------------------------------------------
@@ -75,6 +80,7 @@ export interface MCPConfig {
 	circuitBreaker: CircuitBreakerConfig;
 	timeout: TimeoutConfig;
 	logging: LoggingConfig;
+	rateLimit: RateLimitConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -107,6 +113,11 @@ export const DEFAULT_LOGGING_CONFIG: LoggingConfig = {
 	timestamps: true,
 	requestIds: true,
 	stderr: true,
+};
+
+export const DEFAULT_RATE_LIMIT_CONFIG: RateLimitConfig = {
+	requestsPerMinute: 60,
+	windowMs: 60_000,
 };
 
 // ---------------------------------------------------------------------------
@@ -235,6 +246,14 @@ export function loadConfig(): MCPConfig {
 			timestamps: process.env.MCP_LOG_TIMESTAMPS !== "false",
 			requestIds: process.env.MCP_LOG_REQUEST_IDS !== "false",
 			stderr: process.env.MCP_LOG_STDERR !== "false",
+		},
+
+		rateLimit: {
+			requestsPerMinute: envInt(
+				process.env.MCP_RATE_LIMIT_PER_MINUTE,
+				DEFAULT_RATE_LIMIT_CONFIG.requestsPerMinute,
+			),
+			windowMs: DEFAULT_RATE_LIMIT_CONFIG.windowMs,
 		},
 	};
 }

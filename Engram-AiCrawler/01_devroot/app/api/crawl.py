@@ -53,6 +53,7 @@ async def execute_crawl(crawl_id: str, request: CrawlRequest):
         )
 
         run_config = CrawlerRunConfig(
+            check_robots_txt=True,
             cache_mode=CacheMode.BYPASS if request.bypass_cache else CacheMode.ENABLED,
             wait_for=request.wait_for,
             screenshot=request.screenshot,

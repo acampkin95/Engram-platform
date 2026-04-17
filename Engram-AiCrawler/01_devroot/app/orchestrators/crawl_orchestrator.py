@@ -69,6 +69,7 @@ class CrawlOrchestrator:
         async with self.semaphore:
             async with AsyncWebCrawler(config=browser_config) as crawler:
                 run_config = CrawlerRunConfig(
+                    check_robots_txt=True,
                     cache_mode=CacheMode.ENABLED,
                     wait_for=plan.get("wait_for"),
                     word_count_threshold=plan.get("word_count_threshold", 50),

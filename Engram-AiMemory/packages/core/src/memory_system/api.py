@@ -8,7 +8,6 @@ All endpoint logic lives in the routers/ sub-package.
 import asyncio
 import logging
 import time
-import traceback
 from contextlib import asynccontextmanager, suppress
 
 from fastapi import (
@@ -140,15 +139,6 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled exception on {request.url.path}: {exc}\n{traceback.format_exc()}")
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "An internal server error occurred. Please check the logs."},
-    )
 
 
 @app.exception_handler(RequestValidationError)

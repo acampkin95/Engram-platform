@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 # Models
 # ---------------------------------------------------------------------------
 
+
 class DeepCrawlStage(StrEnum):
     """Stages in the deep crawl pipeline."""
 
@@ -59,6 +60,7 @@ class DeepCrawlStage(StrEnum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+
 class SearchVector(BaseModel):
     """A search vector generated from entity data."""
 
@@ -69,6 +71,7 @@ class SearchVector(BaseModel):
     priority: int = Field(default=1, ge=1, le=10)  # Higher = more likely to yield results
     source_data: dict[str, Any] = Field(default_factory=dict)  # What entity data generated this
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
 
 class CrawlIteration(BaseModel):
     """One iteration of the deep crawl."""
@@ -83,6 +86,7 @@ class CrawlIteration(BaseModel):
     started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     completed_at: datetime | None = None
     diminishing_returns: bool = False  # Less than 10% new data
+
 
 class DeepCrawlRequest(BaseModel):
     """Request to start a deep crawl."""
@@ -112,6 +116,7 @@ class DeepCrawlRequest(BaseModel):
 
     # Context
     query_context: str = ""  # Additional context for LLM
+
 
 class DeepCrawlResult(BaseModel):
     """Result of a deep crawl operation."""
@@ -143,6 +148,7 @@ class DeepCrawlResult(BaseModel):
 
     # Error handling
     error: str | None = None
+
 
 class ExtractedData(BaseModel):
     """Data extracted from a crawl result."""
@@ -178,12 +184,14 @@ class ExtractedData(BaseModel):
     raw_text: str | None = None
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
 
+
 # Type alias for progress callback
 ProgressCallback = Callable[[str, DeepCrawlStage, dict[str, Any]], Coroutine[Any, Any, None]]
 
 # ---------------------------------------------------------------------------
 # Search Vector Generator
 # ---------------------------------------------------------------------------
+
 
 class SearchVectorGenerator:
     """Generates search vectors from entity data using LM Studio."""
@@ -651,9 +659,11 @@ Generate queries that are likely to yield NEW information not already known."""
 
         return "\n".join(parts)
 
+
 # ---------------------------------------------------------------------------
 # Deep Crawl Orchestrator
 # ---------------------------------------------------------------------------
+
 
 class DeepCrawlOrchestrator:
     """Orchestrates recursive deep crawling based on entity data.
@@ -688,8 +698,13 @@ class DeepCrawlOrchestrator:
         self.crawl_router = PlatformCrawlRouter(max_concurrent=5)
 
     def _check_diminishing_returns(
-        self, crawl_count: int, new_count: int, threshold: float,
-        diminishing_count: int, iteration_num: int, iteration: CrawlIteration,
+        self,
+        crawl_count: int,
+        new_count: int,
+        threshold: float,
+        diminishing_count: int,
+        iteration_num: int,
+        iteration: CrawlIteration,
     ) -> tuple[bool, int]:
         if crawl_count <= 0:
             return False, diminishing_count
@@ -791,9 +806,12 @@ class DeepCrawlOrchestrator:
                 )
 
                 should_stop, diminishing_count = self._check_diminishing_returns(
-                    len(crawl_results), enrichment_stats["new"],
-                    request.min_new_data_threshold, diminishing_count,
-                    iteration_num, iteration,
+                    len(crawl_results),
+                    enrichment_stats["new"],
+                    request.min_new_data_threshold,
+                    diminishing_count,
+                    iteration_num,
+                    iteration,
                 )
                 if should_stop:
                     result.stopped_reason = "diminishing_returns"
@@ -921,7 +939,10 @@ class DeepCrawlOrchestrator:
 
                     browser_config = BrowserConfig(headless=True)
                     run_config = CrawlerRunConfig(
-                        cache_mode=CacheMode.ENABLED, word_count_threshold=50, page_timeout=30000
+                        check_robots_txt=True,
+                        cache_mode=CacheMode.ENABLED,
+                        word_count_threshold=50,
+                        page_timeout=30000,
                     )
 
                     async with AsyncWebCrawler(config=browser_config) as crawler:

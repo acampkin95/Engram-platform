@@ -7,11 +7,7 @@
  *   DELETE — session termination
  *
  * Also serves:
- *   GET /health              — health check
- *   GET /.well-known/oauth-authorization-server — OAuth metadata (if enabled)
- *   POST /oauth/register     — dynamic client registration (if enabled)
- *   GET  /oauth/authorize    — authorization endpoint (if enabled)
- *   POST /oauth/token        — token endpoint (if enabled)
+ *   GET /health — health check
  */
 
 import { createServer } from "node:http";
@@ -20,6 +16,52 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 
 import { initKeyValidator, validateAuth } from "../auth/middleware.js";
 import type { MCPConfig } from "../config.js";
+
+// ---------------------------------------------------------------------------
+// Sliding-window rate limiter
+// ---------------------------------------------------------------------------
+
+interface RateLimitEntry {
+	count: number;
+	windowStart: number;
+}
+
+function getClientIp(req: { socket: { remoteAddress?: string } }): string {
+	return req.socket.remoteAddress ?? "unknown";
+}
+
+function createRateLimiter(windowMs: number, maxRequests: number) {
+	const store = new Map<string, RateLimitEntry>();
+
+	return function rateLimit(
+		req: { socket: { remoteAddress?: string } },
+	): { allowed: boolean; remaining: number; retryAfterMs: number } {
+		const ip = getClientIp(req);
+		const now = Date.now();
+		const entry = store.get(ip);
+
+		if (entry === undefined || now - entry.windowStart > windowMs) {
+			store.set(ip, { count: 1, windowStart: now });
+			return { allowed: true, remaining: maxRequests - 1, retryAfterMs: 0 };
+		}
+
+		if (entry.count >= maxRequests) {
+			const retryAfterMs = windowMs - (now - entry.windowStart);
+			return {
+				allowed: false,
+				remaining: 0,
+				retryAfterMs: Math.max(0, retryAfterMs),
+			};
+		}
+
+		entry.count++;
+		return {
+			allowed: true,
+			remaining: maxRequests - entry.count,
+			retryAfterMs: 0,
+		};
+	};
+}
 import { HookManager } from "../hooks/hook-manager.js";
 import { registerMemoryHooks } from "../hooks/memory-hooks.js";
 import { generateRequestId, logger } from "../logger.js";
@@ -90,6 +132,10 @@ function corsHeaders(
 export async function startHttpTransport(config: MCPConfig): Promise<void> {
 	const PORT = config.port;
 	const allowedOrigins = buildAllowedOrigins(config);
+	const rateLimit = createRateLimiter(
+		config.rateLimit.windowMs,
+		config.rateLimit.requestsPerMinute,
+	);
 
 	// Set up hook manager
 	const hookManager = new HookManager();
@@ -209,6 +255,38 @@ export async function startHttpTransport(config: MCPConfig): Promise<void> {
 						requestId,
 					);
 					return;
+				}
+
+				// Rate limiting on POST /mcp
+				if (method === "POST") {
+					const rl = rateLimit(req);
+					res.setHeader("X-RateLimit-Limit", config.rateLimit.requestsPerMinute);
+					res.setHeader("X-RateLimit-Remaining", rl.remaining);
+					if (!rl.allowed) {
+						const retryAfterSec = Math.ceil(rl.retryAfterMs / 1000);
+						res.setHeader("Retry-After", String(retryAfterSec));
+						if (!res.headersSent) {
+							res.writeHead(429, {
+								"Content-Type": "application/json",
+								...baseHeaders,
+							});
+							res.end(
+								JSON.stringify({
+									error: "rate_limit_exceeded",
+									message: "Too many requests",
+									retryAfter: retryAfterSec,
+								}),
+							);
+						}
+						logger.apiResponse(
+							method,
+							url.pathname,
+							429,
+							Date.now() - startedAt,
+							requestId,
+						);
+						return;
+					}
 				}
 
 				// --- POST: new or existing session ---

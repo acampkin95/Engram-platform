@@ -144,6 +144,7 @@ class PlatformCrawlRouter:
                 user_agent=_random_user_agent(),
             )
             run_cfg = CrawlerRunConfig(
+                check_robots_txt=True,
                 cache_mode=CacheMode.ENABLED,
                 word_count_threshold=30,
                 page_timeout=30000,

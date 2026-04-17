@@ -60,7 +60,7 @@ async def crawl_task(ctx: dict[str, Any], url: str, config: dict | None = None) 
         logger.error("Crawler not available in worker context")
         return {"url": url, "success": False, "error": "Crawler not initialized"}
 
-    run_config = CrawlerRunConfig(**(config or {}))
+    run_config = CrawlerRunConfig(check_robots_txt=True, **(config or {}))
 
     try:
         result = await crawler.arun(url, config=run_config)

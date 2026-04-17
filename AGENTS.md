@@ -134,7 +134,7 @@ cd Engram-Platform/frontend && npm run test:run  # 1,081 tests
 ## ANTI-PATTERNS (FORBIDDEN)
 
 1. **NEVER remove critical deps:** react-dom, tailwindcss, typescript, @biomejs/biome, next
-2. **NEVER use public IPs in production** — Tailscale only (`*.tail4da6b7.ts.net`)
+2. **NEVER use public IPs in production** — Tailscale only (`*.icefish-discus.ts.net`)
 3. **NEVER set `check_robots_txt=False`** in crawler — legal/ethical violation
 4. **NEVER bypass pre-commit hooks** without explicit justification
 5. **NEVER log sensitive values** (credentials, tokens, API keys)
@@ -143,11 +143,7 @@ cd Engram-Platform/frontend && npm run test:run  # 1,081 tests
 
 ### Target Infrastructure
 
-**Production:** `dv-syd-host01` (100.100.42.6 via Tailscale)
-- Ubuntu 24.04, 12 vCPU, 48GB RAM, 500GB NVMe
-- Docker Engine 24.0+, Docker Compose 2.20+
-
-**Development:** `acdev-devnode` (100.78.187.5 via Tailscale)
+**Production:** `acdev-devnode` (100.78.187.5 via Tailscale)
 - Ubuntu, i5, 16GB RAM, 1TB NVMe
 - LM Studio, Engram services, Crawl4AI
 
