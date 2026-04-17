@@ -398,6 +398,9 @@ services:
     container_name: engram-landing
     restart: unless-stopped
     read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=32m
+      - /var/run:size=1m
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3099/"]
       interval: 30s
