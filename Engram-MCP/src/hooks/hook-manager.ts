@@ -16,9 +16,22 @@ import type {
 	ToolResultContext,
 } from "./types.js";
 
+export interface RecallResult {
+	requestId: string;
+	toolName: string;
+	query: string;
+	memories: Array<{ memory_id: string; content: string; score: number }>;
+	timestamp: number;
+}
+
 export class HookManager {
 	private preToolHooks: PreToolHookRegistration[] = [];
 	private postToolHooks: PostToolHookRegistration[] = [];
+
+	private _sessionRecall: RecallResult[] = [];
+	private _lastStoreResult?: { tool: string; content: string; timestamp: number };
+	private _sessionStart = Date.now();
+	private _contextPrepended = false;
 
 	// -------------------------------------------------------------------------
 	// Registration
@@ -89,6 +102,54 @@ export class HookManager {
 				logger.warn(`Post-tool hook "${hook.name}" failed: ${message}`);
 			}
 		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Session recall store — stores last pre-hook recall results for session context
+	// -------------------------------------------------------------------------
+
+	storeRecallResult(result: RecallResult): void {
+		this._sessionRecall.unshift(result);
+		if (this._sessionRecall.length > 20) {
+			this._sessionRecall = this._sessionRecall.slice(0, 20);
+		}
+	}
+
+	storePostResult(tool: string, content: string): void {
+		this._lastStoreResult = { tool, content, timestamp: Date.now() };
+	}
+
+	getSessionRecall(limit = 10): RecallResult[] {
+		return this._sessionRecall.slice(0, limit);
+	}
+
+	getSessionSummary(): {
+		sessionStart: number;
+		recallCount: number;
+		lastStore?: { tool: string; content: string; timestamp: number };
+		recentRecall: RecallResult[];
+	} {
+		return {
+			sessionStart: this._sessionStart,
+			recallCount: this._sessionRecall.length,
+			lastStore: this._lastStoreResult,
+			recentRecall: this._sessionRecall.slice(0, 5),
+		};
+	}
+
+	resetSession(): void {
+		this._sessionRecall = [];
+		this._lastStoreResult = undefined;
+		this._sessionStart = Date.now();
+		this._contextPrepended = false;
+	}
+
+	hasPrependedContext(): boolean {
+		return this._contextPrepended;
+	}
+
+	markContextPrepended(): void {
+		this._contextPrepended = true;
 	}
 
 	// -------------------------------------------------------------------------

@@ -4,7 +4,7 @@ enabled: true
 event: file
 action: warn
 conditions:
-  - field: file_path
+  - field: path
     operator: regex_match
     pattern: \.(ts|tsx|js|jsx|py|go|rs|java|c|cpp|cs|rb|swift|kt|md)$
 ---

@@ -1,6 +1,6 @@
 ---
 name: memory-session-summary
-enabled: false
+enabled: true
 event: stop
 action: warn
 conditions:

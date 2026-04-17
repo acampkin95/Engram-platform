@@ -1,14 +1,7 @@
-/**
- * Memory hooks — automatic recall/storage around every tool call
- *
- * Hook 1 (pre):  search for relevant memories before tool executes
- * Hook 2 (post): store a memory entry after write-like tools complete
- */
-
 import { MemoryAPIClient } from "../client.js";
 import type { MCPConfig } from "../config.js";
 import { logger } from "../logger.js";
-import type { HookManager } from "./hook-manager.js";
+import type { HookManager, RecallResult } from "./hook-manager.js";
 import type { ToolCallContext, ToolResultContext } from "./types.js";
 
 // ---------------------------------------------------------------------------
@@ -181,6 +174,17 @@ export function registerMemoryHooks(
 							content: m.content?.slice(0, 120),
 							score: m.score,
 						})),
+					});
+					hookManager.storeRecallResult({
+						requestId: ctx.requestId,
+						toolName: ctx.toolName,
+						query,
+						memories: relevant.map((m) => ({
+							memory_id: m.memory_id,
+							content: m.content ?? "",
+							score: m.score ?? 0,
+						})),
+						timestamp: Date.now(),
 					});
 				}
 			} catch (error) {

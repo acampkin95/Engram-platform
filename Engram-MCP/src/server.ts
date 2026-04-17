@@ -152,6 +152,34 @@ export function createMCPServer(options: CreateServerOptions): Server {
 					requestId,
 					Date.now() - startedAt,
 				);
+
+				if (
+					!hookManager.hasPrependedContext() &&
+					result.content[0]?.type === "text"
+				) {
+					const recall = hookManager.getSessionRecall(5);
+					if (recall.length > 0) {
+						const memoryLines = recall.flatMap((r) =>
+							r.memories.map(
+								(m) =>
+									`[${m.memory_id.slice(0, 8)}] ${m.content.slice(0, 200)}`,
+							),
+						);
+						const preamble = `[Memory context from this session — ${
+							memoryLines.length
+						} relevant memory${
+							memoryLines.length !== 1 ? "ies" : ""
+						}:\n${memoryLines.join("\n")}\n]\n\n`;
+						result.content = [
+							{
+								type: "text",
+								text: preamble + result.content[0].text,
+							},
+							...result.content.slice(1),
+						];
+						hookManager.markContextPrepended();
+					}
+				}
 			}
 
 			return result;

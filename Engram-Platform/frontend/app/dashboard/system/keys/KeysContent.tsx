@@ -71,7 +71,10 @@ function CreateKeyModal({
       onCreated();
       addToast({ type: 'success', message: `API key "${name}" created` });
     } catch (err) {
-      addToast({ type: 'error', message: err instanceof Error ? err.message : 'Failed to create key' });
+      addToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to create key',
+      });
     } finally {
       setLoading(false);
     }
@@ -186,7 +189,10 @@ function DeleteModal({
       onDeleted();
       onClose();
     } catch (err) {
-      addToast({ type: 'error', message: err instanceof Error ? err.message : 'Failed to delete key' });
+      addToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to delete key',
+      });
     } finally {
       setLoading(false);
     }
@@ -296,11 +302,7 @@ function ClaudeCodeConfigSection() {
     {
       'engram-memory': {
         command: 'node',
-        args: [
-          '/path/to/Engram-MCP/dist/index.js',
-          '--transport',
-          'stdio',
-        ],
+        args: ['/path/to/Engram-MCP/dist/index.js', '--transport', 'stdio'],
         env: {
           ENGRAM_API_URL: 'http://acdev-devnode.icefish-discus.ts.net:8000',
           ENGRAM_API_KEY: '<paste-your-api-key-here>',
@@ -409,8 +411,8 @@ export default function KeysContent() {
           <div>
             <h1 className="text-lg font-semibold text-[#f0eef8] font-display">API Keys</h1>
             <p className="text-xs text-[#5c5878]">
-              {keys.length} key{keys.length !== 1 ? 's' : ''} total — used for MCP, Memory API,
-              and all service authentication
+              {keys.length} key{keys.length !== 1 ? 's' : ''} total — used for MCP, Memory API, and
+              all service authentication
             </p>
           </div>
         </div>
@@ -479,12 +481,8 @@ export default function KeysContent() {
                         {k.enabled ? 'active' : 'disabled'}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-xs text-[#a09bb8]">
-                      {formatDate(k.createdAt)}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-[#a09bb8]">
-                      {formatDate(k.lastUsedAt)}
-                    </td>
+                    <td className="px-4 py-3 text-xs text-[#a09bb8]">{formatDate(k.createdAt)}</td>
+                    <td className="px-4 py-3 text-xs text-[#a09bb8]">{formatDate(k.lastUsedAt)}</td>
                     <td className="px-4 py-3 text-xs text-[#a09bb8] font-mono">
                       {k.requestCount?.toLocaleString() ?? '--'}
                     </td>
