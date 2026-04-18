@@ -1,0 +1,9 @@
+{
+  "engram-memory": {
+    "type": "http",
+    "url": "${ENGRAM_MCP_URL}",
+    "headers": {
+      "Authorization": "Bearer ${ENGRAM_MCP_AUTH_TOKEN}"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "engram-memory-helper",
+  "version": "0.1.0",
+  "description": "Engram-focused Claude Code plugin for memory search, context enrichment, graph exploration, ingestion, and operational debugging.",
+  "author": {
+    "name": "AC Dev"
+  },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "keywords": [
+    "engram",
+    "memory",
+    "mcp",
+    "weaviate",
+    "knowledge-graph",
+    "claude-code"
+  ]
+}
