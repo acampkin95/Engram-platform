@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-04-18] — Claude Code Engram Memory Helper Plugin
+
+### Claude Code Plugin
+- Added a repo-local Claude Code marketplace at `claude-code-marketplace/`
+- Added `engram-memory-helper` plugin with `.claude-plugin/plugin.json` and `.mcp.json`
+- Added install docs for enabling the plugin as a local directory marketplace
+- Added slash skills for Engram memory search, context enrichment, graph traversal, ingestion, personal memory workflows, admin tasks, and debugging
+- Added document extraction and matter/evidence plugin skills for document-to-memory workflows
+- Added Engram-specific API/MCP reference doc for plugin workflows
+- Added document workflow reference for choosing between direct memory extraction and matter evidence ingestion
+- Added `scripts/validate-plugin.sh` to validate plugin JSON and required file structure
+
+---
+
 ## [2026-04-03] — MCP & Auth Unification Overhaul
 
 ### Architecture
@@ -1189,4 +1203,3 @@ See AGENTS.md files for tech stack version details.
   - Related resources links to deployment scripts, quality gate, infrastructure docs
 
 ---
-
