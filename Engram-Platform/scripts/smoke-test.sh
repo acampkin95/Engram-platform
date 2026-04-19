@@ -19,6 +19,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PASS=0
 FAIL=0
 SKIP=0
+HAS_LOCAL_COMPOSE=0
 
 # Configurable base URL for nginx proxy (default: localhost via docker)
 BASE_URL="${SMOKE_TEST_BASE_URL:-http://localhost:8080}"
@@ -71,6 +72,20 @@ compose_cmd() {
   return 1
 }
 
+service_port_published() {
+  local service="$1"
+  local container_port="$2"
+  local cid
+  cid=$(compose_cmd ps -q "$service" 2>/dev/null) || true
+  if [[ -z "$cid" ]]; then
+    return 1
+  fi
+
+  local published
+  published=$(docker inspect --format "{{json .NetworkSettings.Ports}}" "$cid" 2>/dev/null | grep -F '"'"${container_port}/tcp"'":[' || true)
+  [[ -n "$published" ]]
+}
+
 # HTTP check with retries
 http_check() {
   local url="$1"
@@ -114,14 +129,16 @@ check_docker_services() {
 
   local services=("nginx" "platform-frontend" "crawler-api" "memory-api" "weaviate" "crawler-redis" "memory-redis")
   local optional_services=("mcp-server")
+  local found_any=0
 
   for svc in "${services[@]}"; do
     local cid
     cid=$(compose_cmd ps -q "$svc" 2>/dev/null) || true
     if [[ -z "$cid" ]]; then
-      fail "$svc" "container not running"
       continue
     fi
+
+    found_any=1
 
     local status
     status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid" 2>/dev/null) || true
@@ -138,6 +155,7 @@ check_docker_services() {
     if [[ -z "$cid" ]]; then
       skip "$svc (optional, not running)"
     else
+      found_any=1
       local status
       status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid" 2>/dev/null) || true
       if [[ "$status" == "healthy" || "$status" == "running" ]]; then
@@ -145,6 +163,24 @@ check_docker_services() {
       else
         fail "$svc" "status: ${status:-unknown}"
       fi
+    fi
+  done
+
+  if (( found_any == 0 )); then
+    skip "No local Docker Compose services found for this host"
+    echo -e "  ${YELLOW}Skipping local container checks because the smoke test is targeting a remote base URL or this host is not the deployment node.${NC}"
+    HAS_LOCAL_COMPOSE=0
+    echo
+    return
+  fi
+
+  HAS_LOCAL_COMPOSE=1
+
+  for svc in "${services[@]}"; do
+    local cid
+    cid=$(compose_cmd ps -q "$svc" 2>/dev/null) || true
+    if [[ -z "$cid" ]]; then
+      fail "$svc" "container not running"
     fi
   done
 
@@ -156,6 +192,13 @@ check_docker_services() {
 check_service_endpoints() {
   print_section "Phase 2: Direct Service Health Endpoints"
 
+  if (( HAS_LOCAL_COMPOSE == 0 )); then
+    skip "Direct service endpoint checks"
+    echo -e "  ${YELLOW}Skipping direct localhost checks because no local compose stack is running on this host.${NC}"
+    echo
+    return
+  fi
+
   # Memory API
   local code
   if code=$(http_check "http://localhost:8000/health"); then
@@ -165,17 +208,25 @@ check_service_endpoints() {
   fi
 
   # Crawler API
-  if code=$(http_check "http://localhost:11235/health"); then
-    pass "crawler-api:11235/health (HTTP $code)"
+  if service_port_published "crawler-api" 11235; then
+    if code=$(http_check "http://localhost:11235/health"); then
+      pass "crawler-api:11235/health (HTTP $code)"
+    else
+      fail "crawler-api:11235/health" "HTTP $code"
+    fi
   else
-    fail "crawler-api:11235/health" "HTTP $code"
+    skip "crawler-api direct host port not published"
   fi
 
   # MCP Server (optional)
-  if code=$(http_check "http://localhost:3000/health"); then
-    pass "mcp-server:3000/health (HTTP $code)"
+  if service_port_published "mcp-server" 3000; then
+    if code=$(http_check "http://localhost:3000/health"); then
+      pass "mcp-server:3000/health (HTTP $code)"
+    else
+      skip "mcp-server:3000/health (HTTP $code)"
+    fi
   else
-    skip "mcp-server:3000/health (HTTP $code)"
+    skip "mcp-server direct host port not published"
   fi
 
   # Platform Frontend
