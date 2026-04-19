@@ -7,6 +7,7 @@ Claude Code plugin for Engram's 3-tier memory system.
 - MCP connection template for the Engram HTTP MCP server
 - Slash skills for memory search, context enrichment, graph workflows, ingestion, personal memory, tenant/project operations, and troubleshooting
 - Additional document extraction and matter/evidence workflows for document-to-memory conversion
+- PreToolUse and PostToolUse hooks for Engram API/MCP safety and troubleshooting guidance
 - Repo-specific guidance for choosing between direct Memory API calls and MCP workflows
 
 ## Required Environment Variables
@@ -35,6 +36,7 @@ export ENGRAM_API_KEY="your-betterauth-api-key"
 - Use the MCP server for normal memory workflows when it is connected.
 - Use direct API calls when you need endpoint-specific debugging, tenant admin, or evidence ingestion flows.
 - The plugin assumes BetterAuth-backed API keys for direct Memory API access.
+- Hooks auto-load from `hooks/hooks.json` when the plugin is enabled.
 
 ## Validation
 

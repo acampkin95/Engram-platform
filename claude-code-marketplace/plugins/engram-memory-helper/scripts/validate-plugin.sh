@@ -5,9 +5,11 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 python3 -m json.tool "$ROOT/.claude-plugin/plugin.json" >/dev/null
 python3 -m json.tool "$ROOT/.mcp.json" >/dev/null
+python3 -m json.tool "$ROOT/hooks/hooks.json" >/dev/null
 
 test -f "$ROOT/README.md"
 test -f "$ROOT/docs/api-surface.md"
+test -f "$ROOT/hooks/hooks.json"
 
 for skill in \
   engram-memory-helper \

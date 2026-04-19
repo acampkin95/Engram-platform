@@ -1,0 +1,27 @@
+{
+  "description": "Pre/Post tool hooks for Engram memory workflows",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "If this Bash command is unrelated to Engram memory or MCP, allow it without comment. If it appears to call Engram memory endpoints, MCP endpoints, or tenant/project/matter deletion flows, check that the operation has enough scope clarity and auth context. For Engram API or MCP commands, prefer warning or asking when authentication variables are obviously missing, the command looks destructive, or tenant/project/user scope is ambiguous. Otherwise allow. Mention ENGRAM_API_KEY, ENGRAM_MCP_AUTH_TOKEN, tenant_id, project_id, and user_id when relevant."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Only react if this Bash command appears to target Engram memory or MCP workflows. If the command failed or the output suggests auth, scope, health, or endpoint issues, summarize the most likely cause and the next best diagnostic step in one short note. If the command succeeded or is unrelated, return no additional feedback."
+          }
+        ]
+      }
+    ]
+  }
+}

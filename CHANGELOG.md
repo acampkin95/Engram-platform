@@ -16,6 +16,8 @@
 - Added Engram-specific API/MCP reference doc for plugin workflows
 - Added document workflow reference for choosing between direct memory extraction and matter evidence ingestion
 - Added `scripts/validate-plugin.sh` to validate plugin JSON and required file structure
+- Added plugin pre/post hooks for Engram API and MCP workflow guidance
+- Added standalone marketplace metadata under `dist/claude-plugin` for Claude Code plugin manager installs and updates
 
 ---
 
