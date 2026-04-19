@@ -1,0 +1,35 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "engram-local",
+  "version": "0.1.0",
+  "description": "Marketplace metadata for Engram Claude Code plugins.",
+  "owner": {
+    "name": "AC Dev"
+  },
+  "plugins": [
+    {
+      "name": "engram-memory-helper",
+      "description": "Engram-focused Claude Code plugin for memory search, context enrichment, graph exploration, document-to-memory workflows, personal memory, tenant management, and debugging.",
+      "version": "0.1.0",
+      "author": {
+        "name": "AC Dev"
+      },
+      "category": "productivity",
+      "homepage": "https://github.com/acampkin95/Engram-platform/tree/main/claude-code-marketplace/plugins/engram-memory-helper",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/acampkin95/Engram-platform.git",
+        "path": "claude-code-marketplace/plugins/engram-memory-helper",
+        "ref": "main"
+      },
+      "tags": [
+        "engram",
+        "memory",
+        "mcp",
+        "weaviate",
+        "knowledge-graph",
+        "document-to-memory"
+      ]
+    }
+  ]
+}
